@@ -2,6 +2,8 @@
 
 This application belong to the **Migration Toolkit** project, which is intended to migrate data from **MyPay4** to  **Piattaforma Unitaria** product.
 
+See [p4pa-doc](https://github.com/pagopa/p4pa-doc) for further documentation on Piattaforma Unitaria.
+
 ## 🧱 Role
 
 * Extract data from MyPay4 sources producing the zip files to import on Piattaforma Unitaria;
