@@ -54,6 +54,7 @@ val openApiToolsVersion = "0.2.10"
 val micrometerVersion = "1.6.5"
 val httpClientVersion = "5.6.1"
 val httpCoreVersion = "5.4.2"
+val openCsvVersion = "5.10"
 
 dependencies {
   implementation("org.springframework.boot:spring-boot-starter-webmvc")
@@ -69,6 +70,9 @@ dependencies {
   implementation("org.openapitools:jackson-databind-nullable:$openApiToolsVersion")
   implementation("org.apache.httpcomponents.client5:httpclient5:$httpClientVersion")
   implementation("org.apache.httpcomponents.core5:httpcore5:$httpCoreVersion")
+  implementation("com.opencsv:opencsv:$openCsvVersion")
+  implementation("org.springframework.boot:spring-boot-starter-jdbc")
+  implementation("org.postgresql:postgresql")
 
   compileOnly("org.projectlombok:lombok")
   annotationProcessor("org.projectlombok:lombok")
