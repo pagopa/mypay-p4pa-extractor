@@ -56,13 +56,19 @@ val httpClientVersion = "5.6.1"
 val httpCoreVersion = "5.4.2"
 val openCsvVersion = "5.10"
 val postgresqlVersion = "42.7.11"
+val tomcatVersion = "11.0.22"
+val openTelemetryVersion = "1.62.0"
+
+extra["tomcat.version"] = tomcatVersion
+extra["opentelemetry.version"] = openTelemetryVersion
 
 dependencies {
+  implementation(platform("io.opentelemetry:opentelemetry-bom:$openTelemetryVersion"))
+
   constraints {
+    // Spring Boot 4.0.6 resolves Tomcat 11.0.x; override the managed version on the same branch.
     // CVE-2026-41293, CVE-2026-43512, CVE-2026-43515, CVE-2026-41284, CVE-2026-42498, CVE-2026-43513, CVE-2026-43514
-    implementation("org.apache.tomcat.embed:tomcat-embed-core:10.1.55")
-    implementation("org.apache.tomcat.embed:tomcat-embed-el:10.1.55")
-    implementation("org.apache.tomcat.embed:tomcat-embed-websocket:10.1.55")
+    // Managed via the Spring Boot BOM property above.
     // CVE-2025-48734
     implementation("commons-beanutils:commons-beanutils:1.11.0")
   }
