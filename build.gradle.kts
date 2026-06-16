@@ -55,6 +55,7 @@ val micrometerVersion = "1.6.5"
 val httpClientVersion = "5.6.1"
 val httpCoreVersion = "5.4.2"
 val openCsvVersion = "5.10"
+val postgresqlVersion = "42.7.7"
 
 dependencies {
   implementation("org.springframework.boot:spring-boot-starter-webmvc")
@@ -72,7 +73,7 @@ dependencies {
   implementation("org.apache.httpcomponents.core5:httpcore5:$httpCoreVersion")
   implementation("com.opencsv:opencsv:$openCsvVersion")
   implementation("org.springframework.boot:spring-boot-starter-jdbc")
-  implementation("org.postgresql:postgresql")
+  implementation("org.postgresql:postgresql:$postgresqlVersion")
 
   compileOnly("org.projectlombok:lombok")
   annotationProcessor("org.projectlombok:lombok")
