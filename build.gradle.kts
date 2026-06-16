@@ -58,6 +58,12 @@ val openCsvVersion = "5.10"
 val postgresqlVersion = "42.7.11"
 
 dependencies {
+  constraints {
+    implementation("org.apache.tomcat.embed:tomcat-embed-core:10.1.55")
+    implementation("org.apache.tomcat.embed:tomcat-embed-el:10.1.55")
+    implementation("org.apache.tomcat.embed:tomcat-embed-websocket:10.1.55")
+  }
+
   implementation("org.springframework.boot:spring-boot-starter-webmvc")
   implementation("org.springframework.boot:spring-boot-starter-opentelemetry")
   implementation("org.springframework.boot:spring-boot-starter-restclient")
