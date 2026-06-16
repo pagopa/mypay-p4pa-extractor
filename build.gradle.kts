@@ -55,7 +55,7 @@ val micrometerVersion = "1.6.5"
 val httpClientVersion = "5.6.1"
 val httpCoreVersion = "5.4.2"
 val openCsvVersion = "5.10"
-val postgresqlVersion = "42.7.7"
+val postgresqlVersion = "42.7.11"
 
 dependencies {
   implementation("org.springframework.boot:spring-boot-starter-webmvc")
