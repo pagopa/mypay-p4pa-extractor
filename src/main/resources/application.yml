@@ -67,9 +67,22 @@ logging:
 rest:
   defaults:
     connection-pool:
-      size: "\${DEFAULT_REST_CONNECTION_POOL_SIZE:10}"
-      size-per-route: "\${DEFAULT_REST_CONNECTION_POOL_SIZE_PER_ROUTE:5}"
-      time-to-live-minutes: "\${DEFAULT_REST_CONNECTION_POOL_TIME_TO_LIVE_MINUTES:10}"
+      size: "${DEFAULT_REST_CONNECTION_POOL_SIZE:10}"
+      size-per-route: "${DEFAULT_REST_CONNECTION_POOL_SIZE_PER_ROUTE:5}"
+      time-to-live-minutes: "${DEFAULT_REST_CONNECTION_POOL_TIME_TO_LIVE_MINUTES:10}"
     timeout:
-      connect-millis: "\${DEFAULT_REST_TIMEOUT_CONNECT_MILLIS:120000}"
-      read-millis: "\${DEFAULT_REST_TIMEOUT_READ_MILLIS:120000}"
+      connect-millis: "${DEFAULT_REST_TIMEOUT_CONNECT_MILLIS:120000}"
+      read-millis: "${DEFAULT_REST_TIMEOUT_READ_MILLIS:120000}"
+
+app:
+  datasource:
+    mp4:
+      url: "jdbc:postgresql://${MP4_DB_HOST}:${MP4_DB_PORT:5432}/${MP4_DB_NAME}"
+      username: "${MP4_DB_USER}"
+      password: "${MP4_DB_PASSWORD}"
+      driver-class-name: org.postgresql.Driver
+    fesp:
+      url: "jdbc:postgresql://${FESP_DB_HOST}:${FESP_DB_PORT:5432}/${FESP_DB_NAME}"
+      username: "${FESP_DB_USER}"
+      password: "${FESP_DB_PASSWORD}"
+      driver-class-name: org.postgresql.Driver
