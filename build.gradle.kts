@@ -59,9 +59,12 @@ val postgresqlVersion = "42.7.11"
 
 dependencies {
   constraints {
+    // CVE-2026-41293, CVE-2026-43512, CVE-2026-43515, CVE-2026-41284, CVE-2026-42498, CVE-2026-43513, CVE-2026-43514
     implementation("org.apache.tomcat.embed:tomcat-embed-core:10.1.55")
     implementation("org.apache.tomcat.embed:tomcat-embed-el:10.1.55")
     implementation("org.apache.tomcat.embed:tomcat-embed-websocket:10.1.55")
+    // CVE-2025-48734
+    implementation("commons-beanutils:commons-beanutils:1.11.0")
   }
 
   implementation("org.springframework.boot:spring-boot-starter-webmvc")
