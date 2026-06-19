@@ -1,6 +1,6 @@
 # mypay-p4pa-extractor
 
-This application belongs to the **Migration Toolkit** project, which is intended to migrate data from **MyPay4** to **Piattaforma Unitaria** product.
+This application belong to the **Migration Toolkit** project, which is intended to migrate data from **MyPay4** to **Piattaforma Unitaria** product.
 
 See [p4pa-doc](https://github.com/pagopa/p4pa-doc) for further documentation on Piattaforma Unitaria.
 
