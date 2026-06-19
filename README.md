@@ -2,6 +2,8 @@
 
 This application belongs to the **Migration Toolkit** project, which is intended to migrate data from **MyPay4** to **Piattaforma Unitaria** product.
 
+See [p4pa-doc](https://github.com/pagopa/p4pa-doc) for further documentation on Piattaforma Unitaria.
+
 ## 🧱 Role
 
 Extract data from MyPay4, MyPivot, FESP and myDictionary sources producing ZIP files to import on Piattaforma Unitaria.
@@ -38,31 +40,10 @@ See [OpenAPI](openapi/generated.openapi.json), exposed through the following pat
 | `GET` | `/extract/{id}` | Get the extraction status (`RUNNING`, `COMPLETED`, `FAILED`) |
 | `GET` | `/extract/{id}/files` | List produced ZIP files by scanning the filesystem (`STORAGE_PATH/<id>/`) |
 
-**Request body — `POST /extract`:**
-```json
-{
-  "organizationId": "codice-ente",
-  "fileTypes": ["DEBT_POSITIONS"],
-  "filters": {
-    "logicalKey": "string | null",
-    "modifiedFrom": "YYYY-MM-DD | null",
-    "modifiedTo":   "YYYY-MM-DD | null",
-    "referenceFrom": "YYYY-MM-DD | null",
-    "referenceTo":   "YYYY-MM-DD | null"
-  }
-}
-```
+
 
 > `fileTypes` must contain **exactly one element**. Returns `400 Bad Request` if more than one type is provided.
 
-**Extraction filters:**
-
-| Filter | Required | Description |
-|---|---|---|
-| `organizationId` | Yes | Organization fiscal code / IPA code |
-| `logicalKey` | No | Single-record extraction key (IUV, position ID, etc.). If set, date filters are ignored |
-| `modifiedFrom` / `modifiedTo` | No | Filter on `dt_ultima_modifica`. If `dt_ultima_modifica <> dt_inserimento` → record was updated |
-| `referenceFrom` / `referenceTo` | No | Filter on entity reference date (due date, payment date, etc. — per type) |
 
 ### 📌 Common HTTP status returned
 
@@ -152,14 +133,13 @@ See [application.yml](src/main/resources/application.yml) for each configurable 
 
 #### 🗄️ myPivot4 Database *(optional)*
 
-| ENV | DESCRIPTION | DEFAULT |
-|---|---|---|
-| `MYPIVOT_ENABLED` | Enable myPivot4 extraction (types 10/11/12). If `false`, Adapter A2 is skipped | `false` |
-| `MPV4_DB_HOST` | myPivot4 PostgreSQL host *(required if `MYPIVOT_ENABLED=true`)* | — |
-| `MPV4_DB_PORT` | myPivot4 PostgreSQL port | `5432` |
-| `MPV4_DB_NAME` | myPivot4 database name *(required if `MYPIVOT_ENABLED=true`)* | — |
-| `MPV4_DB_USER` | myPivot4 JDBC user (read-only) *(required if `MYPIVOT_ENABLED=true`)* | — |
-| `MPV4_DB_PASSWORD` | myPivot4 JDBC password *(required if `MYPIVOT_ENABLED=true`)* | — |
+| ENV | DESCRIPTION                                                                                      | DEFAULT |
+|---|--------------------------------------------------------------------------------------------------|---|
+| `MPV4_DB_HOST` | myPivot4 PostgreSQL host *(required if `MYPIVOT_ENABLED=true`)*                                  | — |
+| `MPV4_DB_PORT` | myPivot4 PostgreSQL port                                                                         | `5432` |
+| `MPV4_DB_NAME` | myPivot4 database name *(required if `MYPIVOT_ENABLED=true`)*                                    | — |
+| `MPV4_DB_USER` | myPivot4 JDBC user (read-only) *(required if `MYPIVOT_ENABLED=true`)*                            | — |
+| `MPV4_DB_PASSWORD` | myPivot4 JDBC password *(required if `MYPIVOT_ENABLED=true`)*                                    | — |
 
 #### ⚡ Async extraction
 
@@ -208,7 +188,7 @@ See [application.yml](src/main/resources/application.yml) for each configurable 
 | `STORAGE_PATH` | Base path for extracted ZIP files | `/data/extractions` |
 | `MULTIPART_MAX_FILE_SIZE` | Max ZIP part size (aligned to PU upload limit) | `50MB` |
 | `EXPORT_PAGE_SIZE` | JDBC fetch page size | `1000` |
-| `MYPIVOT_ENABLED` | Enable optional myPivot4 extraction | `false` |
+| `MYPIVOT_ENABLED` | Enable myPivot4 extraction (types 10/11/12). If `false`, Adapters related to MyPivot are skipped | `false` |
 | `BROKER_CF` | Fiscal code of the broker/intermediary running the extraction (used as context metadata) | — |
 | `AVG_ROW_SIZE_ORGANIZATIONS` | Average row size in bytes for `ORGANIZATIONS` split calculation (`maxRows = MULTIPART_MAX_FILE_SIZE / avgRowSize`) | `500` |
 
@@ -260,31 +240,6 @@ docker build -t mypay-p4pa-extractor .
 docker run --env-file <ENV_FILE> mypay-p4pa-extractor
 ```
 
-Minimal `ENV_FILE` example:
-```env
-SERVER_PORT=8080
-CLIENT_ID=admin
-CLIENT_SECRET=secret
-STORAGE_PATH=/data/extractions
-BROKER_CF=01234567890
-ASYNC_CORE_POOL_SIZE=2
-ASYNC_MAX_POOL_SIZE=5
-ASYNC_QUEUE_CAPACITY=10
-MULTIPART_MAX_FILE_SIZE=50MB
-MP4_DB_HOST=localhost
-MP4_DB_PORT=5432
-MP4_DB_NAME=mypay4
-MP4_DB_USER=readonly
-MP4_DB_PASSWORD=secret
-FESP_DB_HOST=localhost
-FESP_DB_PORT=5432
-FESP_DB_NAME=fesp
-FESP_DB_USER=readonly
-FESP_DB_PASSWORD=secret
-MYDICTIONARY_BASE_URL=https://mydictionary-host/mydictionary
-MYDICT_API_KEY=your-api-key
-MYPIVOT_ENABLED=false
-```
 
 ### ⚖️ Generate dependencies licenses
 
