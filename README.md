@@ -161,6 +161,14 @@ See [application.yml](src/main/resources/application.yml) for each configurable 
 | `MPV4_DB_USER` | myPivot4 JDBC user (read-only) *(required if `MYPIVOT_ENABLED=true`)* | — |
 | `MPV4_DB_PASSWORD` | myPivot4 JDBC password *(required if `MYPIVOT_ENABLED=true`)* | — |
 
+#### ⚡ Async extraction
+
+| ENV | DESCRIPTION | DEFAULT |
+| --- | --- | --- |
+| `ASYNC_CORE_POOL_SIZE` | Core thread pool size for async extractions | `2` |
+| `ASYNC_MAX_POOL_SIZE` | Max thread pool size for async extractions | `5` |
+| `ASYNC_QUEUE_CAPACITY` | Queue capacity for async extraction tasks | `10` |
+
 #### 🌍 External services
 
 | ENV | DESCRIPTION | DEFAULT |
@@ -201,6 +209,8 @@ See [application.yml](src/main/resources/application.yml) for each configurable 
 | `MULTIPART_MAX_FILE_SIZE` | Max ZIP part size (aligned to PU upload limit) | `50MB` |
 | `EXPORT_PAGE_SIZE` | JDBC fetch page size | `1000` |
 | `MYPIVOT_ENABLED` | Enable optional myPivot4 extraction | `false` |
+| `BROKER_CF` | Fiscal code of the broker/intermediary running the extraction (used as context metadata) | — |
+| `AVG_ROW_SIZE_ORGANIZATIONS` | Average row size in bytes for `ORGANIZATIONS` split calculation (`maxRows = MULTIPART_MAX_FILE_SIZE / avgRowSize`) | `500` |
 
 ## 🛠️ Getting Started
 
@@ -256,6 +266,10 @@ SERVER_PORT=8080
 CLIENT_ID=admin
 CLIENT_SECRET=secret
 STORAGE_PATH=/data/extractions
+BROKER_CF=01234567890
+ASYNC_CORE_POOL_SIZE=2
+ASYNC_MAX_POOL_SIZE=5
+ASYNC_QUEUE_CAPACITY=10
 MULTIPART_MAX_FILE_SIZE=50MB
 MP4_DB_HOST=localhost
 MP4_DB_PORT=5432
