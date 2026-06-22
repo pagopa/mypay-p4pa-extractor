@@ -42,8 +42,6 @@ See [OpenAPI](openapi/generated.openapi.json), exposed through the following pat
 
 
 
-> `fileTypes` must contain **exactly one element**. Returns `400 Bad Request` if more than one type is provided.
-
 
 ### 📌 Common HTTP status returned
 
