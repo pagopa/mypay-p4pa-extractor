@@ -58,12 +58,17 @@ val lz4JavaVersion = "1.11.0"
 val postgresqlVersion = "42.7.11"
 val openCsvVersion = "5.10"
 val openTelemetryVersion = "1.62.0" // CVE-2026-45292
+val commonsBeanutilsVersion = "1.11.0" // CVE-2025-48734
 
 configurations.all {
   resolutionStrategy.eachDependency {
     if (requested.group == "io.opentelemetry") {
       useVersion(openTelemetryVersion)
       because("CVE-2026-45292: fix in $openTelemetryVersion")
+    }
+    if (requested.group == "commons-beanutils" && requested.name == "commons-beanutils") {
+      useVersion(commonsBeanutilsVersion)
+      because("CVE-2025-48734: fix in $commonsBeanutilsVersion")
     }
   }
 }
