@@ -57,7 +57,16 @@ val kafkaAppender = "0.2.0-RC2"
 val lz4JavaVersion = "1.11.0"
 val postgresqlVersion = "42.7.11"
 val openCsvVersion = "5.10"
+val openTelemetryVersion = "1.62.0" // CVE-2026-45292
 
+configurations.all {
+  resolutionStrategy.eachDependency {
+    if (requested.group == "io.opentelemetry") {
+      useVersion(openTelemetryVersion)
+      because("CVE-2026-45292: fix in $openTelemetryVersion")
+    }
+  }
+}
 
 dependencies {
   implementation("org.springframework.boot:spring-boot-starter-webmvc")
