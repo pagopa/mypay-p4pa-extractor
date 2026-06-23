@@ -17,7 +17,7 @@ public class DataSourceConfig {
 
   @Bean("mp4DataSource")
   @Primary
-  @ConfigurationProperties("app.datasource.mp4")
+  @ConfigurationProperties("datasource.mp4")
   public DataSource mp4DataSource() {
     return DataSourceBuilder.create().build();
   }
@@ -31,7 +31,7 @@ public class DataSourceConfig {
   // ── FESP (secondary) ───────────────────────────────────────────────────────
 
   @Bean("fespDataSource")
-  @ConfigurationProperties("app.datasource.fesp")
+  @ConfigurationProperties("datasource.fesp")
   public DataSource fespDataSource() {
     return DataSourceBuilder.create().build();
   }
