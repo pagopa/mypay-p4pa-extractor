@@ -77,12 +77,12 @@ rest:
 
 datasource:
   mp4:
-    url: "jdbc:postgresql://\${MP4_DB_HOST}:\${MP4_DB_PORT:5432}/\${MP4_DB_NAME}"
+    jdbc-url: "jdbc:postgresql://\${MP4_DB_HOST}:\${MP4_DB_PORT:5432}/\${MP4_DB_NAME}"
     username: "\${MP4_DB_USER}"
     password: "\${MP4_DB_PASSWORD}"
     driver-class-name: org.postgresql.Driver
   fesp:
-    url: "jdbc:postgresql://\${FESP_DB_HOST}:\${FESP_DB_PORT:5432}/\${FESP_DB_NAME}"
+    jdbc-url: "jdbc:postgresql://\${FESP_DB_HOST}:\${FESP_DB_PORT:5432}/\${FESP_DB_NAME}"
     username: "\${FESP_DB_USER}"
     password: "\${FESP_DB_PASSWORD}"
     driver-class-name: org.postgresql.Driver

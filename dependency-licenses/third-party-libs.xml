@@ -77,7 +77,7 @@
 </tr>
 <tr>
 <td><a href='http://opencsv.sf.net'>com.opencsv:opencsv</a></td>
-<td>5.10</td>
+<td>5.12.0</td>
 <td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
 </tr>
 <tr>
@@ -107,7 +107,7 @@
 </tr>
 <tr>
 <td><a href='https://commons.apache.org/proper/commons-beanutils'>commons-beanutils:commons-beanutils</a></td>
-<td>1.10.0</td>
+<td>1.11.0</td>
 <td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
 </tr>
 <tr>
@@ -312,7 +312,7 @@
 </tr>
 <tr>
 <td><a href='https://commons.apache.org/proper/commons-collections/'>org.apache.commons:commons-collections4</a></td>
-<td>4.4</td>
+<td>4.5.0</td>
 <td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
 </tr>
 <tr>
@@ -322,7 +322,7 @@
 </tr>
 <tr>
 <td><a href='https://commons.apache.org/proper/commons-text'>org.apache.commons:commons-text</a></td>
-<td>1.13.0</td>
+<td>1.13.1</td>
 <td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
 </tr>
 <tr>
@@ -522,7 +522,7 @@
 </tr>
 <tr>
 <td><a href='https://spring.io/projects/spring-boot'>org.springframework.boot:spring-boot-jdbc</a></td>
-<td>4.0.7</td>
+<td>4.1.0</td>
 <td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
 </tr>
 <tr>
@@ -552,7 +552,7 @@
 </tr>
 <tr>
 <td><a href='https://spring.io/projects/spring-boot'>org.springframework.boot:spring-boot-persistence</a></td>
-<td>4.0.7</td>
+<td>4.1.0</td>
 <td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
 </tr>
 <tr>
@@ -567,7 +567,7 @@
 </tr>
 <tr>
 <td><a href='https://spring.io/projects/spring-boot'>org.springframework.boot:spring-boot-sql</a></td>
-<td>4.0.7</td>
+<td>4.1.0</td>
 <td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
 </tr>
 <tr>
@@ -587,7 +587,7 @@
 </tr>
 <tr>
 <td><a href='https://spring.io/projects/spring-boot'>org.springframework.boot:spring-boot-starter-jdbc</a></td>
-<td>4.0.7</td>
+<td>4.1.0</td>
 <td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
 </tr>
 <tr>
@@ -637,7 +637,7 @@
 </tr>
 <tr>
 <td><a href='https://spring.io/projects/spring-boot'>org.springframework.boot:spring-boot-transaction</a></td>
-<td>4.0.7</td>
+<td>4.1.0</td>
 <td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
 </tr>
 <tr>
