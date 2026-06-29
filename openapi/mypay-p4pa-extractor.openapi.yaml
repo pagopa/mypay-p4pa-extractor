@@ -1,36 +1,177 @@
 openapi: 3.1.0
 info:
-  title: Fake API
-  description: "Sample API"
+  title: MyPay P4PA Extractor API
+  description: API for asynchronous data extraction from MyPay4 toward Piattaforma Unitaria.
   version: "1.0.0"
+tags:
+  - name: Extract
+    description: Extraction lifecycle APIs
 paths:
-  /api/v1/greet:
+  /extract:
+    post:
+      tags:
+        - Extract
+      operationId: createExtraction
+      summary: Start an asynchronous extraction
+      security:
+        - basicAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExtractionRequest'
+            example:
+              ipaCode: "00493410240"
+              fileTypes:
+                - ORGANIZATIONS
+              filters:
+                modifiedFrom: "2024-01-01"
+                modifiedTo: "2026-06-18"
+      responses:
+        '202':
+          description: Extraction accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExtractionAcceptedResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDTO'
+  /extract/{extractionId}:
     get:
-      summary: "Hello World"
-      description: "Sample endpoint that return greetings"
+      tags:
+        - Extract
+      operationId: getExtractionStatus
+      summary: Get extraction status
+      security:
+        - basicAuth: [ ]
+      parameters:
+        - name: extractionId
+          in: path
+          required: true
+          schema:
+            type: string
       responses:
         '200':
-          description: "Success"
+          description: Current extraction status
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Hello, World!"
-        '500':
-          description: "Internal Server Error"
+                $ref: '#/components/schemas/ExtractionStatusResponse'
+        '404':
+          description: Extraction not found
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: "Internal Server Error"
+                $ref: '#/components/schemas/ErrorDTO'
 components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
   schemas:
+    ExtractionRequest:
+      type: object
+      example:
+        ipaCode: "00493410240"
+        fileTypes:
+          - ORGANIZATIONS
+        filters:
+          modifiedFrom: "2024-01-01"
+          modifiedTo: "2026-06-18"
+      required:
+        - ipaCode
+        - fileTypes
+      properties:
+        ipaCode:
+          type: string
+          minLength: 1
+          example: "00493410240"
+        fileTypes:
+          type: array
+          minItems: 1
+          maxItems: 1
+          items:
+            $ref: '#/components/schemas/MigrationFileType'
+        filters:
+          $ref: '#/components/schemas/ExtractionFilters'
+          example:
+            ipaCode: "00493410240"
+            modifiedFrom: "2024-01-01"
+            modifiedTo: "2026-06-18"
+    ExtractionFilters:
+      type: object
+      properties:
+        modifiedFrom:
+          type: string
+          format: date
+          example: "2024-01-01"
+        modifiedTo:
+          type: string
+          format: date
+          example: "2026-06-18"
+    ExtractionAcceptedResponse:
+      type: object
+      required:
+        - extractionId
+      properties:
+        extractionId:
+          type: string
+          format: uuid
+    ExtractionStatusResponse:
+      type: object
+      required:
+        - extractionId
+        - status
+        - createdAt
+        - updatedAt
+        - files
+      properties:
+        extractionId:
+          type: string
+        organizationId:
+          type: string
+        fileType:
+          $ref: '#/components/schemas/MigrationFileType'
+        status:
+          $ref: '#/components/schemas/ExtractionStatus'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        error:
+          type: string
+        files:
+          type: array
+          items:
+            type: string
+    ExtractionStatus:
+      type: string
+      enum:
+        - RUNNING
+        - COMPLETED
+        - FAILED
+    MigrationFileType:
+      type: string
+      enum:
+        - ORGANIZATIONS
+        - ORG_SIL_SERVICES
+        - DEBT_POSITIONS_TYPE
+        - DEBT_POSITIONS_TYPE_ORG
+        - DEBT_POSITIONS_TYPE_ORG_OPERATORS
+        - DEBT_POSITIONS
+        - DEBT_POSITIONS_PAID
+        - PAYMENT_NOTIFICATION
+        - PAYMENTS_REPORTING
+        - TREASURY_CSV_COMPLETE
+        - ASSESSMENTS
+        - ASSESSMENTS_REGISTRY
     ErrorDTO:
       type: object
       required:
