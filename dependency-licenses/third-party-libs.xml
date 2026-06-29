@@ -76,6 +76,11 @@
 <td><a href='https://opensource.org/licenses/BSD-3-Clause'>BSD-3-Clause</a></td>
 </tr>
 <tr>
+<td><a href='http://opencsv.sf.net'>com.opencsv:opencsv</a></td>
+<td>5.12.0</td>
+<td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
+</tr>
+<tr>
 <td><a href='https://square.github.io/okhttp/'>com.squareup.okhttp3:okhttp</a></td>
 <td>5.3.2</td>
 <td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
@@ -93,6 +98,21 @@
 <tr>
 <td><a href='https://github.com/square/okio/'>com.squareup.okio:okio-jvm</a></td>
 <td>3.16.4</td>
+<td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
+</tr>
+<tr>
+<td><a href='https://github.com/brettwooldridge/HikariCP'>com.zaxxer:HikariCP</a></td>
+<td>7.0.2</td>
+<td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
+</tr>
+<tr>
+<td><a href='https://commons.apache.org/proper/commons-beanutils'>commons-beanutils:commons-beanutils</a></td>
+<td>1.11.0</td>
+<td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
+</tr>
+<tr>
+<td><a href='http://commons.apache.org/collections/'>commons-collections:commons-collections</a></td>
+<td>3.2.2</td>
 <td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
 </tr>
 <tr>
@@ -291,8 +311,18 @@
 <td><a href='https://openjdk.java.net/legal/gplv2+ce.html'>GPL-2.0-only WITH Classpath-exception-2.0</a></td>
 </tr>
 <tr>
+<td><a href='https://commons.apache.org/proper/commons-collections/'>org.apache.commons:commons-collections4</a></td>
+<td>4.5.0</td>
+<td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
+</tr>
+<tr>
 <td><a href='https://commons.apache.org/proper/commons-lang/'>org.apache.commons:commons-lang3</a></td>
 <td>3.20.0</td>
+<td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
+</tr>
+<tr>
+<td><a href='https://commons.apache.org/proper/commons-text'>org.apache.commons:commons-text</a></td>
+<td>1.13.1</td>
 <td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
 </tr>
 <tr>
@@ -376,6 +406,11 @@
 <td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
 </tr>
 <tr>
+<td><a href='https://jdbc.postgresql.org/'>org.postgresql:postgresql</a></td>
+<td>42.7.11</td>
+<td><a href='https://opensource.org/licenses/BSD-2-Clause'>BSD-2-Clause</a></td>
+</tr>
+<tr>
 <td><a href='http://www.slf4j.org'>org.slf4j:jul-to-slf4j</a></td>
 <td>2.0.18</td>
 <td><a href='https://opensource.org/licenses/mit'>MIT</a></td>
@@ -422,6 +457,16 @@
 </tr>
 <tr>
 <td><a href='https://github.com/spring-projects/spring-framework'>org.springframework:spring-expression</a></td>
+<td>7.0.8</td>
+<td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
+</tr>
+<tr>
+<td><a href='https://github.com/spring-projects/spring-framework'>org.springframework:spring-jdbc</a></td>
+<td>7.0.8</td>
+<td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
+</tr>
+<tr>
+<td><a href='https://github.com/spring-projects/spring-framework'>org.springframework:spring-tx</a></td>
 <td>7.0.8</td>
 <td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
 </tr>
@@ -476,6 +521,11 @@
 <td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
 </tr>
 <tr>
+<td><a href='https://spring.io/projects/spring-boot'>org.springframework.boot:spring-boot-jdbc</a></td>
+<td>4.1.0</td>
+<td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
+</tr>
+<tr>
 <td><a href='https://spring.io/projects/spring-boot'>org.springframework.boot:spring-boot-micrometer-metrics</a></td>
 <td>4.1.0</td>
 <td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
@@ -501,12 +551,22 @@
 <td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
 </tr>
 <tr>
+<td><a href='https://spring.io/projects/spring-boot'>org.springframework.boot:spring-boot-persistence</a></td>
+<td>4.1.0</td>
+<td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
+</tr>
+<tr>
 <td><a href='https://spring.io/projects/spring-boot'>org.springframework.boot:spring-boot-restclient</a></td>
 <td>4.1.0</td>
 <td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
 </tr>
 <tr>
 <td><a href='https://spring.io/projects/spring-boot'>org.springframework.boot:spring-boot-servlet</a></td>
+<td>4.1.0</td>
+<td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
+</tr>
+<tr>
+<td><a href='https://spring.io/projects/spring-boot'>org.springframework.boot:spring-boot-sql</a></td>
 <td>4.1.0</td>
 <td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
 </tr>
@@ -522,6 +582,11 @@
 </tr>
 <tr>
 <td><a href='https://spring.io/projects/spring-boot'>org.springframework.boot:spring-boot-starter-jackson</a></td>
+<td>4.1.0</td>
+<td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
+</tr>
+<tr>
+<td><a href='https://spring.io/projects/spring-boot'>org.springframework.boot:spring-boot-starter-jdbc</a></td>
 <td>4.1.0</td>
 <td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
 </tr>
@@ -567,6 +632,11 @@
 </tr>
 <tr>
 <td><a href='https://spring.io/projects/spring-boot'>org.springframework.boot:spring-boot-tomcat</a></td>
+<td>4.1.0</td>
+<td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
+</tr>
+<tr>
+<td><a href='https://spring.io/projects/spring-boot'>org.springframework.boot:spring-boot-transaction</a></td>
 <td>4.1.0</td>
 <td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
 </tr>

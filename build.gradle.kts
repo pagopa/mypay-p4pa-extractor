@@ -55,6 +55,8 @@ val httpClientVersion = "5.6.1"
 val httpCoreVersion = "5.4.2"
 val kafkaAppender = "0.2.0-RC2"
 val lz4JavaVersion = "1.11.0"
+val postgresqlVersion = "42.7.11"
+val openCsvVersion = "5.12.0"
 
 dependencies {
   implementation("org.springframework.boot:spring-boot-starter-webmvc")
@@ -73,7 +75,9 @@ dependencies {
     exclude(group = "org.lz4", module = "lz4-java")
   }
   implementation("at.yawk.lz4:lz4-java:$lz4JavaVersion")
-
+  implementation("com.opencsv:opencsv:$openCsvVersion")
+  implementation("org.springframework.boot:spring-boot-starter-jdbc")
+  implementation("org.postgresql:postgresql:$postgresqlVersion")
   compileOnly("org.projectlombok:lombok")
   annotationProcessor("org.projectlombok:lombok")
   testAnnotationProcessor("org.projectlombok:lombok")
