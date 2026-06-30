@@ -15,8 +15,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.List;
-
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -38,7 +36,7 @@ class ExportControllerTest {
   void createExtractionShouldReturnAccepted() throws Exception {
     ExtractionRequest request = new ExtractionRequest(
       "00493410240",
-      List.of(it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType.ORGANIZATIONS),
+      ExtractionRequest.FileTypesEnum.ORGANIZATIONS,
       new ExtractionFilters()
     );
 
@@ -50,28 +48,10 @@ class ExportControllerTest {
   }
 
   @Test
-  void createExtractionShouldRejectMultipleFileTypes() throws Exception {
-    ExtractionRequest request = new ExtractionRequest(
-      "00493410240",
-      List.of(
-        it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType.ORGANIZATIONS,
-        it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType.DEBT_POSITIONS
-      ),
-      null
-    );
-
-    mockMvc.perform(post("/extract")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(objectMapper.writeValueAsString(request)))
-      .andExpect(status().isBadRequest())
-      .andExpect(jsonPath("$.message").value("[BAD_REQUEST] Invalid request content. fileTypes: size must be between 1 and 1"));
-  }
-
-  @Test
   void createExtractionShouldRejectUnsupportedFileType() throws Exception {
     ExtractionRequest request = new ExtractionRequest(
       "00493410240",
-      List.of(it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType.DEBT_POSITIONS),
+      ExtractionRequest.FileTypesEnum.DEBT_POSITIONS,
       null
     );
 

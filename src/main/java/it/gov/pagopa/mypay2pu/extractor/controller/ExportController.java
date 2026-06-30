@@ -38,7 +38,7 @@ public class ExportController implements ExtractApi {
           value = """
             {
               "ipaCode": "00493410240",
-              "fileTypes": ["ORGANIZATIONS"],
+              "fileTypes": "ORGANIZATIONS",
               "filters": {
                 "modifiedFrom": "2024-01-01",
                 "modifiedTo": "2026-06-18"
@@ -51,7 +51,7 @@ public class ExportController implements ExtractApi {
   )
   public ResponseEntity<ExtractionAcceptedResponse> createExtraction(@Valid ExtractionRequest extractionRequest) {
     ExtractionRequestDTO request = toInternalRequest(extractionRequest);
-    MigrationFileType fileType = request.getFileTypes().getFirst();
+    MigrationFileType fileType = MigrationFileType.valueOf(request.getFileTypes());
     if (fileType != MigrationFileType.ORGANIZATIONS) {
       throw new BadRequestException("UNSUPPORTED_FILE_TYPE", "Current POC supports only ORGANIZATIONS");
     }
@@ -71,9 +71,7 @@ public class ExportController implements ExtractApi {
   private ExtractionRequestDTO toInternalRequest(ExtractionRequest request) {
     return new ExtractionRequestDTO(
       request.getIpaCode(),
-      request.getFileTypes().stream()
-        .map(fileType -> MigrationFileType.valueOf(fileType.name()))
-        .toList(),
+      request.getFileTypes().getValue(),
       toInternalFilters(request.getFilters())
     );
   }

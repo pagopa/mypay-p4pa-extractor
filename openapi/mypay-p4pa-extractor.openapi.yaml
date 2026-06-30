@@ -23,8 +23,7 @@ paths:
               $ref: '#/components/schemas/ExtractionRequest'
             example:
               ipaCode: "00493410240"
-              fileTypes:
-                - ORGANIZATIONS
+              fileTypes: ORGANIZATIONS
               filters:
                 modifiedFrom: "2024-01-01"
                 modifiedTo: "2026-06-18"
@@ -78,8 +77,7 @@ components:
       type: object
       example:
         ipaCode: "00493410240"
-        fileTypes:
-          - ORGANIZATIONS
+        fileTypes: ORGANIZATIONS
         filters:
           modifiedFrom: "2024-01-01"
           modifiedTo: "2026-06-18"
@@ -92,11 +90,20 @@ components:
           minLength: 1
           example: "00493410240"
         fileTypes:
-          type: array
-          minItems: 1
-          maxItems: 1
-          items:
-            $ref: '#/components/schemas/MigrationFileType'
+          type: string
+          enum:
+                - ORGANIZATIONS
+                - ORG_SIL_SERVICES
+                - DEBT_POSITIONS_TYPE
+                - DEBT_POSITIONS_TYPE_ORG
+                - DEBT_POSITIONS_TYPE_ORG_OPERATORS
+                - DEBT_POSITIONS
+                - DEBT_POSITIONS_PAID
+                - PAYMENT_NOTIFICATION
+                - PAYMENTS_REPORTING
+                - TREASURY_CSV_COMPLETE
+                - ASSESSMENTS
+                - ASSESSMENTS_REGISTRY
         filters:
           $ref: '#/components/schemas/ExtractionFilters'
           example:
