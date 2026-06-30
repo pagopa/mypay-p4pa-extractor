@@ -1,6 +1,9 @@
 package it.gov.pagopa.mypay2pu.extractor.config;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.springframework.context.annotation.Configuration;
@@ -14,7 +17,13 @@ import org.springframework.context.annotation.Configuration;
     title = "${spring.application.name}",
     version = "${spring.application.version}",
     description = "Api and Models"
-  )
+  ),
+  security = @SecurityRequirement(name = "basicAuth")
+)
+@SecurityScheme(
+  name = "basicAuth",
+  type = SecuritySchemeType.HTTP,
+  scheme = "basic"
 )
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class SwaggerConfig {

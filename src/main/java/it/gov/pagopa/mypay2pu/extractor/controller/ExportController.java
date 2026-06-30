@@ -9,11 +9,6 @@ import it.gov.pagopa.mypay2pu.extractor.exception.BadRequestException;
 import it.gov.pagopa.mypay2pu.extractor.enums.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.dto.ExtractionFiltersDTO;
 import it.gov.pagopa.mypay2pu.extractor.dto.ExtractionRequestDTO;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -27,31 +22,10 @@ public class ExportController implements ExtractApi {
 
 
   @Override
-  @Operation(
-    requestBody = @RequestBody(
-      required = true,
-      content = @Content(
-        mediaType = "application/json",
-        schema = @Schema(implementation = ExtractionRequest.class),
-        examples = @ExampleObject(
-          name = "organizationsExtraction",
-          value = """
-            {
-              "ipaCode": "00493410240",
-              "fileTypes": "ORGANIZATIONS",
-              "filters": {
-                "modifiedFrom": "2024-01-01",
-                "modifiedTo": "2026-06-18"
-              }
-            }
-            """
-        )
-      )
-    )
-  )
   public ResponseEntity<ExtractionAcceptedResponse> createExtraction(@Valid ExtractionRequest extractionRequest) {
+    log.info("createExtraction: ipaCode={}, fileTypes={}", extractionRequest.getIpaCode(), extractionRequest.getFileTypes());
     ExtractionRequestDTO request = toInternalRequest(extractionRequest);
-    MigrationFileType fileType = MigrationFileType.valueOf(request.getFileTypes());
+    MigrationFileType fileType = request.getFileType();
     if (fileType != MigrationFileType.ORGANIZATIONS) {
       throw new BadRequestException("UNSUPPORTED_FILE_TYPE", "Current POC supports only ORGANIZATIONS");
     }
@@ -64,6 +38,7 @@ public class ExportController implements ExtractApi {
 
   @Override
   public ResponseEntity<ExtractionStatusResponse> getExtractionStatus(String extractionId) {
+    log.info("getExtractionStatus: extractionId={}", extractionId);
     //TODO extraction status will be implemented after resolution of tasks P4ADEV-4816
     return ResponseEntity.ok(null);
   }
@@ -71,7 +46,7 @@ public class ExportController implements ExtractApi {
   private ExtractionRequestDTO toInternalRequest(ExtractionRequest request) {
     return new ExtractionRequestDTO(
       request.getIpaCode(),
-      request.getFileTypes().getValue(),
+      request.getFileTypes(),
       toInternalFilters(request.getFilters())
     );
   }

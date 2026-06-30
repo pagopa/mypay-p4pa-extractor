@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import it.gov.pagopa.mypay2pu.extractor.config.json.JsonConfig;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionFilters;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
+import it.gov.pagopa.mypay2pu.extractor.enums.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.exception.ControllerExceptionHandler;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,7 +37,7 @@ class ExportControllerTest {
   void createExtractionShouldReturnAccepted() throws Exception {
     ExtractionRequest request = new ExtractionRequest(
       "00493410240",
-      ExtractionRequest.FileTypesEnum.ORGANIZATIONS,
+      MigrationFileType.ORGANIZATIONS,
       new ExtractionFilters()
     );
 
@@ -51,14 +52,14 @@ class ExportControllerTest {
   void createExtractionShouldRejectUnsupportedFileType() throws Exception {
     ExtractionRequest request = new ExtractionRequest(
       "00493410240",
-      ExtractionRequest.FileTypesEnum.DEBT_POSITIONS,
+      MigrationFileType.DEBT_POSITIONS,
       null
     );
 
     mockMvc.perform(post("/extract")
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(request)))
-      .andExpect(status().isInternalServerError())
+      .andExpect(status().isBadRequest())
       .andExpect(jsonPath("$.code").value("UNSUPPORTED_FILE_TYPE"))
       .andExpect(jsonPath("$.message").value("[UNSUPPORTED_FILE_TYPE] Current POC supports only ORGANIZATIONS"));
   }

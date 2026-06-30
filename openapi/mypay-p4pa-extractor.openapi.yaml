@@ -21,12 +21,15 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ExtractionRequest'
-            example:
-              ipaCode: "00493410240"
-              fileTypes: ORGANIZATIONS
-              filters:
-                modifiedFrom: "2024-01-01"
-                modifiedTo: "2026-06-18"
+            examples:
+              organizationsExtraction:
+                summary: Extract organizations
+                value:
+                  ipaCode: "00493410240"
+                  fileTypes: ORGANIZATIONS
+                  filters:
+                    modifiedFrom: "2024-01-01"
+                    modifiedTo: "2026-06-18"
       responses:
         '202':
           description: Extraction accepted
@@ -90,20 +93,7 @@ components:
           minLength: 1
           example: "00493410240"
         fileTypes:
-          type: string
-          enum:
-                - ORGANIZATIONS
-                - ORG_SIL_SERVICES
-                - DEBT_POSITIONS_TYPE
-                - DEBT_POSITIONS_TYPE_ORG
-                - DEBT_POSITIONS_TYPE_ORG_OPERATORS
-                - DEBT_POSITIONS
-                - DEBT_POSITIONS_PAID
-                - PAYMENT_NOTIFICATION
-                - PAYMENTS_REPORTING
-                - TREASURY_CSV_COMPLETE
-                - ASSESSMENTS
-                - ASSESSMENTS_REGISTRY
+          $ref: '#/components/schemas/MigrationFileType'
         filters:
           $ref: '#/components/schemas/ExtractionFilters'
           example:

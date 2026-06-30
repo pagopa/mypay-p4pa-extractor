@@ -163,6 +163,16 @@ openApiGenerate {
   outputDir.set("$projectDir/build/generated")
   apiPackage.set("it.gov.pagopa.mypay2pu.extractor.controller.generated")
   modelPackage.set("it.gov.pagopa.mypay2pu.extractor.dto.generated")
+  typeMappings.set(mapOf(
+    "MigrationFileType" to "MigrationFileType"
+  ))
+  schemaMappings.set(mapOf(
+    "MigrationFileType" to "it.gov.pagopa.mypay2pu.extractor.enums.MigrationFileType"
+  ))
+  importMappings.set(mapOf(
+    "MigrationFileType" to "it.gov.pagopa.mypay2pu.extractor.enums.MigrationFileType"
+  ))
+
   configOptions.set(
     mapOf(
       "dateLibrary" to "java8",
