@@ -31,7 +31,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
   "logging.level.org.springdoc.core.utils.SpringDocAnnotationsUtils=OFF",
   "springdoc.api-docs.enabled=true",
-  "springdoc.swagger-ui.enabled=false"
+  "springdoc.swagger-ui.enabled=false",
+  "springdoc.writer-with-default-pretty-printer=true"
 })
 @Slf4j
 class OpenApiGeneratorTest {
