@@ -132,7 +132,7 @@ components:
           type: string
         organizationId:
           type: string
-        fileType:
+        fileTypes:
           $ref: '#/components/schemas/MigrationFileType'
         status:
           $ref: '#/components/schemas/ExtractionStatus'
