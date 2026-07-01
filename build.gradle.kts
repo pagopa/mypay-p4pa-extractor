@@ -163,6 +163,8 @@ openApiGenerate {
   outputDir.set("$projectDir/build/generated")
   apiPackage.set("it.gov.pagopa.mypay2pu.extractor.controller.generated")
   modelPackage.set("it.gov.pagopa.mypay2pu.extractor.dto.generated")
+
+
   configOptions.set(
     mapOf(
       "dateLibrary" to "java8",

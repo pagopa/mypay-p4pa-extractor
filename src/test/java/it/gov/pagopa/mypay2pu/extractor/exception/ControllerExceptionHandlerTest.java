@@ -41,6 +41,7 @@ import org.springframework.web.server.ServerErrorException;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.Map;
 import java.util.Set;
 
@@ -57,7 +58,7 @@ import static org.mockito.Mockito.doThrow;
 class ControllerExceptionHandlerTest {
 
   public static final String DATA = "data";
-  public static final TestRequestBody BODY = new TestRequestBody("bodyData", null, "abc", LocalDateTime.now());
+  public static final TestRequestBody BODY = new TestRequestBody("bodyData", null, "abc", LocalDateTime.of(2026, Month.JANUARY, 1, 0, 0));
 
   @Autowired
   private MockMvc mockMvc;
@@ -81,6 +82,7 @@ class ControllerExceptionHandlerTest {
   @BeforeEach
   void init() {
     TestUtils.clearDefaultTimezone();
+    UtilitiesTest.setTraceId(traceId);
   }
 
   @Data
@@ -96,11 +98,6 @@ class ControllerExceptionHandlerTest {
   }
 
   private final String traceId = "TRACEID";
-
-  @BeforeEach
-  void setTraceId() {
-    UtilitiesTest.setTraceId(traceId);
-  }
 
   @AfterEach
   void clearTraceId() {
@@ -282,6 +279,19 @@ class ControllerExceptionHandlerTest {
       .andExpect(MockMvcResultMatchers.jsonPath("$.category").value("GENERIC_ERROR"))
       .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("ERRORCODE"))
       .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("[ERRORCODE] Error"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.traceId").value(traceId));
+  }
+
+  @Test
+  void handleBadRequestException() throws Exception {
+    doThrow(new BadRequestException("UNSUPPORTED_FILE_TYPE", "Current POC supports only ORGANIZATIONS"))
+      .when(requestMappingHandlerAdapterSpy).handle(any(), any(), any());
+
+    performRequest(DATA, MediaType.APPLICATION_JSON)
+      .andExpect(MockMvcResultMatchers.status().isBadRequest())
+      .andExpect(MockMvcResultMatchers.jsonPath("$.category").value("BAD_REQUEST"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("UNSUPPORTED_FILE_TYPE"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("[UNSUPPORTED_FILE_TYPE] Current POC supports only ORGANIZATIONS"))
       .andExpect(MockMvcResultMatchers.jsonPath("$.traceId").value(traceId));
   }
 }

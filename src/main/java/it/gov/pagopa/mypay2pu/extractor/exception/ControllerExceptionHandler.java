@@ -44,6 +44,11 @@ public class ControllerExceptionHandler {
     return handleException(ex, request, HttpStatus.BAD_REQUEST, ErrorDTO.CategoryEnum.BAD_REQUEST);
   }
 
+  @ExceptionHandler(BadRequestException.class)
+  public ResponseEntity<ErrorDTO> handleBadRequestException(BadRequestException ex, HttpServletRequest request) {
+    return handleException(ex, request, HttpStatus.BAD_REQUEST, ErrorDTO.CategoryEnum.BAD_REQUEST);
+  }
+
   @ExceptionHandler(HttpClientErrorException.TooManyRequests.class)
   public ResponseEntity<ErrorDTO> handleInvokedHttpClientTooManyRequestsError(Exception ex, HttpServletRequest request) {
     return handleException(ex, request, HttpStatus.TOO_MANY_REQUESTS, ErrorDTO.CategoryEnum.TOO_MANY_REQUESTS);

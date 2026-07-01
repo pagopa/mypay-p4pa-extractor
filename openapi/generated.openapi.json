@@ -1,0 +1,221 @@
+{
+  "openapi" : "3.1.0",
+  "info" : {
+    "title" : "mypay-p4pa-extractor",
+    "description" : "Api and Models",
+    "version" : "0.0.1"
+  },
+  "servers" : [ {
+    "url" : "http://localhost",
+    "description" : "Generated server url"
+  } ],
+  "security" : [ {
+    "basicAuth" : [ ]
+  } ],
+  "tags" : [ {
+    "name" : "Extract",
+    "description" : "Extraction lifecycle APIs"
+  } ],
+  "paths" : {
+    "/extract" : {
+      "post" : {
+        "tags" : [ "Extract" ],
+        "summary" : "Start an asynchronous extraction",
+        "operationId" : "createExtraction",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ExtractionRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "202" : {
+            "description" : "Extraction accepted",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ExtractionAcceptedResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorDTO"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/extract/{extractionId}" : {
+      "get" : {
+        "tags" : [ "Extract" ],
+        "summary" : "Get extraction status",
+        "operationId" : "getExtractionStatus",
+        "parameters" : [ {
+          "name" : "extractionId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Current extraction status",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ExtractionStatusResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Extraction not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorDTO"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "ExtractionAcceptedResponse" : {
+        "type" : "object",
+        "properties" : {
+          "extractionId" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        },
+        "required" : [ "extractionId" ]
+      },
+      "CategoryEnum" : {
+        "type" : "string",
+        "enum" : [ "NOT_FOUND", "BAD_REQUEST", "GENERIC_ERROR", "TOO_MANY_REQUESTS" ]
+      },
+      "ErrorDTO" : {
+        "type" : "object",
+        "properties" : {
+          "category" : {
+            "$ref" : "#/components/schemas/CategoryEnum"
+          },
+          "code" : {
+            "type" : "string"
+          },
+          "message" : {
+            "type" : "string"
+          },
+          "traceId" : {
+            "type" : [ "string", "null" ]
+          }
+        },
+        "required" : [ "category", "code", "message" ]
+      },
+      "ExtractionFilters" : {
+        "type" : "null",
+        "properties" : {
+          "modifiedFrom" : {
+            "type" : [ "string", "null" ],
+            "format" : "date",
+            "example" : "2024-01-01"
+          },
+          "modifiedTo" : {
+            "type" : [ "string", "null" ],
+            "format" : "date",
+            "example" : "2026-06-18"
+          }
+        }
+      },
+      "ExtractionRequest" : {
+        "type" : "object",
+        "properties" : {
+          "ipaCode" : {
+            "type" : "string",
+            "example" : "00493410240",
+            "maxLength" : 2147483647,
+            "minLength" : 1
+          },
+          "fileTypes" : {
+            "$ref" : "#/components/schemas/MigrationFileType"
+          },
+          "filters" : {
+            "$ref" : "#/components/schemas/ExtractionFilters"
+          }
+        },
+        "required" : [ "fileTypes", "ipaCode" ]
+      },
+      "MigrationFileType" : {
+        "type" : [ "string", "null" ],
+        "enum" : [ "ORGANIZATIONS", "ORG_SIL_SERVICES", "DEBT_POSITIONS_TYPE", "DEBT_POSITIONS_TYPE_ORG", "DEBT_POSITIONS_TYPE_ORG_OPERATORS", "DEBT_POSITIONS", "DEBT_POSITIONS_PAID", "PAYMENT_NOTIFICATION", "PAYMENTS_REPORTING", "TREASURY_CSV_COMPLETE", "ASSESSMENTS", "ASSESSMENTS_REGISTRY" ]
+      },
+      "ExtractionStatus" : {
+        "type" : "string",
+        "enum" : [ "RUNNING", "COMPLETED", "FAILED" ]
+      },
+      "ExtractionStatusResponse" : {
+        "type" : "object",
+        "properties" : {
+          "extractionId" : {
+            "type" : "string"
+          },
+          "organizationId" : {
+            "type" : [ "string", "null" ]
+          },
+          "fileTypes" : {
+            "$ref" : "#/components/schemas/MigrationFileType"
+          },
+          "status" : {
+            "$ref" : "#/components/schemas/ExtractionStatus"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "updatedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "error" : {
+            "type" : [ "string", "null" ]
+          },
+          "files" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        },
+        "required" : [ "createdAt", "extractionId", "files", "status", "updatedAt" ]
+      }
+    },
+    "securitySchemes" : {
+      "basicAuth" : {
+        "type" : "http",
+        "scheme" : "basic"
+      }
+    }
+  }
+}
