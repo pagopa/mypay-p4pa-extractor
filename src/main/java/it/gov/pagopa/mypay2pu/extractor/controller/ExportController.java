@@ -32,10 +32,10 @@ public class ExportController implements ExtractApi {
       throw new BadRequestException("UNSUPPORTED_FILE_TYPE", "Current POC supports only ORGANIZATIONS");
     }
 
-    UUID extractionId = UUID.randomUUID();
-    ExtractionStatusResponse extractionStatusResponse = exportFileHandlerService.executeExport(extractionId.toString(), request);
-    log.info("Accepted extraction {} for organization {} and fileTypes {}", extractionStatusResponse.getExtractionId(), request.getIpaCode(), extractionStatusResponse.getFileTypes());
-    return ResponseEntity.accepted().body(new ExtractionAcceptedResponse(extractionStatusResponse.getExtractionId()));
+    String extractionId = UUID.randomUUID().toString();
+    exportFileHandlerService.executeExport(extractionId, request);
+    log.info("Accepted extraction {} for organization {} and fileTypes {}", extractionId, request.getIpaCode(), request.getFileTypes());
+    return ResponseEntity.accepted().body(new ExtractionAcceptedResponse(extractionId));
   }
 
   @Override

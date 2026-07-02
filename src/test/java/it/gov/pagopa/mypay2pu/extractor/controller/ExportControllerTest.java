@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import it.gov.pagopa.mypay2pu.extractor.config.json.JsonConfig;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionFilters;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
-import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionStatusResponse;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.exception.ControllerExceptionHandler;
 import it.gov.pagopa.mypay2pu.extractor.service.ExportFileHandlerService;
@@ -21,12 +20,13 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -52,22 +52,19 @@ class ExportControllerTest {
   }
 
   @Test
-  void createExtractionShouldReturnAcceptedUsingServiceExtractionId() throws Exception {
+  void createExtractionShouldReturnAcceptedUsingGeneratedExtractionId() throws Exception {
     ExtractionRequest request = new ExtractionRequest(
       "IPA_CODE_TEST",
       MigrationFileType.ORGANIZATIONS,
       new ExtractionFilters()
     );
-    String extractionId = "0d527f1b-cb46-47ae-a58e-49949d1e8cb9";
-
-    when(exportFileHandlerService.executeExport(anyString(), eq(request)))
-      .thenReturn(new ExtractionStatusResponse().extractionId(extractionId));
+    doNothing().when(exportFileHandlerService).executeExport(anyString(), eq(request));
 
     mockMvc.perform(post("/extract")
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(request)))
       .andExpect(status().isAccepted())
-      .andExpect(jsonPath("$.extractionId").value(extractionId));
+      .andExpect(jsonPath("$.extractionId").isNotEmpty());
 
     verify(exportFileHandlerService).executeExport(anyString(), eq(request));
     verifyNoMoreInteractions(exportFileHandlerService);
@@ -81,8 +78,7 @@ class ExportControllerTest {
       new ExtractionFilters()
     );
 
-    when(exportFileHandlerService.executeExport(anyString(), eq(request)))
-      .thenAnswer(invocation -> new ExtractionStatusResponse().extractionId(invocation.getArgument(0, String.class)));
+    doNothing().when(exportFileHandlerService).executeExport(anyString(), any(ExtractionRequest.class));
 
     mockMvc.perform(post("/extract")
         .contentType(MediaType.APPLICATION_JSON)
