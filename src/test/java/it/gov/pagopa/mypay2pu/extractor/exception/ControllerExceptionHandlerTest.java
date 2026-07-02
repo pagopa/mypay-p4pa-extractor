@@ -294,4 +294,17 @@ class ControllerExceptionHandlerTest {
       .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("[UNSUPPORTED_FILE_TYPE] Current POC supports only ORGANIZATIONS"))
       .andExpect(MockMvcResultMatchers.jsonPath("$.traceId").value(traceId));
   }
+
+  @Test
+  void handleExportFileTypeNotSupportedException() throws Exception {
+    doThrow(new ExportFileTypeNotSupportedException("Invalid export file type"))
+      .when(requestMappingHandlerAdapterSpy).handle(any(), any(), any());
+
+    performRequest(DATA, MediaType.APPLICATION_JSON)
+      .andExpect(MockMvcResultMatchers.status().isBadRequest())
+      .andExpect(MockMvcResultMatchers.jsonPath("$.category").value("BAD_REQUEST"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("EXPORT_FILE_NOT_SUPPORTED"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("[EXPORT_FILE_NOT_SUPPORTED] Invalid export file type"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.traceId").value(traceId));
+  }
 }

@@ -6,6 +6,7 @@ import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionStatusResponse;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.exception.BadRequestException;
+import it.gov.pagopa.mypay2pu.extractor.service.ExportFileHandlerService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,11 @@ import java.util.UUID;
 @Slf4j
 public class ExportController implements ExtractApi {
 
+  private final ExportFileHandlerService exportFileHandlerService;
+
+  public ExportController(ExportFileHandlerService exportFileHandlerService) {
+    this.exportFileHandlerService = exportFileHandlerService;
+  }
 
   @Override
   public ResponseEntity<ExtractionAcceptedResponse> createExtraction(@Valid ExtractionRequest request) {
@@ -27,9 +33,9 @@ public class ExportController implements ExtractApi {
     }
 
     UUID extractionId = UUID.randomUUID();
-    //TODO extraction will be implemented after resolution of tasks P4ADEV-4811 and P4ADEV-4816
-    log.info("Accepted extraction {} for organization {} and fileTypes {}", extractionId, request.getIpaCode(), fileTypes);
-    return ResponseEntity.accepted().body(new ExtractionAcceptedResponse(extractionId));
+    ExtractionStatusResponse extractionStatusResponse = exportFileHandlerService.executeExport(extractionId.toString(), request);
+    log.info("Accepted extraction {} for organization {} and fileTypes {}", extractionStatusResponse.getExtractionId(), request.getIpaCode(), extractionStatusResponse.getFileTypes());
+    return ResponseEntity.accepted().body(new ExtractionAcceptedResponse(extractionStatusResponse.getExtractionId()));
   }
 
   @Override

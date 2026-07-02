@@ -118,7 +118,6 @@ components:
       properties:
         extractionId:
           type: string
-          format: uuid
     ExtractionStatusResponse:
       type: object
       required:
@@ -130,7 +129,7 @@ components:
       properties:
         extractionId:
           type: string
-        organizationId:
+        ipaCode:
           type: string
         fileTypes:
           $ref: '#/components/schemas/MigrationFileType'

@@ -106,8 +106,7 @@
         "type" : "object",
         "properties" : {
           "extractionId" : {
-            "type" : "string",
-            "format" : "uuid"
+            "type" : "string"
           }
         },
         "required" : [ "extractionId" ]
@@ -181,7 +180,7 @@
           "extractionId" : {
             "type" : "string"
           },
-          "organizationId" : {
+          "ipaCode" : {
             "type" : [ "string", "null" ]
           },
           "fileTypes" : {
