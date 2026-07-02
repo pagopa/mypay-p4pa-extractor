@@ -86,3 +86,12 @@ datasource:
     username: "\${FESP_DB_USER}"
     password: "\${FESP_DB_PASSWORD}"
     driver-class-name: org.postgresql.Driver
+
+csv:
+  separator: "\${CSV_SEPARATOR_CHAR:;}"
+  quote-char: "\${CSV_QUOTE_CHAR:\\\"}"
+
+export-flow-files:
+  page-request-thresholds:
+    warn: "\${EXPORT_FLOW_FILES_PAGE_REQUEST_THRESHOLDS_WARN: 100}"
+    error: "\${EXPORT_FLOW_FILES_PAGE_REQUEST_THRESHOLDS_ERROR: 1000}"
