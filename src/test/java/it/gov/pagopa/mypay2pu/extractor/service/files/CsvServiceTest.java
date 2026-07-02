@@ -1,6 +1,5 @@
 package it.gov.pagopa.mypay2pu.extractor.service.files;
 
-import com.opencsv.exceptions.CsvException;
 import it.gov.pagopa.mypay2pu.extractor.exception.InvalidCsvRowException;
 import org.junit.jupiter.api.Test;
 import uk.co.jemos.podam.api.PodamFactory;
@@ -21,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class CsvServiceTest {
 
     private final PodamFactory podamFactory = new PodamFactoryImpl();
-    private final CsvService csvService = new CsvService(';', '\"', 5, 10);
+    private final CsvService csvService = new CsvService(';', '\"');
 
     @Test
     void testCreateCsv_success() throws IOException {
@@ -78,8 +77,8 @@ class CsvServiceTest {
 
 
     @Test
-    void testCreateCsvFromBean_success() throws IOException {
-        // Give
+    void testCreateCsvFromBean_successWithRepeatedSupplier() throws IOException {
+        // Given
         Path filePath = Path.of("build", "tmp", "test", "EXPORT.csv");
 
         TestCsv testCsv = podamFactory.manufacturePojo(TestCsv.class);
@@ -92,11 +91,11 @@ class CsvServiceTest {
         Supplier<List<TestCsv>> csvRowsSupplier = () -> {
             if (supplierCalled.get()) {
                 return Collections.emptyList();
-            } else {
-                supplierCalled.set(true);
-                return testCsvList;
             }
+            supplierCalled.set(true);
+            return testCsvList;
         };
+
         // When
         csvService.createCsv(filePath, TestCsv.class, csvRowsSupplier, "v1");
 
@@ -104,29 +103,6 @@ class CsvServiceTest {
         File file = filePath.toFile();
         assertTrue(file.exists(), "The file should exist.");
         assertTrue(file.length() > 0, "The file should not be empty.");
-    }
-
-
-    @Test
-    void testCreateCsvFromBean_whenPageRequestCountBiggerThenThreshold_thenThrowIllegalException() {
-        // Given
-        Path filePath = Path.of("build", "tmp", "test", "EXPORT.csv");
-
-        TestCsv testCsv = podamFactory.manufacturePojo(TestCsv.class);
-        TestCsv testCsv1 = podamFactory.manufacturePojo(TestCsv.class);
-        TestCsv testCsv2 = podamFactory.manufacturePojo(TestCsv.class);
-
-        List<TestCsv> testCsvList = List.of(testCsv, testCsv1, testCsv2);
-
-        // When
-        IllegalStateException ex = assertThrows(IllegalStateException.class, () ->
-                csvService.createCsv(filePath, TestCsv.class, () -> testCsvList, "v1"));
-
-        // Then
-        File file = filePath.toFile();
-        assertTrue(file.exists(), "The file should exist.");
-        assertTrue(file.length() > 0, "The file should not be empty.");
-        assertEquals("Export process reached error threshold page request count: 11", ex.getMessage());
     }
 
     @Test

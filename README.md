@@ -94,6 +94,13 @@ See [application.yml](src/main/resources/application.yml) for each configurable 
 |---|---|---|
 | `SERVER_PORT` | Application server listening port | `8080` |
 
+#### 🧾 CSV
+
+| ENV | DESCRIPTION | DEFAULT |
+|---|---|---|
+| `CSV_SEPARATOR_CHAR` | Separator character used when generating CSV files | `;` |
+| `CSV_QUOTE_CHAR` | Quote character used when generating CSV files | `"` |
+
 #### 🔐 Authentication
 
 | ENV | DESCRIPTION | DEFAULT |
