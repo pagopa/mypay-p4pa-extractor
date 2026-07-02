@@ -57,6 +57,7 @@ val kafkaAppender = "0.2.0-RC2"
 val lz4JavaVersion = "1.11.0"
 val postgresqlVersion = "42.7.11"
 val openCsvVersion = "5.12.0"
+val podamVersion = "8.0.2.RELEASE"
 
 dependencies {
   implementation("org.springframework.boot:spring-boot-starter-webmvc")
@@ -87,6 +88,8 @@ dependencies {
   testImplementation("org.springframework.boot:spring-boot-starter-security-test")
   testImplementation("org.mockito:mockito-core")
   testImplementation("org.projectlombok:lombok")
+  testImplementation("uk.co.jemos.podam:podam:${podamVersion}")
+
 }
 
 tasks.withType<Test> {

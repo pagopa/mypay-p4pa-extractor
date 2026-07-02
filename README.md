@@ -189,6 +189,8 @@ See [application.yml](src/main/resources/application.yml) for each configurable 
 | `MYPIVOT_ENABLED` | Enable myPivot4 extraction (types 10/11/12). If `false`, Adapters related to MyPivot are skipped | `false` |
 | `BROKER_CF` | Fiscal code of the broker/intermediary running the extraction (used as context metadata) | — |
 | `AVG_ROW_SIZE_ORGANIZATIONS` | Average row size in bytes for `ORGANIZATIONS` split calculation (`maxRows = MULTIPART_MAX_FILE_SIZE / avgRowSize`) | `500` |
+| `CSV_SEPARATOR_CHAR` | Separator character used when generating CSV files | `;` |
+| `CSV_QUOTE_CHAR` | Quote character used when generating CSV files | `"` |
 
 ## 🛠️ Getting Started
 
