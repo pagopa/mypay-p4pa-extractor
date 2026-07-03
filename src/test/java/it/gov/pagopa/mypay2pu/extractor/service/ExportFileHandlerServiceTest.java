@@ -12,8 +12,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -40,10 +40,10 @@ class ExportFileHandlerServiceTest {
     when(dataExportFacadeServiceMock.executeExport(extractionId, MigrationFileType.ORGANIZATIONS))
       .thenReturn(exportFileResult);
 
-    assertDoesNotThrow(() -> service.executeExport(extractionId, request));
-    assertSame(List.of("organizations.csv"), exportFileResult.files());
-    assertSame(null, exportFileResult.error());
+    service.executeExport(extractionId, request);
 
+    assertEquals(List.of("organizations.csv"), exportFileResult.files());
+    assertNull(exportFileResult.error());
   }
 
   @Test
@@ -57,8 +57,7 @@ class ExportFileHandlerServiceTest {
 
     service.executeExport(extractionId, request);
 
-    assertDoesNotThrow(() -> service.executeExport(extractionId, request));
-    assertSame(List.of(), exportFileResult.files());
-    assertSame("export failed", exportFileResult.error());
+    assertEquals(List.of(), exportFileResult.files());
+    assertEquals("export failed", exportFileResult.error());
   }
 }

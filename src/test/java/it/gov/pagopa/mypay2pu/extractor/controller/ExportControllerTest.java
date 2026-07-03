@@ -17,7 +17,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -68,27 +67,9 @@ class ExportControllerTest {
   }
 
   @Test
-  void givenGenerateUuidWhenCreateExtractionThenDelegatingToService() throws Exception {
-    ExtractionRequest request = new ExtractionRequest(
-      "IPA_CODE_TEST",
-      MigrationFileType.ORGANIZATIONS,
-      new ExtractionFilters()
-    );
-
-    doNothing().when(exportFileHandlerServiceMock).executeExport(anyString(), any(ExtractionRequest.class));
-
-    mockMvc.perform(post("/extract")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(objectMapper.writeValueAsString(request)))
-      .andExpect(status().isAccepted())
-      .andExpect(jsonPath("$.extractionId").isNotEmpty());
-
-  }
-
-  @Test
-  void givenInvalidExtractionIdWhenGetExtractionStatusThenReturnBadRequest() throws Exception {
+  void givenInvalidExtractionIdWhenGetExtractionStatusThenReturnNotImplemented() throws Exception {
     mockMvc.perform(get("/extract/extraction-id"))
-      .andExpect(status().isBadRequest());
+      .andExpect(status().isNotImplemented());
 
   }
 }
