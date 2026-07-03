@@ -74,7 +74,6 @@ rest:
       connect-millis: "\${DEFAULT_REST_TIMEOUT_CONNECT_MILLIS:120000}"
       read-millis: "\${DEFAULT_REST_TIMEOUT_READ_MILLIS:120000}"
 
-
 datasource:
   mp4:
     jdbc-url: "jdbc:postgresql://\${MP4_DB_HOST}:\${MP4_DB_PORT:5432}/\${MP4_DB_NAME}"
