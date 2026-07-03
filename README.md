@@ -191,13 +191,13 @@ See [application.yml](src/main/resources/application.yml) for each configurable 
 | `AVG_ROW_SIZE_ORGANIZATIONS` | Average row size in bytes for `ORGANIZATIONS` split calculation (`maxRows = MULTIPART_MAX_FILE_SIZE / avgRowSize`) | `500` |
 | `CSV_SEPARATOR_CHAR` | Separator character used when generating CSV files | `;` |
 | `CSV_QUOTE_CHAR` | Quote character used when generating CSV files | `"` |
-| `FILE_ENCRYPT_ENABLED` | Enable AES-GCM encryption of produced ZIP files | `false` |
+| `FILE_ENCRYPT_ENABLED` | Enable the encryption of the extracted files | `false` |
 
 #### 🔑 keys
 
-| ENV | DESCRIPTION                                                                      | DEFAULT |
-|---|----------------------------------------------------------------------------------|---|
-| `FILE_ENCRYPT_PSW` | Password used to derive the AES encryption key (used only if encryption enables) | `changeme` |
+| ENV | DESCRIPTION | DEFAULT |
+|---|---|---|
+| `FILE_ENCRYPT_PSW` | Password used to encrypt produced files (used only if encryption enables) | `` |
 
 ## 🛠️ Getting Started
 

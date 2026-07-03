@@ -95,7 +95,7 @@ extractor:
 
 cipher:
   file-encrypt-enabled: "\${FILE_ENCRYPT_ENABLED:false}"
-  file-encrypt-psw: "\${FILE_ENCRYPT_PSW:changeme}"
+  file-encrypt-psw: "\${FILE_ENCRYPT_PSW:}"
 
 csv:
   separator: "\${CSV_SEPARATOR_CHAR:;}"
