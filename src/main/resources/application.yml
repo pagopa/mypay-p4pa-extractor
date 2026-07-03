@@ -98,6 +98,10 @@ extractor:
     avg-row-size-organizations: "\${AVG_ROW_SIZE_ORGANIZATIONS:500}"
     broker-cf: "\${BROKER_CF:\${PA_IDENTIFICATIVO_INTERMEDIARIO_PA:}}"
 
+cipher:
+  file-encrypt-enabled: "\${FILE_ENCRYPT_ENABLED:false}"
+  file-encrypt-psw: "\${FILE_ENCRYPT_PSW:}"
+
 csv:
   separator: "\${CSV_SEPARATOR_CHAR:;}"
   quote-char: "\${CSV_QUOTE_CHAR:\\\"}"
