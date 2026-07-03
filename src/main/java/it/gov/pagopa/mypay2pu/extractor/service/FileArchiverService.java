@@ -47,17 +47,17 @@ public class FileArchiverService {
     Files.createDirectories(file2Zip.getParent());
     File zipped = zipFileService.zipper(file2Zip, files2Archive);
     Long zippedFileSize = zipped.length();
-    Path fileToArchive = zipped.toPath();
+    Path resultFile = zipped.toPath();
     if (fileEncryptEnabled) {
       File encrypted = AESUtils.encrypt(dataCipherPsw, zipped);
       Files.deleteIfExists(zipped.toPath());
-      fileToArchive = encrypted.toPath();
+      resultFile = encrypted.toPath();
     }
     for (Path path : files2Archive) {
       Files.deleteIfExists(path);
     }
 
-    moveFilesToTargetDirectory(List.of(fileToArchive), targetPath);
+    moveFilesToTargetDirectory(List.of(resultFile), targetPath);
     return zippedFileSize;
   }
 
