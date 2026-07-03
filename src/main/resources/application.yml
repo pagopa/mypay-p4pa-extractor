@@ -93,6 +93,10 @@ extractor:
     max-pool-size: "\${ASYNC_MAX_POOL_SIZE:5}"
     queue-capacity: "\${ASYNC_QUEUE_CAPACITY:10}"
 
+cipher:
+  file-encrypt-enabled: "\${FILE_ENCRYPT_ENABLED:false}"
+  file-encrypt-psw: "\${FILE_ENCRYPT_PSW:}"
+
 csv:
   separator: "\${CSV_SEPARATOR_CHAR:;}"
   quote-char: "\${CSV_QUOTE_CHAR:\\\"}"
