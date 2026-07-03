@@ -4,8 +4,7 @@ import it.gov.pagopa.mypay2pu.extractor.controller.generated.ExtractApi;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionAcceptedResponse;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionStatusResponse;
-import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
-import it.gov.pagopa.mypay2pu.extractor.exception.BadRequestException;
+import it.gov.pagopa.mypay2pu.extractor.service.ExportFileHandlerService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -17,18 +16,20 @@ import java.util.UUID;
 @Slf4j
 public class ExportController implements ExtractApi {
 
+  private final ExportFileHandlerService exportFileHandlerService;
+
+  public ExportController(ExportFileHandlerService exportFileHandlerService) {
+    this.exportFileHandlerService = exportFileHandlerService;
+  }
 
   @Override
   public ResponseEntity<ExtractionAcceptedResponse> createExtraction(@Valid ExtractionRequest request) {
     log.info("createExtraction: ipaCode={}, fileTypes={}", request.getIpaCode(), request.getFileTypes());
-    MigrationFileType fileTypes = request.getFileTypes();
-    if (fileTypes != MigrationFileType.ORGANIZATIONS) {
-      throw new BadRequestException("UNSUPPORTED_FILE_TYPE", "Current POC supports only ORGANIZATIONS");
-    }
 
-    UUID extractionId = UUID.randomUUID();
-    //TODO extraction will be implemented after resolution of tasks P4ADEV-4811 and P4ADEV-4816
-    log.info("Accepted extraction {} for organization {} and fileTypes {}", extractionId, request.getIpaCode(), fileTypes);
+    String extractionId = UUID.randomUUID().toString();
+    exportFileHandlerService.executeExport(extractionId, request);
+    
+    log.info("Accepted extraction {} for organization {} and fileTypes {}", extractionId, request.getIpaCode(), request.getFileTypes());
     return ResponseEntity.accepted().body(new ExtractionAcceptedResponse(extractionId));
   }
 
@@ -38,5 +39,4 @@ public class ExportController implements ExtractApi {
     //TODO extraction status will be implemented after resolution of tasks P4ADEV-4816
     return ResponseEntity.ok(null);
   }
-
 }

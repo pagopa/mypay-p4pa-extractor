@@ -6,62 +6,90 @@ import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionFilters;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.exception.ControllerExceptionHandler;
+import it.gov.pagopa.mypay2pu.extractor.service.ExportFileHandlerService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(SpringExtension.class)
-@WebMvcTest(value = ExportController.class)
-@AutoConfigureMockMvc(addFilters = false)
-@ContextConfiguration(classes = {ExportController.class, ControllerExceptionHandler.class, JsonConfig.class})
+@ExtendWith(MockitoExtension.class)
 class ExportControllerTest {
 
-  @Autowired
+  @Mock
+  private ExportFileHandlerService exportFileHandlerService;
+
   private MockMvc mockMvc;
-  @Autowired
   private ObjectMapper objectMapper;
 
+  @BeforeEach
+  void setUp() {
+    objectMapper = new JsonConfig().objectMapper();
+    mockMvc = MockMvcBuilders
+      .standaloneSetup(new ExportController(exportFileHandlerService))
+      .setControllerAdvice(new ControllerExceptionHandler())
+      .build();
+  }
+
   @Test
-  void createExtractionShouldReturnAccepted() throws Exception {
+  void createExtractionShouldReturnAcceptedUsingGeneratedExtractionId() throws Exception {
     ExtractionRequest request = new ExtractionRequest(
-      "00493410240",
+      "IPA_CODE_TEST",
       MigrationFileType.ORGANIZATIONS,
       new ExtractionFilters()
     );
+    doNothing().when(exportFileHandlerService).executeExport(anyString(), eq(request));
 
     mockMvc.perform(post("/extract")
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(request)))
       .andExpect(status().isAccepted())
       .andExpect(jsonPath("$.extractionId").isNotEmpty());
+
+    verify(exportFileHandlerService).executeExport(anyString(), eq(request));
+    verifyNoMoreInteractions(exportFileHandlerService);
   }
 
   @Test
-  void createExtractionShouldRejectUnsupportedFileType() throws Exception {
+  void createExtractionShouldGenerateUuidBeforeDelegatingToService() throws Exception {
     ExtractionRequest request = new ExtractionRequest(
-      "00493410240",
-      MigrationFileType.DEBT_POSITIONS,
-      null
+      "IPA_CODE_TEST",
+      MigrationFileType.ORGANIZATIONS,
+      new ExtractionFilters()
     );
+
+    doNothing().when(exportFileHandlerService).executeExport(anyString(), any(ExtractionRequest.class));
 
     mockMvc.perform(post("/extract")
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(request)))
-      .andExpect(status().isBadRequest())
-      .andExpect(jsonPath("$.code").value("UNSUPPORTED_FILE_TYPE"))
-      .andExpect(jsonPath("$.message").value("[UNSUPPORTED_FILE_TYPE] Current POC supports only ORGANIZATIONS"));
+      .andExpect(status().isAccepted())
+      .andExpect(jsonPath("$.extractionId").isNotEmpty());
+
+    ArgumentCaptor<String> extractionIdCaptor = ArgumentCaptor.forClass(String.class);
+    verify(exportFileHandlerService).executeExport(extractionIdCaptor.capture(), eq(request));
+    assertDoesNotThrow(() -> UUID.fromString(extractionIdCaptor.getValue()));
+    verifyNoMoreInteractions(exportFileHandlerService);
   }
 
   @Test
@@ -69,5 +97,7 @@ class ExportControllerTest {
     mockMvc.perform(get("/extract/extraction-id"))
       .andExpect(status().isOk())
       .andExpect(content().string(""));
+
+    verifyNoInteractions(exportFileHandlerService);
   }
 }

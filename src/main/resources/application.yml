@@ -87,6 +87,12 @@ datasource:
     password: "\${FESP_DB_PASSWORD}"
     driver-class-name: org.postgresql.Driver
 
+extractor:
+  async:
+    core-pool-size: "\${ASYNC_CORE_POOL_SIZE:2}"
+    max-pool-size: "\${ASYNC_MAX_POOL_SIZE:5}"
+    queue-capacity: "\${ASYNC_QUEUE_CAPACITY:10}"
+
 csv:
   separator: "\${CSV_SEPARATOR_CHAR:;}"
   quote-char: "\${CSV_QUOTE_CHAR:\\\"}"

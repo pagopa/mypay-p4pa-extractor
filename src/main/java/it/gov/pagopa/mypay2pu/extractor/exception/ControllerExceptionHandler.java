@@ -44,8 +44,8 @@ public class ControllerExceptionHandler {
     return handleException(ex, request, HttpStatus.BAD_REQUEST, ErrorDTO.CategoryEnum.BAD_REQUEST);
   }
 
-  @ExceptionHandler(BadRequestException.class)
-  public ResponseEntity<ErrorDTO> handleBadRequestException(BadRequestException ex, HttpServletRequest request) {
+  @ExceptionHandler({BadRequestException.class, ExportFileTypeNotSupportedException.class})
+  public ResponseEntity<ErrorDTO> handleBadRequestException(BaseBusinessException ex, HttpServletRequest request) {
     return handleException(ex, request, HttpStatus.BAD_REQUEST, ErrorDTO.CategoryEnum.BAD_REQUEST);
   }
 
