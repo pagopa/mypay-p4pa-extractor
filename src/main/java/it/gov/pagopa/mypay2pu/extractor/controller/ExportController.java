@@ -5,10 +5,10 @@ import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionAcceptedResponse
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionStatusResponse;
 import it.gov.pagopa.mypay2pu.extractor.service.ExportFileHandlerService;
+import it.gov.pagopa.mypay2pu.extractor.service.ExportFileStatusService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
@@ -18,9 +18,11 @@ import java.util.UUID;
 public class ExportController implements ExtractApi {
 
   private final ExportFileHandlerService exportFileHandlerService;
+  private final ExportFileStatusService exportFileStatusService;
 
-  public ExportController(ExportFileHandlerService exportFileHandlerService) {
+  public ExportController(ExportFileHandlerService exportFileHandlerService, ExportFileStatusService exportFileStatusService) {
     this.exportFileHandlerService = exportFileHandlerService;
+    this.exportFileStatusService = exportFileStatusService;
   }
 
   @Override
@@ -37,8 +39,6 @@ public class ExportController implements ExtractApi {
   @Override
   public ResponseEntity<ExtractionStatusResponse> getExtractionStatus(String extractionId) {
     log.info("getExtractionStatus: extractionId={}", extractionId);
-    //TODO Extraction status will be implemented by task P4ADEV-4816
-    throw new ResponseStatusException(org.springframework.http.HttpStatus.NOT_IMPLEMENTED,
-      "Extraction status endpoint is not implemented yet");
+    return ResponseEntity.ok(exportFileStatusService.readStatus(extractionId));
   }
 }
