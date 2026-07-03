@@ -8,6 +8,7 @@ import it.gov.pagopa.mypay2pu.extractor.service.ExportFileHandlerService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
@@ -28,7 +29,7 @@ public class ExportController implements ExtractApi {
 
     String extractionId = UUID.randomUUID().toString();
     exportFileHandlerService.executeExport(extractionId, request);
-    
+
     log.info("Accepted extraction {} for organization {} and fileTypes {}", extractionId, request.getIpaCode(), request.getFileTypes());
     return ResponseEntity.accepted().body(new ExtractionAcceptedResponse(extractionId));
   }
@@ -36,7 +37,8 @@ public class ExportController implements ExtractApi {
   @Override
   public ResponseEntity<ExtractionStatusResponse> getExtractionStatus(String extractionId) {
     log.info("getExtractionStatus: extractionId={}", extractionId);
-    //TODO extraction status will be implemented after resolution of tasks P4ADEV-4816
-    return ResponseEntity.ok(null);
+    //TODO Extraction status will be implemented by task P4ADEV-4816
+    throw new ResponseStatusException(org.springframework.http.HttpStatus.NOT_IMPLEMENTED,
+      "Extraction status endpoint is not implemented yet");
   }
 }

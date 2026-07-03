@@ -16,7 +16,7 @@ class DataExportFacadeServiceTest {
   private final DataExportFacadeService service = new DataExportFacadeService();
 
   @Test
-  void executeExportShouldReturnEmptyOrganizationsResult() {
+  void whenExecuteExportThenReturnEmptyOrganizationsResult() {
     ExportFileResult result = service.executeExport("extraction-id", MigrationFileType.ORGANIZATIONS);
 
     assertEquals(List.of(), result.files());
@@ -24,7 +24,7 @@ class DataExportFacadeServiceTest {
   }
 
   @Test
-  void executeExportShouldRejectUnsupportedFileType() {
+  void whenExecuteExportThenRejectUnsupportedFileType() {
     ExportFileTypeNotSupportedException exception = assertThrows(
       ExportFileTypeNotSupportedException.class,
       () -> service.executeExport("extraction-id", MigrationFileType.DEBT_POSITIONS)
