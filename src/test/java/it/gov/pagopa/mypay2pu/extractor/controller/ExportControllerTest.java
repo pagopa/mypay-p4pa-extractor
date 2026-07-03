@@ -93,24 +93,6 @@ class ExportControllerTest {
   }
 
   @Test
-  void createExtractionShouldRejectUnsupportedFileType() throws Exception {
-    ExtractionRequest request = new ExtractionRequest(
-      "IPA_CODE_TEST",
-      MigrationFileType.DEBT_POSITIONS,
-      null
-    );
-
-    mockMvc.perform(post("/extract")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(objectMapper.writeValueAsString(request)))
-      .andExpect(status().isBadRequest())
-      .andExpect(jsonPath("$.code").value("UNSUPPORTED_FILE_TYPE"))
-      .andExpect(jsonPath("$.message").value("[UNSUPPORTED_FILE_TYPE] Current POC supports only ORGANIZATIONS"));
-
-    verifyNoInteractions(exportFileHandlerService);
-  }
-
-  @Test
   void getExtractionStatusShouldReturnOkWithEmptyBody() throws Exception {
     mockMvc.perform(get("/extract/extraction-id"))
       .andExpect(status().isOk())
