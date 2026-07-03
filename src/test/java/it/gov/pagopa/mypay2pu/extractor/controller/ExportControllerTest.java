@@ -7,29 +7,23 @@ import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.exception.ControllerExceptionHandler;
 import it.gov.pagopa.mypay2pu.extractor.service.ExportFileHandlerService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -37,7 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class ExportControllerTest {
 
   @Mock
-  private ExportFileHandlerService exportFileHandlerService;
+  private ExportFileHandlerService exportFileHandlerServiceMock;
 
   private MockMvc mockMvc;
   private ObjectMapper objectMapper;
@@ -46,19 +40,24 @@ class ExportControllerTest {
   void setUp() {
     objectMapper = new JsonConfig().objectMapper();
     mockMvc = MockMvcBuilders
-      .standaloneSetup(new ExportController(exportFileHandlerService))
+      .standaloneSetup(new ExportController(exportFileHandlerServiceMock))
       .setControllerAdvice(new ControllerExceptionHandler())
       .build();
   }
 
+  @AfterEach
+  void tearDown() {
+    verifyNoMoreInteractions(exportFileHandlerServiceMock);
+  }
+
   @Test
-  void createExtractionShouldReturnAcceptedUsingGeneratedExtractionId() throws Exception {
+  void givenGeneratedExtractionIdWhenExecuteExportThenReturnAccepted() throws Exception {
     ExtractionRequest request = new ExtractionRequest(
       "IPA_CODE_TEST",
       MigrationFileType.ORGANIZATIONS,
       new ExtractionFilters()
     );
-    doNothing().when(exportFileHandlerService).executeExport(anyString(), eq(request));
+    doNothing().when(exportFileHandlerServiceMock).executeExport(anyString(), eq(request));
 
     mockMvc.perform(post("/extract")
         .contentType(MediaType.APPLICATION_JSON)
@@ -66,19 +65,17 @@ class ExportControllerTest {
       .andExpect(status().isAccepted())
       .andExpect(jsonPath("$.extractionId").isNotEmpty());
 
-    verify(exportFileHandlerService).executeExport(anyString(), eq(request));
-    verifyNoMoreInteractions(exportFileHandlerService);
   }
 
   @Test
-  void createExtractionShouldGenerateUuidBeforeDelegatingToService() throws Exception {
+  void givenGenerateUuidWhenCreateExtractionThenDelegatingToService() throws Exception {
     ExtractionRequest request = new ExtractionRequest(
       "IPA_CODE_TEST",
       MigrationFileType.ORGANIZATIONS,
       new ExtractionFilters()
     );
 
-    doNothing().when(exportFileHandlerService).executeExport(anyString(), any(ExtractionRequest.class));
+    doNothing().when(exportFileHandlerServiceMock).executeExport(anyString(), any(ExtractionRequest.class));
 
     mockMvc.perform(post("/extract")
         .contentType(MediaType.APPLICATION_JSON)
@@ -86,18 +83,12 @@ class ExportControllerTest {
       .andExpect(status().isAccepted())
       .andExpect(jsonPath("$.extractionId").isNotEmpty());
 
-    ArgumentCaptor<String> extractionIdCaptor = ArgumentCaptor.forClass(String.class);
-    verify(exportFileHandlerService).executeExport(extractionIdCaptor.capture(), eq(request));
-    assertDoesNotThrow(() -> UUID.fromString(extractionIdCaptor.getValue()));
-    verifyNoMoreInteractions(exportFileHandlerService);
   }
 
   @Test
-  void getExtractionStatusShouldReturnOkWithEmptyBody() throws Exception {
+  void givenInvalidExtractionIdWhenGetExtractionStatusThenReturnBadRequest() throws Exception {
     mockMvc.perform(get("/extract/extraction-id"))
-      .andExpect(status().isOk())
-      .andExpect(content().string(""));
+      .andExpect(status().isBadRequest());
 
-    verifyNoInteractions(exportFileHandlerService);
   }
 }

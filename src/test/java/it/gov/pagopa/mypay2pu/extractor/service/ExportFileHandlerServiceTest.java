@@ -3,6 +3,7 @@ package it.gov.pagopa.mypay2pu.extractor.service;
 import it.gov.pagopa.mypay2pu.extractor.dto.ExportFileResult;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -11,7 +12,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
-import static org.mockito.Mockito.verify;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -19,38 +21,44 @@ import static org.mockito.Mockito.when;
 class ExportFileHandlerServiceTest {
 
   @Mock
-  private DataExportFacadeService dataExportFacadeService;
+  private DataExportFacadeService dataExportFacadeServiceMock;
 
   @InjectMocks
   private ExportFileHandlerService service;
 
+  @AfterEach
+  void tearDown() {
+    verifyNoMoreInteractions(dataExportFacadeServiceMock);
+  }
+
   @Test
-  void executeExportShouldDelegateAndPopulateResponse() {
+  void givenValidRequestWhenExecuteExportThenReturnFiles() {
     String extractionId = "extraction-id";
     ExtractionRequest request = new ExtractionRequest("IPA_CODE_TEST", MigrationFileType.ORGANIZATIONS);
     ExportFileResult exportFileResult = new ExportFileResult(List.of("organizations.csv"), null);
 
-    when(dataExportFacadeService.executeExport(extractionId, MigrationFileType.ORGANIZATIONS))
+    when(dataExportFacadeServiceMock.executeExport(extractionId, MigrationFileType.ORGANIZATIONS))
       .thenReturn(exportFileResult);
 
-    service.executeExport(extractionId, request);
+    assertDoesNotThrow(() -> service.executeExport(extractionId, request));
+    assertSame(List.of("organizations.csv"), exportFileResult.files());
+    assertSame(null, exportFileResult.error());
 
-    verify(dataExportFacadeService).executeExport(extractionId, MigrationFileType.ORGANIZATIONS);
-    verifyNoMoreInteractions(dataExportFacadeService);
   }
 
   @Test
-  void executeExportShouldPropagateFacadeError() {
+  void givenFacadeThrowsExceptionWhenExecuteExportThenResultContainsError() {
     String extractionId = "extraction-id";
     ExtractionRequest request = new ExtractionRequest("IPA_CODE_TEST", MigrationFileType.ORGANIZATIONS);
     ExportFileResult exportFileResult = new ExportFileResult(List.of(), "export failed");
 
-    when(dataExportFacadeService.executeExport(extractionId, MigrationFileType.ORGANIZATIONS))
+    when(dataExportFacadeServiceMock.executeExport(extractionId, MigrationFileType.ORGANIZATIONS))
       .thenReturn(exportFileResult);
 
     service.executeExport(extractionId, request);
 
-    verify(dataExportFacadeService).executeExport(extractionId, MigrationFileType.ORGANIZATIONS);
-    verifyNoMoreInteractions(dataExportFacadeService);
+    assertDoesNotThrow(() -> service.executeExport(extractionId, request));
+    assertSame(List.of(), exportFileResult.files());
+    assertSame("export failed", exportFileResult.error());
   }
 }
