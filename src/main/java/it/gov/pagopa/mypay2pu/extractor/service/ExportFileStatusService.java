@@ -1,56 +1,65 @@
 package it.gov.pagopa.mypay2pu.extractor.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import it.gov.pagopa.mypay2pu.extractor.config.ExtractorExportProperties;
+import io.micrometer.common.util.StringUtils;
+import it.gov.pagopa.mypay2pu.extractor.dao.ExportFileStatusDao;
+import it.gov.pagopa.mypay2pu.extractor.dto.ExportFileResult;
+import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
+import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionStatus;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionStatusResponse;
-import it.gov.pagopa.mypay2pu.extractor.exception.ExportFileNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.time.OffsetDateTime;
+import java.util.List;
 
+import static it.gov.pagopa.mypay2pu.extractor.utils.Constants.ZONEID;
+
+@Slf4j
 @Service
 public class ExportFileStatusService {
 
-  private static final String STATUS_FILE_NAME = "status.json";
+  private final ExportFileStatusDao exportFileStatusDao;
 
-  private final ObjectMapper objectMapper;
-  private final Path storagePath;
+  public ExportFileStatusService(ExportFileStatusDao exportFileStatusDao) {
+    this.exportFileStatusDao = exportFileStatusDao;
+  }
 
-  public ExportFileStatusService(ObjectMapper objectMapper, ExtractorExportProperties extractorExportProperties) {
-    this.objectMapper = objectMapper;
-    this.storagePath = Paths.get(extractorExportProperties.storagePath());
+  public void createNew(String extractionId, ExtractionRequest request) {
+    OffsetDateTime now = OffsetDateTime.now(ZONEID);
+    ExtractionStatusResponse newStatus = ExtractionStatusResponse.builder()
+      .extractionId(extractionId)
+      .ipaCode(request.getIpaCode())
+      .fileTypes(request.getFileTypes())
+      .status(ExtractionStatus.RUNNING)
+      .createdAt(now)
+      .updatedAt(now)
+      .error(null)
+      .files(List.of())
+      .build();
+    exportFileStatusDao.writeStatus(newStatus);
+  }
+
+  public void update(String extractionId, ExportFileResult exportFileResult) {
+    ExtractionStatusResponse currentStatus = exportFileStatusDao.readStatus(extractionId);
+    List<String> exportedFiles = exportFileResult.files() == null ? List.of() : List.copyOf(exportFileResult.files());
+    String errorDescription = exportFileResult.error();
+    if (StringUtils.isBlank(errorDescription)) {
+      currentStatus
+        .status(ExtractionStatus.COMPLETED)
+        .updatedAt(OffsetDateTime.now(ZONEID))
+        .error(null)
+        .files(exportedFiles);
+    } else {
+      currentStatus
+        .status(ExtractionStatus.FAILED)
+        .updatedAt(OffsetDateTime.now(ZONEID))
+        .error(errorDescription)
+        .files(exportedFiles);
+    }
+    exportFileStatusDao.writeStatus(currentStatus);
   }
 
   public ExtractionStatusResponse readStatus(String extractionId) {
-    Path statusPath = resolveStatusPath(extractionId);
-    if (!Files.exists(statusPath)) {
-      throw new ExportFileNotFoundException("File for extractionId: %s not found".formatted(extractionId));
-    }
-    try {
-      return objectMapper.readValue(statusPath.toFile(), ExtractionStatusResponse.class);
-    } catch (IOException e) {
-      throw new UncheckedIOException("Cannot read status file for extraction %s".formatted(extractionId), e);
-    }
-  }
-
-  public void writeStatus(ExtractionStatusResponse status) {
-    try {
-      Files.createDirectories(resolveExtractionDirectory(status.getExtractionId()));
-      objectMapper.writeValue(resolveStatusPath(status.getExtractionId()).toFile(), status);
-    } catch (IOException e) {
-      throw new UncheckedIOException("Cannot write status file for extraction %s".formatted(status.getExtractionId()), e);
-    }
-  }
-
-  public Path resolveExtractionDirectory(String extractionId) {
-    return storagePath.resolve(extractionId);
-  }
-
-  private Path resolveStatusPath(String extractionId) {
-    return resolveExtractionDirectory(extractionId).resolve(STATUS_FILE_NAME);
+    return exportFileStatusDao.readStatus(extractionId);
   }
 }

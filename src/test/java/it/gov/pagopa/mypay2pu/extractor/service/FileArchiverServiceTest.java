@@ -1,6 +1,5 @@
 package it.gov.pagopa.mypay2pu.extractor.service;
 
-import it.gov.pagopa.mypay2pu.extractor.config.CipherProperties;
 import it.gov.pagopa.mypay2pu.extractor.service.files.ZipFileService;
 import it.gov.pagopa.mypay2pu.extractor.utils.AESUtils;
 import org.junit.jupiter.api.Test;
@@ -26,7 +25,7 @@ class FileArchiverServiceTest {
 
   @Test
   void givenSingleFileWhenCompressAndArchiveWithoutEncryptionThenCreateZipInTargetDirectory() throws IOException {
-    FileArchiverService service = new FileArchiverService(new CipherProperties(false, PASSWORD), zipFileService);
+    FileArchiverService service = new FileArchiverService(false, PASSWORD, zipFileService);
 
     Path sourceFile = tempDir.resolve("source.txt");
     Files.writeString(sourceFile, "test content");
@@ -41,7 +40,7 @@ class FileArchiverServiceTest {
 
   @Test
   void givenSingleFileWhenCompressAndArchiveWithEncryptionThenCreateEncryptedZipInTargetDirectory() throws IOException {
-    FileArchiverService service = new FileArchiverService(new CipherProperties(true, PASSWORD), zipFileService);
+    FileArchiverService service = new FileArchiverService(true, PASSWORD, zipFileService);
 
     Path sourceFile = tempDir.resolve("source.txt");
     Files.writeString(sourceFile, "test content");
@@ -56,7 +55,7 @@ class FileArchiverServiceTest {
 
   @Test
   void givenMultipleFilesWhenCompressAndArchiveWithoutEncryptionThenReturnZippedFileSize() throws IOException {
-    FileArchiverService service = new FileArchiverService(new CipherProperties(false, PASSWORD), zipFileService);
+    FileArchiverService service = new FileArchiverService(false, PASSWORD, zipFileService);
 
     Path file1 = tempDir.resolve("file1.txt");
     Path file2 = tempDir.resolve("file2.txt");
@@ -76,7 +75,7 @@ class FileArchiverServiceTest {
 
   @Test
   void givenMultipleFilesWhenCompressAndArchiveWithEncryptionThenReturnOriginalZippedFileSize() throws IOException {
-    FileArchiverService service = new FileArchiverService(new CipherProperties(true, PASSWORD), zipFileService);
+    FileArchiverService service = new FileArchiverService(true, PASSWORD, zipFileService);
 
     Path file1 = tempDir.resolve("file1.txt");
     Path file2 = tempDir.resolve("file2.txt");
@@ -97,7 +96,7 @@ class FileArchiverServiceTest {
 
   @Test
   void givenZipFileWhenZipFileThenCreateZipArchive() throws IOException {
-    FileArchiverService service = new FileArchiverService(new CipherProperties(false, PASSWORD), zipFileService);
+    FileArchiverService service = new FileArchiverService(false, PASSWORD, zipFileService);
 
     Path sourceFile = tempDir.resolve("source.txt");
     Files.writeString(sourceFile, "test content");
@@ -112,7 +111,7 @@ class FileArchiverServiceTest {
 
   @Test
   void givenFilesInSourceDirectoryWhenMoveFilesToTargetDirectoryThenCopyAndDeleteSourceFiles() throws IOException {
-    FileArchiverService service = new FileArchiverService(new CipherProperties(false, PASSWORD), zipFileService);
+    FileArchiverService service = new FileArchiverService(false, PASSWORD, zipFileService);
 
     Path file1 = tempDir.resolve("file1.zip");
     Path file2 = tempDir.resolve("file2.zip");
@@ -130,7 +129,7 @@ class FileArchiverServiceTest {
 
   @Test
   void givenNonExistentTargetDirectoryWhenMoveFilesToTargetDirectoryThenCreateDirectoryAndMoveFiles() throws IOException {
-    FileArchiverService service = new FileArchiverService(new CipherProperties(false, PASSWORD), zipFileService);
+    FileArchiverService service = new FileArchiverService(false, PASSWORD, zipFileService);
 
     Path file1 = tempDir.resolve("file1.zip");
     Files.writeString(file1, "zip content");

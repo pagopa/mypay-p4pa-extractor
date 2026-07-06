@@ -11,8 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.UUID;
-
 @RestController
 @Slf4j
 public class ExportController implements ExtractApi {
@@ -29,8 +27,7 @@ public class ExportController implements ExtractApi {
   public ResponseEntity<ExtractionAcceptedResponse> createExtraction(@Valid ExtractionRequest request) {
     log.info("createExtraction: ipaCode={}, fileTypes={}", request.getIpaCode(), request.getFileTypes());
 
-    String extractionId = UUID.randomUUID().toString();
-    exportFileHandlerService.executeExport(extractionId, request);
+    String extractionId = exportFileHandlerService.createExtraction(request);
 
     log.info("Accepted extraction {} for organization {} and fileTypes {}", extractionId, request.getIpaCode(), request.getFileTypes());
     return ResponseEntity.accepted().body(new ExtractionAcceptedResponse(extractionId));

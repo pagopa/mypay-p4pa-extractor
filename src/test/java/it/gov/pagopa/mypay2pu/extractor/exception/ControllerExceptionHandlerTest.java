@@ -307,4 +307,17 @@ class ControllerExceptionHandlerTest {
       .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("[EXPORT_FILE_NOT_SUPPORTED] Invalid export file type"))
       .andExpect(MockMvcResultMatchers.jsonPath("$.traceId").value(traceId));
   }
+
+  @Test
+  void handleExportFileNotFoundException() throws Exception {
+    doThrow(new ExportFileNotFoundException("File for extractionId: extraction-id not found"))
+      .when(requestMappingHandlerAdapterSpy).handle(any(), any(), any());
+
+    performRequest(DATA, MediaType.APPLICATION_JSON)
+      .andExpect(MockMvcResultMatchers.status().isNotFound())
+      .andExpect(MockMvcResultMatchers.jsonPath("$.category").value("NOT_FOUND"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("EXPORT_FILE_NOT_FOUND"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("[EXPORT_FILE_NOT_FOUND] File for extractionId: extraction-id not found"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.traceId").value(traceId));
+  }
 }

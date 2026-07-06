@@ -49,6 +49,11 @@ public class ControllerExceptionHandler {
     return handleException(ex, request, HttpStatus.BAD_REQUEST, ErrorDTO.CategoryEnum.BAD_REQUEST);
   }
 
+  @ExceptionHandler(ExportFileNotFoundException.class)
+  public ResponseEntity<ErrorDTO> handleNotFoundException(BaseBusinessException ex, HttpServletRequest request) {
+    return handleException(ex, request, HttpStatus.NOT_FOUND, ErrorDTO.CategoryEnum.NOT_FOUND);
+  }
+
   @ExceptionHandler(HttpClientErrorException.TooManyRequests.class)
   public ResponseEntity<ErrorDTO> handleInvokedHttpClientTooManyRequestsError(Exception ex, HttpServletRequest request) {
     return handleException(ex, request, HttpStatus.TOO_MANY_REQUESTS, ErrorDTO.CategoryEnum.TOO_MANY_REQUESTS);

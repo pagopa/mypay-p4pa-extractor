@@ -23,9 +23,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.time.OffsetDateTime;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -65,13 +62,13 @@ class ExportControllerTest {
       MigrationFileType.ORGANIZATIONS,
       new ExtractionFilters()
     );
-    doNothing().when(exportFileHandlerServiceMock).executeExport(anyString(), eq(request));
+    when(exportFileHandlerServiceMock.createExtraction(request)).thenReturn("generated-extraction-id");
 
     mockMvc.perform(post("/extract")
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(request)))
       .andExpect(status().isAccepted())
-      .andExpect(jsonPath("$.extractionId").isNotEmpty());
+      .andExpect(jsonPath("$.extractionId").value("generated-extraction-id"));
 
   }
 
