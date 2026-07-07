@@ -105,7 +105,7 @@ See [application.yml](src/main/resources/application.yml) for each configurable 
 
 | ENV | DESCRIPTION | DEFAULT |
 |---|---|---|
-| `STORAGE_PATH` | Base path where extracted ZIP files are written (`<STORAGE_PATH>/<extractionId>/<fileType>_<date>_partN.zip`) | `/data/extractions` |
+| `STORAGE_PATH` | Base path where extracted ZIP files are written (`<STORAGE_PATH>/<extractionId>/<fileType>_<date>_partN.zip`). **Must be a shared folder accessible by multiple extraction instances (WRITE_MANY/READ_MANY)** to support concurrent operations and distributed deployments. Files returned by `/extract/{id}/files` API are unencrypted (in clear); encryption is optional (`FILE_ENCRYPT_ENABLED`), and it is the responsibility of the operator to ensure temporary file handling and cleanup of sensitive data. | `/data/extractions` |
 | `MULTIPART_MAX_FILE_SIZE` | Max size per ZIP part, aligned to PU `spring.servlet.multipart.max-file-size`. Files exceeding this limit are split into numbered parts | `50MB` |
 | `EXPORT_PAGE_SIZE` | Number of records fetched per JDBC page | `1000` |
 
@@ -191,13 +191,13 @@ See [application.yml](src/main/resources/application.yml) for each configurable 
 | `AVG_ROW_SIZE_ORGANIZATIONS` | Average row size in bytes for `ORGANIZATIONS` split calculation (`maxRows = MULTIPART_MAX_FILE_SIZE / avgRowSize`) | `500` |
 | `CSV_SEPARATOR_CHAR` | Separator character used when generating CSV files | `;` |
 | `CSV_QUOTE_CHAR` | Quote character used when generating CSV files | `"` |
-| `FILE_ENCRYPT_ENABLED` | Enable the encryption of the extracted files | `false` |
+| `FILE_ENCRYPT_ENABLED` | Enable the encryption of the extracted files. **Files are returned unencrypted via the `/extract/{id}/files` API regardless of this setting.** When encryption is enabled, it is the responsibility of the operator to ensure secure temporary storage and cleanup of extracted data. | `false` |
 
-#### 🔑 keys
+#### 🔑 Encryption keys
 
 | ENV | DESCRIPTION | DEFAULT |
 |---|---|---|
-| `FILE_ENCRYPT_PSW` | Password used to encrypt produced files (used only if encryption enables) | `` |
+| `FILE_ENCRYPT_PSW` | Password used to encrypt produced files (used only if `FILE_ENCRYPT_ENABLED=true`). Ignored if encryption is disabled. | `` |
 
 ## 🛠️ Getting Started
 

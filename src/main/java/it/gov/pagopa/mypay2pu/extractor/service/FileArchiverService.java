@@ -1,8 +1,8 @@
 package it.gov.pagopa.mypay2pu.extractor.service;
 
-import it.gov.pagopa.mypay2pu.extractor.config.CipherProperties;
 import it.gov.pagopa.mypay2pu.extractor.service.files.ZipFileService;
 import it.gov.pagopa.mypay2pu.extractor.utils.AESUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
@@ -23,11 +23,12 @@ public class FileArchiverService {
   private final ZipFileService zipFileService;
 
   public FileArchiverService(
-    CipherProperties cipherProperties,
+    @Value("${cipher.file-encrypt-enabled}") boolean fileEncryptEnabled,
+    @Value("${cipher.file-encrypt-psw}") String dataCipherPsw,
     ZipFileService zipFileService
   ) {
-    this.fileEncryptEnabled = cipherProperties.fileEncryptEnabled();
-    this.dataCipherPsw = cipherProperties.fileEncryptPsw();
+    this.fileEncryptEnabled = fileEncryptEnabled;
+    this.dataCipherPsw = dataCipherPsw;
     this.zipFileService = zipFileService;
   }
 
