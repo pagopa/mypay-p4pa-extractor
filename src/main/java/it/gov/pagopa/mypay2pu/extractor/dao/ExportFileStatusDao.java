@@ -1,10 +1,12 @@
 package it.gov.pagopa.mypay2pu.extractor.dao;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionStatusResponse;
 import it.gov.pagopa.mypay2pu.extractor.exception.ExportFileNotFoundException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.exc.JacksonIOException;
+import tools.jackson.core.exc.StreamReadException;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -17,12 +19,12 @@ public class ExportFileStatusDao {
 
   private static final String STATUS_FILE_NAME = "status.json";
 
-  private final ObjectMapper objectMapper;
+  private final JsonMapper jsonMapper;
   private final Path storagePath;
 
-  public ExportFileStatusDao(ObjectMapper objectMapper,
+  public ExportFileStatusDao(JsonMapper jsonMapper,
                              @Value("${extractor.export.storage-path}") String storagePath) {
-    this.objectMapper = objectMapper;
+    this.jsonMapper = jsonMapper;
     this.storagePath = Paths.get(storagePath);
   }
 
@@ -32,16 +34,16 @@ public class ExportFileStatusDao {
       throw new ExportFileNotFoundException("File for extractionId: %s not found".formatted(extractionId));
     }
     try {
-      return objectMapper.readValue(statusPath.toFile(), ExtractionStatusResponse.class);
-    } catch (IOException e) {
-      throw new UncheckedIOException("Cannot read status file for extraction %s".formatted(extractionId), e);
+      return jsonMapper.readValue(statusPath.toFile(), ExtractionStatusResponse.class);
+    } catch (JacksonIOException e) {
+      throw new StreamReadException("Cannot deserialize status file for extraction %s".formatted(extractionId));
     }
   }
 
   public void writeStatus(ExtractionStatusResponse status) {
     try {
       Files.createDirectories(resolveExtractionDirectory(status.getExtractionId()));
-      objectMapper.writeValue(resolveStatusPath(status.getExtractionId()).toFile(), status);
+      jsonMapper.writeValue(resolveStatusPath(status.getExtractionId()).toFile(), status);
     } catch (IOException e) {
       throw new UncheckedIOException("Cannot write status file for extraction %s".formatted(status.getExtractionId()), e);
     }

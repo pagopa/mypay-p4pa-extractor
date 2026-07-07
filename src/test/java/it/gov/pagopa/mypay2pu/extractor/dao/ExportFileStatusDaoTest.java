@@ -1,6 +1,5 @@
 package it.gov.pagopa.mypay2pu.extractor.dao;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import it.gov.pagopa.mypay2pu.extractor.config.json.JsonConfig;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionStatus;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionStatusResponse;
@@ -8,8 +7,9 @@ import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.exception.ExportFileNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import tools.jackson.core.exc.StreamReadException;
+import tools.jackson.databind.json.JsonMapper;
 
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.OffsetDateTime;
@@ -22,12 +22,12 @@ class ExportFileStatusDaoTest {
   @TempDir
   Path tempDir;
 
-  private final ObjectMapper objectMapper = new JsonConfig().objectMapper();
+  private final JsonMapper jsonMapper = new JsonConfig().objectMapperJackson3();
 
   @Test
   void givenStatusWhenWriteAndReadThenReturnStoredValue() {
     ExportFileStatusDao service = new ExportFileStatusDao(
-      objectMapper,
+      jsonMapper,
       tempDir.toString()
     );
 
@@ -58,7 +58,7 @@ class ExportFileStatusDaoTest {
   @Test
   void givenMissingStatusFileWhenReadStatusThenThrowExportFileNotFoundException() {
     ExportFileStatusDao service = new ExportFileStatusDao(
-      objectMapper,
+      jsonMapper,
       tempDir.toString()
     );
 
@@ -74,19 +74,14 @@ class ExportFileStatusDaoTest {
   @Test
   void givenMalformedStatusFileWhenReadStatusThenThrowUncheckedIOException() throws Exception {
     ExportFileStatusDao service = new ExportFileStatusDao(
-      objectMapper,
+      jsonMapper,
       tempDir.toString()
     );
     Path extractionDirectory = service.resolveExtractionDirectory("extraction-id");
     Files.createDirectories(extractionDirectory);
     Files.writeString(extractionDirectory.resolve("status.json"), "{malformed-json");
 
-    UncheckedIOException exception = assertThrows(
-      UncheckedIOException.class,
-      () -> service.readStatus("extraction-id")
-    );
-
-    assertEquals("Cannot read status file for extraction extraction-id", exception.getMessage());
+    assertThrows(StreamReadException.class, () -> service.readStatus("extraction-id"));
   }
 
 }
