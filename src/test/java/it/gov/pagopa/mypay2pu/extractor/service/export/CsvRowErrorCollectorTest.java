@@ -162,6 +162,34 @@ class CsvRowErrorCollectorTest {
   }
 
   @Test
+  void testWriteToFile_incrementalModeAppendsToExistingFile() throws IOException {
+    // Given - existing error file with header and one error row from a previous run
+    Path csvFile = tempDir.resolve("output.csv");
+    Path errorFile = tempDir.resolve("output.errors.csv");
+    Files.writeString(errorFile,
+      "\"rowNumber\";\"field\";\"code\";\"message\";\"rejectedValue\"\n" +
+      "\"2\";\"email\";\"Email\";\"must be a well-formed email address\";\"bad\"\n",
+      StandardCharsets.UTF_8);
+
+    CsvRowErrorCollector collector = new CsvRowErrorCollector(csvService, csvFile);
+    collector.add(3, "name", "NotBlank", "must not be blank", "");
+
+    // When
+    var result = collector.writeToFile(csvFile);
+
+    // Then
+    assertTrue(result.isPresent());
+    String content = Files.readString(errorFile, StandardCharsets.UTF_8);
+    String[] lines = content.split("\n");
+
+    // Exactly 1 header + 2 data rows (no duplicate header)
+    assertEquals(3, lines.length);
+    assertTrue(lines[0].contains("rowNumber"));
+    assertTrue(lines[1].contains("email"));
+    assertTrue(lines[2].contains("name"));
+  }
+
+  @Test
   void testWriteToFile_incrementalModeNoErrorsDeletesErrorFile() throws IOException {
     // Given
     Path csvFile = tempDir.resolve("output.csv");

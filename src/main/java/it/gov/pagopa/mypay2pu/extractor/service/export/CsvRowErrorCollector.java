@@ -20,7 +20,8 @@ import java.util.Optional;
  *   <li><b>in-memory collection</b>, when no CSV path is provided in the constructor:
  *       errors are kept in memory and written later by {@link #writeToFile(Path)}</li>
  *   <li><b>incremental write</b>, when a CSV path is provided in the constructor:
- *       errors are streamed directly to {@code .errors.csv} as they are collected</li>
+ *       errors are appended directly to {@code .errors.csv} as they are collected;
+ *       the CSV header is written only when the file does not yet exist</li>
  * </ul>
  *
  * @see CsvValidatedRowSupplier
@@ -152,8 +153,11 @@ public class CsvRowErrorCollector implements AutoCloseable {
       return;
     }
     try {
-      incrementalWriter = csvService.openCsvWriter(errorsCsvFilePath, false);
-      incrementalWriter.writeAll(ERROR_REPORT_HEADER);
+      boolean fileExists = Files.exists(errorsCsvFilePath);
+      incrementalWriter = csvService.openCsvWriter(errorsCsvFilePath, true);
+      if (!fileExists) {
+        incrementalWriter.writeAll(ERROR_REPORT_HEADER);
+      }
     } catch (IOException e) {
       throw new IllegalStateException("Cannot open CSV error report file: " + errorsCsvFilePath, e);
     }
