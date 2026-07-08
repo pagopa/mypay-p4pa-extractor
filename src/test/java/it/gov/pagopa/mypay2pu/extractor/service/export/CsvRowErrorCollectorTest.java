@@ -162,8 +162,8 @@ class CsvRowErrorCollectorTest {
   }
 
   @Test
-  void testWriteToFile_incrementalModeAppendsToExistingFile() throws IOException {
-    // Given - existing error file with header and one error row from a previous run
+  void testWriteToFile_incrementalModeOverwritesExistingFile() throws IOException {
+    // Given - existing error file with stale data from a previous run
     Path csvFile = tempDir.resolve("output.csv");
     Path errorFile = tempDir.resolve("output.errors.csv");
     Files.writeString(errorFile,
@@ -177,16 +177,14 @@ class CsvRowErrorCollectorTest {
     // When
     var result = collector.writeToFile(csvFile);
 
-    // Then
+    // Then - stale row from previous run must not appear; only header + new row
     assertTrue(result.isPresent());
     String content = Files.readString(errorFile, StandardCharsets.UTF_8);
     String[] lines = content.split("\n");
-
-    // Exactly 1 header + 2 data rows (no duplicate header)
-    assertEquals(3, lines.length);
+    assertEquals(2, lines.length);
     assertTrue(lines[0].contains("rowNumber"));
-    assertTrue(lines[1].contains("email"));
-    assertTrue(lines[2].contains("name"));
+    assertTrue(lines[1].contains("name"));
+    assertFalse(content.contains("email"));
   }
 
   @Test
