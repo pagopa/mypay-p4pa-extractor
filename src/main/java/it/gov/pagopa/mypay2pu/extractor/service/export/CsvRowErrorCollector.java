@@ -13,7 +13,12 @@ import java.util.Optional;
  * Collects and manages validation errors for CSV rows.
  * Stores constraint violations from Jakarta Validation and can write them to a separate error report file.
  * Each error records the row number, field name, violation code, message, and rejected value.
- * The error report file is named as {original_filename}.errors.csv and placed in the same directory.
+ * The error report file is named as {@code {original_filename}.errors.csv} and placed in the same directory.
+ * It supports two modes:
+ * <ul>
+ *   <li>in-memory collection, when no CSV path is provided in the constructor</li>
+ *   <li>incremental write, when a CSV path is provided in the constructor</li>
+ * </ul>
  *
  * @see CsvRowValidationSupplier
  */
@@ -38,6 +43,13 @@ public class CsvRowErrorCollector implements AutoCloseable {
     this(csvService, null);
   }
 
+  /**
+   * Constructs a CSV row error collector.
+   *
+   * @param csvService the CSV service used to write the error report file
+   * @param csvFilePath the source CSV path used to derive the error report file path;
+   *                    when {@code null}, errors are kept in memory until {@link #writeToFile(Path)} is called
+   */
   public CsvRowErrorCollector(CsvService csvService, Path csvFilePath) {
     this.csvService = csvService;
     this.csvFilePath = csvFilePath;
@@ -73,10 +85,14 @@ public class CsvRowErrorCollector implements AutoCloseable {
 
   /**
    * Writes collected errors to a CSV file if any errors exist.
-   * File path is derived from the original CSV path: {filename}.csv becomes {filename}.errors.csv.
-   * Does not write any file if there are no errors.
    *
-   * @param csvFilePath the path of the original CSV file
+   * <p>In incremental mode (constructor received a non-null path), this method closes the writer and ignores the
+   * method parameter path. In in-memory mode, it writes all collected errors using the method parameter path.</p>
+   *
+   * <p>File path is derived as {@code {filename}.csv -> {filename}.errors.csv}. No file is written when there are
+   * no errors.</p>
+   *
+   * @param csvFilePath the path of the original CSV file, used only in in-memory mode
    * @return an Optional containing the path to the error report file, or empty if no errors to write
    * @throws IOException if writing the error report file fails
    */
@@ -97,6 +113,11 @@ public class CsvRowErrorCollector implements AutoCloseable {
     return Optional.of(errorReportPath);
   }
 
+  /**
+   * Closes the incremental writer when present.
+   *
+   * @throws IllegalStateException if the writer cannot be closed
+   */
   @Override
   public void close() {
     try {
@@ -108,7 +129,7 @@ public class CsvRowErrorCollector implements AutoCloseable {
 
   /**
    * Builds the error report file path from the original CSV file path.
-   * Converts {filename}.csv to {filename}.errors.csv.
+   * Converts {@code {filename}.csv} to {@code {filename}.errors.csv}.
    *
    * @param csvFilePath the path of the original CSV file
    * @return the path where the error report should be written
