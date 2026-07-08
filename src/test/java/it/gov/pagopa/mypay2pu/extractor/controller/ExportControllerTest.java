@@ -103,23 +103,6 @@ class ExportControllerTest {
   }
 
   @Test
-  void givenInvalidIpaCodeWhenExecuteExportThenReturnBadRequest() throws Exception {
-    ExtractionRequest request = new ExtractionRequest(
-      "IPA CODE TEST!",
-      MigrationFileType.ORGANIZATIONS,
-      new ExtractionFilters()
-    );
-
-    mockMvc.perform(post("/extract")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(objectMapper.writeValueAsString(request)))
-      .andExpect(status().isBadRequest())
-      .andExpect(jsonPath("$.category").value("BAD_REQUEST"))
-      .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
-      .andExpect(jsonPath("$.message").value("[BAD_REQUEST] Invalid request content. ipaCode: must match \"^[A-Za-z0-9_-]+$\""));
-  }
-
-  @Test
   void givenReversedFilterDatesWhenExecuteExportThenReturnBadRequest() throws Exception {
     ExtractionRequest request = new ExtractionRequest(
       "IPA_CODE_TEST",

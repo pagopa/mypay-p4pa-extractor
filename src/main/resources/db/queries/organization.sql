@@ -40,4 +40,6 @@ LEFT JOIN organization_feature_flags
 WHERE (:ipaCode IS NULL OR e.cod_ipa_ente = :ipaCode)
   AND (:modifiedFrom IS NULL OR e.dt_ultima_modifica >= :modifiedFrom)
   AND (:modifiedToExclusive IS NULL OR e.dt_ultima_modifica < :modifiedToExclusive)
-ORDER BY e.dt_ultima_modifica, e.mygov_ente_id;
+ORDER BY e.dt_ultima_modifica, e.mygov_ente_id
+LIMIT :limit
+OFFSET COALESCE(:offset, 0);
