@@ -164,4 +164,28 @@ class CsvRowErrorCollectorTest {
     // Header + 9 error rows
     assertEquals(10, lines.length);
   }
+
+  @Test
+  void testWriteToFile_incrementalMode() throws IOException {
+    // Given
+    Path csvFile = tempDir.resolve("output.csv");
+    CsvRowErrorCollector collector = new CsvRowErrorCollector(csvService, csvFile);
+    collector.add(2, "email", "Email", "must be a well-formed email address", "invalid-email");
+    collector.add(3, "name", "NotBlank", "must not be blank", "");
+
+    // When
+    var result = collector.writeToFile(csvFile);
+
+    // Then
+    assertTrue(result.isPresent());
+    Path errorFile = result.get();
+    assertEquals(tempDir.resolve("output.errors.csv"), errorFile);
+    assertTrue(Files.exists(errorFile));
+
+    String content = Files.readString(errorFile, StandardCharsets.UTF_8);
+    String[] lines = content.split("\n");
+    assertEquals(3, lines.length);
+    assertTrue(lines[1].contains("2") && lines[1].contains("email"));
+    assertTrue(lines[2].contains("3") && lines[2].contains("name"));
+  }
 }

@@ -1,5 +1,6 @@
 package it.gov.pagopa.mypay2pu.extractor.service.export;
 
+import com.opencsv.ICSVWriter;
 import it.gov.pagopa.mypay2pu.extractor.service.files.CsvService;
 
 import java.io.IOException;
@@ -16,14 +17,17 @@ import java.util.Optional;
  *
  * @see CsvRowValidationSupplier
  */
-public class CsvRowErrorCollector {
+public class CsvRowErrorCollector implements AutoCloseable {
 
   private static final String[] ERROR_REPORT_HEADER_ROW =
     {"rowNumber", "field", "code", "message", "rejectedValue"};
   private static final List<String[]> ERROR_REPORT_HEADER = java.util.Collections.singletonList(ERROR_REPORT_HEADER_ROW);
 
   private final CsvService csvService;
+  private final Path csvFilePath;
   private final List<ValidationError> errors = new ArrayList<>();
+  private ICSVWriter incrementalWriter;
+  private long errorCount;
 
   /**
    * Constructs a CSV row error collector.
@@ -31,7 +35,12 @@ public class CsvRowErrorCollector {
    * @param csvService the CSV service used to write the error report file
    */
   public CsvRowErrorCollector(CsvService csvService) {
+    this(csvService, null);
+  }
+
+  public CsvRowErrorCollector(CsvService csvService, Path csvFilePath) {
     this.csvService = csvService;
+    this.csvFilePath = csvFilePath;
   }
 
   /**
@@ -44,7 +53,13 @@ public class CsvRowErrorCollector {
    * @param rejectedValue the value that failed validation
    */
   public void add(long rowNumber, String field, String code, String message, String rejectedValue) {
-    errors.add(new ValidationError(rowNumber, field, code, message, rejectedValue));
+    ValidationError validationError = new ValidationError(rowNumber, field, code, message, rejectedValue);
+    errorCount++;
+    if (csvFilePath == null) {
+      errors.add(validationError);
+      return;
+    }
+    writeIncrementalError(validationError);
   }
 
   /**
@@ -66,6 +81,10 @@ public class CsvRowErrorCollector {
    * @throws IOException if writing the error report file fails
    */
   public Optional<Path> writeToFile(Path csvFilePath) throws IOException {
+    if (this.csvFilePath != null) {
+      closeIncrementalWriter();
+      return errorCount == 0 ? Optional.empty() : Optional.of(buildErrorReportPath(this.csvFilePath));
+    }
     if (errors.isEmpty()) {
       return Optional.empty();
     }
@@ -73,17 +92,18 @@ public class CsvRowErrorCollector {
     csvService.createCsv(
       errorReportPath,
       ERROR_REPORT_HEADER,
-      errors.stream()
-        .map(error -> new String[]{
-          String.valueOf(error.rowNumber()),
-          error.field(),
-          error.code(),
-          error.message(),
-          error.rejectedValue()
-        })
-        .toList()
+      errors.stream().map(this::toCsvErrorRow).toList()
     );
     return Optional.of(errorReportPath);
+  }
+
+  @Override
+  public void close() {
+    try {
+      closeIncrementalWriter();
+    } catch (IOException e) {
+      throw new IllegalStateException("Cannot close CSV error report writer", e);
+    }
   }
 
   /**
@@ -97,6 +117,41 @@ public class CsvRowErrorCollector {
     String csvName = csvFilePath.getFileName().toString();
     String errorReportFileName = csvName.endsWith(".csv") ? csvName.replace(".csv", ".errors.csv") : csvName + ".errors.csv";
     return csvFilePath.resolveSibling(errorReportFileName);
+  }
+
+  private void writeIncrementalError(ValidationError error) {
+    ensureIncrementalWriter();
+    incrementalWriter.writeNext(toCsvErrorRow(error));
+  }
+
+  private void ensureIncrementalWriter() {
+    if (incrementalWriter != null) {
+      return;
+    }
+    Path incrementalErrorReportPath = buildErrorReportPath(csvFilePath);
+    try {
+      incrementalWriter = csvService.openCsvWriter(incrementalErrorReportPath, false);
+      incrementalWriter.writeAll(ERROR_REPORT_HEADER);
+    } catch (IOException e) {
+      throw new IllegalStateException("Cannot open CSV error report file: " + incrementalErrorReportPath, e);
+    }
+  }
+
+  private void closeIncrementalWriter() throws IOException {
+    if (incrementalWriter != null) {
+      incrementalWriter.close();
+      incrementalWriter = null;
+    }
+  }
+
+  private String[] toCsvErrorRow(ValidationError error) {
+    return new String[]{
+      String.valueOf(error.rowNumber()),
+      error.field(),
+      error.code(),
+      error.message(),
+      error.rejectedValue()
+    };
   }
 
   /**
