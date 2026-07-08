@@ -19,51 +19,6 @@ class CsvRowErrorCollectorTest {
   Path tempDir;
 
   @Test
-  void testAdd_singleError() {
-    // Given
-    CsvRowErrorCollector collector = new CsvRowErrorCollector(csvService);
-
-    // When
-    collector.add(2, "email", "Email", "must be a well-formed email address", "invalid-email");
-
-    // Then
-    assertEquals(1, collector.getErrors().size());
-    CsvRowErrorCollector.ValidationError error = collector.getErrors().getFirst();
-    assertEquals(2, error.rowNumber());
-    assertEquals("email", error.field());
-    assertEquals("Email", error.code());
-    assertEquals("must be a well-formed email address", error.message());
-    assertEquals("invalid-email", error.rejectedValue());
-  }
-
-  @Test
-  void testAdd_multipleErrors() {
-    // Given
-    CsvRowErrorCollector collector = new CsvRowErrorCollector(csvService);
-
-    // When
-    collector.add(2, "email", "Email", "must be a well-formed email address", "invalid-email");
-    collector.add(2, "name", "NotBlank", "must not be blank", "");
-    collector.add(3, "value", "Positive", "must be greater than 0", "-5");
-
-    // Then
-    assertEquals(3, collector.getErrors().size());
-  }
-
-  @Test
-  void testGetErrors_immutableCopy() {
-    // Given
-    CsvRowErrorCollector collector = new CsvRowErrorCollector(csvService);
-    collector.add(2, "email", "Email", "must be a well-formed email address", "invalid-email");
-
-    // When
-    var errors = collector.getErrors();
-
-    // Then
-    assertThrows(UnsupportedOperationException.class, () -> errors.add(null));
-  }
-
-  @Test
   void testWriteToFile_noErrors() throws IOException {
     // Given
     Path csvFile = tempDir.resolve("output.csv");
@@ -187,5 +142,36 @@ class CsvRowErrorCollectorTest {
     assertEquals(3, lines.length);
     assertTrue(lines[1].contains("2") && lines[1].contains("email"));
     assertTrue(lines[2].contains("3") && lines[2].contains("name"));
+  }
+
+  @Test
+  void testWriteToFile_incrementalModeNoErrorsDeletesErrorFile() throws IOException {
+    // Given
+    Path csvFile = tempDir.resolve("output.csv");
+    Path errorFile = tempDir.resolve("output.errors.csv");
+    Files.writeString(errorFile, "rowNumber;field;code;message;rejectedValue\n", StandardCharsets.UTF_8);
+    CsvRowErrorCollector collector = new CsvRowErrorCollector(csvService, csvFile);
+
+    // When
+    var result = collector.writeToFile(csvFile);
+
+    // Then
+    assertTrue(result.isEmpty());
+    assertFalse(Files.exists(errorFile));
+  }
+
+  @Test
+  void testWriteToFile_incrementalModeNoErrorsDoesNotCreateErrorFile() throws IOException {
+    // Given
+    Path csvFile = tempDir.resolve("output.csv");
+    Path errorFile = tempDir.resolve("output.errors.csv");
+    CsvRowErrorCollector collector = new CsvRowErrorCollector(csvService, csvFile);
+
+    // When
+    var result = collector.writeToFile(csvFile);
+
+    // Then
+    assertTrue(result.isEmpty());
+    assertFalse(Files.exists(errorFile));
   }
 }

@@ -21,7 +21,7 @@ import java.util.function.Supplier;
  * @param <T> the type of row objects being validated (typically a DTO with Jakarta Validation annotations)
  * @see CsvRowErrorCollector
  */
-public class CsvRowValidationSupplier<T> implements Supplier<List<T>> {
+public class CsvValidatedRowSupplier<T> implements Supplier<List<T>> {
 
   private static final long FIRST_DATA_ROW_NUMBER = 2L;
 
@@ -40,7 +40,7 @@ public class CsvRowValidationSupplier<T> implements Supplier<List<T>> {
    * @param validator the Jakarta Validator instance to validate rows
    * @param errorCollector the collector to accumulate validation errors
    */
-  public CsvRowValidationSupplier(Supplier<List<T>> source, Validator validator, CsvRowErrorCollector errorCollector) {
+  public CsvValidatedRowSupplier(Supplier<List<T>> source, Validator validator, CsvRowErrorCollector errorCollector) {
     this.source = source;
     this.validator = validator;
     this.errorCollector = errorCollector;
@@ -58,8 +58,8 @@ public class CsvRowValidationSupplier<T> implements Supplier<List<T>> {
    */
   @Override
   public List<T> get() {
-    List<T> rows = source.get();
-    while (rows != null && !rows.isEmpty()) {
+    List<T> rows ;
+    while ((rows = source.get()) != null && !rows.isEmpty()) {
       List<T> validRows = new ArrayList<>(rows.size());
       for (T row : rows) {
         if (validateAndCollectErrors(row)) {
@@ -69,7 +69,6 @@ public class CsvRowValidationSupplier<T> implements Supplier<List<T>> {
       if (!validRows.isEmpty()) {
         return validRows;
       }
-      rows = source.get();
     }
     return List.of();
   }

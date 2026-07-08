@@ -4,6 +4,7 @@ import com.opencsv.ICSVWriter;
 import it.gov.pagopa.mypay2pu.extractor.service.files.CsvService;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,11 +17,13 @@ import java.util.Optional;
  * The error report file is named as {@code {original_filename}.errors.csv} and placed in the same directory.
  * It supports two modes:
  * <ul>
- *   <li>in-memory collection, when no CSV path is provided in the constructor</li>
- *   <li>incremental write, when a CSV path is provided in the constructor</li>
+ *   <li><b>in-memory collection</b>, when no CSV path is provided in the constructor:
+ *       errors are kept in memory and written later by {@link #writeToFile(Path)}</li>
+ *   <li><b>incremental write</b>, when a CSV path is provided in the constructor:
+ *       errors are streamed directly to {@code .errors.csv} as they are collected</li>
  * </ul>
  *
- * @see CsvRowValidationSupplier
+ * @see CsvValidatedRowSupplier
  */
 public class CsvRowErrorCollector implements AutoCloseable {
 
@@ -29,7 +32,7 @@ public class CsvRowErrorCollector implements AutoCloseable {
   private static final List<String[]> ERROR_REPORT_HEADER = java.util.Collections.singletonList(ERROR_REPORT_HEADER_ROW);
 
   private final CsvService csvService;
-  private final Path csvFilePath;
+  private final Path errorsCsvFilePath;
   private final List<ValidationError> errors = new ArrayList<>();
   private ICSVWriter incrementalWriter;
   private long errorCount;
@@ -47,12 +50,13 @@ public class CsvRowErrorCollector implements AutoCloseable {
    * Constructs a CSV row error collector.
    *
    * @param csvService the CSV service used to write the error report file
-   * @param csvFilePath the source CSV path used to derive the error report file path;
-   *                    when {@code null}, errors are kept in memory until {@link #writeToFile(Path)} is called
+   * @param errorsCsvFilePath the source CSV path used to derive the error report file path;
+   *                    when {@code null}, errors are kept in memory until {@link #writeToFile(Path)} is called;
+   *                    when non-null, errors are written incrementally to disk
    */
-  public CsvRowErrorCollector(CsvService csvService, Path csvFilePath) {
+  public CsvRowErrorCollector(CsvService csvService, Path errorsCsvFilePath) {
     this.csvService = csvService;
-    this.csvFilePath = csvFilePath;
+    this.errorsCsvFilePath = errorsCsvFilePath;
   }
 
   /**
@@ -67,7 +71,7 @@ public class CsvRowErrorCollector implements AutoCloseable {
   public void add(long rowNumber, String field, String code, String message, String rejectedValue) {
     ValidationError validationError = new ValidationError(rowNumber, field, code, message, rejectedValue);
     errorCount++;
-    if (csvFilePath == null) {
+    if (errorsCsvFilePath == null) {
       errors.add(validationError);
       return;
     }
@@ -75,19 +79,12 @@ public class CsvRowErrorCollector implements AutoCloseable {
   }
 
   /**
-   * Returns an immutable copy of all collected errors.
-   *
-   * @return a list of validation errors, or empty list if no errors
-   */
-  public List<ValidationError> getErrors() {
-    return List.copyOf(errors);
-  }
-
-  /**
    * Writes collected errors to a CSV file if any errors exist.
    *
    * <p>In incremental mode (constructor received a non-null path), this method closes the writer and ignores the
-   * method parameter path. In in-memory mode, it writes all collected errors using the method parameter path.</p>
+   * method parameter path, then returns the incremental error file path when at least one error was collected.
+   * If no errors were collected, it removes any pre-existing error file and returns empty.
+   * In in-memory mode, it writes all collected errors using the method parameter path.</p>
    *
    * <p>File path is derived as {@code {filename}.csv -> {filename}.errors.csv}. No file is written when there are
    * no errors.</p>
@@ -97,9 +94,14 @@ public class CsvRowErrorCollector implements AutoCloseable {
    * @throws IOException if writing the error report file fails
    */
   public Optional<Path> writeToFile(Path csvFilePath) throws IOException {
-    if (this.csvFilePath != null) {
+    if (this.errorsCsvFilePath != null) {
       closeIncrementalWriter();
-      return errorCount == 0 ? Optional.empty() : Optional.of(buildErrorReportPath(this.csvFilePath));
+      Path incrementalErrorReportPath = buildErrorReportPath(this.errorsCsvFilePath);
+      if (errorCount == 0) {
+        Files.deleteIfExists(incrementalErrorReportPath);
+        return Optional.empty();
+      }
+      return Optional.of(incrementalErrorReportPath);
     }
     if (errors.isEmpty()) {
       return Optional.empty();
@@ -149,7 +151,7 @@ public class CsvRowErrorCollector implements AutoCloseable {
     if (incrementalWriter != null) {
       return;
     }
-    Path incrementalErrorReportPath = buildErrorReportPath(csvFilePath);
+    Path incrementalErrorReportPath = buildErrorReportPath(errorsCsvFilePath);
     try {
       incrementalWriter = csvService.openCsvWriter(incrementalErrorReportPath, false);
       incrementalWriter.writeAll(ERROR_REPORT_HEADER);
