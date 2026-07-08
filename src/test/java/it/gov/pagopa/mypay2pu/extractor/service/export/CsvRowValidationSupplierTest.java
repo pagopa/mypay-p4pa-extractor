@@ -18,7 +18,7 @@ import java.util.function.Supplier;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class ValidatingCsvSupplierTest {
+class CsvRowValidationSupplierTest {
 
   @Test
   void testValidatingSupplier_validRow() {
@@ -34,8 +34,8 @@ class ValidatingCsvSupplierTest {
       return Collections.emptyList();
     };
 
-    var errorCollector = new ValidationErrorCollector(null);
-    var supplier = new ValidatingCsvSupplier<>(source,
+    var errorCollector = new CsvRowErrorCollector(null);
+    var supplier = new CsvRowValidationSupplier<>(source,
       Validation.buildDefaultValidatorFactory().getValidator(),
       errorCollector);
 
@@ -62,8 +62,8 @@ class ValidatingCsvSupplierTest {
       return Collections.emptyList();
     };
 
-    var errorCollector = new ValidationErrorCollector(null);
-    var supplier = new ValidatingCsvSupplier<>(source,
+    var errorCollector = new CsvRowErrorCollector(null);
+    var supplier = new CsvRowValidationSupplier<>(source,
       Validation.buildDefaultValidatorFactory().getValidator(),
       errorCollector);
 
@@ -98,8 +98,8 @@ class ValidatingCsvSupplierTest {
     var batchIterator = batches.iterator();
     Supplier<List<TestDto>> source = () -> batchIterator.hasNext() ? batchIterator.next() : Collections.emptyList();
 
-    var errorCollector = new ValidationErrorCollector(null);
-    var supplier = new ValidatingCsvSupplier<>(source,
+    var errorCollector = new CsvRowErrorCollector(null);
+    var supplier = new CsvRowValidationSupplier<>(source,
       Validation.buildDefaultValidatorFactory().getValidator(),
       errorCollector);
 
@@ -141,8 +141,8 @@ class ValidatingCsvSupplierTest {
     var batchIterator = batches.iterator();
     Supplier<List<TestDto>> source = () -> batchIterator.hasNext() ? batchIterator.next() : Collections.emptyList();
 
-    var errorCollector = new ValidationErrorCollector(null);
-    var supplier = new ValidatingCsvSupplier<>(source,
+    var errorCollector = new CsvRowErrorCollector(null);
+    var supplier = new CsvRowValidationSupplier<>(source,
       Validation.buildDefaultValidatorFactory().getValidator(),
       errorCollector);
 
@@ -174,10 +174,10 @@ class ValidatingCsvSupplierTest {
   @Test
   void testValidatingSupplier_emptyBatch() {
     // Given
-    var errorCollector = new ValidationErrorCollector(null);
+    var errorCollector = new CsvRowErrorCollector(null);
     Supplier<List<TestDto>> source = Collections::emptyList;
 
-    var supplier = new ValidatingCsvSupplier<>(source,
+    var supplier = new CsvRowValidationSupplier<>(source,
       Validation.buildDefaultValidatorFactory().getValidator(),
       errorCollector);
 
@@ -203,8 +203,8 @@ class ValidatingCsvSupplierTest {
     var batchIterator = batches.iterator();
     Supplier<List<TestDto>> source = () -> batchIterator.hasNext() ? batchIterator.next() : Collections.emptyList();
 
-    var errorCollector = new ValidationErrorCollector(null);
-    var supplier = new ValidatingCsvSupplier<>(source,
+    var errorCollector = new CsvRowErrorCollector(null);
+    var supplier = new CsvRowValidationSupplier<>(source,
       Validation.buildDefaultValidatorFactory().getValidator(),
       errorCollector);
 

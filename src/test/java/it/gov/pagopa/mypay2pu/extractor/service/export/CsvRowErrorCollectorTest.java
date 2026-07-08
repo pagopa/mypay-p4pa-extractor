@@ -11,7 +11,7 @@ import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ValidationErrorCollectorTest {
+class CsvRowErrorCollectorTest {
 
   private final CsvService csvService = new CsvService(';', '"');
 
@@ -21,14 +21,14 @@ class ValidationErrorCollectorTest {
   @Test
   void testAdd_singleError() {
     // Given
-    ValidationErrorCollector collector = new ValidationErrorCollector(csvService);
+    CsvRowErrorCollector collector = new CsvRowErrorCollector(csvService);
 
     // When
     collector.add(2, "email", "Email", "must be a well-formed email address", "invalid-email");
 
     // Then
     assertEquals(1, collector.getErrors().size());
-    ValidationErrorCollector.ValidationError error = collector.getErrors().getFirst();
+    CsvRowErrorCollector.ValidationError error = collector.getErrors().getFirst();
     assertEquals(2, error.rowNumber());
     assertEquals("email", error.field());
     assertEquals("Email", error.code());
@@ -39,7 +39,7 @@ class ValidationErrorCollectorTest {
   @Test
   void testAdd_multipleErrors() {
     // Given
-    ValidationErrorCollector collector = new ValidationErrorCollector(csvService);
+    CsvRowErrorCollector collector = new CsvRowErrorCollector(csvService);
 
     // When
     collector.add(2, "email", "Email", "must be a well-formed email address", "invalid-email");
@@ -53,7 +53,7 @@ class ValidationErrorCollectorTest {
   @Test
   void testGetErrors_immutableCopy() {
     // Given
-    ValidationErrorCollector collector = new ValidationErrorCollector(csvService);
+    CsvRowErrorCollector collector = new CsvRowErrorCollector(csvService);
     collector.add(2, "email", "Email", "must be a well-formed email address", "invalid-email");
 
     // When
@@ -67,12 +67,13 @@ class ValidationErrorCollectorTest {
   void testWriteToFile_noErrors() throws IOException {
     // Given
     Path csvFile = tempDir.resolve("output.csv");
-    ValidationErrorCollector collector = new ValidationErrorCollector(csvService);
+    CsvRowErrorCollector collector = new CsvRowErrorCollector(csvService);
 
     // When
-    collector.writeToFile(csvFile);
+    var result = collector.writeToFile(csvFile);
 
     // Then
+    assertTrue(result.isEmpty());
     assertFalse(Files.exists(tempDir.resolve("output.errors.csv")));
   }
 
@@ -80,20 +81,22 @@ class ValidationErrorCollectorTest {
   void testWriteToFile_withErrors() throws IOException {
     // Given
     Path csvFile = tempDir.resolve("output.csv");
-    ValidationErrorCollector collector = new ValidationErrorCollector(csvService);
+    CsvRowErrorCollector collector = new CsvRowErrorCollector(csvService);
     collector.add(2, "email", "Email", "must be a well-formed email address", "invalid-email");
     collector.add(3, "name", "NotBlank", "must not be blank", "");
 
     // When
-    collector.writeToFile(csvFile);
+    var result = collector.writeToFile(csvFile);
 
     // Then
-    Path errorFile = tempDir.resolve("output.errors.csv");
+    assertTrue(result.isPresent());
+    Path errorFile = result.get();
+    assertEquals(tempDir.resolve("output.errors.csv"), errorFile);
     assertTrue(Files.exists(errorFile));
 
     String content = Files.readString(errorFile, StandardCharsets.UTF_8);
     String[] lines = content.split("\n");
-    
+
     // Header + 2 error rows
     assertEquals(3, lines.length);
     assertTrue(lines[0].contains("rowNumber") && lines[0].contains("field"));
@@ -105,14 +108,16 @@ class ValidationErrorCollectorTest {
   void testWriteToFile_csvPathWithoutExtension() throws IOException {
     // Given
     Path csvFile = tempDir.resolve("output");
-    ValidationErrorCollector collector = new ValidationErrorCollector(csvService);
+    CsvRowErrorCollector collector = new CsvRowErrorCollector(csvService);
     collector.add(2, "email", "Email", "must be a well-formed email address", "invalid-email");
 
     // When
-    collector.writeToFile(csvFile);
+    var result = collector.writeToFile(csvFile);
 
     // Then
-    Path errorFile = tempDir.resolve("output.errors.csv");
+    assertTrue(result.isPresent());
+    Path errorFile = result.get();
+    assertEquals(tempDir.resolve("output.errors.csv"), errorFile);
     assertTrue(Files.exists(errorFile));
   }
 
@@ -121,15 +126,17 @@ class ValidationErrorCollectorTest {
     // Given
     Path csvFile = tempDir.resolve("subdir").resolve("data.csv");
     Files.createDirectories(csvFile.getParent());
-    
-    ValidationErrorCollector collector = new ValidationErrorCollector(csvService);
+
+    CsvRowErrorCollector collector = new CsvRowErrorCollector(csvService);
     collector.add(2, "field1", "NotNull", "must not be null", "");
 
     // When
-    collector.writeToFile(csvFile);
+    var result = collector.writeToFile(csvFile);
 
     // Then
-    Path errorFile = tempDir.resolve("subdir").resolve("data.errors.csv");
+    assertTrue(result.isPresent());
+    Path errorFile = result.get();
+    assertEquals(tempDir.resolve("subdir").resolve("data.errors.csv"), errorFile);
     assertTrue(Files.exists(errorFile));
   }
 
@@ -137,22 +144,23 @@ class ValidationErrorCollectorTest {
   void testWriteToFile_manyErrors() throws IOException {
     // Given
     Path csvFile = tempDir.resolve("output.csv");
-    ValidationErrorCollector collector = new ValidationErrorCollector(csvService);
-    
+    CsvRowErrorCollector collector = new CsvRowErrorCollector(csvService);
+
     for (int i = 2; i <= 10; i++) {
       collector.add(i, "field" + i, "Code" + i, "Error message " + i, "value" + i);
     }
 
     // When
-    collector.writeToFile(csvFile);
+    var result = collector.writeToFile(csvFile);
 
     // Then
-    Path errorFile = tempDir.resolve("output.errors.csv");
+    assertTrue(result.isPresent());
+    Path errorFile = result.get();
     assertTrue(Files.exists(errorFile));
 
     String content = Files.readString(errorFile, StandardCharsets.UTF_8);
     String[] lines = content.split("\n");
-    
+
     // Header + 9 error rows
     assertEquals(10, lines.length);
   }
