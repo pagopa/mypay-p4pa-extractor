@@ -50,13 +50,14 @@ public class CsvRowErrorCollector implements AutoCloseable {
    * Constructs a CSV row error collector.
    *
    * @param csvService the CSV service used to write the error report file
-   * @param errorsCsvFilePath the source CSV path used to derive the error report file path;
+   * @param errorsCsvFilePath the source CSV file path used to derive and store the error report file path
+   *                    ({@code source.csv -> source.errors.csv});
    *                    when {@code null}, errors are kept in memory until {@link #writeToFile(Path)} is called;
    *                    when non-null, errors are written incrementally to disk
    */
   public CsvRowErrorCollector(CsvService csvService, Path errorsCsvFilePath) {
     this.csvService = csvService;
-    this.errorsCsvFilePath = errorsCsvFilePath;
+    this.errorsCsvFilePath = errorsCsvFilePath != null ? buildErrorReportPath(errorsCsvFilePath) : null;
   }
 
   /**
@@ -81,7 +82,7 @@ public class CsvRowErrorCollector implements AutoCloseable {
   /**
    * Writes collected errors to a CSV file if any errors exist.
    *
-   * <p>In incremental mode (constructor received a non-null path), this method closes the writer and ignores the
+   * <p>In incremental mode (constructor received a non-null source CSV path), this method closes the writer and ignores the
    * method parameter path, then returns the incremental error file path when at least one error was collected.
    * If no errors were collected, it removes any pre-existing error file and returns empty.
    * In in-memory mode, it writes all collected errors using the method parameter path.</p>
@@ -96,12 +97,11 @@ public class CsvRowErrorCollector implements AutoCloseable {
   public Optional<Path> writeToFile(Path csvFilePath) throws IOException {
     if (this.errorsCsvFilePath != null) {
       closeIncrementalWriter();
-      Path incrementalErrorReportPath = buildErrorReportPath(this.errorsCsvFilePath);
       if (errorCount == 0) {
-        Files.deleteIfExists(incrementalErrorReportPath);
+        Files.deleteIfExists(this.errorsCsvFilePath);
         return Optional.empty();
       }
-      return Optional.of(incrementalErrorReportPath);
+      return Optional.of(this.errorsCsvFilePath);
     }
     if (errors.isEmpty()) {
       return Optional.empty();
@@ -151,12 +151,11 @@ public class CsvRowErrorCollector implements AutoCloseable {
     if (incrementalWriter != null) {
       return;
     }
-    Path incrementalErrorReportPath = buildErrorReportPath(errorsCsvFilePath);
     try {
-      incrementalWriter = csvService.openCsvWriter(incrementalErrorReportPath, false);
+      incrementalWriter = csvService.openCsvWriter(errorsCsvFilePath, false);
       incrementalWriter.writeAll(ERROR_REPORT_HEADER);
     } catch (IOException e) {
-      throw new IllegalStateException("Cannot open CSV error report file: " + incrementalErrorReportPath, e);
+      throw new IllegalStateException("Cannot open CSV error report file: " + errorsCsvFilePath, e);
     }
   }
 

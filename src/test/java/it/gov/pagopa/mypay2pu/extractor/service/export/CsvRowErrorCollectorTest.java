@@ -145,6 +145,23 @@ class CsvRowErrorCollectorTest {
   }
 
   @Test
+  void testWriteToFile_incrementalModeUsesConstructorPath() throws IOException {
+    // Given
+    Path constructorCsvFile = tempDir.resolve("constructor.csv");
+    Path ignoredMethodCsvFile = tempDir.resolve("ignored.csv");
+    CsvRowErrorCollector collector = new CsvRowErrorCollector(csvService, constructorCsvFile);
+    collector.add(2, "email", "Email", "must be a well-formed email address", "invalid-email");
+
+    // When
+    var result = collector.writeToFile(ignoredMethodCsvFile);
+
+    // Then
+    assertTrue(result.isPresent());
+    assertEquals(tempDir.resolve("constructor.errors.csv"), result.get());
+    assertFalse(Files.exists(tempDir.resolve("ignored.errors.csv")));
+  }
+
+  @Test
   void testWriteToFile_incrementalModeNoErrorsDeletesErrorFile() throws IOException {
     // Given
     Path csvFile = tempDir.resolve("output.csv");
