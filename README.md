@@ -201,8 +201,8 @@ See [application.yml](src/main/resources/application.yml) for each configurable 
 
 ## Extraction queries customization
 
-Le query SQL di estrazione sono lette da risorse su classpath sotto `/db/**` (vedi `SqlLoader`).  
-Per customizzarle, aggiungi nel classpath una risorsa con lo stesso path della query da sovrascrivere (ad esempio tramite risorse applicative esterne o classpath aggiuntivo in avvio).
+Extraction SQL queries are loaded from classpath resources under `/db/**` (see `SqlLoader`).  
+To customize them, add to the classpath a resource with the same path as the query to override (for example via external application resources or additional classpath entries at startup).
 
 ### MyPay
 

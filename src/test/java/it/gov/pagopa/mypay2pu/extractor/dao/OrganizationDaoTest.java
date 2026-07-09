@@ -6,25 +6,29 @@ import it.gov.pagopa.mypay2pu.extractor.utils.SqlLoader;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
+import java.time.LocalDate;
+import java.time.Month;
 import java.util.List;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class OrganizationDaoTest {
+  private static final String FIND_BY_FILTERS_SQL = "SELECT * FROM organizations ORDER BY id LIMIT :limit OFFSET :offset";
+  private static final String FIND_TREASURY_BY_IPA_SQL = "SELECT TRUE";
 
   @Mock
   private NamedParameterJdbcTemplate mp4JdbcTemplateMock;
@@ -40,50 +44,72 @@ class OrganizationDaoTest {
 
   @Test
   void givenFiltersWhenFindByFiltersThenQueryMp4Database() {
-    when(sqlLoaderMock.load("mypay/organization/organization.sql")).thenReturn("SELECT * FROM organizations LIMIT :limit OFFSET :offset");
-    when(sqlLoaderMock.load("mypivot/organization/organization-pivot.sql")).thenReturn("SELECT TRUE");
-    OrganizationDao dao = new OrganizationDao(mp4JdbcTemplateMock, mpv4JdbcTemplateMock, sqlLoaderMock);
+    OrganizationDao dao = buildDao(mpv4JdbcTemplateMock);
 
     List<OrganizationDTO> expected = List.of(new OrganizationDTO(
       "IPA1", "1", "CF", "name", "type", "mail@example.com",
       "iban", "postal", "seg", "cbill", "logo", "ACTIVE",
       "it", null, true, false
     ));
-    when(mp4JdbcTemplateMock.query(anyString(), any(MapSqlParameterSource.class), any(RowMapper.class)))
+    when(mp4JdbcTemplateMock.query(
+      eq(FIND_BY_FILTERS_SQL),
+      ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
+        "IPA1".equals(params.getValue("ipaCode"))
+          && params.getValue("limit") == null
+          && params.getValue("offset") == null
+          && params.getValue("modifiedFrom") == null
+          && params.getValue("modifiedToExclusive") == null
+      ),
+      ArgumentMatchers.<RowMapper<OrganizationDTO>>argThat(Objects::nonNull)
+    ))
       .thenReturn(expected);
 
     List<OrganizationDTO> result = dao.findByFilters("IPA1", new ExtractionFilters(null, null));
 
     assertEquals(expected, result);
-    verify(mp4JdbcTemplateMock).query(anyString(), any(MapSqlParameterSource.class), any(RowMapper.class));
+    verify(mp4JdbcTemplateMock).query(
+      eq(FIND_BY_FILTERS_SQL),
+      ArgumentMatchers.isA(MapSqlParameterSource.class),
+      ArgumentMatchers.<RowMapper<OrganizationDTO>>argThat(Objects::nonNull)
+    );
   }
 
   @Test
   void givenPagedFiltersWhenFindByFiltersThenUsePagedSqlAndParams() {
-    when(sqlLoaderMock.load("mypay/organization/organization.sql")).thenReturn("SELECT * FROM organizations ORDER BY id LIMIT :limit OFFSET :offset");
-    when(sqlLoaderMock.load("mypivot/organization/organization-pivot.sql")).thenReturn("SELECT TRUE");
-    OrganizationDao dao = new OrganizationDao(mp4JdbcTemplateMock, mpv4JdbcTemplateMock, sqlLoaderMock);
+    OrganizationDao dao = buildDao(mpv4JdbcTemplateMock);
 
-    when(mp4JdbcTemplateMock.query(anyString(), any(MapSqlParameterSource.class), any(RowMapper.class)))
+    when(mp4JdbcTemplateMock.query(
+      eq(FIND_BY_FILTERS_SQL),
+      ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
+        "IPA1".equals(params.getValue("ipaCode"))
+          && LocalDate.of(2026, Month.JANUARY, 1).atStartOfDay().equals(params.getValue("modifiedFrom"))
+          && LocalDate.of(2026, Month.JANUARY, 3).atStartOfDay().equals(params.getValue("modifiedToExclusive"))
+          && Integer.valueOf(50).equals(params.getValue("limit"))
+          && Integer.valueOf(100).equals(params.getValue("offset"))
+      ),
+      ArgumentMatchers.<RowMapper<OrganizationDTO>>argThat(Objects::nonNull)
+    ))
       .thenReturn(List.of());
 
-    dao.findByFilters("IPA1", new ExtractionFilters(null, null), 50, 100);
+    dao.findByFilters("IPA1", new ExtractionFilters(LocalDate.of(2026, Month.JANUARY, 1), LocalDate.of(2026, Month.JANUARY, 2)), 50, 100);
 
-    ArgumentCaptor<String> queryCaptor = ArgumentCaptor.forClass(String.class);
-    ArgumentCaptor<MapSqlParameterSource> paramsCaptor = ArgumentCaptor.forClass(MapSqlParameterSource.class);
-    verify(mp4JdbcTemplateMock).query(queryCaptor.capture(), paramsCaptor.capture(), any(RowMapper.class));
-    assertTrue(queryCaptor.getValue().contains("LIMIT :limit OFFSET :offset"));
-    assertEquals(50, paramsCaptor.getValue().getValue("limit"));
-    assertEquals(100, paramsCaptor.getValue().getValue("offset"));
-    assertEquals("IPA1", paramsCaptor.getValue().getValue("ipaCode"));
+    verify(mp4JdbcTemplateMock).query(
+      eq(FIND_BY_FILTERS_SQL),
+      ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
+        "IPA1".equals(params.getValue("ipaCode"))
+          && LocalDate.of(2026, Month.JANUARY, 1).atStartOfDay().equals(params.getValue("modifiedFrom"))
+          && LocalDate.of(2026, Month.JANUARY, 3).atStartOfDay().equals(params.getValue("modifiedToExclusive"))
+          && Integer.valueOf(50).equals(params.getValue("limit"))
+          && Integer.valueOf(100).equals(params.getValue("offset"))
+      ),
+      ArgumentMatchers.<RowMapper<OrganizationDTO>>argThat(Objects::nonNull)
+    );
   }
 
   @Test
   void givenInvalidLimitWhenFindByFiltersThenThrowIllegalArgumentException() {
     ExtractionFilters filters = new ExtractionFilters(null, null);
-    when(sqlLoaderMock.load("mypay/organization/organization.sql")).thenReturn("SELECT * FROM organizations LIMIT :limit OFFSET :offset");
-    when(sqlLoaderMock.load("mypivot/organization/organization-pivot.sql")).thenReturn("SELECT TRUE");
-    OrganizationDao dao = new OrganizationDao(mp4JdbcTemplateMock, mpv4JdbcTemplateMock, sqlLoaderMock);
+    OrganizationDao dao = buildDao(mpv4JdbcTemplateMock);
 
     IllegalArgumentException exception = assertThrows(
       IllegalArgumentException.class,
@@ -96,34 +122,42 @@ class OrganizationDaoTest {
 
   @Test
   void givenMissingPivotTemplateWhenIsTreasuryEnabledThenReturnFalse() {
-    when(sqlLoaderMock.load("mypay/organization/organization.sql")).thenReturn("SELECT * FROM organizations LIMIT :limit OFFSET :offset");
-    when(sqlLoaderMock.load("mypivot/organization/organization-pivot.sql")).thenReturn("SELECT TRUE");
-    OrganizationDao dao = new OrganizationDao(mp4JdbcTemplateMock, null, sqlLoaderMock);
+    OrganizationDao dao = buildDao(null);
 
     assertFalse(dao.isTreasuryEnabled("IPA1"));
   }
 
   @Test
   void givenNullIpaCodeWhenIsTreasuryEnabledThenReturnFalse() {
-    when(sqlLoaderMock.load("mypay/organization/organization.sql")).thenReturn("SELECT * FROM organizations LIMIT :limit OFFSET :offset");
-    when(sqlLoaderMock.load("mypivot/organization/organization-pivot.sql")).thenReturn("SELECT TRUE");
-    OrganizationDao dao = new OrganizationDao(mp4JdbcTemplateMock, mpv4JdbcTemplateMock, sqlLoaderMock);
+    OrganizationDao dao = buildDao(mpv4JdbcTemplateMock);
 
     assertFalse(dao.isTreasuryEnabled(null));
-    verify(mpv4JdbcTemplateMock, never()).queryForObject(anyString(), any(MapSqlParameterSource.class), any(Class.class));
+    verify(mpv4JdbcTemplateMock, never()).queryForObject(
+      eq(FIND_TREASURY_BY_IPA_SQL),
+      ArgumentMatchers.<MapSqlParameterSource>isA(MapSqlParameterSource.class),
+      eq(Boolean.class)
+    );
   }
 
   @Test
   void givenPivotResultWhenIsTreasuryEnabledThenReturnBooleanValue() {
-    when(sqlLoaderMock.load("mypay/organization/organization.sql")).thenReturn("SELECT * FROM organizations LIMIT :limit OFFSET :offset");
-    when(sqlLoaderMock.load("mypivot/organization/organization-pivot.sql")).thenReturn("SELECT TRUE");
-    OrganizationDao dao = new OrganizationDao(mp4JdbcTemplateMock, mpv4JdbcTemplateMock, sqlLoaderMock);
+    OrganizationDao dao = buildDao(mpv4JdbcTemplateMock);
 
-    when(mpv4JdbcTemplateMock.queryForObject(anyString(), any(MapSqlParameterSource.class), any(Class.class)))
+    when(mpv4JdbcTemplateMock.queryForObject(
+      eq(FIND_TREASURY_BY_IPA_SQL),
+      ArgumentMatchers.<MapSqlParameterSource>argThat(params -> "IPA1".equals(params.getValue("codIpaEnte"))),
+      eq(Boolean.class)
+    ))
       .thenReturn(Boolean.TRUE)
       .thenReturn(Boolean.FALSE);
 
     assertTrue(dao.isTreasuryEnabled("IPA1"));
     assertFalse(dao.isTreasuryEnabled("IPA1"));
+  }
+
+  private OrganizationDao buildDao(NamedParameterJdbcTemplate mpv4JdbcTemplate) {
+    when(sqlLoaderMock.load("mypay/organization/organization.sql")).thenReturn(FIND_BY_FILTERS_SQL);
+    when(sqlLoaderMock.load("mypivot/organization/organization-pivot.sql")).thenReturn(FIND_TREASURY_BY_IPA_SQL);
+    return new OrganizationDao(mp4JdbcTemplateMock, mpv4JdbcTemplate, sqlLoaderMock);
   }
 }

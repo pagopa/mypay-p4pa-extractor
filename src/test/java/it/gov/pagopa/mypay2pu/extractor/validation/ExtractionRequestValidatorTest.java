@@ -52,9 +52,7 @@ class ExtractionRequestValidatorTest {
     } else {
       when(requestMock.getFilters()).thenReturn(filtersMock);
       when(filtersMock.getModifiedFrom()).thenReturn(modifiedFrom);
-      if (modifiedFrom != null) {
-        when(filtersMock.getModifiedTo()).thenReturn(modifiedTo);
-      }
+      when(filtersMock.getModifiedTo()).thenReturn(modifiedTo);
     }
 
     assertDoesNotThrow(() -> validator.validate(requestMock));

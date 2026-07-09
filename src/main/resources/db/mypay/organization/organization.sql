@@ -31,6 +31,7 @@ SELECT
     e.lingua_aggiuntiva AS additional_language,
     e.dt_avvio AS start_date,
     NULL AS io_api_key,
+    --Uncomment the following line to enable IO notification handling and comment out the current null field.
     --COALESCE(organization_feature_flags.flag_notify_io, FALSE) AS flag_notify_io,
     FALSE AS flag_notify_io,
     COALESCE(organization_feature_flags.flag_notify_outcome_push, FALSE) AS flag_notify_outcome_push

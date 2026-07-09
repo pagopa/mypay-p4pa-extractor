@@ -2,6 +2,7 @@ package it.gov.pagopa.mypay2pu.extractor.dao;
 
 import it.gov.pagopa.mypay2pu.extractor.dto.OrganizationDTO;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionFilters;
+import it.gov.pagopa.mypay2pu.extractor.utils.DateTimeUtils;
 import it.gov.pagopa.mypay2pu.extractor.utils.SqlLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -11,8 +12,6 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -70,8 +69,8 @@ public class OrganizationDao {
   ) {
     return new MapSqlParameterSource()
       .addValue("ipaCode", ipaCode)
-      .addValue("modifiedFrom", toStartOfDay(filters != null ? filters.getModifiedFrom() : null))
-      .addValue("modifiedToExclusive", toStartOfNextDay(filters != null ? filters.getModifiedTo() : null))
+      .addValue("modifiedFrom", DateTimeUtils.toStartOfDay(filters != null ? filters.getModifiedFrom() : null))
+      .addValue("modifiedToExclusive", DateTimeUtils.toStartOfNextDay(filters != null ? filters.getModifiedTo() : null))
       .addValue("limit", limit)
       .addValue("offset", offset);
   }
@@ -79,13 +78,5 @@ public class OrganizationDao {
   private MapSqlParameterSource buildTreasuryParams(String ipaCode) {
     return new MapSqlParameterSource()
       .addValue("codIpaEnte", ipaCode);
-  }
-
-  private LocalDateTime toStartOfDay(LocalDate date) {
-    return date == null ? null : date.atStartOfDay();
-  }
-
-  private LocalDateTime toStartOfNextDay(LocalDate date) {
-    return date == null ? null : date.plusDays(1).atStartOfDay();
   }
 }

@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import it.gov.pagopa.mypay2pu.extractor.config.json.JsonConfig;
 import it.gov.pagopa.mypay2pu.extractor.utils.TestUtils;
 import it.gov.pagopa.mypay2pu.extractor.utils.UtilitiesTest;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.ServletException;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
@@ -45,7 +47,7 @@ import java.time.Month;
 import java.util.Map;
 import java.util.Set;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doThrow;
 
 @ExtendWith({SpringExtension.class})
@@ -149,7 +151,11 @@ class ControllerExceptionHandlerTest {
   @Test
   void handleGenericServletException() throws Exception {
     doThrow(new ServletException("Error"))
-      .when(requestMappingHandlerAdapterSpy).handle(any(), any(), any());
+      .when(requestMappingHandlerAdapterSpy).handle(
+        isA(HttpServletRequest.class),
+        isA(HttpServletResponse.class),
+        isA(Object.class)
+      );
 
     performRequest(DATA, MediaType.APPLICATION_JSON)
       .andExpect(MockMvcResultMatchers.status().isInternalServerError())
@@ -225,7 +231,11 @@ class ControllerExceptionHandlerTest {
   @Test
   void handle5xxHttpServletException() throws Exception {
     doThrow(new ServerErrorException("Error", new RuntimeException("Error")))
-      .when(requestMappingHandlerAdapterSpy).handle(any(), any(), any());
+      .when(requestMappingHandlerAdapterSpy).handle(
+        isA(HttpServletRequest.class),
+        isA(HttpServletResponse.class),
+        isA(Object.class)
+      );
 
     performRequest(DATA, MediaType.APPLICATION_JSON)
       .andExpect(MockMvcResultMatchers.status().isInternalServerError())
@@ -238,7 +248,11 @@ class ControllerExceptionHandlerTest {
   @Test
   void handleHttpClientErrorTooManyRequestsException() throws Exception {
     doThrow(HttpClientErrorException.create(HttpStatus.TOO_MANY_REQUESTS, "TooManyRequests", null, null, null))
-      .when(requestMappingHandlerAdapterSpy).handle(any(), any(), any());
+      .when(requestMappingHandlerAdapterSpy).handle(
+        isA(HttpServletRequest.class),
+        isA(HttpServletResponse.class),
+        isA(Object.class)
+      );
 
     performRequest(DATA, MediaType.APPLICATION_JSON)
       .andExpect(MockMvcResultMatchers.status().isTooManyRequests())
@@ -272,7 +286,11 @@ class ControllerExceptionHandlerTest {
         return super.getCode();
       }
     })
-      .when(requestMappingHandlerAdapterSpy).handle(any(), any(), any());
+      .when(requestMappingHandlerAdapterSpy).handle(
+        isA(HttpServletRequest.class),
+        isA(HttpServletResponse.class),
+        isA(Object.class)
+      );
 
     performRequest(DATA, MediaType.APPLICATION_JSON)
       .andExpect(MockMvcResultMatchers.status().isInternalServerError())
@@ -285,7 +303,11 @@ class ControllerExceptionHandlerTest {
   @Test
   void handleBadRequestException() throws Exception {
     doThrow(new BadRequestException("UNSUPPORTED_FILE_TYPE", "Current POC supports only ORGANIZATIONS"))
-      .when(requestMappingHandlerAdapterSpy).handle(any(), any(), any());
+      .when(requestMappingHandlerAdapterSpy).handle(
+        isA(HttpServletRequest.class),
+        isA(HttpServletResponse.class),
+        isA(Object.class)
+      );
 
     performRequest(DATA, MediaType.APPLICATION_JSON)
       .andExpect(MockMvcResultMatchers.status().isBadRequest())
@@ -298,7 +320,11 @@ class ControllerExceptionHandlerTest {
   @Test
   void handleExportFileTypeNotSupportedException() throws Exception {
     doThrow(new ExportFileTypeNotSupportedException("Invalid export file type"))
-      .when(requestMappingHandlerAdapterSpy).handle(any(), any(), any());
+      .when(requestMappingHandlerAdapterSpy).handle(
+        isA(HttpServletRequest.class),
+        isA(HttpServletResponse.class),
+        isA(Object.class)
+      );
 
     performRequest(DATA, MediaType.APPLICATION_JSON)
       .andExpect(MockMvcResultMatchers.status().isBadRequest())
@@ -311,7 +337,11 @@ class ControllerExceptionHandlerTest {
   @Test
   void handleExportFileNotFoundException() throws Exception {
     doThrow(new ExportFileNotFoundException("File for extractionId: extraction-id not found"))
-      .when(requestMappingHandlerAdapterSpy).handle(any(), any(), any());
+      .when(requestMappingHandlerAdapterSpy).handle(
+        isA(HttpServletRequest.class),
+        isA(HttpServletResponse.class),
+        isA(Object.class)
+      );
 
     performRequest(DATA, MediaType.APPLICATION_JSON)
       .andExpect(MockMvcResultMatchers.status().isNotFound())
