@@ -3,6 +3,7 @@ package it.gov.pagopa.mypay2pu.extractor.validation;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionFilters;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.exception.BadRequestException;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -18,19 +19,25 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ExtractionRequestValidatorTest {
-
-  @InjectMocks
-  private ExtractionRequestValidator validator;
 
   @Mock
   private ExtractionRequest requestMock;
 
   @Mock
   private ExtractionFilters filtersMock;
+
+  @InjectMocks
+  private ExtractionRequestValidator validator;
+
+  @AfterEach
+  void tearDown() {
+    verifyNoMoreInteractions(requestMock, filtersMock);
+  }
 
   @Test
   void givenNullRequestWhenValidateThenNoExceptionThrown() {
