@@ -61,6 +61,7 @@ val podamVersion = "8.0.2.RELEASE"
 
 dependencies {
   implementation("org.springframework.boot:spring-boot-starter-webmvc")
+  implementation("org.springframework.boot:spring-boot-starter-security")
   implementation("org.springframework.boot:spring-boot-starter-opentelemetry")
   implementation("org.springframework.boot:spring-boot-starter-restclient")
   implementation("org.springframework.data:spring-data-commons")
