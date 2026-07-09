@@ -96,6 +96,9 @@ extractor:
     multipart-max-file-size: "\${MULTIPART_MAX_FILE_SIZE:52428800}"
     avg-row-size-organizations: "\${AVG_ROW_SIZE_ORGANIZATIONS:500}"
     broker-cf: "\${BROKER_CF:\${PA_IDENTIFICATIVO_INTERMEDIARIO_PA:}}"
+  basic-auth:
+    username: "\${CLIENT_ID:client}"
+    password: "\${CLIENT_SECRET:secret}"
 
 cipher:
   file-encrypt-enabled: "\${FILE_ENCRYPT_ENABLED:false}"
