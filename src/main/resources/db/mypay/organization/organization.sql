@@ -30,10 +30,12 @@ SELECT
     s.cod_stato AS status,
     e.lingua_aggiuntiva AS additional_language,
     e.dt_avvio AS start_date,
+    -- The standard MyPay4 codebase does not handle IO communication; therefore, it is not possible to extract its API keys. As a result, this tool will disable this feature for all exported organizations.
+    -- However, to preserve the original configuration, an additional column will be created(flag_notify_io_bkp), which will be ignored during the Piattaforma Unitaria import.
+    -- If your custom MyPay4 version allows exporting the API key via SQL, replace the NULL value with it here, and update the value of the flag_notify_io column using the expression provided for flag_notify_io_bkp.
     NULL AS io_api_key,
-    --Uncomment the following line to enable IO notification handling and comment out the current null field.
-    --COALESCE(organization_feature_flags.flag_notify_io, FALSE) AS flag_notify_io,
     FALSE AS flag_notify_io,
+    COALESCE(organization_feature_flags.flag_notify_io, FALSE) AS flag_notify_io_bkp,
     COALESCE(organization_feature_flags.flag_notify_outcome_push, FALSE) AS flag_notify_outcome_push
 FROM mygov_ente e
 LEFT JOIN mygov_anagrafica_stato s

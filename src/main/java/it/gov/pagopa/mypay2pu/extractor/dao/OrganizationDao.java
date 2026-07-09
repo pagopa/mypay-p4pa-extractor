@@ -3,6 +3,7 @@ package it.gov.pagopa.mypay2pu.extractor.dao;
 import it.gov.pagopa.mypay2pu.extractor.dto.OrganizationDTO;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionFilters;
 import it.gov.pagopa.mypay2pu.extractor.utils.DateTimeUtils;
+import it.gov.pagopa.mypay2pu.extractor.utils.QueryUtils;
 import it.gov.pagopa.mypay2pu.extractor.utils.SqlLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -19,7 +20,7 @@ public class OrganizationDao {
 
   private static final String FIND_BY_FILTERS_SQL_PATH = "mypay/organization/organization.sql";
   private static final String FIND_TREASURY_BY_IPA_SQL_PATH = "mypivot/organization/organization-pivot.sql";
-  private static final RowMapper<OrganizationDTO> ORGANIZATION_ROW_MAPPER =
+  protected static final RowMapper<OrganizationDTO> ORGANIZATION_ROW_MAPPER =
     DataClassRowMapper.newInstance(OrganizationDTO.class);
 
   private final NamedParameterJdbcTemplate mp4JdbcTemplate;
@@ -43,12 +44,6 @@ public class OrganizationDao {
   }
 
   public List<OrganizationDTO> findByFilters(String ipaCode, ExtractionFilters filters, int limit, int offset) {
-    if (limit <= 0) {
-      throw new IllegalArgumentException("limit must be greater than 0");
-    }
-    if (offset < 0) {
-      throw new IllegalArgumentException("offset must be non-negative");
-    }
     MapSqlParameterSource params = buildFiltersParams(ipaCode, filters, limit, offset);
     return mp4JdbcTemplate.query(findByFiltersSql, params, ORGANIZATION_ROW_MAPPER);
   }
@@ -67,12 +62,10 @@ public class OrganizationDao {
     Integer limit,
     Integer offset
   ) {
-    return new MapSqlParameterSource()
+    return QueryUtils.buildPaginatedFilterParams(limit, offset)
       .addValue("ipaCode", ipaCode)
       .addValue("modifiedFrom", DateTimeUtils.toStartOfDay(filters != null ? filters.getModifiedFrom() : null))
-      .addValue("modifiedToExclusive", DateTimeUtils.toStartOfNextDay(filters != null ? filters.getModifiedTo() : null))
-      .addValue("limit", limit)
-      .addValue("offset", offset);
+      .addValue("modifiedToExclusive", DateTimeUtils.toStartOfNextDay(filters != null ? filters.getModifiedTo() : null));
   }
 
   private MapSqlParameterSource buildTreasuryParams(String ipaCode) {

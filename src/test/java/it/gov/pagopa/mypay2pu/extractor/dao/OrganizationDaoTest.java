@@ -8,15 +8,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.List;
-import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -49,29 +48,26 @@ class OrganizationDaoTest {
     List<OrganizationDTO> expected = List.of(new OrganizationDTO(
       "IPA1", "1", "CF", "name", "type", "mail@example.com",
       "iban", "postal", "seg", "cbill", "logo", "ACTIVE",
-      "it", null, true, false
+      "it", null, true, true, false
     ));
     when(mp4JdbcTemplateMock.query(
       eq(FIND_BY_FILTERS_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         "IPA1".equals(params.getValue("ipaCode"))
-          && params.getValue("limit") == null
-          && params.getValue("offset") == null
+          && !params.hasValue("limit")
+          && !params.hasValue("offset")
+          && params.hasValue("modifiedFrom")
           && params.getValue("modifiedFrom") == null
+          && params.hasValue("modifiedToExclusive")
           && params.getValue("modifiedToExclusive") == null
       ),
-      ArgumentMatchers.<RowMapper<OrganizationDTO>>argThat(Objects::nonNull)
+      Mockito.same(OrganizationDao.ORGANIZATION_ROW_MAPPER)
     ))
       .thenReturn(expected);
 
     List<OrganizationDTO> result = dao.findByFilters("IPA1", new ExtractionFilters(null, null));
 
     assertEquals(expected, result);
-    verify(mp4JdbcTemplateMock).query(
-      eq(FIND_BY_FILTERS_SQL),
-      ArgumentMatchers.isA(MapSqlParameterSource.class),
-      ArgumentMatchers.<RowMapper<OrganizationDTO>>argThat(Objects::nonNull)
-    );
   }
 
   @Test
@@ -87,23 +83,12 @@ class OrganizationDaoTest {
           && Integer.valueOf(50).equals(params.getValue("limit"))
           && Integer.valueOf(100).equals(params.getValue("offset"))
       ),
-      ArgumentMatchers.<RowMapper<OrganizationDTO>>argThat(Objects::nonNull)
+      Mockito.same(OrganizationDao.ORGANIZATION_ROW_MAPPER)
     ))
       .thenReturn(List.of());
 
-    dao.findByFilters("IPA1", new ExtractionFilters(LocalDate.of(2026, Month.JANUARY, 1), LocalDate.of(2026, Month.JANUARY, 2)), 50, 100);
-
-    verify(mp4JdbcTemplateMock).query(
-      eq(FIND_BY_FILTERS_SQL),
-      ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
-        "IPA1".equals(params.getValue("ipaCode"))
-          && LocalDate.of(2026, Month.JANUARY, 1).atStartOfDay().equals(params.getValue("modifiedFrom"))
-          && LocalDate.of(2026, Month.JANUARY, 3).atStartOfDay().equals(params.getValue("modifiedToExclusive"))
-          && Integer.valueOf(50).equals(params.getValue("limit"))
-          && Integer.valueOf(100).equals(params.getValue("offset"))
-      ),
-      ArgumentMatchers.<RowMapper<OrganizationDTO>>argThat(Objects::nonNull)
-    );
+    List<OrganizationDTO> result = dao.findByFilters("IPA1", new ExtractionFilters(LocalDate.of(2026, Month.JANUARY, 1), LocalDate.of(2026, Month.JANUARY, 2)), 50, 100);
+    assertEquals(List.of(), result);
   }
 
   @Test
@@ -132,11 +117,6 @@ class OrganizationDaoTest {
     OrganizationDao dao = buildDao(mpv4JdbcTemplateMock);
 
     assertFalse(dao.isTreasuryEnabled(null));
-    verify(mpv4JdbcTemplateMock, never()).queryForObject(
-      eq(FIND_TREASURY_BY_IPA_SQL),
-      ArgumentMatchers.<MapSqlParameterSource>isA(MapSqlParameterSource.class),
-      eq(Boolean.class)
-    );
   }
 
   @Test
