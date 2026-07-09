@@ -199,6 +199,23 @@ See [application.yml](src/main/resources/application.yml) for each configurable 
 |---|---|---|
 | `FILE_ENCRYPT_PSW` | Password used to encrypt produced files (used only if `FILE_ENCRYPT_ENABLED=true`). Ignored if encryption is disabled. | `` |
 
+## Extraction queries customization
+
+Le query SQL di estrazione sono lette da risorse su classpath sotto `/db/**` (vedi `SqlLoader`).  
+Per customizzarle, aggiungi nel classpath una risorsa con lo stesso path della query da sovrascrivere (ad esempio tramite risorse applicative esterne o classpath aggiuntivo in avvio).
+
+### MyPay
+
+| PU Entity | Resource | Parameters | Description |
+| ------------ | ------------------------- | ------------------------------------------------ | ----------------------------- |
+| organization | `/db/mypay/organization/organization.sql` | <li>ipaCode: organization IPA code (nullable)<br><li>modifiedFrom: extraction start date at 00:00 (nullable)<br><li>modifiedToExclusive: extraction end date +1 day at 00:00 (nullable)<br><li>limit: page size (> 0)<br><li>offset: page start (>= 0, nullable) | Organization entity extractor |
+
+### MyPivot
+
+| PU Entity | Resource | Parameters | Description |
+| ------------ | ------------------------- | ------------------------------------------------ | ----------------------------- |
+| organization (treasury check) | `/db/mypivot/organization/organization-pivot.sql` | <li>codIpaEnte: organization IPA code | Check if treasury extraction is enabled for organization |
+
 ## 🛠️ Getting Started
 
 ### 📝 Prerequisites
