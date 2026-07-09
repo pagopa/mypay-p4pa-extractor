@@ -24,6 +24,10 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.function.Supplier;
 
+/**
+ * Service responsible for creating CSV files using OpenCSV.
+ * Supports writing raw string rows or bean-based rows through a supplier.
+ */
 @Lazy
 @Service
 @Slf4j
@@ -32,6 +36,12 @@ public class CsvService {
   private final char separator;
   private final char quoteChar;
 
+  /**
+   * Constructs the CSV service with configured CSV formatting characters.
+   *
+   * @param separator the configured field separator character
+   * @param quoteChar the configured quote character
+   */
   public CsvService(
     @Value("${csv.separator}") char separator,
     @Value("${csv.quote-char}") char quoteChar) {
@@ -42,21 +52,13 @@ public class CsvService {
   /**
    * Creates a CSV file from the provided header and data.
    *
-   * @param csvFilePath The full path where the CSV file should be saved.
-   * @param header      The header of the CSV, as a list of String[].
-   * @param data        The data to write to the CSV, as a list of String[].
-   * @throws IOException If an error occurs while writing the file.
+   * @param csvFilePath the full path where the CSV file should be saved
+   * @param header the CSV header rows
+   * @param data the CSV data rows
+   * @throws IOException if an error occurs while writing the file
    */
   public void createCsv(Path csvFilePath, List<String[]> header, List<String[]> data) throws IOException {
-    // Create the destination folder if it doesn't already exist
-    File file = csvFilePath.toFile();
-    File parentDir = file.getParentFile();
-    if (!parentDir.exists() && !parentDir.mkdirs()) {
-      throw new IOException("Unable to create directory: " + parentDir.getAbsolutePath());
-    }
-
-    // Create the CSV file
-    try (ICSVWriter csvWriter = buildCsvWriter(file)) {
+    try (ICSVWriter csvWriter = openCsvWriter(csvFilePath, false)) {
       // Write the header
       if (header != null && !header.isEmpty()) {
         csvWriter.writeAll(header);
@@ -71,16 +73,12 @@ public class CsvService {
   }
 
   /**
-   * Creates a CSV file from the provided supplier of beans.
+   * Creates a CSV file from a supplier of bean batches.
    *
-   * <p>This method ensures that the file is properly closed after processing
-   * by using a try-with-resources statement.</p>
+   * <p>The supplier is called repeatedly until it returns {@code null} or an empty list.</p>
    *
-   * <p>This method uses {@code StatefulBeanToCsv.write()}
-   * to write each bean individually, reducing memory consumption at the cost of lower performance.</p>
-   *
-   * <p>The supplier is called repeatedly until it returns an empty list or null,
-   * indicating that there are no more beans to write.</p>
+   * <p>Bean serialization is delegated to {@link StatefulBeanToCsv}, configured with the given profile and
+   * an {@link OrderedHeaderColumnNameMappingStrategy}.</p>
    *
    * @param <C> the generic type of the beans to be written to the CSV
    * @param csvFilePath the path to the CSV file to write
@@ -91,11 +89,7 @@ public class CsvService {
    */
   public <C> void createCsv(Path csvFilePath, Class<C> typeClass, Supplier<List<C>> csvRowsSupplier, String csvProfile) throws IOException {
 
-    File file = csvFilePath.toFile();
-    File parentDir = file.getParentFile();
-    if (!parentDir.exists() && !parentDir.mkdirs()) {
-      throw new IOException("Unable to create directory: " + parentDir.getAbsolutePath());
-    }
+    ensureParentDirectory(csvFilePath.toFile());
 
     try (Writer writer = Files.newBufferedWriter(csvFilePath)) {
       OrderedHeaderColumnNameMappingStrategy<C> mappingStrategy = new OrderedHeaderColumnNameMappingStrategy<>();
@@ -120,8 +114,29 @@ public class CsvService {
     }
   }
 
-  private ICSVWriter buildCsvWriter(File file) throws IOException {
-    return new CSVWriterBuilder(new FileWriter(file))
+  /**
+   * Opens an {@link ICSVWriter} for the given CSV path.
+   *
+   * @param csvFilePath the target CSV file path
+   * @param append whether to append to an existing file ({@code true}) or overwrite ({@code false})
+   * @return an initialized CSV writer
+   * @throws IOException if the parent directory cannot be created or the file cannot be opened
+   */
+  public ICSVWriter openCsvWriter(Path csvFilePath, boolean append) throws IOException {
+    File file = csvFilePath.toFile();
+    ensureParentDirectory(file);
+    return buildCsvWriter(file, append);
+  }
+
+  private void ensureParentDirectory(File file) throws IOException {
+    File parentDir = file.getParentFile();
+    if (!parentDir.exists() && !parentDir.mkdirs()) {
+      throw new IOException("Unable to create directory: " + parentDir.getAbsolutePath());
+    }
+  }
+
+  private ICSVWriter buildCsvWriter(File file, boolean append) throws IOException {
+    return new CSVWriterBuilder(new FileWriter(file, append))
       .withSeparator(separator)
       .withQuoteChar(quoteChar)
       .build();
