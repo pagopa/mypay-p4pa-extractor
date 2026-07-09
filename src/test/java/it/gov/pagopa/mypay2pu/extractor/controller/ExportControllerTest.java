@@ -10,6 +10,7 @@ import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.exception.ControllerExceptionHandler;
 import it.gov.pagopa.mypay2pu.extractor.service.ExportFileHandlerService;
 import it.gov.pagopa.mypay2pu.extractor.service.ExportFileStatusService;
+import it.gov.pagopa.mypay2pu.extractor.validation.ExtractionRequestValidator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +21,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.time.LocalDate;
+import java.time.Month;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -45,7 +48,10 @@ class ExportControllerTest {
   void setUp() {
     objectMapper = new JsonConfig().objectMapper();
     mockMvc = MockMvcBuilders
-      .standaloneSetup(new ExportController(exportFileHandlerServiceMock, exportFileStatusServiceMock))
+      .standaloneSetup(new ExportController(
+        exportFileHandlerServiceMock,
+        exportFileStatusServiceMock,
+        new ExtractionRequestValidator()))
       .setControllerAdvice(new ControllerExceptionHandler())
       .build();
   }
@@ -75,8 +81,9 @@ class ExportControllerTest {
   @Test
   void givenValidExtractionIdWhenGetExtractionStatusThenReturnStatus() throws Exception {
     OffsetDateTime now = OffsetDateTime.parse("2026-01-01T00:00:00Z");
+    String extractionId = "123e4567-e89b-42d3-a456-426614174000";
     ExtractionStatusResponse statusResponse = new ExtractionStatusResponse(
-      "extraction-id",
+      extractionId,
       "IPA_CODE_TEST",
       MigrationFileType.ORGANIZATIONS,
       ExtractionStatus.COMPLETED,
@@ -85,13 +92,42 @@ class ExportControllerTest {
       null,
       List.of("organizations.csv")
     );
-    when(exportFileStatusServiceMock.readStatus("extraction-id")).thenReturn(statusResponse);
+    when(exportFileStatusServiceMock.readStatus(extractionId)).thenReturn(statusResponse);
 
-    mockMvc.perform(get("/extract/extraction-id"))
+    mockMvc.perform(get("/extract/" + extractionId))
       .andExpect(status().isOk())
-      .andExpect(jsonPath("$.extractionId").value("extraction-id"))
+      .andExpect(jsonPath("$.extractionId").value(extractionId))
       .andExpect(jsonPath("$.status").value("COMPLETED"))
       .andExpect(jsonPath("$.files[0]").value("organizations.csv"));
 
+  }
+
+  @Test
+  void givenReversedFilterDatesWhenExecuteExportThenReturnBadRequest() throws Exception {
+    ExtractionRequest request = new ExtractionRequest(
+      "IPA_CODE_TEST",
+      MigrationFileType.ORGANIZATIONS,
+      new ExtractionFilters(
+        LocalDate.of(2026, Month.JANUARY, 2),
+        LocalDate.of(2026, Month.JANUARY, 1)
+      )
+    );
+
+    mockMvc.perform(post("/extract")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(request)))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.category").value("BAD_REQUEST"))
+      .andExpect(jsonPath("$.code").value("INVALID_EXTRACTION_FILTERS"))
+      .andExpect(jsonPath("$.message").value("[INVALID_EXTRACTION_FILTERS] filters.modifiedFrom must be before or equal to filters.modifiedTo"));
+  }
+
+  @Test
+  void givenInvalidExtractionIdWhenGetExtractionStatusThenReturnBadRequest() throws Exception {
+    mockMvc.perform(get("/extract/not-a-uuid"))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.category").value("BAD_REQUEST"))
+      .andExpect(jsonPath("$.code").value("INVALID_EXTRACTION_ID"))
+      .andExpect(jsonPath("$.message").value("[INVALID_EXTRACTION_ID] extractionId must be a valid UUID"));
   }
 }

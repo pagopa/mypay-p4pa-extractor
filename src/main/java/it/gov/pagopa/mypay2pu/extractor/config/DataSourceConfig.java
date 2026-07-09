@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import javax.sql.DataSource;
 
@@ -28,6 +29,12 @@ public class DataSourceConfig {
     return new JdbcTemplate(dataSource);
   }
 
+  @Bean("mp4NamedParameterJdbcTemplate")
+  @Primary
+  public NamedParameterJdbcTemplate mp4NamedParameterJdbcTemplate(@Qualifier("mp4DataSource") DataSource dataSource) {
+    return new NamedParameterJdbcTemplate(dataSource);
+  }
+
   // ── FESP (secondary) ───────────────────────────────────────────────────────
 
   @Bean("fespDataSource")
@@ -39,5 +46,10 @@ public class DataSourceConfig {
   @Bean("fespJdbcTemplate")
   public JdbcTemplate fespJdbcTemplate(@Qualifier("fespDataSource") DataSource dataSource) {
     return new JdbcTemplate(dataSource);
+  }
+
+  @Bean("mpv4NamedParameterJdbcTemplate")
+  public NamedParameterJdbcTemplate mpv4NamedParameterJdbcTemplate(@Qualifier("fespDataSource") DataSource dataSource) {
+    return new NamedParameterJdbcTemplate(dataSource);
   }
 }
