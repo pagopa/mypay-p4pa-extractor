@@ -30,10 +30,10 @@ class SqlLoaderTest {
   @Test
   void givenValidSqlResourceWhenLoadTwiceThenTrimAndCacheResult() throws IOException {
     SqlLoader sqlLoader = new SqlLoader(resourceLoader);
-    String location = "db/queries/test.sql";
+    String location = "queries/test.sql";
     String sqlWithSpaces = "  SELECT * FROM table_name  ";
 
-    when(resourceLoader.getResource("classpath:" + location)).thenReturn(resource);
+    when(resourceLoader.getResource("classpath:db/queries/test.sql")).thenReturn(resource);
     when(resource.exists()).thenReturn(true);
     when(resource.getInputStream()).thenReturn(new java.io.ByteArrayInputStream(sqlWithSpaces.getBytes(StandardCharsets.UTF_8)));
 
@@ -42,36 +42,45 @@ class SqlLoaderTest {
 
     assertEquals("SELECT * FROM table_name", firstLoad);
     assertSame(firstLoad, secondLoad);
-    verify(resourceLoader, times(1)).getResource("classpath:" + location);
+    verify(resourceLoader, times(1)).getResource("classpath:db/queries/test.sql");
     verify(resource, times(1)).getInputStream();
   }
 
   @Test
   void givenMissingSqlResourceWhenLoadThenThrowIllegalArgumentException() {
     SqlLoader sqlLoader = new SqlLoader(resourceLoader);
-    String location = "db/queries/missing.sql";
+    String location = "queries/missing.sql";
 
-    when(resourceLoader.getResource("classpath:" + location)).thenReturn(resource);
+    when(resourceLoader.getResource("classpath:db/queries/missing.sql")).thenReturn(resource);
     when(resource.exists()).thenReturn(false);
 
     IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> sqlLoader.load(location));
 
-    assertEquals("SQL resource not found: " + location, exception.getMessage());
+    assertEquals("SQL resource not found: db/queries/missing.sql", exception.getMessage());
+  }
+
+  @Test
+  void givenPathTraversalWhenLoadThenThrowIllegalArgumentException() {
+    SqlLoader sqlLoader = new SqlLoader(resourceLoader);
+
+    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> sqlLoader.load("../outside.sql"));
+
+    assertEquals("SQL resource location escapes base path: ../outside.sql", exception.getMessage());
   }
 
   @Test
   void givenUnreadableSqlResourceWhenLoadThenThrowUncheckedIOException() throws IOException {
     SqlLoader sqlLoader = new SqlLoader(resourceLoader);
-    String location = "db/queries/broken.sql";
+    String location = "queries/broken.sql";
     IOException ioException = new IOException("read failure");
 
-    when(resourceLoader.getResource("classpath:" + location)).thenReturn(resource);
+    when(resourceLoader.getResource("classpath:db/queries/broken.sql")).thenReturn(resource);
     when(resource.exists()).thenReturn(true);
     when(resource.getInputStream()).thenThrow(ioException);
 
     UncheckedIOException exception = assertThrows(UncheckedIOException.class, () -> sqlLoader.load(location));
 
-    assertEquals("Cannot read SQL resource: " + location, exception.getMessage());
+    assertEquals("Cannot read SQL resource: db/queries/broken.sql", exception.getMessage());
     assertInstanceOf(IOException.class, exception.getCause());
     assertEquals("read failure", exception.getCause().getMessage());
   }

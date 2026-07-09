@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -15,6 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SqlLoader {
 
   private static final String CLASSPATH_PREFIX = "classpath:";
+  private static final Path BASE_SQL_PATH = Path.of("db").normalize();
 
   private final ResourceLoader resourceLoader;
   private final Map<String, String> sqlCache = new ConcurrentHashMap<>();
@@ -24,7 +27,35 @@ public class SqlLoader {
   }
 
   public String load(String location) {
-    return sqlCache.computeIfAbsent(location, this::readSql);
+    String normalizedLocation = normalizeLocation(location);
+    return sqlCache.computeIfAbsent(normalizedLocation, this::readSql);
+  }
+
+  private String normalizeLocation(String location) {
+    if (location == null || location.isBlank()) {
+      throw new IllegalArgumentException("SQL resource location must not be blank");
+    }
+
+    Path inputPath;
+    try {
+      inputPath = Path.of(location).normalize();
+    } catch (InvalidPathException exception) {
+      throw new IllegalArgumentException("Invalid SQL resource location: " + location, exception);
+    }
+
+    if (inputPath.isAbsolute()) {
+      throw new IllegalArgumentException("SQL resource location must be relative: " + location);
+    }
+
+    Path normalizedPath = inputPath.startsWith(BASE_SQL_PATH)
+      ? inputPath
+      : BASE_SQL_PATH.resolve(inputPath).normalize();
+
+    if (!normalizedPath.startsWith(BASE_SQL_PATH)) {
+      throw new IllegalArgumentException("SQL resource location escapes base path: " + location);
+    }
+
+    return normalizedPath.toString().replace('\\', '/');
   }
 
   private String readSql(String location) {
