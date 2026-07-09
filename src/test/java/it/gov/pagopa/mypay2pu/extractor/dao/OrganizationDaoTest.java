@@ -36,8 +36,8 @@ class OrganizationDaoTest {
 
   @Test
   void givenFiltersWhenFindByFiltersThenQueryMp4Database() {
-    when(sqlLoader.load("db/queries/organization.sql")).thenReturn("SELECT * FROM organizations LIMIT :limit OFFSET :offset");
-    when(sqlLoader.load("db/queries/organization-pivot.sql")).thenReturn("SELECT TRUE");
+    when(sqlLoader.load("queries/organization.sql")).thenReturn("SELECT * FROM organizations LIMIT :limit OFFSET :offset");
+    when(sqlLoader.load("queries/organization-pivot.sql")).thenReturn("SELECT TRUE");
     OrganizationDao dao = new OrganizationDao(mp4JdbcTemplate, mpv4JdbcTemplate, sqlLoader);
 
     List<OrganizationDTO> expected = List.of(new OrganizationDTO(
@@ -56,8 +56,8 @@ class OrganizationDaoTest {
 
   @Test
   void givenPagedFiltersWhenFindByFiltersThenUsePagedSqlAndParams() {
-    when(sqlLoader.load("db/queries/organization.sql")).thenReturn("SELECT * FROM organizations ORDER BY id LIMIT :limit OFFSET :offset");
-    when(sqlLoader.load("db/queries/organization-pivot.sql")).thenReturn("SELECT TRUE");
+    when(sqlLoader.load("queries/organization.sql")).thenReturn("SELECT * FROM organizations ORDER BY id LIMIT :limit OFFSET :offset");
+    when(sqlLoader.load("queries/organization-pivot.sql")).thenReturn("SELECT TRUE");
     OrganizationDao dao = new OrganizationDao(mp4JdbcTemplate, mpv4JdbcTemplate, sqlLoader);
 
     when(mp4JdbcTemplate.query(anyString(), any(MapSqlParameterSource.class), any(RowMapper.class)))
@@ -77,8 +77,8 @@ class OrganizationDaoTest {
   @Test
   void givenInvalidLimitWhenFindByFiltersThenThrowIllegalArgumentException() {
     ExtractionFilters filters = new ExtractionFilters(null, null);
-    when(sqlLoader.load("db/queries/organization.sql")).thenReturn("SELECT * FROM organizations LIMIT :limit OFFSET :offset");
-    when(sqlLoader.load("db/queries/organization-pivot.sql")).thenReturn("SELECT TRUE");
+    when(sqlLoader.load("queries/organization.sql")).thenReturn("SELECT * FROM organizations LIMIT :limit OFFSET :offset");
+    when(sqlLoader.load("queries/organization-pivot.sql")).thenReturn("SELECT TRUE");
     OrganizationDao dao = new OrganizationDao(mp4JdbcTemplate, mpv4JdbcTemplate, sqlLoader);
 
     IllegalArgumentException exception = assertThrows(
@@ -92,8 +92,8 @@ class OrganizationDaoTest {
 
   @Test
   void givenMissingPivotTemplateWhenIsTreasuryEnabledThenReturnFalse() {
-    when(sqlLoader.load("db/queries/organization.sql")).thenReturn("SELECT * FROM organizations LIMIT :limit OFFSET :offset");
-    when(sqlLoader.load("db/queries/organization-pivot.sql")).thenReturn("SELECT TRUE");
+    when(sqlLoader.load("queries/organization.sql")).thenReturn("SELECT * FROM organizations LIMIT :limit OFFSET :offset");
+    when(sqlLoader.load("queries/organization-pivot.sql")).thenReturn("SELECT TRUE");
     OrganizationDao dao = new OrganizationDao(mp4JdbcTemplate, null, sqlLoader);
 
     assertFalse(dao.isTreasuryEnabled("IPA1"));
@@ -101,8 +101,8 @@ class OrganizationDaoTest {
 
   @Test
   void givenNullIpaCodeWhenIsTreasuryEnabledThenReturnFalse() {
-    when(sqlLoader.load("db/queries/organization.sql")).thenReturn("SELECT * FROM organizations LIMIT :limit OFFSET :offset");
-    when(sqlLoader.load("db/queries/organization-pivot.sql")).thenReturn("SELECT TRUE");
+    when(sqlLoader.load("queries/organization.sql")).thenReturn("SELECT * FROM organizations LIMIT :limit OFFSET :offset");
+    when(sqlLoader.load("queries/organization-pivot.sql")).thenReturn("SELECT TRUE");
     OrganizationDao dao = new OrganizationDao(mp4JdbcTemplate, mpv4JdbcTemplate, sqlLoader);
 
     assertFalse(dao.isTreasuryEnabled(null));
@@ -111,8 +111,8 @@ class OrganizationDaoTest {
 
   @Test
   void givenPivotResultWhenIsTreasuryEnabledThenReturnBooleanValue() {
-    when(sqlLoader.load("db/queries/organization.sql")).thenReturn("SELECT * FROM organizations LIMIT :limit OFFSET :offset");
-    when(sqlLoader.load("db/queries/organization-pivot.sql")).thenReturn("SELECT TRUE");
+    when(sqlLoader.load("queries/organization.sql")).thenReturn("SELECT * FROM organizations LIMIT :limit OFFSET :offset");
+    when(sqlLoader.load("queries/organization-pivot.sql")).thenReturn("SELECT TRUE");
     OrganizationDao dao = new OrganizationDao(mp4JdbcTemplate, mpv4JdbcTemplate, sqlLoader);
 
     when(mpv4JdbcTemplate.queryForObject(anyString(), any(MapSqlParameterSource.class), any(Class.class)))

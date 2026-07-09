@@ -18,8 +18,8 @@ import java.util.List;
 @Repository
 public class OrganizationDao {
 
-  private static final String FIND_BY_FILTERS_SQL_PATH = "db/queries/organization.sql";
-  private static final String FIND_TREASURY_BY_IPA_SQL_PATH = "db/queries/organization-pivot.sql";
+  private static final String FIND_BY_FILTERS_SQL_PATH = "queries/organization.sql";
+  private static final String FIND_TREASURY_BY_IPA_SQL_PATH = "queries/organization-pivot.sql";
   private static final RowMapper<OrganizationDTO> ORGANIZATION_ROW_MAPPER =
     DataClassRowMapper.newInstance(OrganizationDTO.class);
 
