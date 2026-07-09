@@ -7,7 +7,7 @@ WITH organization_feature_flags AS (
         BOOL_OR(ef.cod_funzionalita = 'NOTIFICA_AVVISI_IO') AS flag_notify_io,
         BOOL_OR(ef.cod_funzionalita = 'INOLTRO_ESITO_PAGAMENTO_PUSH') AS flag_notify_outcome_push
     FROM mygov_ente_funzionalita ef
-    WHERE (:ipaCode IS NULL OR ef.cod_ipa_ente = :ipaCode)
+    WHERE ef.cod_ipa_ente = :ipaCode
       AND ef.flg_attivo = TRUE
       AND ef.cod_funzionalita IN (
           'NOTIFICA_AVVISI_IO',
@@ -30,14 +30,16 @@ SELECT
     s.cod_stato AS status,
     e.lingua_aggiuntiva AS additional_language,
     e.dt_avvio AS start_date,
-    COALESCE(organization_feature_flags.flag_notify_io, FALSE) AS flag_notify_io,
+    NULL AS io_api_key,
+    --COALESCE(organization_feature_flags.flag_notify_io, FALSE) AS flag_notify_io,
+    FALSE AS flag_notify_io,
     COALESCE(organization_feature_flags.flag_notify_outcome_push, FALSE) AS flag_notify_outcome_push
 FROM mygov_ente e
 LEFT JOIN mygov_anagrafica_stato s
-    ON s.cod_stato = e.cd_stato_ente
+    ON s.mygov_anagrafica_stato_id = e.cd_stato_ente
 LEFT JOIN organization_feature_flags
     ON organization_feature_flags.cod_ipa_ente = e.cod_ipa_ente
-WHERE (:ipaCode IS NULL OR e.cod_ipa_ente = :ipaCode)
+WHERE e.cod_ipa_ente = :ipaCode
   AND (:modifiedFrom IS NULL OR e.dt_ultima_modifica >= :modifiedFrom)
   AND (:modifiedToExclusive IS NULL OR e.dt_ultima_modifica < :modifiedToExclusive)
 ORDER BY e.dt_ultima_modifica, e.mygov_ente_id
