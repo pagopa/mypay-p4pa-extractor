@@ -17,7 +17,7 @@ import java.time.LocalDate;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrganizationExportDTO {
+public class PuOrganizationDTO {
 
   @CsvBindByName(column = "ipa_code")
   @NotBlank
