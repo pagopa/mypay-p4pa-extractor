@@ -1,21 +1,25 @@
 package it.gov.pagopa.mypay2pu.extractor.service;
 
 import it.gov.pagopa.mypay2pu.extractor.dto.ExportFileResult;
-import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
+import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.exception.ExportFileTypeNotSupportedException;
+import it.gov.pagopa.mypay2pu.extractor.service.export.organization.OrganizationProcessingService;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 public class DataExportFacadeService {
 
-  public ExportFileResult executeExport(String extractionId, MigrationFileType fileType) {
-    return switch (fileType) {
-      //TODO the extraction logic for type ORGANIZATIONS will be implemented by task P4ADEV-4810
-      case ORGANIZATIONS -> new ExportFileResult(List.of(), null);
+  private final OrganizationProcessingService organizationProcessingService;
+
+  public DataExportFacadeService(OrganizationProcessingService organizationProcessingService) {
+    this.organizationProcessingService = organizationProcessingService;
+  }
+
+  public ExportFileResult executeExport(String extractionId, ExtractionRequest request) {
+    return switch (request.getFileTypes()) {
+      case ORGANIZATIONS -> organizationProcessingService.extract(extractionId, request);
       default ->
-        throw new ExportFileTypeNotSupportedException("Invalid export file type: " + fileType);
+        throw new ExportFileTypeNotSupportedException("Invalid export file type: " + request.getFileTypes());
     };
   }
 }

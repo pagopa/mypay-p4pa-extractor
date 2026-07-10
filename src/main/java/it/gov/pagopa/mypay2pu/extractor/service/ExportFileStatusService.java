@@ -42,7 +42,9 @@ public class ExportFileStatusService {
   public void update(String extractionId, ExportFileResult exportFileResult) {
     ExtractionStatusResponse currentStatus = exportFileStatusDao.readStatus(extractionId);
     List<String> exportedFiles = exportFileResult.files() == null ? List.of() : List.copyOf(exportFileResult.files());
+    List<String> errorFiles = exportFileResult.errorFiles() == null ? List.of() : List.copyOf(exportFileResult.errorFiles());
     String errorDescription = exportFileResult.error();
+
     if (StringUtils.isBlank(errorDescription)) {
       currentStatus
         .status(ExtractionStatus.COMPLETED)
@@ -56,6 +58,11 @@ public class ExportFileStatusService {
         .error(errorDescription)
         .files(exportedFiles);
     }
+
+    if (!errorFiles.isEmpty()) {
+      log.info("Export {} has {} error report files", extractionId, errorFiles.size());
+    }
+
     exportFileStatusDao.writeStatus(currentStatus);
   }
 

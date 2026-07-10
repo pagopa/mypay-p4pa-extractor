@@ -1,8 +1,8 @@
 package it.gov.pagopa.mypay2pu.extractor.dao;
 
+import it.gov.pagopa.mypay2pu.extractor.config.ExtractorExportProperties;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionStatusResponse;
 import it.gov.pagopa.mypay2pu.extractor.exception.ExportFileNotFoundException;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import tools.jackson.core.exc.JacksonIOException;
 import tools.jackson.core.exc.StreamReadException;
@@ -23,9 +23,9 @@ public class ExportFileStatusDao {
   private final Path storagePath;
 
   public ExportFileStatusDao(JsonMapper jsonMapper,
-                             @Value("${extractor.export.storage-path}") String storagePath) {
+                             ExtractorExportProperties extractorExportProperties) {
     this.jsonMapper = jsonMapper;
-    this.storagePath = Paths.get(storagePath);
+    this.storagePath = Paths.get(extractorExportProperties.storagePath());
   }
 
   public ExtractionStatusResponse readStatus(String extractionId) {

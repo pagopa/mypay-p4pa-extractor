@@ -1,5 +1,6 @@
 package it.gov.pagopa.mypay2pu.extractor.dao;
 
+import it.gov.pagopa.mypay2pu.extractor.config.ExtractorExportProperties;
 import it.gov.pagopa.mypay2pu.extractor.config.json.JsonConfig;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionStatus;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionStatusResponse;
@@ -28,7 +29,7 @@ class ExportFileStatusDaoTest {
   void givenStatusWhenWriteAndReadThenReturnStoredValue() {
     ExportFileStatusDao service = new ExportFileStatusDao(
       jsonMapper,
-      tempDir.toString()
+      buildExportProperties()
     );
 
     OffsetDateTime now = OffsetDateTime.parse("2026-01-01T00:00:00Z");
@@ -59,7 +60,7 @@ class ExportFileStatusDaoTest {
   void givenMissingStatusFileWhenReadStatusThenThrowExportFileNotFoundException() {
     ExportFileStatusDao service = new ExportFileStatusDao(
       jsonMapper,
-      tempDir.toString()
+      buildExportProperties()
     );
 
     ExportFileNotFoundException exception = assertThrows(
@@ -75,7 +76,7 @@ class ExportFileStatusDaoTest {
   void givenMalformedStatusFileWhenReadStatusThenThrowUncheckedIOException() throws Exception {
     ExportFileStatusDao service = new ExportFileStatusDao(
       jsonMapper,
-      tempDir.toString()
+      buildExportProperties()
     );
     Path extractionDirectory = service.resolveExtractionDirectory("extraction-id");
     Files.createDirectories(extractionDirectory);
@@ -84,4 +85,13 @@ class ExportFileStatusDaoTest {
     assertThrows(StreamReadException.class, () -> service.readStatus("extraction-id"));
   }
 
+  private ExtractorExportProperties buildExportProperties() {
+    return new ExtractorExportProperties(
+      tempDir.toString(),
+      1024L,
+      100,
+      128,
+      "12345678901"
+    );
+  }
 }

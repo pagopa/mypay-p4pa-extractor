@@ -13,7 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.verify;
+import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -31,7 +31,7 @@ class OrganizationMapperTest {
 
   @Test
   void mapShouldPopulateExportDto() {
-    ExtractorExportProperties exportProperties = new ExtractorExportProperties("12345678901");
+    ExtractorExportProperties exportProperties = buildExportProperties("12345678901");
     OrganizationMapper organizationMapper = new OrganizationMapper(organizationDaoMock, exportProperties);
     Organization organization = organizationFaker.buildOrganization();
 
@@ -45,12 +45,12 @@ class OrganizationMapperTest {
     TestUtils.reflectionEqualsByName(result, organization, "externalOrganizationId", "brokerCf", "sendApiKey", "generateNoticeApiKey", "flagTreasury");
     TestUtils.checkNotNullFields(result, "externalOrganizationId", "sendApiKey", "generateNoticeApiKey");
 
-    verify(organizationDaoMock).isTreasuryEnabled(organization.ipaCode());
+    then(organizationDaoMock).should().isTreasuryEnabled(organization.ipaCode());
   }
 
   @Test
   void mapShouldPreserveNullsAndTreasuryFlag() {
-    ExtractorExportProperties exportProperties = new ExtractorExportProperties(null);
+    ExtractorExportProperties exportProperties = buildExportProperties(null);
     OrganizationMapper organizationMapper = new OrganizationMapper(organizationDaoMock, exportProperties);
     Organization organization = organizationFaker.buildOrganizationWithNullOptionalFields();
 
@@ -79,6 +79,16 @@ class OrganizationMapperTest {
       "generateNoticeApiKey"
     );
 
-    verify(organizationDaoMock).isTreasuryEnabled(organization.ipaCode());
+    then(organizationDaoMock).should().isTreasuryEnabled(organization.ipaCode());
+  }
+
+  private ExtractorExportProperties buildExportProperties(String brokerCf) {
+    return new ExtractorExportProperties(
+      "C:\\temp",
+      1024L,
+      100,
+      128,
+      brokerCf
+    );
   }
 }

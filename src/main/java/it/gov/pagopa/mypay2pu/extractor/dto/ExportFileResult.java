@@ -4,5 +4,6 @@ import java.util.List;
 
 public record ExportFileResult(
   List<String> files,
+  List<String> errorFiles,
   String error
 ) { }

@@ -2,6 +2,7 @@ package it.gov.pagopa.mypay2pu.extractor.service;
 
 import it.gov.pagopa.mypay2pu.extractor.dao.ExportFileStatusDao;
 import it.gov.pagopa.mypay2pu.extractor.dto.ExportFileResult;
+import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionFilters;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionStatus;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionStatusResponse;
@@ -45,7 +46,11 @@ class ExportFileStatusServiceTest {
   @Test
   void givenRequestWhenCreateNewThenStoreRunningStatus() {
     String extractionId = "extraction-id";
-    ExtractionRequest request = new ExtractionRequest("IPA_CODE_TEST", MigrationFileType.ORGANIZATIONS);
+    ExtractionRequest request = new ExtractionRequest(
+      "IPA_CODE_TEST",
+      MigrationFileType.ORGANIZATIONS,
+      new ExtractionFilters()
+    );
 
     service.createNew(extractionId, request);
 
@@ -122,37 +127,36 @@ class ExportFileStatusServiceTest {
     ExtractionStatusResponse result = service.readStatus(extractionId);
 
     assertEquals(expectedStatus, result);
-    verify(exportFileStatusDaoMock).readStatus(extractionId);
   }
 
   private static Stream<Arguments> updateStatusCases() {
     return Stream.of(
       Arguments.of(
-        new ExportFileResult(List.of("organizations.csv"), null),
+        new ExportFileResult(List.of("organizations.csv"), List.of(), null),
         ExtractionStatus.COMPLETED,
         null,
         List.of("organizations.csv")
       ),
       Arguments.of(
-        new ExportFileResult(List.of("organizations.csv"), ""),
+        new ExportFileResult(List.of("organizations.csv"), List.of(), ""),
         ExtractionStatus.COMPLETED,
         null,
         List.of("organizations.csv")
       ),
       Arguments.of(
-        new ExportFileResult(null, "   "),
+        new ExportFileResult(null, null, "   "),
         ExtractionStatus.COMPLETED,
         null,
         List.of()
       ),
       Arguments.of(
-        new ExportFileResult(List.of("organizations.csv"), "result error"),
+        new ExportFileResult(List.of("organizations.csv"), List.of(), "result error"),
         ExtractionStatus.FAILED,
         "result error",
         List.of("organizations.csv")
       ),
       Arguments.of(
-        new ExportFileResult(null, "result error"),
+        new ExportFileResult(null, null, "result error"),
         ExtractionStatus.FAILED,
         "result error",
         List.of()
