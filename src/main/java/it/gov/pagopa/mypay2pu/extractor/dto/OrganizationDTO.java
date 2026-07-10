@@ -29,6 +29,8 @@ public record OrganizationDTO(
   @NotNull
   Boolean flagNotifyIoBkp,
   @NotNull
-  Boolean flagNotifyOutcomePush
+  Boolean flagNotifyOutcomePush,
+  String ioApiKey
+
 ) {
 }
