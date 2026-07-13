@@ -1,7 +1,7 @@
 package it.gov.pagopa.mypay2pu.extractor.dao;
 
-import it.gov.pagopa.mypay2pu.extractor.dto.OrganizationDTO;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionFilters;
+import it.gov.pagopa.mypay2pu.extractor.model.mp4.Organization;
 import it.gov.pagopa.mypay2pu.extractor.utils.SqlLoader;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -45,10 +45,10 @@ class OrganizationDaoTest {
   void givenFiltersWhenFindByFiltersThenQueryMp4Database() {
     OrganizationDao dao = buildDao(mpv4JdbcTemplateMock);
 
-    List<OrganizationDTO> expected = List.of(new OrganizationDTO(
-      "IPA1", "1", "CF", "name", "type", "mail@example.com",
+    List<Organization> expected = List.of(new Organization(
+      "IPA1",  "CF", "name", "type", "mail@example.com",
       "iban", "postal", "seg", "cbill", "logo", "ACTIVE",
-      "it", null, true, true, false
+      "it", null, true, true, false, null
     ));
     when(mp4JdbcTemplateMock.query(
       eq(FIND_BY_FILTERS_SQL),
@@ -65,7 +65,7 @@ class OrganizationDaoTest {
     ))
       .thenReturn(expected);
 
-    List<OrganizationDTO> result = dao.findByFilters("IPA1", new ExtractionFilters(null, null));
+    List<Organization> result = dao.findByFilters("IPA1", new ExtractionFilters(null, null));
 
     assertEquals(expected, result);
   }
@@ -87,7 +87,7 @@ class OrganizationDaoTest {
     ))
       .thenReturn(List.of());
 
-    List<OrganizationDTO> result = dao.findByFilters("IPA1", new ExtractionFilters(LocalDate.of(2026, Month.JANUARY, 1), LocalDate.of(2026, Month.JANUARY, 2)), 50, 100);
+    List<Organization> result = dao.findByFilters("IPA1", new ExtractionFilters(LocalDate.of(2026, Month.JANUARY, 1), LocalDate.of(2026, Month.JANUARY, 2)), 50, 100);
     assertEquals(List.of(), result);
   }
 

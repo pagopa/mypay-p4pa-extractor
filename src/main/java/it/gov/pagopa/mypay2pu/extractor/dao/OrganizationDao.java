@@ -1,7 +1,7 @@
 package it.gov.pagopa.mypay2pu.extractor.dao;
 
-import it.gov.pagopa.mypay2pu.extractor.dto.OrganizationDTO;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionFilters;
+import it.gov.pagopa.mypay2pu.extractor.model.mp4.Organization;
 import it.gov.pagopa.mypay2pu.extractor.utils.DateTimeUtils;
 import it.gov.pagopa.mypay2pu.extractor.utils.QueryUtils;
 import it.gov.pagopa.mypay2pu.extractor.utils.SqlLoader;
@@ -20,8 +20,8 @@ public class OrganizationDao {
 
   private static final String FIND_BY_FILTERS_SQL_PATH = "mypay/organization/organization.sql";
   private static final String FIND_TREASURY_BY_IPA_SQL_PATH = "mypivot/organization/organization-pivot.sql";
-  protected static final RowMapper<OrganizationDTO> ORGANIZATION_ROW_MAPPER =
-    DataClassRowMapper.newInstance(OrganizationDTO.class);
+  protected static final RowMapper<Organization> ORGANIZATION_ROW_MAPPER =
+    DataClassRowMapper.newInstance(Organization.class);
 
   private final NamedParameterJdbcTemplate mp4JdbcTemplate;
   private final NamedParameterJdbcTemplate mpv4JdbcTemplate;
@@ -39,11 +39,11 @@ public class OrganizationDao {
     this.findTreasuryByIpaSql = sqlLoader.load(FIND_TREASURY_BY_IPA_SQL_PATH);
   }
 
-  public List<OrganizationDTO> findByFilters(String ipaCode, ExtractionFilters filters) {
+  public List<Organization> findByFilters(String ipaCode, ExtractionFilters filters) {
     return mp4JdbcTemplate.query(findByFiltersSql, buildFiltersParams(ipaCode, filters, null, null), ORGANIZATION_ROW_MAPPER);
   }
 
-  public List<OrganizationDTO> findByFilters(String ipaCode, ExtractionFilters filters, int limit, int offset) {
+  public List<Organization> findByFilters(String ipaCode, ExtractionFilters filters, int limit, int offset) {
     MapSqlParameterSource params = buildFiltersParams(ipaCode, filters, limit, offset);
     return mp4JdbcTemplate.query(findByFiltersSql, params, ORGANIZATION_ROW_MAPPER);
   }
