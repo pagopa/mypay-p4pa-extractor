@@ -23,13 +23,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.nio.file.Path;
-import java.time.LocalDate;
-import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import static it.gov.pagopa.mypay2pu.extractor.utils.faker.OrganizationFaker.buildOrganization;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -97,7 +96,7 @@ class OrganizationProcessingServiceTest {
 
   @Test
   void givenExtractionRequestWhenRetrieveDataThenDelegateToOrganizationDao() {
-    Organization organization = buildOrganization("IPA_CODE_TEST");
+    Organization organization = buildOrganization();
     when(organizationDaoMock.findByFilters("IPA_CODE_TEST", filters)).thenReturn(List.of(organization));
 
     List<Organization> result = service.retrieveData(request);
@@ -107,9 +106,9 @@ class OrganizationProcessingServiceTest {
 
   @Test
   void givenExecutionContextWhenRetrieveDataSupplierThenUseConfiguredPageSizeAndOffsets() {
-    Organization first = buildOrganization("IPA_1");
-    Organization second = buildOrganization("IPA_2");
-    Organization third = buildOrganization("IPA_3");
+    Organization first = buildOrganization();
+    Organization second = buildOrganization();
+    Organization third = buildOrganization();
     when(organizationDaoMock.findByFilters("IPA_CODE_TEST", filters, 2, 0)).thenReturn(List.of(first, second));
     when(organizationDaoMock.findByFilters("IPA_CODE_TEST", filters, 2, 2)).thenReturn(List.of(third));
 
@@ -123,7 +122,7 @@ class OrganizationProcessingServiceTest {
 
   @Test
   void givenOrganizationWhenAccessSubclassMetadataThenReturnExpectedValues() {
-    Organization organization = buildOrganization("IPA_CODE_TEST");
+    Organization organization = buildOrganization();
     PuOrganizationDTO mappedOrganization = new PuOrganizationDTO();
     when(organizationMapperMock.map(organization)).thenReturn(mappedOrganization);
 
@@ -193,9 +192,9 @@ class OrganizationProcessingServiceTest {
       new ExportBatchCoordinator(),
       exportFilePartWriterMock
     );
-    Organization first = buildOrganization("IPA_1");
-    Organization second = buildOrganization("IPA_2");
-    Organization third = buildOrganization("IPA_3");
+    Organization first = buildOrganization();
+    Organization second = buildOrganization();
+    Organization third = buildOrganization();
     PuOrganizationDTO firstDto = new PuOrganizationDTO();
     PuOrganizationDTO secondDto = new PuOrganizationDTO();
     PuOrganizationDTO thirdDto = new PuOrganizationDTO();
@@ -298,28 +297,5 @@ class OrganizationProcessingServiceTest {
     );
 
     assertEquals("Missing required brokerCf configuration for ZIP naming", exception.getMessage());
-  }
-
-  private Organization buildOrganization(String ipaCode) {
-    return new Organization(
-      ipaCode,
-      null,
-      "12345678901",
-      "Organization " + ipaCode,
-      "COM",
-      "organization@test.it",
-      "IT60X0542811101000000123456",
-      "IT60X0542811101000000123456",
-      "01",
-      "12345",
-      "logo",
-      "ACTIVE",
-      "IT",
-      LocalDate.of(2026, Month.JANUARY, 1),
-      true,
-      false,
-      true,
-      "io-api-key"
-    );
   }
 }
