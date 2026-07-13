@@ -7,6 +7,7 @@ import it.gov.pagopa.mypay2pu.extractor.dto.ExportFileResult;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.utils.Constants;
+import lombok.extern.slf4j.Slf4j;
 
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -25,14 +26,15 @@ import java.util.function.Supplier;
  * <p>
  * Type parameters:
  * <ul>
- *   <li>{@code I} - Input data type retrieved from the data source</li>
- *   <li>{@code O} - Output data type written to the export file</li>
+ *   <li>{@code M} - Source model type retrieved from the data source</li>
+ *   <li>{@code C} - CSV DTO type written to the export file</li>
  * </ul>
  *
- * @param <I> the input entity type
- * @param <O> the output exportable entity type
+ * @param <M> the source model type
+ * @param <C> the CSV DTO type
  */
-public abstract class ExportProcessingService<I, O> {
+@Slf4j
+public abstract class ExportProcessingService<M extends ExportModel, C extends CsvExportDto> {
   private static final DateTimeFormatter FILE_TIMESTAMP_FORMATTER =
     DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
@@ -80,7 +82,14 @@ public abstract class ExportProcessingService<I, O> {
       getMigrationFileType(),
       getAvgRowSize()
     );
-    BufferedBatchSource<I> bufferedRows = exportBatchCoordinator.createBufferedSource(
+    log.info(
+      "Starting export extraction [extractionId={}, migrationFileType={}, maxRowsPerPart={}, pageSize={}]",
+      extractionId,
+      executionContext.migrationFileType(),
+      executionContext.maxRowsPerPart(),
+      executionContext.pageSize()
+    );
+    BufferedBatchSource<M> bufferedRows = exportBatchCoordinator.createBufferedSource(
       retrieveDataSupplier(request, executionContext)
     );
     ExportBatchInspection batchInspection = exportBatchCoordinator.inspect(
@@ -90,12 +99,27 @@ public abstract class ExportProcessingService<I, O> {
 
     List<String> generatedFiles = new ArrayList<>();
     List<String> generatedErrorFiles = new ArrayList<>();
+    log.info(
+      "Inspected export batch [extractionId={}, hasData={}, multipart={}]",
+      extractionId,
+      batchInspection.hasData(),
+      batchInspection.multipart()
+    );
 
     if (!batchInspection.hasData()) {
+      log.info("Writing empty export part [extractionId={}]", extractionId);
+      ExportPartResult partResult = writeExportPart(executionContext, null, List::of);
       collectPartResult(
-        writeExportPart(executionContext, null, List::of),
+        partResult,
         generatedFiles,
         generatedErrorFiles
+      );
+      logPartResult(extractionId, null, partResult);
+      log.info(
+        "Completed export extraction [extractionId={}, generatedFiles={}, generatedErrorFiles={}]",
+        extractionId,
+        generatedFiles.size(),
+        generatedErrorFiles.size()
       );
       return new ExportFileResult(generatedFiles, generatedErrorFiles, null);
     }
@@ -103,20 +127,29 @@ public abstract class ExportProcessingService<I, O> {
     int part = 1;
     while (bufferedRows.hasMoreData()) {
       Integer partNumber = batchInspection.multipart() ? part : null;
-      Supplier<List<O>> csvRowsSupplier = exportBatchCoordinator.createMappedPartSupplier(
+      log.info("Writing export part [extractionId={}, partNumber={}]", extractionId, partNumber);
+      Supplier<List<C>> csvRowsSupplier = exportBatchCoordinator.createMappedPartSupplier(
         bufferedRows,
         executionContext.maxRowsPerPart(),
         executionContext.pageSize(),
         this::toExportableEntity
       );
+      ExportPartResult partResult = writeExportPart(executionContext, partNumber, csvRowsSupplier);
       collectPartResult(
-        writeExportPart(executionContext, partNumber, csvRowsSupplier),
+        partResult,
         generatedFiles,
         generatedErrorFiles
       );
+      logPartResult(extractionId, partNumber, partResult);
       part++;
     }
 
+    log.info(
+      "Completed export extraction [extractionId={}, generatedFiles={}, generatedErrorFiles={}]",
+      extractionId,
+      generatedFiles.size(),
+      generatedErrorFiles.size()
+    );
     return new ExportFileResult(generatedFiles, generatedErrorFiles, null);
   }
 
@@ -126,7 +159,7 @@ public abstract class ExportProcessingService<I, O> {
    * @param data the data list to supply
    * @return a supplier that returns the data list
    */
-  protected final Supplier<List<I>> createSingleBatchSupplier(List<I> data) {
+  protected final Supplier<List<M>> createSingleBatchSupplier(List<M> data) {
     return exportBatchCoordinator.createSingleBatchSupplier(data);
   }
 
@@ -140,9 +173,9 @@ public abstract class ExportProcessingService<I, O> {
    * @param pageRetriever function to retrieve a specific page of data
    * @return a supplier that iterates through all pages
    */
-  protected final Supplier<List<I>> createPagedSupplier(
+  protected final Supplier<List<M>> createPagedSupplier(
     int pageSize,
-    IntFunction<List<I>> pageRetriever
+    IntFunction<List<M>> pageRetriever
   ) {
     return exportBatchCoordinator.createPagedSupplier(pageSize, pageRetriever);
   }
@@ -158,7 +191,7 @@ public abstract class ExportProcessingService<I, O> {
    * @param executionContext runtime export settings, available for subclasses
    * @return a supplier producing source batches
    */
-  protected Supplier<List<I>> retrieveDataSupplier(ExtractionRequest request,
+  protected Supplier<List<M>> retrieveDataSupplier(ExtractionRequest request,
                                                    ExportExecutionContext executionContext) {
     return createSingleBatchSupplier(retrieveData(request));
   }
@@ -176,7 +209,7 @@ public abstract class ExportProcessingService<I, O> {
    */
   private ExportPartResult writeExportPart(ExportExecutionContext executionContext,
                                            Integer partNumber,
-                                           Supplier<List<O>> csvRowsSupplier) {
+                                           Supplier<List<C>> csvRowsSupplier) {
     return exportFilePartWriter.writePart(
       executionContext,
       executionContext.buildExportBaseFileName(partNumber),
@@ -200,6 +233,15 @@ public abstract class ExportProcessingService<I, O> {
                                  List<String> generatedErrorFiles) {
     generatedFiles.add(partResult.fileName());
     partResult.errorFileName().ifPresent(generatedErrorFiles::add);
+  }
+
+  private void logPartResult(String extractionId, Integer partNumber, ExportPartResult partResult) {
+    log.info(
+      "Completed export part [extractionId={}, partNumber={}, errorFileGenerated={}]",
+      extractionId,
+      partNumber,
+      partResult.errorFileName().isPresent()
+    );
   }
 
   /**
@@ -278,7 +320,7 @@ public abstract class ExportProcessingService<I, O> {
    * @param request the extraction request with filtering and configuration details
    * @return the list of source entities to export
    */
-  protected abstract List<I> retrieveData(ExtractionRequest request);
+  protected abstract List<M> retrieveData(ExtractionRequest request);
 
   /**
    * Gets the migration file type for this export.
@@ -296,7 +338,7 @@ public abstract class ExportProcessingService<I, O> {
    *
    * @return the output entity class
    */
-  protected abstract Class<O> getDtoClass();
+  protected abstract Class<C> getDtoClass();
 
   /**
    * Gets the average size in bytes of a single row in the export.
@@ -311,11 +353,10 @@ public abstract class ExportProcessingService<I, O> {
   /**
    * Transforms an input entity into its exportable form.
    * <p>
-   * Subclasses implement this to convert from the source data format (type I)
-   * to the export format (type O).
+   * Subclasses implement this to convert from the source model to the CSV DTO.
    *
    * @param entity the input entity to transform
    * @return the exportable entity
    */
-  protected abstract O toExportableEntity(I entity);
+  protected abstract C toExportableEntity(M entity);
 }

@@ -8,6 +8,7 @@ import com.opencsv.bean.StatefulBeanToCsvBuilder;
 import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import it.gov.pagopa.mypay2pu.extractor.exception.InvalidCsvRowException;
+import it.gov.pagopa.mypay2pu.extractor.service.export.CsvExportDto;
 import it.gov.pagopa.mypay2pu.extractor.service.files.xls.OrderedHeaderColumnNameMappingStrategy;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -80,14 +81,15 @@ public class CsvService {
    * <p>Bean serialization is delegated to {@link StatefulBeanToCsv}, configured with the given profile and
    * an {@link OrderedHeaderColumnNameMappingStrategy}.</p>
    *
-   * @param <C> the generic type of the beans to be written to the CSV
+   * @param <C> the CSV DTO type of the beans to be written
    * @param csvFilePath the path to the CSV file to write
    * @param typeClass the class type of the beans to be written to the CSV
    * @param csvRowsSupplier a supplier of beans to be written to the CSV (called multiple times until data are returned)
    * @param csvProfile the profile to be used for writing the CSV
    * @throws IOException if an error occurs while writing the file
    */
-  public <C> void createCsv(Path csvFilePath, Class<C> typeClass, Supplier<List<C>> csvRowsSupplier, String csvProfile) throws IOException {
+  public <C extends CsvExportDto> void createCsv(Path csvFilePath, Class<C> typeClass,
+                                                  Supplier<List<C>> csvRowsSupplier, String csvProfile) throws IOException {
 
     ensureParentDirectory(csvFilePath.toFile());
 

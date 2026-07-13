@@ -185,6 +185,6 @@ class ExportFilePartWriterTest {
     then(fileArchiverServiceMock).should().zipFile(csvPath, zipPath);
   }
 
-  private record TestDto(String value) {
+  private record TestDto(String value) implements CsvExportDto {
   }
 }

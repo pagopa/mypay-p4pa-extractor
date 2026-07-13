@@ -40,22 +40,22 @@ public class ExportFilePartWriter {
    * @param exportBaseFileName the base file name without extension
    * @param dtoClass the DTO class used by the CSV writer
    * @param csvRowsSupplier the supplier returning CSV rows in batches
-   * @param <D> the type of DTO written to the CSV
+   * @param <C> the type of CSV DTO written to the CSV
    * @return the result describing the generated ZIP file and optional error file
    * @throws IllegalStateException if CSV creation or archiving fails
    */
-  public <D> ExportPartResult writePart(
+  public <C extends CsvExportDto> ExportPartResult writePart(
     ExportExecutionContext executionContext,
     String exportBaseFileName,
-    Class<D> dtoClass,
-    Supplier<List<D>> csvRowsSupplier
+    Class<C> dtoClass,
+    Supplier<List<C>> csvRowsSupplier
   ) {
     Path csvPath = executionContext.resolveCsvPath(exportBaseFileName);
     Path zipPath = executionContext.resolveZipPath(exportBaseFileName);
     Optional<String> errorFileName;
 
     try (CsvRowErrorCollector errorCollector = new CsvRowErrorCollector(csvService, csvPath)) {
-      CsvValidatedRowSupplier<D> validatingSupplier =
+      CsvValidatedRowSupplier<C> validatingSupplier =
         new CsvValidatedRowSupplier<>(csvRowsSupplier, validator, errorCollector);
       csvService.createCsv(csvPath, dtoClass, validatingSupplier, executionContext.zipVersion());
       errorFileName = errorCollector.writeToFile(csvPath)

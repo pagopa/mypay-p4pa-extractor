@@ -18,14 +18,14 @@ import java.util.function.Supplier;
  * Row numbers start at 2 (CSV header = row 1) and are tracked across all batches and multiple get() calls.
  * Errors are collected in CsvRowErrorCollector for later reporting to a separate .errors.csv file.
  *
- * @param <T> the type of row objects being validated (typically a DTO with Jakarta Validation annotations)
+ * @param <C> the type of CSV DTO being validated
  * @see CsvRowErrorCollector
  */
-public class CsvValidatedRowSupplier<T> implements Supplier<List<T>> {
+public class CsvValidatedRowSupplier<C extends CsvExportDto> implements Supplier<List<C>> {
 
   private static final long FIRST_DATA_ROW_NUMBER = 2L;
 
-  private final Supplier<List<T>> source;
+  private final Supplier<List<C>> source;
   private final Validator validator;
   private final CsvRowErrorCollector errorCollector;
   private final AtomicLong rowNumber = new AtomicLong(FIRST_DATA_ROW_NUMBER);
@@ -40,7 +40,7 @@ public class CsvValidatedRowSupplier<T> implements Supplier<List<T>> {
    * @param validator the Jakarta Validator instance to validate rows
    * @param errorCollector the collector to accumulate validation errors
    */
-  public CsvValidatedRowSupplier(Supplier<List<T>> source, Validator validator, CsvRowErrorCollector errorCollector) {
+  public CsvValidatedRowSupplier(Supplier<List<C>> source, Validator validator, CsvRowErrorCollector errorCollector) {
     this.source = source;
     this.validator = validator;
     this.errorCollector = errorCollector;
@@ -57,11 +57,11 @@ public class CsvValidatedRowSupplier<T> implements Supplier<List<T>> {
    * @return a list of valid rows from the next available batch, or empty list if no more valid data
    */
   @Override
-  public List<T> get() {
-    List<T> rows ;
+  public List<C> get() {
+    List<C> rows ;
     while ((rows = source.get()) != null && !rows.isEmpty()) {
-      List<T> validRows = new ArrayList<>(rows.size());
-      for (T row : rows) {
+      List<C> validRows = new ArrayList<>(rows.size());
+      for (C row : rows) {
         if (validateAndCollectErrors(row)) {
           validRows.add(row);
         }
@@ -80,9 +80,9 @@ public class CsvValidatedRowSupplier<T> implements Supplier<List<T>> {
    * @param row the row to validate
    * @return true if the row is valid, false otherwise
    */
-  private boolean validateAndCollectErrors(T row) {
+  private boolean validateAndCollectErrors(C row) {
     long currentRowNumber = rowNumber.getAndIncrement();
-    Set<ConstraintViolation<T>> violations = validator.validate(row);
+    Set<ConstraintViolation<C>> violations = validator.validate(row);
     if (violations.isEmpty()) {
       return true;
     }

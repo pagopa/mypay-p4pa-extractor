@@ -1,6 +1,7 @@
 package it.gov.pagopa.mypay2pu.extractor.dto.export;
 
 import com.opencsv.bean.CsvBindByName;
+import it.gov.pagopa.mypay2pu.extractor.service.export.CsvExportDto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -17,7 +18,7 @@ import java.time.LocalDate;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class PuOrganizationDTO {
+public class PuOrganizationDTO implements CsvExportDto {
 
   @CsvBindByName(column = "ipa_code")
   @NotBlank
@@ -32,7 +33,7 @@ public class PuOrganizationDTO {
   @CsvBindByName(column = "org_fiscal_code")
   @NotBlank
   @Size(max = 11)
-  @Pattern(regexp = "^[0-9]{11}$")
+  @Pattern(regexp = "^\\d{11}$")
   private String orgFiscalCode;
 
   @CsvBindByName(column = "org_name")
@@ -52,14 +53,14 @@ public class PuOrganizationDTO {
   @CsvBindByName(column = "iban")
   @Size(max = 35)
   @Pattern(
-    regexp = "^$|^[A-Z]{2}[0-9]{2}[A-Z0-9]{11,30}$"
+    regexp = "^$|^[A-Z]{2}\\d{2}[A-Z0-9]{11,30}$"
   )
   private String iban;
 
   @CsvBindByName(column = "postal_iban")
   @Size(max = 35)
   @Pattern(
-    regexp = "^$|^[A-Z]{2}[0-9]{2}[A-Z0-9]{11,30}$"
+    regexp = "^$|^[A-Z]{2}\\d{2}[A-Z0-9]{11,30}$"
   )
   private String postalIban;
 
@@ -73,7 +74,7 @@ public class PuOrganizationDTO {
   @CsvBindByName(column = "cbill_inter_bank_code")
   @Size(max = 5)
   @Pattern(
-    regexp = "^$|^[0-9]{5}$"
+    regexp = "^$|^\\d{5}$"
   )
   private String cbillInterBankCode;
 
@@ -109,9 +110,6 @@ public class PuOrganizationDTO {
 
   @CsvBindByName(column = "broker_cf")
   @Size(max = 50)
-  @Pattern(
-    regexp = "^$|^(?:[0-9]{11})$"
-  )
   private String brokerCf;
 
   @CsvBindByName(column = "io_api_key")

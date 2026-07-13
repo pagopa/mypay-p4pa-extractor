@@ -254,7 +254,7 @@ class CsvValidatedRowSupplierTest {
   @Data
   @NoArgsConstructor
   @AllArgsConstructor
-  static class TestDto {
+  static class TestDto implements CsvExportDto {
     @CsvBindByName
     @NotBlank(message = "name must not be blank")
     private String name;
