@@ -7,6 +7,7 @@ import it.gov.pagopa.mypay2pu.extractor.model.mp4.Organization;
 import it.gov.pagopa.mypay2pu.extractor.utils.TestUtils;
 import it.gov.pagopa.mypay2pu.extractor.utils.faker.OrganizationFaker;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -21,6 +22,13 @@ class OrganizationMapperTest {
 
   @Mock
   private OrganizationDao organizationDaoMock;
+  private OrganizationMapper organizationMapper;
+
+  @BeforeEach
+  void setUp() {
+    ExtractorExportProperties exportProperties = new ExtractorExportProperties("./build/extractions", 52428800L, 500, "12345678901");
+    organizationMapper = new OrganizationMapper(organizationDaoMock, exportProperties);
+  }
 
   @AfterEach
   void assertNoMoreInteractions() {
@@ -29,15 +37,12 @@ class OrganizationMapperTest {
 
   @Test
   void mapShouldPopulateExportDto() {
-    ExtractorExportProperties exportProperties = new ExtractorExportProperties("./build/extractions", 52428800L, 500, "12345678901");
-    OrganizationMapper organizationMapper = new OrganizationMapper(organizationDaoMock, exportProperties);
     Organization organization = OrganizationFaker.buildOrganization();
 
     when(organizationDaoMock.isTreasuryEnabled(organization.ipaCode())).thenReturn(true);
 
     PuOrganizationDTO result = organizationMapper.map(organization);
 
-    assertEquals(organization.ipaCode(), result.getIpaCode());
     assertEquals("12345678901", result.getBrokerCf());
     assertEquals("true", result.getFlagTreasury());
     TestUtils.reflectionEqualsByName(result, organization, "externalOrganizationId", "brokerCf", "sendApiKey", "generateNoticeApiKey", "flagTreasury");
@@ -48,7 +53,7 @@ class OrganizationMapperTest {
   @Test
   void mapShouldPreserveNullsAndTreasuryFlag() {
     ExtractorExportProperties exportProperties = new ExtractorExportProperties("./build/extractions", 52428800L, 500, null);
-    OrganizationMapper organizationMapper = new OrganizationMapper(organizationDaoMock, exportProperties);
+    organizationMapper = new OrganizationMapper(organizationDaoMock, exportProperties);
     Organization organization = OrganizationFaker.buildOrganizationWithNullOptionalFields();
 
     when(organizationDaoMock.isTreasuryEnabled(organization.ipaCode())).thenReturn(false);
