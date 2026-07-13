@@ -11,6 +11,6 @@ public record ExtractorExportProperties(
   @NotBlank String storagePath,
   @Positive long multipartMaxFileSize,
   @Positive int avgRowSizeOrganizations,
-  String brokerCf
+  String brokerIpaCode
 ) {
 }

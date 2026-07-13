@@ -95,7 +95,7 @@ extractor:
     storage-path: "\${STORAGE_PATH:./build/extractions}"
     multipart-max-file-size: "\${MULTIPART_MAX_FILE_SIZE:52428800}"
     avg-row-size-organizations: "\${AVG_ROW_SIZE_ORGANIZATIONS:500}"
-    broker-cf: "\${BROKER_CF:\${PA_IDENTIFICATIVO_INTERMEDIARIO_PA:}}"
+    broker-ipa-code: "\${BROKER_IPA_CODE:\${PA_IDENTIFICATIVO_INTERMEDIARIO_PA:}}"
   basic-auth:
     username: "\${CLIENT_ID:client}"
     password: "\${CLIENT_SECRET:secret}"

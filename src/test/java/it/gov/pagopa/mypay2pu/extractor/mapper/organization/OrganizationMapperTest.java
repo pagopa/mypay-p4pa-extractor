@@ -43,7 +43,7 @@ class OrganizationMapperTest {
 
     PuOrganizationDTO result = organizationMapper.map(organization);
 
-    assertEquals("12345678901", result.getBrokerCf());
+    assertEquals("12345678901", result.getBrokerIpaCode());
     assertEquals("true", result.getFlagTreasury());
     TestUtils.reflectionEqualsByName(result, organization);
     TestUtils.checkNotNullFields(result, "externalOrganizationId", "sendApiKey", "generateNoticeApiKey");
@@ -61,11 +61,11 @@ class OrganizationMapperTest {
     PuOrganizationDTO result = organizationMapper.map(organization);
 
     assertEquals("false", result.getFlagTreasury());
-    TestUtils.reflectionEqualsByName(result, organization, "externalOrganizationId", "brokerCf", "sendApiKey", "generateNoticeApiKey", "flagTreasury");
+    TestUtils.reflectionEqualsByName(result, organization, "externalOrganizationId", "brokerIpaCode", "sendApiKey", "generateNoticeApiKey", "flagTreasury");
     TestUtils.checkNotNullFields(
       result,
       "externalOrganizationId",
-      "brokerCf",
+      "brokerIpaCode",
       "iban",
       "postalIban",
       "segregationCode",
