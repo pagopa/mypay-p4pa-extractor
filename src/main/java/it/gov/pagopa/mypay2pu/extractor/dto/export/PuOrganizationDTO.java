@@ -32,7 +32,7 @@ public class PuOrganizationDTO {
   @CsvBindByName(column = "org_fiscal_code")
   @NotBlank
   @Size(max = 11)
-  @Pattern(regexp = "^[0-9]{11}$")
+  @Pattern(regexp = "^\\d{11}$")
   private String orgFiscalCode;
 
   @CsvBindByName(column = "org_name")
@@ -52,14 +52,14 @@ public class PuOrganizationDTO {
   @CsvBindByName(column = "iban")
   @Size(max = 35)
   @Pattern(
-    regexp = "^$|^[A-Z]{2}[0-9]{2}[A-Z0-9]{11,30}$"
+    regexp = "^$|^[A-Z]{2}\\d{2}[A-Z0-9]{11,30}$"
   )
   private String iban;
 
   @CsvBindByName(column = "postal_iban")
   @Size(max = 35)
   @Pattern(
-    regexp = "^$|^[A-Z]{2}[0-9]{2}[A-Z0-9]{11,30}$"
+    regexp = "^$|^[A-Z]{2}\\d{2}[A-Z0-9]{11,30}$"
   )
   private String postalIban;
 
@@ -73,7 +73,7 @@ public class PuOrganizationDTO {
   @CsvBindByName(column = "cbill_inter_bank_code")
   @Size(max = 5)
   @Pattern(
-    regexp = "^$|^[0-9]{5}$"
+    regexp = "^$|^\\d{5}$"
   )
   private String cbillInterBankCode;
 
@@ -109,10 +109,13 @@ public class PuOrganizationDTO {
 
   @CsvBindByName(column = "broker_cf")
   @Size(max = 50)
-  @Pattern(
-    regexp = "^$|^(?:[0-9]{11})$"
-  )
+  @Pattern(regexp = "^\\d{11}$")
   private String brokerCf;
+
+  @CsvBindByName(column = "broker_ipa_code")
+  @Size(max = 256)
+  @Pattern(regexp = "^[A-Z0-9_]+$")
+  private String brokerIpaCode;
 
   @CsvBindByName(column = "io_api_key")
   @Size(max = 255)

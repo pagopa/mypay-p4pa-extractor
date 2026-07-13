@@ -37,6 +37,7 @@ public class OrganizationMapper {
       .flagNotifyOutcomePush(organization.flagNotifyOutcomePush())
       .status(organization.status())
       .brokerCf(exportProperties.brokerCf())
+      .brokerIpaCode(exportProperties.brokerIpaCode())
       .ioApiKey(organization.ioApiKey())
       .flagTreasury(Boolean.toString(organizationDao.isTreasuryEnabled(organization.ipaCode())))
       .sendApiKey(null)
