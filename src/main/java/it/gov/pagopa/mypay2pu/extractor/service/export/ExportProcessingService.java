@@ -92,6 +92,17 @@ public abstract class ExportProcessingService<I, O> {
     return exportBatchCoordinator.createPagedSupplier(pageSize, pageRetriever);
   }
 
+  /**
+   * Builds the supplier used to retrieve source data for the export.
+   * <p>
+   * Default implementation loads all data in a single batch.
+   * Subclasses can override this to provide paged retrieval based on the
+   * current export execution context, such as page size or part sizing.
+   *
+   * @param request the extraction request
+   * @param executionContext runtime export settings, available for subclasses
+   * @return a supplier producing source batches
+   */
   protected Supplier<List<I>> retrieveDataSupplier(ExtractionRequest request,
                                                    ExportExecutionContext executionContext) {
     return createSingleBatchSupplier(retrieveData(request));
