@@ -13,7 +13,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -22,7 +21,6 @@ class OrganizationMapperTest {
 
   @Mock
   private OrganizationDao organizationDaoMock;
-  private final OrganizationFaker organizationFaker = new OrganizationFaker();
 
   @AfterEach
   void assertNoMoreInteractions() {
@@ -31,9 +29,9 @@ class OrganizationMapperTest {
 
   @Test
   void mapShouldPopulateExportDto() {
-    ExtractorExportProperties exportProperties = new ExtractorExportProperties("12345678901");
+    ExtractorExportProperties exportProperties = new ExtractorExportProperties("./build/extractions", 52428800L, 500, "12345678901");
     OrganizationMapper organizationMapper = new OrganizationMapper(organizationDaoMock, exportProperties);
-    Organization organization = organizationFaker.buildOrganization();
+    Organization organization = OrganizationFaker.buildOrganization();
 
     when(organizationDaoMock.isTreasuryEnabled(organization.ipaCode())).thenReturn(true);
 
@@ -45,14 +43,13 @@ class OrganizationMapperTest {
     TestUtils.reflectionEqualsByName(result, organization, "externalOrganizationId", "brokerCf", "sendApiKey", "generateNoticeApiKey", "flagTreasury");
     TestUtils.checkNotNullFields(result, "externalOrganizationId", "sendApiKey", "generateNoticeApiKey");
 
-    verify(organizationDaoMock).isTreasuryEnabled(organization.ipaCode());
   }
 
   @Test
   void mapShouldPreserveNullsAndTreasuryFlag() {
-    ExtractorExportProperties exportProperties = new ExtractorExportProperties(null);
+    ExtractorExportProperties exportProperties = new ExtractorExportProperties("./build/extractions", 52428800L, 500, null);
     OrganizationMapper organizationMapper = new OrganizationMapper(organizationDaoMock, exportProperties);
-    Organization organization = organizationFaker.buildOrganizationWithNullOptionalFields();
+    Organization organization = OrganizationFaker.buildOrganizationWithNullOptionalFields();
 
     when(organizationDaoMock.isTreasuryEnabled(organization.ipaCode())).thenReturn(false);
 
@@ -79,6 +76,5 @@ class OrganizationMapperTest {
       "generateNoticeApiKey"
     );
 
-    verify(organizationDaoMock).isTreasuryEnabled(organization.ipaCode());
   }
 }

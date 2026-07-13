@@ -6,8 +6,6 @@ import it.gov.pagopa.mypay2pu.extractor.dto.export.PuOrganizationDTO;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.Organization;
 import org.springframework.stereotype.Component;
 
-import java.util.Objects;
-
 @Component
 public class OrganizationMapper {
 
@@ -21,32 +19,28 @@ public class OrganizationMapper {
 
   public PuOrganizationDTO map(Organization organization) {
     return PuOrganizationDTO.builder()
-      .ipaCode(defaultString(organization.ipaCode()))
+      .ipaCode(organization.ipaCode())
       .externalOrganizationId(null)
-      .orgFiscalCode(defaultString(organization.orgFiscalCode()))
-      .orgName(defaultString(organization.orgName()))
-      .orgTypeCode(defaultString(organization.orgTypeCode()))
-      .orgEmail(defaultString(organization.orgEmail()))
-      .iban(defaultString(organization.iban()))
-      .postalIban(defaultString(organization.postalIban()))
-      .segregationCode(defaultString(organization.segregationCode()))
-      .cbillInterBankCode(defaultString(organization.cbillInterBankCode()))
-      .orgLogo(defaultString(organization.orgLogo()))
-      .additionalLanguage(defaultString(organization.additionalLanguage()))
+      .orgFiscalCode(organization.orgFiscalCode())
+      .orgName(organization.orgName())
+      .orgTypeCode(organization.orgTypeCode())
+      .orgEmail(organization.orgEmail())
+      .iban(organization.iban())
+      .postalIban(organization.postalIban())
+      .segregationCode(organization.segregationCode())
+      .cbillInterBankCode(organization.cbillInterBankCode())
+      .orgLogo(organization.orgLogo())
+      .additionalLanguage(organization.additionalLanguage())
       .startDate(organization.startDate())
       .flagNotifyIo(organization.flagNotifyIo())
       .flagNotifyIoBkp(organization.flagNotifyIoBkp())
       .flagNotifyOutcomePush(organization.flagNotifyOutcomePush())
-      .status(defaultString(organization.status()))
-      .brokerCf(defaultString(exportProperties.brokerCf()))
-      .ioApiKey(defaultString(organization.ioApiKey()))
+      .status(organization.status())
+      .brokerCf(exportProperties.brokerCf())
+      .ioApiKey(organization.ioApiKey())
       .flagTreasury(Boolean.toString(organizationDao.isTreasuryEnabled(organization.ipaCode())))
       .sendApiKey(null)
       .generateNoticeApiKey(null)
       .build();
-  }
-
-  private String defaultString(String value) {
-    return Objects.toString(value, null);
   }
 }
