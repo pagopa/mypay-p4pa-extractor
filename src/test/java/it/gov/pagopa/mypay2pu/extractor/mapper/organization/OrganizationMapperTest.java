@@ -26,7 +26,7 @@ class OrganizationMapperTest {
 
   @BeforeEach
   void setUp() {
-    ExtractorExportProperties exportProperties = new ExtractorExportProperties("./build/extractions", 52428800L, 500, "12345678901");
+    ExtractorExportProperties exportProperties = new ExtractorExportProperties("./build/extractions", 52428800L, 5, 500, "12345678901");
     organizationMapper = new OrganizationMapper(organizationDaoMock, exportProperties);
   }
 
@@ -52,7 +52,7 @@ class OrganizationMapperTest {
 
   @Test
   void mapShouldPreserveNullsAndTreasuryFlag() {
-    ExtractorExportProperties exportProperties = new ExtractorExportProperties("./build/extractions", 52428800L, 500, null);
+    ExtractorExportProperties exportProperties = new ExtractorExportProperties("./build/extractions", 52428800L, 5, 500, null);
     organizationMapper = new OrganizationMapper(organizationDaoMock, exportProperties);
     Organization organization = OrganizationFaker.buildOrganizationWithNullOptionalFields();
 
