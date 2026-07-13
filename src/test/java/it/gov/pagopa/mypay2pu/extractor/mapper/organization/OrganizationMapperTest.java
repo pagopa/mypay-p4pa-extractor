@@ -7,13 +7,13 @@ import it.gov.pagopa.mypay2pu.extractor.model.mp4.Organization;
 import it.gov.pagopa.mypay2pu.extractor.utils.TestUtils;
 import it.gov.pagopa.mypay2pu.extractor.utils.faker.OrganizationFaker;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -22,7 +22,13 @@ class OrganizationMapperTest {
 
   @Mock
   private OrganizationDao organizationDaoMock;
-  private final OrganizationFaker organizationFaker = new OrganizationFaker();
+  private OrganizationMapper organizationMapper;
+
+  @BeforeEach
+  void setUp() {
+    ExtractorExportProperties exportProperties = new ExtractorExportProperties("./build/extractions", 52428800L, 500, "12345678901");
+    organizationMapper = new OrganizationMapper(organizationDaoMock, exportProperties);
+  }
 
   @AfterEach
   void assertNoMoreInteractions() {
@@ -31,28 +37,24 @@ class OrganizationMapperTest {
 
   @Test
   void mapShouldPopulateExportDto() {
-    ExtractorExportProperties exportProperties = buildExportProperties("12345678901");
-    OrganizationMapper organizationMapper = new OrganizationMapper(organizationDaoMock, exportProperties);
-    Organization organization = organizationFaker.buildOrganization();
+    Organization organization = OrganizationFaker.buildOrganization();
 
     when(organizationDaoMock.isTreasuryEnabled(organization.ipaCode())).thenReturn(true);
 
     PuOrganizationDTO result = organizationMapper.map(organization);
 
-    assertEquals(organization.ipaCode(), result.getIpaCode());
     assertEquals("12345678901", result.getBrokerCf());
     assertEquals("true", result.getFlagTreasury());
-    TestUtils.reflectionEqualsByName(result, organization, "externalOrganizationId", "brokerCf", "sendApiKey", "generateNoticeApiKey", "flagTreasury");
+    TestUtils.reflectionEqualsByName(result, organization);
     TestUtils.checkNotNullFields(result, "externalOrganizationId", "sendApiKey", "generateNoticeApiKey");
 
-    then(organizationDaoMock).should().isTreasuryEnabled(organization.ipaCode());
   }
 
   @Test
   void mapShouldPreserveNullsAndTreasuryFlag() {
-    ExtractorExportProperties exportProperties = buildExportProperties(null);
-    OrganizationMapper organizationMapper = new OrganizationMapper(organizationDaoMock, exportProperties);
-    Organization organization = organizationFaker.buildOrganizationWithNullOptionalFields();
+    ExtractorExportProperties exportProperties = new ExtractorExportProperties("./build/extractions", 52428800L, 500, null);
+    organizationMapper = new OrganizationMapper(organizationDaoMock, exportProperties);
+    Organization organization = OrganizationFaker.buildOrganizationWithNullOptionalFields();
 
     when(organizationDaoMock.isTreasuryEnabled(organization.ipaCode())).thenReturn(false);
 
@@ -79,16 +81,5 @@ class OrganizationMapperTest {
       "generateNoticeApiKey"
     );
 
-    then(organizationDaoMock).should().isTreasuryEnabled(organization.ipaCode());
-  }
-
-  private ExtractorExportProperties buildExportProperties(String brokerCf) {
-    return new ExtractorExportProperties(
-      "C:\\temp",
-      1024L,
-      100,
-      128,
-      brokerCf
-    );
   }
 }
