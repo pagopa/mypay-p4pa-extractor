@@ -26,7 +26,7 @@ class OrganizationMapperTest {
 
   @BeforeEach
   void setUp() {
-    ExtractorExportProperties exportProperties = new ExtractorExportProperties("./build/extractions", 52428800L, 500, "12345678901");
+    ExtractorExportProperties exportProperties = new ExtractorExportProperties("./build/extractions", 52428800L, 500, "12345678901", "IPA_CODE");
     organizationMapper = new OrganizationMapper(organizationDaoMock, exportProperties);
   }
 
@@ -43,7 +43,8 @@ class OrganizationMapperTest {
 
     PuOrganizationDTO result = organizationMapper.map(organization);
 
-    assertEquals("12345678901", result.getBrokerIpaCode());
+    assertEquals("12345678901", result.getBrokerCf());
+    assertEquals("IPA_CODE", result.getBrokerIpaCode());
     assertEquals("true", result.getFlagTreasury());
     TestUtils.reflectionEqualsByName(result, organization);
     TestUtils.checkNotNullFields(result, "externalOrganizationId", "sendApiKey", "generateNoticeApiKey");
@@ -52,7 +53,7 @@ class OrganizationMapperTest {
 
   @Test
   void mapShouldPreserveNullsAndTreasuryFlag() {
-    ExtractorExportProperties exportProperties = new ExtractorExportProperties("./build/extractions", 52428800L, 500, null);
+    ExtractorExportProperties exportProperties = new ExtractorExportProperties("./build/extractions", 52428800L, 500, null, null);
     organizationMapper = new OrganizationMapper(organizationDaoMock, exportProperties);
     Organization organization = OrganizationFaker.buildOrganizationWithNullOptionalFields();
 
@@ -61,10 +62,11 @@ class OrganizationMapperTest {
     PuOrganizationDTO result = organizationMapper.map(organization);
 
     assertEquals("false", result.getFlagTreasury());
-    TestUtils.reflectionEqualsByName(result, organization, "externalOrganizationId", "brokerIpaCode", "sendApiKey", "generateNoticeApiKey", "flagTreasury");
+    TestUtils.reflectionEqualsByName(result, organization, "externalOrganizationId", "brokerCf", "brokerIpaCode", "sendApiKey", "generateNoticeApiKey", "flagTreasury");
     TestUtils.checkNotNullFields(
       result,
       "externalOrganizationId",
+      "brokerCf",
       "brokerIpaCode",
       "iban",
       "postalIban",

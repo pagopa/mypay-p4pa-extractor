@@ -107,6 +107,11 @@ public class PuOrganizationDTO {
   @Size(max = 256)
   private String status;
 
+  @CsvBindByName(column = "broker_cf")
+  @Size(max = 50)
+  @Pattern(regexp = "^\\d{11}$")
+  private String brokerCf;
+
   @CsvBindByName(column = "broker_ipa_code")
   @Size(max = 256)
   @Pattern(regexp = "^[A-Z0-9_]+$")
