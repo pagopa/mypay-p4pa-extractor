@@ -45,7 +45,7 @@ class OrganizationMapperTest {
 
     assertEquals("12345678901", result.getBrokerCf());
     assertEquals("true", result.getFlagTreasury());
-    TestUtils.reflectionEqualsByName(result, organization, "externalOrganizationId", "brokerCf", "sendApiKey", "generateNoticeApiKey", "flagTreasury");
+    TestUtils.reflectionEqualsByName(result, organization);
     TestUtils.checkNotNullFields(result, "externalOrganizationId", "sendApiKey", "generateNoticeApiKey");
 
   }

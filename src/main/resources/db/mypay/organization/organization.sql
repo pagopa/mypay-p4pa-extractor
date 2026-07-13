@@ -17,7 +17,6 @@ WITH organization_feature_flags AS (
 )
 SELECT
     e.cod_ipa_ente AS ipa_code,
-    e.mygov_ente_id::text AS external_organization_id,
     e.codice_fiscale_ente AS org_fiscal_code,
     e.de_nome_ente AS org_name,
     e.cod_tipo_ente AS org_type_code,

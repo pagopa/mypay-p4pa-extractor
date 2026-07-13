@@ -4,7 +4,6 @@ import java.time.LocalDate;
 
 public record Organization(
   String ipaCode,
-  String externalOrganizationId,
   String orgFiscalCode,
   String orgName,
   String orgTypeCode,

@@ -46,7 +46,7 @@ class OrganizationDaoTest {
     OrganizationDao dao = buildDao(mpv4JdbcTemplateMock);
 
     List<Organization> expected = List.of(new Organization(
-      "IPA1", "1", "CF", "name", "type", "mail@example.com",
+      "IPA1",  "CF", "name", "type", "mail@example.com",
       "iban", "postal", "seg", "cbill", "logo", "ACTIVE",
       "it", null, true, true, false, null
     ));

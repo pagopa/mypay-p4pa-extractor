@@ -16,7 +16,6 @@ public class OrganizationFaker {
     Organization source = buildOrganization();
     return new Organization(
       source.ipaCode(),
-      null,
       source.orgFiscalCode(),
       source.orgName(),
       source.orgTypeCode(),
