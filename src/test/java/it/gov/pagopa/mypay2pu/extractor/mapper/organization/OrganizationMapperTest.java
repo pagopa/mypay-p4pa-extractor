@@ -2,6 +2,7 @@ package it.gov.pagopa.mypay2pu.extractor.mapper.organization;
 
 import it.gov.pagopa.mypay2pu.extractor.dao.OrganizationDao;
 import it.gov.pagopa.mypay2pu.extractor.config.ExtractorExportProperties;
+import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.dto.export.PuOrganizationDTO;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.Organization;
 import it.gov.pagopa.mypay2pu.extractor.utils.TestUtils;
@@ -13,7 +14,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Map;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -26,8 +30,7 @@ class OrganizationMapperTest {
 
   @BeforeEach
   void setUp() {
-    ExtractorExportProperties exportProperties = new ExtractorExportProperties("./build/extractions", 52428800L, 500, "12345678901", "IPA_CODE");
-    organizationMapper = new OrganizationMapper(organizationDaoMock, exportProperties);
+    organizationMapper = new OrganizationMapper(organizationDaoMock, buildExportProperties("12345678901", "IPA_CODE"));
   }
 
   @AfterEach
@@ -53,7 +56,7 @@ class OrganizationMapperTest {
 
   @Test
   void mapShouldPreserveNullsAndTreasuryFlag() {
-    ExtractorExportProperties exportProperties = new ExtractorExportProperties("./build/extractions", 52428800L, 500, null, null);
+    ExtractorExportProperties exportProperties = buildExportProperties("12345678901", null);
     organizationMapper = new OrganizationMapper(organizationDaoMock, exportProperties);
     Organization organization = OrganizationFaker.buildOrganizationWithNullOptionalFields();
 
@@ -61,12 +64,13 @@ class OrganizationMapperTest {
 
     PuOrganizationDTO result = organizationMapper.map(organization);
 
+    assertEquals("12345678901", result.getBrokerCf());
+    assertNull(result.getBrokerIpaCode());
     assertEquals("false", result.getFlagTreasury());
     TestUtils.reflectionEqualsByName(result, organization, "externalOrganizationId", "brokerCf", "brokerIpaCode", "sendApiKey", "generateNoticeApiKey", "flagTreasury");
     TestUtils.checkNotNullFields(
       result,
       "externalOrganizationId",
-      "brokerCf",
       "brokerIpaCode",
       "iban",
       "postalIban",
@@ -83,5 +87,16 @@ class OrganizationMapperTest {
       "generateNoticeApiKey"
     );
 
+  }
+
+  private ExtractorExportProperties buildExportProperties(String brokerCf, String brokerIpaCode) {
+    return new ExtractorExportProperties(
+      "./build/extractions",
+      52428800L,
+      1000,
+      brokerCf,
+      brokerIpaCode,
+      Map.of(MigrationFileType.ORGANIZATIONS, new ExtractorExportProperties.FileTypeConfiguration(500))
+    );
   }
 }

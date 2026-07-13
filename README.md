@@ -188,7 +188,8 @@ See [application.yml](src/main/resources/application.yml) for each configurable 
 | `EXPORT_PAGE_SIZE` | JDBC fetch page size | `1000` |
 | `MYPIVOT_ENABLED` | Enable myPivot4 extraction (types 10/11/12). If `false`, Adapters related to MyPivot are skipped | `false` |
 | `BROKER_CF` | Fiscal code of the broker/intermediary running the extraction (used as context metadata) | — |
-| `AVG_ROW_SIZE_ORGANIZATIONS` | Average row size in bytes for `ORGANIZATIONS` split calculation (`maxRows = MULTIPART_MAX_FILE_SIZE / avgRowSize`) | `500` |
+| `BROKER_IPA_CODE` | Optional IPA code of the broker/intermediary running the extraction | — |
+| `AVG_ROW_SIZE_ORGANIZATIONS` | Average row size in bytes for `extractor.export.file-type-configurations.ORGANIZATIONS.avg-row-size` (`maxRows = MULTIPART_MAX_FILE_SIZE / avgRowSize`) | `500` |
 | `CSV_SEPARATOR_CHAR` | Separator character used when generating CSV files | `;` |
 | `CSV_QUOTE_CHAR` | Quote character used when generating CSV files | `"` |
 | `FILE_ENCRYPT_ENABLED` | Enable the encryption of the extracted files. **Files are returned unencrypted via the `/extract/{id}/files` API regardless of this setting.** When encryption is enabled, it is the responsibility of the operator to ensure secure temporary storage and cleanup of extracted data. | `false` |

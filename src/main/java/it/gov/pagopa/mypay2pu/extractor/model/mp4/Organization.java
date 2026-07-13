@@ -1,5 +1,7 @@
 package it.gov.pagopa.mypay2pu.extractor.model.mp4;
 
+import it.gov.pagopa.mypay2pu.extractor.model.ExportModel;
+
 import java.time.LocalDate;
 
 public record Organization(
@@ -21,5 +23,5 @@ public record Organization(
   Boolean flagNotifyOutcomePush,
   String ioApiKey
 
-) {
+) implements ExportModel {
 }

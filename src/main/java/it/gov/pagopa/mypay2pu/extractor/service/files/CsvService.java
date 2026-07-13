@@ -7,6 +7,7 @@ import com.opencsv.bean.StatefulBeanToCsv;
 import com.opencsv.bean.StatefulBeanToCsvBuilder;
 import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
+import it.gov.pagopa.mypay2pu.extractor.dto.export.CsvExportDto;
 import it.gov.pagopa.mypay2pu.extractor.exception.InvalidCsvRowException;
 import it.gov.pagopa.mypay2pu.extractor.service.files.xls.OrderedHeaderColumnNameMappingStrategy;
 import lombok.extern.slf4j.Slf4j;
@@ -87,7 +88,12 @@ public class CsvService {
    * @param csvProfile the profile to be used for writing the CSV
    * @throws IOException if an error occurs while writing the file
    */
-  public <C> void createCsv(Path csvFilePath, Class<C> typeClass, Supplier<List<C>> csvRowsSupplier, String csvProfile) throws IOException {
+  public <C extends CsvExportDto> void createCsv(
+    Path csvFilePath,
+    Class<C> typeClass,
+    Supplier<List<C>> csvRowsSupplier,
+    String csvProfile
+  ) throws IOException {
 
     ensureParentDirectory(csvFilePath.toFile());
 
