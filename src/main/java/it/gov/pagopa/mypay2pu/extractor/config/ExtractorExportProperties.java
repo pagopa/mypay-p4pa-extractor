@@ -15,8 +15,6 @@ import java.util.Map;
 @Validated
 public record ExtractorExportProperties(
   @NotBlank String storagePath,
-  @Positive long multipartMaxFileSize,
-  @Positive int exportPageSize,
   @NotBlank String brokerCf,
   @NotBlank String brokerIpaCode,
   @NestedConfigurationProperty
@@ -35,7 +33,7 @@ public record ExtractorExportProperties(
   }
 
   public record FileTypeConfiguration(
-    @Positive int rowsToExtract
+    @Positive int exportPageSize
   ) {
   }
 }

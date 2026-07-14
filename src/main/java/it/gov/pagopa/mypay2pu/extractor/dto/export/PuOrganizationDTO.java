@@ -21,7 +21,7 @@ import java.time.LocalDate;
 @EqualsAndHashCode(callSuper = false)
 public class PuOrganizationDTO implements CsvExportDto {
 
-  public static final String ZIP_VERSION = "1_0";
+  public static final String VERSION = "1_0";
 
   @CsvBindByName(column = "ipa_code")
   @NotBlank

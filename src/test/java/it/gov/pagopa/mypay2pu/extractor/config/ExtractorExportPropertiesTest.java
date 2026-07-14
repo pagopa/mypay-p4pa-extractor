@@ -36,23 +36,19 @@ class ExtractorExportPropertiesTest {
         ExtractorExportProperties properties = context.getBean(ExtractorExportProperties.class);
 
         assertEquals("/tmp/extractions", properties.storagePath());
-        assertEquals(52428800L, properties.multipartMaxFileSize());
-        assertEquals(1000, properties.exportPageSize());
         assertEquals("12345678901", properties.brokerCf());
         assertEquals("IPA_CODE", properties.brokerIpaCode());
-        assertEquals(500, properties.resolveFileTypeConfiguration(MigrationFileType.ORGANIZATIONS).rowsToExtract());
+        assertEquals(1000, properties.resolveFileTypeConfiguration(MigrationFileType.ORGANIZATIONS).exportPageSize());
       });
   }
 
   @Test
-  void whenGlobalPropertyIsInvalidThenStartupFailsValidation() {
+  void whenOrganizationPageSizeIsInvalidThenStartupFailsValidation() {
     contextRunner
       .withPropertyValues(
         "extractor.export.storage-path=/tmp/extractions",
-        "extractor.export.multipart-max-file-size=52428800",
-        "extractor.export.export-page-size=0",
         "extractor.export.broker-cf=12345678901",
-        "extractor.export.file-type-configurations.ORGANIZATIONS.rows-to-extract=500"
+        "extractor.export.file-type-configurations.ORGANIZATIONS.export-page-size=500"
       )
       .run(context -> {
         Throwable startupFailure = context.getStartupFailure();
@@ -67,8 +63,6 @@ class ExtractorExportPropertiesTest {
     contextRunner
       .withPropertyValues(
         "extractor.export.storage-path=/tmp/extractions",
-        "extractor.export.multipart-max-file-size=52428800",
-        "extractor.export.export-page-size=1000",
         "extractor.export.broker-cf=12345678901"
       )
       .run(context -> {
@@ -84,10 +78,8 @@ class ExtractorExportPropertiesTest {
     contextRunner
       .withPropertyValues(
         "extractor.export.storage-path=/tmp/extractions",
-        "extractor.export.multipart-max-file-size=52428800",
-        "extractor.export.export-page-size=1000",
         "extractor.export.broker-cf=12345678901",
-        "extractor.export.file-type-configurations.ORGANIZATIONS.rows-to-extract=0"
+        "extractor.export.file-type-configurations.ORGANIZATIONS.export-page-size=0"
       )
       .run(context -> {
         Throwable startupFailure = context.getStartupFailure();
@@ -101,8 +93,6 @@ class ExtractorExportPropertiesTest {
   void whenRequestedTypeIsNotConfiguredThenThrowClearError() {
     ExtractorExportProperties properties = new ExtractorExportProperties(
       "/tmp/extractions",
-      52428800L,
-      1000,
       "12345678901",
       "IPA_CODE",
       Map.of(MigrationFileType.ORG_SIL_SERVICES, new ExtractorExportProperties.FileTypeConfiguration(500))
@@ -122,11 +112,9 @@ class ExtractorExportPropertiesTest {
   private String[] validPropertyValues() {
     return new String[]{
       "extractor.export.storage-path=/tmp/extractions",
-      "extractor.export.multipart-max-file-size=52428800",
-      "extractor.export.export-page-size=1000",
       "extractor.export.broker-cf=12345678901",
       "extractor.export.broker-ipa-code=IPA_CODE",
-      "extractor.export.file-type-configurations.ORGANIZATIONS.rows-to-extract=500"
+      "extractor.export.file-type-configurations.ORGANIZATIONS.export-page-size=1000"
     };
   }
 

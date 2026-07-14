@@ -92,8 +92,6 @@ class OrganizationMapperTest {
   private ExtractorExportProperties buildExportProperties(String brokerCf, String brokerIpaCode) {
     return new ExtractorExportProperties(
       "./build/extractions",
-      52428800L,
-      1000,
       brokerCf,
       brokerIpaCode,
       Map.of(MigrationFileType.ORGANIZATIONS, new ExtractorExportProperties.FileTypeConfiguration(500))
