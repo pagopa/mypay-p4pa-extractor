@@ -1,10 +1,8 @@
 package it.gov.pagopa.mypay2pu.extractor.service.export;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.List;
-import java.util.Objects;
+import org.springframework.util.CollectionUtils;
+
+import java.util.*;
 import java.util.function.Supplier;
 
 /**
@@ -16,7 +14,7 @@ public class BufferedPageSupplier<T> implements Supplier<List<T>> {
 
   private final Supplier<List<T>> source;
   private final int pageSize;
-  private final Deque<T> buffer = new ArrayDeque<>();
+  private final Queue<T> buffer = new ArrayDeque<>();
   private boolean sourceExhausted;
 
   /**
@@ -48,7 +46,7 @@ public class BufferedPageSupplier<T> implements Supplier<List<T>> {
       }
 
       List<T> rows = source.get();
-      if (rows == null || rows.isEmpty()) {
+      if (CollectionUtils.isEmpty(rows)) {
         sourceExhausted = true;
       } else {
         buffer.addAll(rows);
@@ -59,7 +57,7 @@ public class BufferedPageSupplier<T> implements Supplier<List<T>> {
 
   private void drainBuffer(List<T> page) {
     while (page.size() < pageSize && !buffer.isEmpty()) {
-      page.add(buffer.removeFirst());
+      page.add(buffer.remove());
     }
   }
 }

@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class BufferedPageSupplierTest {
 
   @Test
-  void get_fillsPagesAndKeepsTheRemainderForTheNextCall() {
+  void givenSourceWithRemainderWhenGetThenFillPagesAndKeepRemainingRows() {
     var supplier = new BufferedPageSupplier<>(batches(
       List.of("one"),
       List.of("two", "three", "four")
@@ -25,7 +25,7 @@ class BufferedPageSupplierTest {
   }
 
   @Test
-  void get_doesNotFetchTheSourceAfterItIsExhausted() {
+  void givenExhaustedSourceWhenGetThenDoNotFetchAgain() {
     var sourceCalls = new AtomicInteger();
     Supplier<List<String>> source = () -> {
       sourceCalls.incrementAndGet();
@@ -39,7 +39,7 @@ class BufferedPageSupplierTest {
   }
 
   @Test
-  void constructor_rejectsNonPositivePageSize() {
+  void givenNonPositivePageSizeWhenConstructingThenThrowIllegalArgumentException() {
     assertThrows(IllegalArgumentException.class, () -> new BufferedPageSupplier<>(Collections::<String>emptyList, 0));
   }
 

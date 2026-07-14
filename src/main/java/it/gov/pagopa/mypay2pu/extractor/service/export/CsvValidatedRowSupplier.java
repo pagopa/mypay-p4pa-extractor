@@ -3,6 +3,7 @@ package it.gov.pagopa.mypay2pu.extractor.service.export;
 import it.gov.pagopa.mypay2pu.extractor.dto.export.CsvExportDto;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
+import org.springframework.util.CollectionUtils;
 
 import java.util.Comparator;
 import java.util.List;
@@ -27,9 +28,12 @@ public class CsvValidatedRowSupplier<C extends CsvExportDto> implements Supplier
   private final AtomicLong rowNumber = new AtomicLong(FIRST_DATA_ROW_NUMBER);
 
   /**
-   * Constructs a CSV row validation supplier.
+   * Constructs a CSV row validation supplier that wraps the source supplier with validation logic.
+   * The source supplier must be a batch supplier: each call to supplier.get() returns a batch of rows.
+   * When the source supplier returns an empty list or null, it signals that no more data is available.
+   * The supplier will be called repeatedly across multiple get() invocations until exhausted.
    *
-   * @param source the batch supplier that provides rows to validate
+   * @param source the batch supplier that provides rows to validate; must return empty/null when exhausted
    * @param validator the Jakarta Validator instance to validate rows
    * @param errorCollector the collector to accumulate validation errors
    */
@@ -44,7 +48,12 @@ public class CsvValidatedRowSupplier<C extends CsvExportDto> implements Supplier
   }
 
   /**
-   * Fetches source batches until it finds valid rows or the source is exhausted.
+   * Fetches and validates the next batch of rows, returning only valid rows.
+   * Behavior: fetches batches from the source supplier and validates each row.
+   * Returns the first batch that contains at least one valid row.
+   * If a batch contains only invalid rows, continues fetching from the source supplier until valid rows are found or source is exhausted.
+   * Each call to this method may invoke the source supplier multiple times internally.
+   * Calling this method repeatedly will eventually exhaust the source supplier and return empty lists.
    *
    * @return the valid rows from the next source batch containing valid rows, or the source result when exhausted
    */
@@ -52,7 +61,7 @@ public class CsvValidatedRowSupplier<C extends CsvExportDto> implements Supplier
   public List<C> get() {
     while (true) {
       List<C> rows = source.get();
-      if (rows == null || rows.isEmpty()) {
+      if (CollectionUtils.isEmpty(rows)) {
         return rows;
       }
       List<C> validRows = rows.stream().filter(this::validateAndCollectErrors).toList();
