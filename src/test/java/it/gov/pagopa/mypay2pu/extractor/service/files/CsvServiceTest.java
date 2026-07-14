@@ -7,6 +7,7 @@ import uk.co.jemos.podam.api.PodamFactoryImpl;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -103,6 +104,32 @@ class CsvServiceTest {
         File file = filePath.toFile();
         assertTrue(file.exists(), "The file should exist.");
         assertTrue(file.length() > 0, "The file should not be empty.");
+    }
+
+    @Test
+    void testCreateCsvFromBean_nullValueIsWrittenAsUnquotedEmptyField() throws IOException {
+        // Given
+        Path filePath = Path.of("build", "tmp", "test", "EXPORT_NULLS.csv");
+        TestCsv testCsv = TestCsv.builder()
+          .column1("Data1")
+          .column2("Data2")
+          .column3(null)
+          .build();
+        AtomicBoolean supplierCalled = new AtomicBoolean(false);
+
+        // When
+        csvService.createCsv(filePath, TestCsv.class, () -> {
+            if (supplierCalled.get()) {
+                return Collections.emptyList();
+            }
+            supplierCalled.set(true);
+            return List.of(testCsv);
+        }, "v1");
+
+        // Then
+        List<String> rows = Files.readAllLines(filePath);
+        assertEquals(2, rows.size(), "The csv should contain header and one data row.");
+        assertEquals("Data1;Data2;", rows.get(1), "Null values should be written as unquoted empty fields.");
     }
 
     @Test
