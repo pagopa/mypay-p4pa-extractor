@@ -1,6 +1,7 @@
 package it.gov.pagopa.mypay2pu.extractor.service.export;
 
 import com.opencsv.bean.CsvBindByName;
+import it.gov.pagopa.mypay2pu.extractor.dto.export.CsvExportDto;
 import it.gov.pagopa.mypay2pu.extractor.service.files.CsvService;
 import jakarta.validation.Validation;
 import jakarta.validation.constraints.Email;
@@ -31,7 +32,7 @@ class CsvValidatedRowSupplierTest {
   Path tempDir;
 
   @Test
-  void testValidatingSupplier_validRow() throws IOException {
+  void givenValidRowWhenGetThenReturnValidRowWithoutErrors() throws IOException {
     // Given
     TestDto validRow = new TestDto("Name", "name@example.com", 10);
     List<TestDto> data = List.of(validRow);
@@ -61,7 +62,7 @@ class CsvValidatedRowSupplierTest {
   }
 
   @Test
-  void testValidatingSupplier_invalidRow() throws IOException {
+  void givenInvalidRowWhenGetThenFilterRowAndCollectErrors() throws IOException {
     // Given
     TestDto invalidRow = new TestDto("", "invalid-email", -5);
     List<TestDto> data = List.of(invalidRow);
@@ -95,7 +96,7 @@ class CsvValidatedRowSupplierTest {
   }
 
   @Test
-  void testValidatingSupplier_mixedRows() throws IOException {
+  void givenMixedRowsWhenGetThenReturnOnlyValidRowsAndCollectErrors() throws IOException {
     // Given
     TestDto validRow1 = new TestDto("Name", "name@example.com", 10);
     TestDto validRow2 = new TestDto("Name 2", "name2@example.com", 20);
@@ -140,7 +141,7 @@ class CsvValidatedRowSupplierTest {
   }
 
   @Test
-  void testValidatingSupplier_rowNumbering() throws IOException {
+  void givenMultipleBatchesWhenGetThenKeepCorrectCsvRowNumbersInErrors() throws IOException {
     // Given - Multiple batches to test row number tracking
     TestDto row1 = new TestDto("", "invalid1", -1);  // row 2: invalid
     TestDto row2 = new TestDto("Name", "name@example.com", 10);  // row 3: valid
@@ -190,7 +191,7 @@ class CsvValidatedRowSupplierTest {
   }
 
   @Test
-  void testValidatingSupplier_emptyBatch() throws IOException {
+  void givenEmptyBatchWhenGetThenReturnEmptyWithoutErrors() throws IOException {
     // Given
     Path csvFile = tempDir.resolve("empty-batch.csv");
     var errorCollector = new CsvRowErrorCollector(csvService, csvFile);
@@ -210,7 +211,7 @@ class CsvValidatedRowSupplierTest {
   }
 
   @Test
-  void testValidatingSupplier_allRowsInvalid() throws IOException {
+  void givenAllRowsInvalidWhenGetThenReturnEmptyAndCollectErrors() throws IOException {
     // Given
     TestDto invalid1 = new TestDto("", "", 0);
     TestDto invalid2 = new TestDto(null, "not-an-email", -10);
@@ -254,7 +255,7 @@ class CsvValidatedRowSupplierTest {
   @Data
   @NoArgsConstructor
   @AllArgsConstructor
-  static class TestDto {
+  static class TestDto implements CsvExportDto {
     @CsvBindByName
     @NotBlank(message = "name must not be blank")
     private String name;
