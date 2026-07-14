@@ -35,7 +35,7 @@ public record ExtractorExportProperties(
   }
 
   public record FileTypeConfiguration(
-    @Positive int avgRowSize
+    @Positive int rowsToExtract
   ) {
   }
 }

@@ -18,10 +18,7 @@ import java.time.LocalDate;
 @Builder
 @EqualsAndHashCode(callSuper = false)
 public class TestCsv implements CsvExportDto {
-    @Override
-    public String getZipVersion() {
-        return "1_0";
-    }
+    public static final String ZIP_VERSION = "1_0";
 
     @CsvBindByName(column = "Column1", required = true)
     private String column1;

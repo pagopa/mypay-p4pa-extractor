@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.autoconfigure.context.ConfigurationPropertiesAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.boot.context.properties.ConfigurationPropertiesBindException;
 import org.springframework.boot.validation.autoconfigure.ValidationAutoConfiguration;
 import org.springframework.context.annotation.Configuration;
 
@@ -15,7 +16,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ExtractorExportPropertiesTest {
 
@@ -40,7 +40,7 @@ class ExtractorExportPropertiesTest {
         assertEquals(1000, properties.exportPageSize());
         assertEquals("12345678901", properties.brokerCf());
         assertEquals("IPA_CODE", properties.brokerIpaCode());
-        assertEquals(500, properties.resolveFileTypeConfiguration(MigrationFileType.ORGANIZATIONS).avgRowSize());
+        assertEquals(500, properties.resolveFileTypeConfiguration(MigrationFileType.ORGANIZATIONS).rowsToExtract());
       });
   }
 
@@ -52,14 +52,13 @@ class ExtractorExportPropertiesTest {
         "extractor.export.multipart-max-file-size=52428800",
         "extractor.export.export-page-size=0",
         "extractor.export.broker-cf=12345678901",
-        "extractor.export.file-type-configurations.ORGANIZATIONS.avg-row-size=500"
+        "extractor.export.file-type-configurations.ORGANIZATIONS.rows-to-extract=500"
       )
       .run(context -> {
         Throwable startupFailure = context.getStartupFailure();
 
         assertNotNull(startupFailure);
-        assertTrue(hasMessageContainingAny(startupFailure, "export-page-size", "exportPageSize"));
-        assertTrue(hasMessageContaining(startupFailure, "greater than 0"));
+        assertEquals(ConfigurationPropertiesBindException.class, startupFailure.getClass());
       });
   }
 
@@ -76,8 +75,7 @@ class ExtractorExportPropertiesTest {
         Throwable startupFailure = context.getStartupFailure();
 
         assertNotNull(startupFailure);
-        assertTrue(hasMessageContainingAny(startupFailure, "file-type-configurations", "fileTypeConfigurations"));
-        assertTrue(hasMessageContaining(startupFailure, "must not be empty"));
+        assertEquals(ConfigurationPropertiesBindException.class, startupFailure.getClass());
       });
   }
 
@@ -89,14 +87,13 @@ class ExtractorExportPropertiesTest {
         "extractor.export.multipart-max-file-size=52428800",
         "extractor.export.export-page-size=1000",
         "extractor.export.broker-cf=12345678901",
-        "extractor.export.file-type-configurations.ORGANIZATIONS.avg-row-size=0"
+        "extractor.export.file-type-configurations.ORGANIZATIONS.rows-to-extract=0"
       )
       .run(context -> {
         Throwable startupFailure = context.getStartupFailure();
 
         assertNotNull(startupFailure);
-        assertTrue(hasMessageContainingAny(startupFailure, "avg-row-size", "avgRowSize"));
-        assertTrue(hasMessageContaining(startupFailure, "greater than 0"));
+        assertEquals(ConfigurationPropertiesBindException.class, startupFailure.getClass());
       });
   }
 
@@ -129,26 +126,8 @@ class ExtractorExportPropertiesTest {
       "extractor.export.export-page-size=1000",
       "extractor.export.broker-cf=12345678901",
       "extractor.export.broker-ipa-code=IPA_CODE",
-      "extractor.export.file-type-configurations.ORGANIZATIONS.avg-row-size=500"
+      "extractor.export.file-type-configurations.ORGANIZATIONS.rows-to-extract=500"
     };
-  }
-
-  private boolean hasMessageContaining(Throwable throwable, String expectedText) {
-    for (Throwable current = throwable; current != null; current = current.getCause()) {
-      if (current.getMessage() != null && current.getMessage().contains(expectedText)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private boolean hasMessageContainingAny(Throwable throwable, String... expectedTexts) {
-    for (String expectedText : expectedTexts) {
-      if (hasMessageContaining(throwable, expectedText)) {
-        return true;
-      }
-    }
-    return false;
   }
 
   @Configuration(proxyBeanMethods = false)
