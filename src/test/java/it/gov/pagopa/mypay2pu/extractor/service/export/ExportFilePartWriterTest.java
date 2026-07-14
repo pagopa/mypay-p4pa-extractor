@@ -52,7 +52,7 @@ class ExportFilePartWriterTest {
     Path expectedErrorFilePath = tempDir.resolve(exportBaseFileName + ".errors.csv");
     ICSVWriter csvWriterMock = mock(ICSVWriter.class);
 
-    when(csvServiceMock.openCsvWriter(eq(expectedErrorFilePath), eq(true))).thenReturn(csvWriterMock);
+    when(csvServiceMock.openCsvWriter(expectedErrorFilePath, true)).thenReturn(csvWriterMock);
 
     CsvRowErrorCollector errorCollector = writer.createErrorCollector(executionContext, exportBaseFileName);
     errorCollector.add(2, "field", "NotBlank", "must not be blank", "");
