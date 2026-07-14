@@ -1,6 +1,7 @@
 package it.gov.pagopa.mypay2pu.extractor.service.export;
 
 import com.opencsv.bean.CsvBindByName;
+import it.gov.pagopa.mypay2pu.extractor.dto.export.CsvExportDto;
 import it.gov.pagopa.mypay2pu.extractor.service.files.CsvService;
 import jakarta.validation.Validation;
 import jakarta.validation.constraints.Email;
@@ -18,7 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -31,211 +32,98 @@ class CsvValidatedRowSupplierTest {
   Path tempDir;
 
   @Test
-  void testValidatingSupplier_validRow() throws IOException {
-    // Given
-    TestDto validRow = new TestDto("Name", "name@example.com", 10);
-    List<TestDto> data = List.of(validRow);
-    Path csvFile = tempDir.resolve("valid-row.csv");
+  void get_fillsPageUsingMultipleSourceBatches() {
+    Supplier<List<TestDto>> source = batches(
+      List.of(valid("one"), valid("two")),
+      List.of(valid("three"))
+    );
+    var supplier = supplier(source, 3, new CsvRowErrorCollector(csvService));
 
-    AtomicBoolean called = new AtomicBoolean(false);
-    Supplier<List<TestDto>> source = () -> {
-      if (!called.getAndSet(true)) {
-        return data;
-      }
-      return Collections.emptyList();
-    };
-
-    var errorCollector = new CsvRowErrorCollector(csvService, csvFile);
-    var supplier = new CsvValidatedRowSupplier<>(source,
-      Validation.buildDefaultValidatorFactory().getValidator(),
-      errorCollector);
-
-    // When
-    List<TestDto> result = supplier.get();
-    List<String> errorRows = readErrorRows(errorCollector, csvFile);
-
-    // Then
-    assertEquals(1, result.size());
-    assertEquals("Name", result.get(0).getName());
-    assertEquals(0, errorRows.size());
+    assertEquals(List.of("one", "two", "three"), names(supplier.get()));
   }
 
   @Test
-  void testValidatingSupplier_invalidRow() throws IOException {
-    // Given
-    TestDto invalidRow = new TestDto("", "invalid-email", -5);
-    List<TestDto> data = List.of(invalidRow);
-    Path csvFile = tempDir.resolve("invalid-row.csv");
-    AtomicBoolean called = new AtomicBoolean(false);
+  void get_preservesBufferedRowsForTheNextPage() {
+    Supplier<List<TestDto>> source = batches(List.of(valid("one"), valid("two"), valid("three")));
+    var supplier = supplier(source, 2, new CsvRowErrorCollector(csvService));
 
-    Supplier<List<TestDto>> source = () -> {
-      if (!called.getAndSet(true)) {
-        return data;
-      }
-      return Collections.emptyList();
-    };
-
-    var errorCollector = new CsvRowErrorCollector(csvService, csvFile);
-    var supplier = new CsvValidatedRowSupplier<>(source,
-      Validation.buildDefaultValidatorFactory().getValidator(),
-      errorCollector);
-
-    // When
-    List<TestDto> result = supplier.get();
-    List<String> errorRows = readErrorRows(errorCollector, csvFile);
-
-    // Then
-    assertEquals(0, result.size());
-    assertEquals(3, errorRows.size());
-
-    // Errors should be sorted by field name
-    assertTrue(errorRows.stream().anyMatch(e -> e.contains("email")));
-    assertTrue(errorRows.stream().anyMatch(e -> e.contains("name")));
-    assertTrue(errorRows.stream().anyMatch(e -> e.contains("value")));
+    assertEquals(List.of("one", "two"), names(supplier.get()));
+    assertEquals(List.of("three"), names(supplier.get()));
+    assertTrue(supplier.get().isEmpty());
   }
 
   @Test
-  void testValidatingSupplier_mixedRows() throws IOException {
-    // Given
-    TestDto validRow1 = new TestDto("Name", "name@example.com", 10);
-    TestDto validRow2 = new TestDto("Name 2", "name2@example.com", 20);
-    TestDto invalidRow = new TestDto("", "invalid-email", -5);
-    TestDto validRow3 = new TestDto("Name 3", "name3@example.com", 15);
+  void get_skipsEntirelyInvalidSourceBatches() throws IOException {
+    Path csvFile = tempDir.resolve("invalid-rows.csv");
+    var errorCollector = new CsvRowErrorCollector(csvService, csvFile);
+    var supplier = supplier(batches(
+      List.of(invalid(), invalid()),
+      List.of(invalid())
+    ), 2, errorCollector);
+
+    assertTrue(supplier.get().isEmpty());
+    assertEquals(9, readErrorRows(errorCollector, csvFile).size());
+  }
+
+  @Test
+  void get_returnsFinalPartialPageAndHandlesEmptySource() {
+    var supplier = supplier(batches(List.of(valid("one"), valid("two"), valid("three"))),
+      2, new CsvRowErrorCollector(csvService));
+
+    assertEquals(List.of("one", "two"), names(supplier.get()));
+    assertEquals(List.of("three"), names(supplier.get()));
+    assertTrue(supplier.get().isEmpty());
+    assertTrue(supplier(Collections::emptyList, 2, new CsvRowErrorCollector(csvService)).get().isEmpty());
+  }
+
+  @Test
+  void get_preservesOrderAndRecordsInvalidRowsOnce() throws IOException {
     Path csvFile = tempDir.resolve("mixed-rows.csv");
-
-    List<List<TestDto>> batches = List.of(
-      List.of(validRow1, invalidRow, validRow2),
-      List.of(validRow3),
-      Collections.emptyList()
-    );
-
-    var batchIterator = batches.iterator();
-    Supplier<List<TestDto>> source = () -> batchIterator.hasNext() ? batchIterator.next() : Collections.emptyList();
-
     var errorCollector = new CsvRowErrorCollector(csvService, csvFile);
-    var supplier = new CsvValidatedRowSupplier<>(source,
-      Validation.buildDefaultValidatorFactory().getValidator(),
-      errorCollector);
+    var sourceCalls = new AtomicInteger();
+    Supplier<List<TestDto>> source = () -> switch (sourceCalls.getAndIncrement()) {
+      case 0 -> List.of(valid("one"), invalid(), valid("two"));
+      case 1 -> List.of(valid("three"));
+      default -> Collections.emptyList();
+    };
+    var supplier = supplier(source, 2, errorCollector);
 
-    // When - First batch: validRow1, validRow2 (invalidRow filtered)
-    List<TestDto> result1 = supplier.get();
-    // When - Second batch: validRow3
-    List<TestDto> result2 = supplier.get();
-    // When - Third batch: empty
-    List<TestDto> result3 = supplier.get();
-    List<String> errorRows = readErrorRows(errorCollector, csvFile);
-
-    // Then
-    assertEquals(2, result1.size());
-    assertEquals("Name", result1.get(0).getName());
-    assertEquals("Name 2", result1.get(1).getName());
-
-    assertEquals(1, result2.size());
-    assertEquals("Name 3", result2.get(0).getName());
-
-    assertEquals(0, result3.size());
-
-    // Should have 3 errors from invalidRow
-    assertEquals(3, errorRows.size());
+    assertEquals(List.of("one", "two"), names(supplier.get()));
+    assertEquals(List.of("three"), names(supplier.get()));
+    assertEquals(3, readErrorRows(errorCollector, csvFile).size());
   }
 
-  @Test
-  void testValidatingSupplier_rowNumbering() throws IOException {
-    // Given - Multiple batches to test row number tracking
-    TestDto row1 = new TestDto("", "invalid1", -1);  // row 2: invalid
-    TestDto row2 = new TestDto("Name", "name@example.com", 10);  // row 3: valid
-    TestDto row3 = new TestDto("", "invalid2", -2);  // row 4: invalid
-    TestDto row4 = new TestDto("Name 2", "name2@example.com", 20);  // row 5: valid
-    Path csvFile = tempDir.resolve("row-numbering.csv");
-
-    List<List<TestDto>> batches = List.of(
-      List.of(row1, row2),
-      List.of(row3, row4),
-      Collections.emptyList()
+  private Supplier<List<TestDto>> supplier(
+    Supplier<List<TestDto>> source,
+    int pageSize,
+    CsvRowErrorCollector errorCollector
+  ) {
+    return new BufferedPageSupplier<>(
+      new CsvValidatedRowSupplier<>(
+        source,
+        Validation.buildDefaultValidatorFactory().getValidator(),
+        errorCollector
+      ),
+      pageSize
     );
-
-    var batchIterator = batches.iterator();
-    Supplier<List<TestDto>> source = () -> batchIterator.hasNext() ? batchIterator.next() : Collections.emptyList();
-
-    var errorCollector = new CsvRowErrorCollector(csvService, csvFile);
-    var supplier = new CsvValidatedRowSupplier<>(source,
-      Validation.buildDefaultValidatorFactory().getValidator(),
-      errorCollector);
-
-    // When
-    List<TestDto> result1 = supplier.get();
-    List<TestDto> result2 = supplier.get();
-    List<String> errorRows = readErrorRows(errorCollector, csvFile);
-
-    // Then
-    // First batch should contain only row2 (valid)
-    assertEquals(1, result1.size());
-
-    // Second batch should contain only row4 (valid)
-    assertEquals(1, result2.size());
-
-    // Errors should have correct row numbers
-    assertEquals(6, errorRows.size());  // 3 errors from row1 + 3 errors from row3
-
-    // Check row numbers: row1 is row 2, row3 is row 4
-    assertTrue(errorRows.stream()
-      .map(this::extractRowNumber)
-      .filter(rowNumber -> rowNumber == 2)
-      .count() >= 1, "Should have errors from row 2");
-
-    assertTrue(errorRows.stream()
-      .map(this::extractRowNumber)
-      .filter(rowNumber -> rowNumber == 4)
-      .count() >= 1, "Should have errors from row 4");
   }
 
-  @Test
-  void testValidatingSupplier_emptyBatch() throws IOException {
-    // Given
-    Path csvFile = tempDir.resolve("empty-batch.csv");
-    var errorCollector = new CsvRowErrorCollector(csvService, csvFile);
-    Supplier<List<TestDto>> source = Collections::emptyList;
-
-    var supplier = new CsvValidatedRowSupplier<>(source,
-      Validation.buildDefaultValidatorFactory().getValidator(),
-      errorCollector);
-
-    // When
-    List<TestDto> result = supplier.get();
-    List<String> errorRows = readErrorRows(errorCollector, csvFile);
-
-    // Then
-    assertEquals(0, result.size());
-    assertEquals(0, errorRows.size());
+  @SafeVarargs
+  private final Supplier<List<TestDto>> batches(List<TestDto>... batches) {
+    var batchIterator = List.of(batches).iterator();
+    return () -> batchIterator.hasNext() ? batchIterator.next() : Collections.emptyList();
   }
 
-  @Test
-  void testValidatingSupplier_allRowsInvalid() throws IOException {
-    // Given
-    TestDto invalid1 = new TestDto("", "", 0);
-    TestDto invalid2 = new TestDto(null, "not-an-email", -10);
-    Path csvFile = tempDir.resolve("all-invalid.csv");
+  private TestDto valid(String name) {
+    return new TestDto(name, name + "@example.com", 1);
+  }
 
-    List<List<TestDto>> batches = List.of(
-      List.of(invalid1, invalid2),
-      Collections.emptyList()
-    );
+  private TestDto invalid() {
+    return new TestDto("", "invalid-email", -1);
+  }
 
-    var batchIterator = batches.iterator();
-    Supplier<List<TestDto>> source = () -> batchIterator.hasNext() ? batchIterator.next() : Collections.emptyList();
-
-    var errorCollector = new CsvRowErrorCollector(csvService, csvFile);
-    var supplier = new CsvValidatedRowSupplier<>(source,
-      Validation.buildDefaultValidatorFactory().getValidator(),
-      errorCollector);
-
-    // When
-    List<TestDto> result = supplier.get();
-    List<String> errorRows = readErrorRows(errorCollector, csvFile);
-
-    // Then
-    assertEquals(0, result.size());
-    assertTrue(errorRows.size() > 0);
+  private List<String> names(List<TestDto> rows) {
+    return rows.stream().map(TestDto::getName).toList();
   }
 
   private List<String> readErrorRows(CsvRowErrorCollector errorCollector, Path csvFile) throws IOException {
@@ -246,15 +134,10 @@ class CsvValidatedRowSupplierTest {
     return Files.readAllLines(errorPath.get(), StandardCharsets.UTF_8).stream().skip(1).toList();
   }
 
-  private long extractRowNumber(String csvErrorRow) {
-    String normalizedRow = csvErrorRow.replace("\"", "");
-    return Long.parseLong(normalizedRow.split(";", 2)[0]);
-  }
-
   @Data
   @NoArgsConstructor
   @AllArgsConstructor
-  static class TestDto {
+  static class TestDto implements CsvExportDto {
     @CsvBindByName
     @NotBlank(message = "name must not be blank")
     private String name;
@@ -266,5 +149,6 @@ class CsvValidatedRowSupplierTest {
     @CsvBindByName
     @Positive(message = "value must be positive")
     private Integer value;
+
   }
 }
