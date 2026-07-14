@@ -100,6 +100,7 @@ public class CsvService {
         .withProfile(csvProfile)
         .withSeparator(separator)
         .withQuotechar(quoteChar)
+        .withApplyQuotesToAll(false)
         .withMappingStrategy(mappingStrategy)
         .withThrowExceptions(true)
         .build();
