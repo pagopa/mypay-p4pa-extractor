@@ -3,9 +3,11 @@ package it.gov.pagopa.mypay2pu.extractor.service.files;
 import com.opencsv.bean.CsvBindByName;
 import com.opencsv.bean.CsvDate;
 import com.opencsv.bean.CsvIgnore;
+import it.gov.pagopa.mypay2pu.extractor.dto.export.CsvExportDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
@@ -14,7 +16,10 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class TestCsv {
+@EqualsAndHashCode(callSuper = false)
+public class TestCsv implements CsvExportDto {
+    public static final String ZIP_VERSION = "1_0";
+
     @CsvBindByName(column = "Column1", required = true)
     private String column1;
     @CsvBindByName(column = "Column2", required = true)

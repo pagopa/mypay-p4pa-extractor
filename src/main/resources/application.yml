@@ -93,10 +93,11 @@ extractor:
     queue-capacity: "\${ASYNC_QUEUE_CAPACITY:10}"
   export:
     storage-path: "\${STORAGE_PATH:./build/extractions}"
-    multipart-max-file-size: "\${MULTIPART_MAX_FILE_SIZE:52428800}"
-    avg-row-size-organizations: "\${AVG_ROW_SIZE_ORGANIZATIONS:500}"
-    broker-ipa-code: "\${BROKER_IPA_CODE:\${PA_COD_IPA_ENTE_PREDEFINITO:}}"
-    broker-cf: "\${BROKER_CF:\${PA_IDENTIFICATIVO_INTERMEDIARIO_PA:}}"
+    broker-cf: "\${BROKER_CF:\${PA_IDENTIFICATIVO_INTERMEDIARIO_PA:00123456789}}"
+    broker-ipa-code: "\${BROKER_IPA_CODE:\${PA_COD_IPA_ENTE_PREDEFINITO:IPA_DEFAULT}}"
+    file-type-configurations:
+      ORGANIZATIONS:
+        export-page-size: "\${EXPORT_PAGE_SIZE_ORGANIZATIONS:1000}"
   basic-auth:
     username: "\${CLIENT_ID:client}"
     password: "\${CLIENT_SECRET:secret}"

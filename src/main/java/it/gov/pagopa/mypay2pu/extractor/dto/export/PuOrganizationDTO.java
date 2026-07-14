@@ -9,6 +9,7 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
@@ -17,7 +18,10 @@ import java.time.LocalDate;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class PuOrganizationDTO {
+@EqualsAndHashCode(callSuper = false)
+public class PuOrganizationDTO implements CsvExportDto {
+
+  public static final String VERSION = "1_0";
 
   @CsvBindByName(column = "ipa_code")
   @NotBlank
