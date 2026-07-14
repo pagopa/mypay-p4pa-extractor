@@ -7,6 +7,7 @@ import it.gov.pagopa.mypay2pu.extractor.dto.export.CsvExportDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
@@ -15,7 +16,13 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode(callSuper = false)
 public class TestCsv implements CsvExportDto {
+    @Override
+    public String getZipVersion() {
+        return "1_0";
+    }
+
     @CsvBindByName(column = "Column1", required = true)
     private String column1;
     @CsvBindByName(column = "Column2", required = true)

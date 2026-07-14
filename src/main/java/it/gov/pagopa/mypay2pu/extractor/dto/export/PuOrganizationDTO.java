@@ -1,7 +1,6 @@
 package it.gov.pagopa.mypay2pu.extractor.dto.export;
 
 import com.opencsv.bean.CsvBindByName;
-import it.gov.pagopa.mypay2pu.extractor.enums.ExportFileVersion;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -10,6 +9,7 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
@@ -18,8 +18,13 @@ import java.time.LocalDate;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 public class PuOrganizationDTO implements CsvExportDto {
-  public static final String ZIP_VERSION = ExportFileVersion.V1_0.getValue();
+
+  @Override
+  public String getZipVersion() {
+    return "1_0";
+  }
 
   @CsvBindByName(column = "ipa_code")
   @NotBlank

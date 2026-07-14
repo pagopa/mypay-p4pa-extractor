@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Positive;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.util.StringUtils;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.Map;
@@ -18,13 +18,9 @@ public record ExtractorExportProperties(
   @Positive long multipartMaxFileSize,
   @Positive int exportPageSize,
   @NotBlank String brokerCf,
-  String brokerIpaCode,
-  @NotEmpty Map<MigrationFileType, @Valid FileTypeConfiguration> fileTypeConfigurations
-) {
-
-  public ExtractorExportProperties {
-    brokerIpaCode = StringUtils.hasText(brokerIpaCode) ? brokerIpaCode : null;
-  }
+  @NotBlank String brokerIpaCode,
+  @NestedConfigurationProperty
+  @NotEmpty Map<MigrationFileType, @Valid FileTypeConfiguration> fileTypeConfigurations) {
 
   public FileTypeConfiguration resolveFileTypeConfiguration(MigrationFileType migrationFileType) {
     FileTypeConfiguration configuration = fileTypeConfigurations != null
