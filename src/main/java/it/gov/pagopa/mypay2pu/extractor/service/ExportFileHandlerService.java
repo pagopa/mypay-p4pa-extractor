@@ -39,7 +39,7 @@ public class ExportFileHandlerService {
 
     ExportFileResult exportFileResult;
     try {
-      exportFileResult = dataExportFacadeService.executeExport(extractionId, request.getFileTypes());
+      exportFileResult = dataExportFacadeService.executeExport(extractionId, request);
     } catch (Exception e) {
       log.error("Error processing extraction {}", extractionId, e);
       exportFileResult = new ExportFileResult(List.of(), e.getMessage());
