@@ -7,31 +7,29 @@ import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.service.FileArchiverService;
 import it.gov.pagopa.mypay2pu.extractor.service.files.CsvService;
-import it.gov.pagopa.mypay2pu.extractor.utils.AESUtils;
+import it.gov.pagopa.mypay2pu.extractor.utils.FileUtils;
 import jakarta.validation.Validator;
-import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Supplier;
 
-public abstract class BaseExportProcessingService<E, C extends CsvExportDto> {
+import static it.gov.pagopa.mypay2pu.extractor.utils.Constants.ZONEID;
+
+public abstract class BaseExportProcessingService<M, C extends CsvExportDto> {
 
   private final CsvService csvService;
   private final FileArchiverService fileArchiverService;
   private final Validator validator;
   private final ExtractorExportProperties exportProperties;
 
-  protected BaseExportProcessingService(
-    CsvService csvService,
-    FileArchiverService fileArchiverService,
-    Validator validator,
-    ExtractorExportProperties exportProperties
-  ) {
+  protected BaseExportProcessingService(CsvService csvService,
+                                        FileArchiverService fileArchiverService,
+                                        Validator validator,
+                                        ExtractorExportProperties exportProperties) {
     this.csvService = csvService;
     this.fileArchiverService = fileArchiverService;
     this.validator = validator;
@@ -42,51 +40,41 @@ public abstract class BaseExportProcessingService<E, C extends CsvExportDto> {
     ExtractorExportProperties.FileTypeConfiguration configuration =
       exportProperties.resolveFileTypeConfiguration(getMigrationFileType());
     Path extractionDirectory = Path.of(exportProperties.storagePath()).resolve(extractionId);
-    String exportName = getMigrationFileType().name().toLowerCase(Locale.ROOT) + "_" + getZipVersion();
-    Path workingDirectory = extractionDirectory.resolve(".work").resolve(exportName);
+    Path workingDirectory = FileUtils.createWorkingDirectory(extractionDirectory, getMigrationFileType().name().toLowerCase(Locale.ROOT));
+
+    String exportName = "%s-%s-%s-%s".formatted(
+      exportProperties.brokerIpaCode(),
+      getMigrationFileType().name(),
+      LocalDateTime.now(ZONEID).format(FileUtils.FILE_TIMESTAMP_FORMATTER),
+      getZipVersion()
+    );
     Path csvFilePath = workingDirectory.resolve(exportName + ".csv");
 
     try (CsvRowErrorCollector errorCollector = new CsvRowErrorCollector(csvService, csvFilePath)) {
-      Supplier<List<C>> pagedRows = new BufferedPageSupplier<>(
-        createDataSupplier(request, configuration.exportPageSize()),
-        configuration.exportPageSize()
-      );
-      Supplier<List<C>> validatedRows = new CsvValidatedRowSupplier<>(pagedRows, validator, errorCollector);
+      Supplier<List<C>> exportRowsSupplier = buildExportRowsSupplier(request, configuration.exportPageSize());
+      Supplier<List<C>> validatedRowsSupplier = new CsvValidatedRowSupplier<>(exportRowsSupplier, validator, errorCollector);
+      Supplier<List<C>> bufferedRowsSupplier = new BufferedPageSupplier<>(validatedRowsSupplier, configuration.exportPageSize());
 
-      csvService.createCsv(csvFilePath, getDtoClass(), validatedRows, getZipVersion());
-      List<Path> filesToArchive = new ArrayList<>();
-      filesToArchive.add(csvFilePath);
-      errorCollector.writeToFile(csvFilePath).ifPresent(filesToArchive::add);
+      // TODO follow-up: split large exports into multiple CSV parts instead of a single archive.
+      csvService.createCsv(csvFilePath, getDtoClass(), bufferedRowsSupplier, getZipVersion());
 
+      errorCollector.writeToFile(csvFilePath);
       Path archivePath = workingDirectory.resolve(exportName + ".zip");
-      fileArchiverService.compressAndArchive(filesToArchive, archivePath, extractionDirectory);
-      return new ExportFileResult(List.of(resolveArchiveName(extractionDirectory, archivePath)), null);
+      fileArchiverService.compressAndArchive(List.of(csvFilePath), archivePath, extractionDirectory);
+      return new ExportFileResult(List.of(archivePath.getFileName().toString()), null);
     } catch (IOException e) {
       throw new IllegalStateException("Cannot generate export for " + getMigrationFileType(), e);
+    } finally {
+      FileUtils.deleteRecursively(workingDirectory);
     }
   }
 
-  private Supplier<List<C>> createDataSupplier(ExtractionRequest request, int pageSize) {
-    return new Supplier<>() {
-      private int offset;
-
-      @Override
-      public List<C> get() {
-        List<E> entities = retrieveData(request, pageSize, offset);
-        if (CollectionUtils.isEmpty(entities)) {
-          return List.of();
-        }
-        offset += entities.size();
-        return entities.stream().map(BaseExportProcessingService.this::toExportableEntity).toList();
-      }
-    };
-  }
-
-  private String resolveArchiveName(Path extractionDirectory, Path archivePath) {
-    if (Files.exists(extractionDirectory.resolve(archivePath.getFileName()))) {
-      return archivePath.getFileName().toString();
-    }
-    return archivePath.getFileName() + AESUtils.CIPHER_EXTENSION;
+  private Supplier<List<C>> buildExportRowsSupplier(ExtractionRequest request, int pageSize) {
+    return new PaginatedExportRowsSupplier<>(
+      (limit, offset) -> retrieveData(request, limit, offset),
+      this::toExportableEntity,
+      pageSize
+    );
   }
 
   protected abstract MigrationFileType getMigrationFileType();
@@ -95,7 +83,7 @@ public abstract class BaseExportProcessingService<E, C extends CsvExportDto> {
 
   protected abstract String getZipVersion();
 
-  protected abstract C toExportableEntity(E entity);
+  protected abstract C toExportableEntity(M model);
 
-  protected abstract List<E> retrieveData(ExtractionRequest request, int pageSize, int offset);
+  protected abstract List<M> retrieveData(ExtractionRequest request, int pageSize, int offset);
 }

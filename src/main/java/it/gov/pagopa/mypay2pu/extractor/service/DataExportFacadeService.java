@@ -3,7 +3,7 @@ package it.gov.pagopa.mypay2pu.extractor.service;
 import it.gov.pagopa.mypay2pu.extractor.dto.ExportFileResult;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.exception.ExportFileTypeNotSupportedException;
-import it.gov.pagopa.mypay2pu.extractor.service.export.OrganizationExportProcessingService;
+import it.gov.pagopa.mypay2pu.extractor.service.export.organization.OrganizationExportProcessingService;
 import org.springframework.stereotype.Component;
 
 @Component

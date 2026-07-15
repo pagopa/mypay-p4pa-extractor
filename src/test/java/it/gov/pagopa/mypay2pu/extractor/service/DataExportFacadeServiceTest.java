@@ -4,9 +4,11 @@ import it.gov.pagopa.mypay2pu.extractor.dto.ExportFileResult;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.exception.ExportFileTypeNotSupportedException;
-import it.gov.pagopa.mypay2pu.extractor.service.export.OrganizationExportProcessingService;
+import it.gov.pagopa.mypay2pu.extractor.service.export.organization.OrganizationExportProcessingService;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -14,8 +16,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class DataExportFacadeServiceTest {
@@ -23,9 +24,20 @@ class DataExportFacadeServiceTest {
   @Mock
   private OrganizationExportProcessingService organizationExportProcessingServiceMock;
 
+  private DataExportFacadeService service;
+
+  @BeforeEach
+  void setUp() {
+    service = new DataExportFacadeService(organizationExportProcessingServiceMock);
+  }
+
+  @AfterEach
+  void tearDown() {
+    verifyNoMoreInteractions(organizationExportProcessingServiceMock);
+  }
+
   @Test
   void whenExecuteOrganizationsExportThenDelegateToOrganizationProcessor() {
-    DataExportFacadeService service = new DataExportFacadeService(organizationExportProcessingServiceMock);
     ExtractionRequest request = new ExtractionRequest("IPA_CODE", MigrationFileType.ORGANIZATIONS);
     ExportFileResult expected = new ExportFileResult(List.of("organizations_1_0.zip"), null);
     when(organizationExportProcessingServiceMock.executeExport("extraction-id", request)).thenReturn(expected);
@@ -33,12 +45,10 @@ class DataExportFacadeServiceTest {
     ExportFileResult result = service.executeExport("extraction-id", request);
 
     assertEquals(expected, result);
-    verify(organizationExportProcessingServiceMock).executeExport("extraction-id", request);
   }
 
   @Test
   void whenExecuteExportThenRejectUnsupportedFileType() {
-    DataExportFacadeService service = new DataExportFacadeService(organizationExportProcessingServiceMock);
     ExtractionRequest request = new ExtractionRequest("IPA_CODE", MigrationFileType.DEBT_POSITIONS);
 
     ExportFileTypeNotSupportedException exception = assertThrows(

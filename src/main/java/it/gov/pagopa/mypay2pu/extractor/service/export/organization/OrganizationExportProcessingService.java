@@ -1,4 +1,4 @@
-package it.gov.pagopa.mypay2pu.extractor.service.export;
+package it.gov.pagopa.mypay2pu.extractor.service.export.organization;
 
 import it.gov.pagopa.mypay2pu.extractor.config.ExtractorExportProperties;
 import it.gov.pagopa.mypay2pu.extractor.dao.OrganizationDao;
@@ -8,6 +8,7 @@ import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.mapper.organization.OrganizationMapper;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.Organization;
 import it.gov.pagopa.mypay2pu.extractor.service.FileArchiverService;
+import it.gov.pagopa.mypay2pu.extractor.service.export.BaseExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.files.CsvService;
 import jakarta.validation.Validator;
 import org.springframework.stereotype.Service;
