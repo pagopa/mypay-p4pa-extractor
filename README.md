@@ -206,6 +206,8 @@ To customize them, add to the classpath a resource with the same path as the que
 | PU Entity | Resource | Parameters | Description |
 | ------------ | ------------------------- | ------------------------------------------------ | ----------------------------- |
 | organization | `/db/mypay/organization/organization.sql` | <li>ipaCode: organization IPA code (nullable)<br><li>modifiedFrom: extraction start date at 00:00 (nullable)<br><li>modifiedToExclusive: extraction end date +1 day at 00:00 (nullable)<br><li>limit: page size (> 0)<br><li>offset: page start (>= 0, nullable) | Organization entity extractor |
+| org_sil_services (paid notification outcome) | `/db/mypay/org-sil-service/paid-notification-outcome.sql` | <li>codIpaEnte: organization IPA code (nullable)<br><li>limit: page size (> 0)<br><li>offset: page start (>= 0, nullable) | ORG_SIL_SERVICES extractor for `PAID_NOTIFICATION_OUTCOME` source (`mygov_ente_sil`) |
+| org_sil_services (actualization) | `/db/mypay/org-sil-service/actualization.sql` | <li>codIpaEnte: organization IPA code (nullable)<br><li>limit: page size (> 0)<br><li>offset: page start (>= 0, nullable) | ORG_SIL_SERVICES extractor for `ACTUALIZATION` source (`mygov_ente_tipo_dovuto`) |
 
 ### MyPivot
 
