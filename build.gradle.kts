@@ -2,6 +2,7 @@ import com.github.jk1.license.filter.SpdxLicenseBundleNormalizer
 import com.github.jk1.license.render.XmlReportRenderer
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
 
 plugins {
   java
@@ -146,7 +147,8 @@ tasks.register("dependenciesBuild") {
   description = "grouping all together automatically generate code tasks"
 
   dependsOn(
-    "openApiGenerate"
+    "openApiGenerate",
+    "openApiGenerateORGANIZATION"
   )
 }
 
@@ -184,4 +186,37 @@ openApiGenerate {
       "additionalModelTypeAnnotations" to "@lombok.experimental.SuperBuilder(toBuilder = true)"
     )
   )
+}
+
+tasks.register<GenerateTask>("openApiGenerateORGANIZATION") {
+  group = "AutomaticallyGeneratedCode"
+  description = "Generates the destination migration system (p4pa-organization) models, including its enums, used to translate extracted DB values into the CSV values expected at import time."
+
+  generatorName.set("java")
+  remoteInputSpec.set("https://raw.githubusercontent.com/pagopa/p4pa-organization/refs/heads/develop/openapi/generated.openapi.json")
+  outputDir.set("$projectDir/build/generated")
+  invokerPackage.set("it.gov.pagopa.pu.organization.generated")
+  apiPackage.set("it.gov.pagopa.pu.organization.client.generated")
+  modelPackage.set("it.gov.pagopa.pu.organization.dto.generated")
+  configOptions.set(
+    mapOf(
+      "swaggerAnnotations" to "false",
+      "openApiNullable" to "false",
+      "dateLibrary" to "java8",
+      "serializableModel" to "true",
+      "useSpringBoot4" to "true",
+      "useJackson3" to "true",
+      "useJakartaEe" to "true",
+      "useOneOfInterfaces" to "true",
+      "useBeanValidation" to "true",
+      "serializationLibrary" to "jackson",
+      "generateSupportingFiles" to "true",
+      "generateConstructorWithAllArgs" to "true",
+      "generatedConstructorWithRequiredArgs" to "true",
+      "enumPropertyNaming" to "original",
+      "additionalModelTypeAnnotations" to "@lombok.experimental.SuperBuilder(toBuilder = true)"
+    )
+  )
+  library.set("resttemplate")
+  workerIsolation.set("process")
 }

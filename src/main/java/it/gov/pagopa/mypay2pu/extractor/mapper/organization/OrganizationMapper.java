@@ -11,10 +11,19 @@ public class OrganizationMapper {
 
   private final OrganizationDao organizationDao;
   private final ExtractorExportProperties exportProperties;
+  private final OrganizationStatusCsvConverter statusCsvConverter;
+  private final OrganizationAdditionalLanguageCsvConverter additionalLanguageCsvConverter;
 
-  public OrganizationMapper(OrganizationDao organizationDao, ExtractorExportProperties exportProperties) {
+  public OrganizationMapper(
+    OrganizationDao organizationDao,
+    ExtractorExportProperties exportProperties,
+    OrganizationStatusCsvConverter statusCsvConverter,
+    OrganizationAdditionalLanguageCsvConverter additionalLanguageCsvConverter
+  ) {
     this.organizationDao = organizationDao;
     this.exportProperties = exportProperties;
+    this.statusCsvConverter = statusCsvConverter;
+    this.additionalLanguageCsvConverter = additionalLanguageCsvConverter;
   }
 
   public PuOrganizationDTO map(Organization organization) {
@@ -30,12 +39,12 @@ public class OrganizationMapper {
       .segregationCode(organization.segregationCode())
       .cbillInterBankCode(organization.cbillInterBankCode())
       .orgLogo(organization.orgLogo())
-      .additionalLanguage(organization.additionalLanguage())
+      .additionalLanguage(additionalLanguageCsvConverter.toCsvValue(organization.additionalLanguage()))
       .startDate(organization.startDate())
       .flagNotifyIo(organization.flagNotifyIo())
       .flagNotifyIoBkp(organization.flagNotifyIoBkp())
       .flagNotifyOutcomePush(organization.flagNotifyOutcomePush())
-      .status(organization.status())
+      .status(statusCsvConverter.toCsvValue(organization.status()))
       .brokerCf(exportProperties.brokerCf())
       .brokerIpaCode(exportProperties.brokerIpaCode())
       .ioApiKey(organization.ioApiKey())

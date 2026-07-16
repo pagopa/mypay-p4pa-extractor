@@ -24,18 +24,30 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class OrganizationMapperTest {
 
+  private static final String TRANSLATED_STATUS = "TRANSLATED_STATUS";
+  private static final String TRANSLATED_ADDITIONAL_LANGUAGE = "TRANSLATED_ADDITIONAL_LANGUAGE";
+
   @Mock
   private OrganizationDao organizationDaoMock;
+  @Mock
+  private OrganizationStatusCsvConverter statusCsvConverterMock;
+  @Mock
+  private OrganizationAdditionalLanguageCsvConverter additionalLanguageCsvConverterMock;
   private OrganizationMapper organizationMapper;
 
   @BeforeEach
   void setUp() {
-    organizationMapper = new OrganizationMapper(organizationDaoMock, buildExportProperties("12345678901", "IPA_CODE"));
+    organizationMapper = new OrganizationMapper(
+      organizationDaoMock,
+      buildExportProperties("12345678901", "IPA_CODE"),
+      statusCsvConverterMock,
+      additionalLanguageCsvConverterMock
+    );
   }
 
   @AfterEach
   void assertNoMoreInteractions() {
-    verifyNoMoreInteractions(organizationDaoMock);
+    verifyNoMoreInteractions(organizationDaoMock, statusCsvConverterMock, additionalLanguageCsvConverterMock);
   }
 
   @Test
@@ -43,13 +55,17 @@ class OrganizationMapperTest {
     Organization organization = OrganizationFaker.buildOrganization();
 
     when(organizationDaoMock.isTreasuryEnabled(organization.ipaCode())).thenReturn(true);
+    when(statusCsvConverterMock.toCsvValue(organization.status())).thenReturn(TRANSLATED_STATUS);
+    when(additionalLanguageCsvConverterMock.toCsvValue(organization.additionalLanguage())).thenReturn(TRANSLATED_ADDITIONAL_LANGUAGE);
 
     PuOrganizationDTO result = organizationMapper.map(organization);
 
     assertEquals("12345678901", result.getBrokerCf());
     assertEquals("IPA_CODE", result.getBrokerIpaCode());
     assertEquals("true", result.getFlagTreasury());
-    TestUtils.reflectionEqualsByName(result, organization);
+    assertEquals(TRANSLATED_STATUS, result.getStatus());
+    assertEquals(TRANSLATED_ADDITIONAL_LANGUAGE, result.getAdditionalLanguage());
+    TestUtils.reflectionEqualsByName(result, organization, "status", "additionalLanguage");
     TestUtils.checkNotNullFields(result, "externalOrganizationId", "sendApiKey", "generateNoticeApiKey");
 
   }
@@ -57,17 +73,21 @@ class OrganizationMapperTest {
   @Test
   void mapShouldPreserveNullsAndTreasuryFlag() {
     ExtractorExportProperties exportProperties = buildExportProperties("12345678901", null);
-    organizationMapper = new OrganizationMapper(organizationDaoMock, exportProperties);
+    organizationMapper = new OrganizationMapper(organizationDaoMock, exportProperties, statusCsvConverterMock, additionalLanguageCsvConverterMock);
     Organization organization = OrganizationFaker.buildOrganizationWithNullOptionalFields();
 
     when(organizationDaoMock.isTreasuryEnabled(organization.ipaCode())).thenReturn(false);
+    when(statusCsvConverterMock.toCsvValue(organization.status())).thenReturn(TRANSLATED_STATUS);
+    when(additionalLanguageCsvConverterMock.toCsvValue(null)).thenReturn(null);
 
     PuOrganizationDTO result = organizationMapper.map(organization);
 
     assertEquals("12345678901", result.getBrokerCf());
     assertNull(result.getBrokerIpaCode());
     assertEquals("false", result.getFlagTreasury());
-    TestUtils.reflectionEqualsByName(result, organization, "externalOrganizationId", "brokerCf", "brokerIpaCode", "sendApiKey", "generateNoticeApiKey", "flagTreasury");
+    assertEquals(TRANSLATED_STATUS, result.getStatus());
+    assertNull(result.getAdditionalLanguage());
+    TestUtils.reflectionEqualsByName(result, organization, "externalOrganizationId", "brokerCf", "brokerIpaCode", "sendApiKey", "generateNoticeApiKey", "flagTreasury", "status", "additionalLanguage");
     TestUtils.checkNotNullFields(
       result,
       "externalOrganizationId",
