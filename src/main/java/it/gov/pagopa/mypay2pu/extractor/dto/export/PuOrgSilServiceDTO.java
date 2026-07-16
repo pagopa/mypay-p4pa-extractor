@@ -21,61 +21,61 @@ public class PuOrgSilServiceDTO implements CsvExportDto {
 
   public static final String VERSION = "1_0";
 
-  @CsvBindByName(column = "ipa_code")
+  @CsvBindByName(column = "codIpaEnte")
   @NotBlank
   @Size(max = 256)
   @Pattern(regexp = "^[A-Z0-9_]+$")
   private String ipaCode;
 
-  @CsvBindByName(column = "application_name")
+  @CsvBindByName(column = "nomeApplicazione")
   @NotBlank
   @Size(max = 255)
   private String applicationName;
 
-  @CsvBindByName(column = "service_type")
+  @CsvBindByName(column = "tipoServizio")
   @NotBlank
   @Size(max = 30)
   private String serviceType;
 
-  @CsvBindByName(column = "service_url")
+  @CsvBindByName(column = "urlServizio")
   @Size(max = 255)
   private String serviceUrl;
 
-  @CsvBindByName(column = "flag_legacy")
+  @CsvBindByName(column = "flagLegacy")
   @NotBlank
   @Size(max = 5)
   @Pattern(regexp = "^(true|false)$")
   private String flagLegacy;
 
-  @CsvBindByName(column = "legacy_jwt_kid")
+  @CsvBindByName(column = "legacyJwtKid")
   @Size(max = 50)
   private String legacyJwtKid;
 
-  @CsvBindByName(column = "legacy_jwt_subject")
+  @CsvBindByName(column = "legacyJwtSubject")
   @Size(max = 255)
   private String legacyJwtSubject;
 
-  @CsvBindByName(column = "legacy_jwt_issuer")
+  @CsvBindByName(column = "legacyJwtIssuer")
   @Size(max = 50)
   private String legacyJwtIssuer;
 
-  @CsvBindByName(column = "legacy_jwt_algorithm")
+  @CsvBindByName(column = "legacyJwtAlgorithm")
   @Size(max = 10)
   private String legacyJwtAlgorithm;
 
-  @CsvBindByName(column = "legacy_jwt_signing_key")
+  @CsvBindByName(column = "legacyJwtSigningKey")
   @Size(max = 255)
   private String legacyJwtSigningKey;
 
-  @CsvBindByName(column = "legacy_basic_auth_url")
+  @CsvBindByName(column = "legacyBasicAuthUrl")
   @Size(max = 255)
   private String legacyBasicAuthUrl;
 
-  @CsvBindByName(column = "legacy_basic_user")
+  @CsvBindByName(column = "legacyBasicUser")
   @Size(max = 255)
   private String legacyBasicUser;
 
-  @CsvBindByName(column = "legacy_basic_psw")
+  @CsvBindByName(column = "legacyBasicPsw")
   @Size(max = 255)
   private String legacyBasicPsw;
 }
