@@ -7,19 +7,25 @@ import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.service.FileArchiverService;
 import it.gov.pagopa.mypay2pu.extractor.service.files.CsvService;
-import it.gov.pagopa.mypay2pu.extractor.utils.FileUtils;
 import jakarta.validation.Validator;
+import org.springframework.util.FileSystemUtils;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import static it.gov.pagopa.mypay2pu.extractor.utils.Constants.ZONEID;
 
 public abstract class BaseExportProcessingService<M, C extends CsvExportDto> {
+
+  private static final DateTimeFormatter FILE_TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
   private final CsvService csvService;
   private final FileArchiverService fileArchiverService;
@@ -40,41 +46,74 @@ public abstract class BaseExportProcessingService<M, C extends CsvExportDto> {
     ExtractorExportProperties.FileTypeConfiguration configuration =
       exportProperties.resolveFileTypeConfiguration(getMigrationFileType());
     Path extractionDirectory = Path.of(exportProperties.storagePath()).resolve(extractionId);
-    Path workingDirectory = FileUtils.createWorkingDirectory(extractionDirectory, getMigrationFileType().name().toLowerCase(Locale.ROOT));
+    Path workingDirectory = Path.of(exportProperties.tempBaseDir()).resolve(extractionId)
+      .resolve(getMigrationFileType().name().toLowerCase(Locale.ROOT));
 
     String exportName = "%s-%s-%s-%s".formatted(
       exportProperties.brokerIpaCode(),
       getMigrationFileType().name(),
-      LocalDateTime.now(ZONEID).format(FileUtils.FILE_TIMESTAMP_FORMATTER),
+      LocalDateTime.now(ZONEID).format(FILE_TIMESTAMP_FORMATTER),
       getZipVersion()
     );
     Path csvFilePath = workingDirectory.resolve(exportName + ".csv");
 
     try (CsvRowErrorCollector errorCollector = new CsvRowErrorCollector(csvService, csvFilePath)) {
-      Supplier<List<C>> exportRowsSupplier = buildExportRowsSupplier(request, configuration.exportPageSize());
-      Supplier<List<C>> validatedRowsSupplier = new CsvValidatedRowSupplier<>(exportRowsSupplier, validator, errorCollector);
-      Supplier<List<C>> bufferedRowsSupplier = new BufferedPageSupplier<>(validatedRowsSupplier, configuration.exportPageSize());
+      Supplier<List<C>> decoratedRowsSupplier = buildDecoratedRowsSupplier(request, configuration.exportPageSize(), errorCollector);
 
-      // TODO follow-up: split large exports into multiple CSV parts instead of a single archive.
-      csvService.createCsv(csvFilePath, getDtoClass(), bufferedRowsSupplier, getZipVersion());
+      // TODO follow-up: P4ADEV-4905 split large exports into multiple CSV parts instead of a single archive.
+      csvService.createCsv(csvFilePath, getDtoClass(), decoratedRowsSupplier, getZipVersion());
 
-      errorCollector.writeToFile(csvFilePath);
-      Path archivePath = workingDirectory.resolve(exportName + ".zip");
-      fileArchiverService.compressAndArchive(List.of(csvFilePath), archivePath, extractionDirectory);
-      return new ExportFileResult(List.of(archivePath.getFileName().toString()), null);
+      Optional<Path> errorFilePath = errorCollector.writeToFile(csvFilePath);
+      List<String> archivedFiles = archiveExportFiles(csvFilePath, errorFilePath, exportName, extractionDirectory, workingDirectory);
+      return new ExportFileResult(archivedFiles, null);
     } catch (IOException e) {
       throw new IllegalStateException("Cannot generate export for " + getMigrationFileType(), e);
     } finally {
-      FileUtils.deleteRecursively(workingDirectory);
+      cleanupWorkingDirectory(workingDirectory);
     }
   }
 
-  private Supplier<List<C>> buildExportRowsSupplier(ExtractionRequest request, int pageSize) {
-    return new PaginatedExportRowsSupplier<>(
+  private Supplier<List<C>> buildDecoratedRowsSupplier(ExtractionRequest request,
+                                                       int pageSize,
+                                                       CsvRowErrorCollector errorCollector) {
+    Supplier<List<C>> exportRowsSupplier = new PaginatedExportRowsSupplier<>(
       (limit, offset) -> retrieveData(request, limit, offset),
       this::toExportableEntity,
       pageSize
     );
+    Supplier<List<C>> validatedRowsSupplier = new CsvValidatedRowSupplier<>(exportRowsSupplier, validator, errorCollector);
+    return new BufferedPageSupplier<>(validatedRowsSupplier, pageSize);
+  }
+
+  private List<String> archiveExportFiles(Path csvFilePath,
+                                          Optional<Path> errorFilePath,
+                                          String exportName,
+                                          Path extractionDirectory,
+                                          Path workingDirectory) throws IOException {
+    List<String> archivedFileNames = new ArrayList<>(2);
+
+    Path exportZipPath = workingDirectory.resolve(exportName + ".zip");
+    fileArchiverService.compressAndArchive(List.of(csvFilePath), exportZipPath, extractionDirectory);
+    archivedFileNames.add(exportZipPath.getFileName().toString());
+
+    if (errorFilePath.isPresent()) {
+      Path errorCsvPath = errorFilePath.get();
+      String errorZipName = errorCsvPath.getFileName().toString().replace(".csv", ".zip");
+      Path errorZipPath = workingDirectory.resolve(errorZipName);
+      fileArchiverService.compressAndArchive(List.of(errorCsvPath), errorZipPath, extractionDirectory);
+      archivedFileNames.add(errorZipPath.getFileName().toString());
+    }
+    return archivedFileNames;
+  }
+
+  private void cleanupWorkingDirectory(Path workingDirectory) {
+    if (workingDirectory == null || !Files.exists(workingDirectory)) {
+      return;
+    }
+    boolean deleted = FileSystemUtils.deleteRecursively(workingDirectory.toFile());
+    if (!deleted && Files.exists(workingDirectory)) {
+      throw new IllegalStateException("Cannot clean temporary export directory " + workingDirectory);
+    }
   }
 
   protected abstract MigrationFileType getMigrationFileType();

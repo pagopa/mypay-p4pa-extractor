@@ -15,6 +15,7 @@ import java.util.Map;
 @Validated
 public record ExtractorExportProperties(
   @NotBlank String storagePath,
+  @NotBlank String tempBaseDir,
   @NotBlank String brokerCf,
   @NotBlank String brokerIpaCode,
   @NestedConfigurationProperty

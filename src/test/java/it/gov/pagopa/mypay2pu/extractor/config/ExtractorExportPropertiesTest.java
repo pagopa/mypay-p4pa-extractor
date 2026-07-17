@@ -36,6 +36,7 @@ class ExtractorExportPropertiesTest {
         ExtractorExportProperties properties = context.getBean(ExtractorExportProperties.class);
 
         assertEquals("/tmp/extractions", properties.storagePath());
+        assertEquals("/tmp", properties.tempBaseDir());
         assertEquals("12345678901", properties.brokerCf());
         assertEquals("IPA_CODE", properties.brokerIpaCode());
         assertEquals(1000, properties.resolveFileTypeConfiguration(MigrationFileType.ORGANIZATIONS).exportPageSize());
@@ -47,8 +48,10 @@ class ExtractorExportPropertiesTest {
     contextRunner
       .withPropertyValues(
         "extractor.export.storage-path=/tmp/extractions",
+        "extractor.export.temp-base-dir=/tmp",
         "extractor.export.broker-cf=12345678901",
-        "extractor.export.file-type-configurations.ORGANIZATIONS.export-page-size=500"
+        "extractor.export.broker-ipa-code=IPA_CODE",
+        "extractor.export.file-type-configurations.ORGANIZATIONS.export-page-size=0"
       )
       .run(context -> {
         Throwable startupFailure = context.getStartupFailure();
@@ -63,7 +66,9 @@ class ExtractorExportPropertiesTest {
     contextRunner
       .withPropertyValues(
         "extractor.export.storage-path=/tmp/extractions",
-        "extractor.export.broker-cf=12345678901"
+        "extractor.export.temp-base-dir=/tmp",
+        "extractor.export.broker-cf=12345678901",
+        "extractor.export.broker-ipa-code=IPA_CODE"
       )
       .run(context -> {
         Throwable startupFailure = context.getStartupFailure();
@@ -78,7 +83,9 @@ class ExtractorExportPropertiesTest {
     contextRunner
       .withPropertyValues(
         "extractor.export.storage-path=/tmp/extractions",
+        "extractor.export.temp-base-dir=/tmp",
         "extractor.export.broker-cf=12345678901",
+        "extractor.export.broker-ipa-code=IPA_CODE",
         "extractor.export.file-type-configurations.ORGANIZATIONS.export-page-size=0"
       )
       .run(context -> {
@@ -93,6 +100,7 @@ class ExtractorExportPropertiesTest {
   void whenRequestedTypeIsNotConfiguredThenThrowClearError() {
     ExtractorExportProperties properties = new ExtractorExportProperties(
       "/tmp/extractions",
+      "/tmp",
       "12345678901",
       "IPA_CODE",
       Map.of(MigrationFileType.ORG_SIL_SERVICES, new ExtractorExportProperties.FileTypeConfiguration(500))
@@ -112,6 +120,7 @@ class ExtractorExportPropertiesTest {
   private String[] validPropertyValues() {
     return new String[]{
       "extractor.export.storage-path=/tmp/extractions",
+      "extractor.export.temp-base-dir=/tmp",
       "extractor.export.broker-cf=12345678901",
       "extractor.export.broker-ipa-code=IPA_CODE",
       "extractor.export.file-type-configurations.ORGANIZATIONS.export-page-size=1000"
