@@ -23,6 +23,25 @@ import java.util.function.Supplier;
 
 import static it.gov.pagopa.mypay2pu.extractor.utils.Constants.ZONEID;
 
+/**
+ * Base service for CSV export generation and archiving.
+ *
+ * <p>The export workflow performs the following steps:
+ * <ol>
+ *   <li>Retrieves paginated data from the underlying source.</li>
+ *   <li>Maps each domain entity into a CSV export DTO.</li>
+ *   <li>Validates generated records and collects validation errors.</li>
+ *   <li>Generates the CSV file.</li>
+ *   <li>Archives the generated CSV and any error report into ZIP files.</li>
+ *   <li>Cleans up temporary working resources.</li>
+ * </ol>
+ *
+ * <p>Concrete implementations are responsible for retrieving source data and
+ * converting domain entities into exportable DTOs.
+ *
+ * @param <M> source model type retrieved from the data source
+ * @param <C> CSV export DTO type
+ */
 public abstract class BaseExportProcessingService<M, C extends CsvExportDto> {
 
   private static final DateTimeFormatter FILE_TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
@@ -42,7 +61,19 @@ public abstract class BaseExportProcessingService<M, C extends CsvExportDto> {
     this.exportProperties = exportProperties;
   }
 
-  public final ExportFileResult executeExport(String extractionId, ExtractionRequest request) {
+  /**
+   * Executes the complete export process for the provided extraction request.
+   *
+   * <p>The generated CSV file is validated, archived into a ZIP file and stored
+   * in the configured extraction directory. If row validation errors are found,
+   * an additional ZIP archive containing the error report is generated.
+   *
+   * @param extractionId unique identifier of the extraction execution
+   * @param request extraction request containing filtering criteria
+   * @return information about the generated archive files
+   * @throws IllegalStateException if the export generation or file handling fails
+   */
+    public final ExportFileResult executeExport(String extractionId, ExtractionRequest request) {
     ExtractorExportProperties.FileTypeConfiguration configuration =
       exportProperties.resolveFileTypeConfiguration(getMigrationFileType());
     Path extractionDirectory = Path.of(exportProperties.storagePath()).resolve(extractionId);
@@ -73,6 +104,14 @@ public abstract class BaseExportProcessingService<M, C extends CsvExportDto> {
     }
   }
 
+  /**
+   * Builds the supplier chain used to retrieve, transform and validate export rows.
+   *
+   * @param request extraction request
+   * @param pageSize page size used for paginated retrieval
+   * @param errorCollector collector used to store row validation errors
+   * @return supplier providing validated export rows
+   */
   private Supplier<List<C>> buildDecoratedRowsSupplier(ExtractionRequest request,
                                                        int pageSize,
                                                        CsvRowErrorCollector errorCollector) {
@@ -85,6 +124,20 @@ public abstract class BaseExportProcessingService<M, C extends CsvExportDto> {
     return new BufferedPageSupplier<>(validatedRowsSupplier, pageSize);
   }
 
+  /**
+   * Archives generated export artifacts into ZIP files.
+   *
+   * <p>The main CSV is always archived. If an error CSV is present, it is archived
+   * separately and included in the returned file list.
+   *
+   * @param csvFilePath generated export CSV
+   * @param errorFilePath optional error CSV
+   * @param exportName export base name
+   * @param extractionDirectory target archive directory
+   * @param workingDirectory temporary working directory
+   * @return names of archived files
+   * @throws IOException if archive creation fails
+   */
   private List<String> archiveExportFiles(Path csvFilePath,
                                           Optional<Path> errorFilePath,
                                           String exportName,
@@ -106,6 +159,12 @@ public abstract class BaseExportProcessingService<M, C extends CsvExportDto> {
     return archivedFileNames;
   }
 
+  /**
+   * Removes the temporary working directory used during export generation.
+   *
+   * @param workingDirectory directory to delete
+   * @throws IllegalStateException if the directory cannot be removed
+   */
   private void cleanupWorkingDirectory(Path workingDirectory) {
     if (workingDirectory == null || !Files.exists(workingDirectory)) {
       return;
@@ -116,13 +175,42 @@ public abstract class BaseExportProcessingService<M, C extends CsvExportDto> {
     }
   }
 
+  /**
+   * Returns the migration file type managed by the implementation.
+   *
+   * @return migration file type
+   */
   protected abstract MigrationFileType getMigrationFileType();
 
+  /**
+   * Returns the DTO class used for CSV generation.
+   *
+   * @return export DTO class
+   */
   protected abstract Class<C> getDtoClass();
 
+  /**
+   * Returns the ZIP version identifier to be included in generated file names.
+   *
+   * @return ZIP version
+   */
   protected abstract String getZipVersion();
 
+  /**
+   ** Converts a source domain model i*to its exportable CSV representation.
+   *
+   * @param model source model
+   * @return export DTO
+   */
   protected abstract C toExportableEntity(M model);
 
+  /**
+   * Retrieves a page of source data to be exported.
+   *
+   * @param request extraction request
+   * @param pageSize maximum number of records to retrieve
+   * @param offset starting offset for pagination
+   * @return list of retrieved records
+   */
   protected abstract List<M> retrieveData(ExtractionRequest request, int pageSize, int offset);
 }
