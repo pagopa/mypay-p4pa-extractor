@@ -39,10 +39,10 @@ import static it.gov.pagopa.mypay2pu.extractor.utils.Constants.ZONEID;
  * <p>Concrete implementations are responsible for retrieving source data and
  * converting domain entities into exportable DTOs.
  *
- * @param <M> source model type retrieved from the data source
+ * @param <ExportModel> the interface of the source model type retrieved from the data source
  * @param <C> CSV export DTO type
  */
-public abstract class BaseExportProcessingService<M, C extends CsvExportDto> {
+public abstract class BaseExportProcessingService<ExportModel, C extends CsvExportDto> {
 
   private static final DateTimeFormatter FILE_TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
@@ -89,13 +89,13 @@ public abstract class BaseExportProcessingService<M, C extends CsvExportDto> {
     Path csvFilePath = workingDirectory.resolve(exportName + ".csv");
 
     try (CsvRowErrorCollector errorCollector = new CsvRowErrorCollector(csvService, csvFilePath)) {
-      Supplier<List<C>> decoratedRowsSupplier = buildDecoratedRowsSupplier(request, configuration.exportPageSize(), errorCollector);
+      Supplier<List<C>> rowsSupplier  = buildRowsSupplier(request, configuration.exportPageSize(), errorCollector);
 
       // TODO follow-up: P4ADEV-4905 split large exports into multiple CSV parts instead of a single archive.
-      csvService.createCsv(csvFilePath, getDtoClass(), decoratedRowsSupplier, getZipVersion());
+      csvService.createCsv(csvFilePath, getDtoClass(), rowsSupplier , getZipVersion());
 
       Optional<Path> errorFilePath = errorCollector.writeToFile(csvFilePath);
-      List<String> archivedFiles = archiveExportFiles(csvFilePath, errorFilePath, exportName, extractionDirectory, workingDirectory);
+      List<String> archivedFiles = archiveExportFiles(List.of(csvFilePath), errorFilePath, exportName, extractionDirectory, workingDirectory);
       return new ExportFileResult(archivedFiles, null);
     } catch (IOException e) {
       throw new IllegalStateException("Cannot generate export for " + getMigrationFileType(), e);
@@ -112,9 +112,9 @@ public abstract class BaseExportProcessingService<M, C extends CsvExportDto> {
    * @param errorCollector collector used to store row validation errors
    * @return supplier providing validated export rows
    */
-  private Supplier<List<C>> buildDecoratedRowsSupplier(ExtractionRequest request,
-                                                       int pageSize,
-                                                       CsvRowErrorCollector errorCollector) {
+  private Supplier<List<C>> buildRowsSupplier(ExtractionRequest request,
+                                              int pageSize,
+                                              CsvRowErrorCollector errorCollector) {
     Supplier<List<C>> exportRowsSupplier = new PaginatedExportRowsSupplier<>(
       (limit, offset) -> retrieveData(request, limit, offset),
       this::toExportableEntity,
@@ -130,7 +130,7 @@ public abstract class BaseExportProcessingService<M, C extends CsvExportDto> {
    * <p>The main CSV is always archived. If an error CSV is present, it is archived
    * separately and included in the returned file list.
    *
-   * @param csvFilePath generated export CSV
+   * @param csvFilePaths generated export CSVs
    * @param errorFilePath optional error CSV
    * @param exportName export base name
    * @param extractionDirectory target archive directory
@@ -138,7 +138,7 @@ public abstract class BaseExportProcessingService<M, C extends CsvExportDto> {
    * @return names of archived files
    * @throws IOException if archive creation fails
    */
-  private List<String> archiveExportFiles(Path csvFilePath,
+  private List<String> archiveExportFiles(List<Path> csvFilePaths,
                                           Optional<Path> errorFilePath,
                                           String exportName,
                                           Path extractionDirectory,
@@ -146,7 +146,7 @@ public abstract class BaseExportProcessingService<M, C extends CsvExportDto> {
     List<String> archivedFileNames = new ArrayList<>(2);
 
     Path exportZipPath = workingDirectory.resolve(exportName + ".zip");
-    fileArchiverService.compressAndArchive(List.of(csvFilePath), exportZipPath, extractionDirectory);
+    fileArchiverService.compressAndArchive(csvFilePaths, exportZipPath, extractionDirectory);
     archivedFileNames.add(exportZipPath.getFileName().toString());
 
     if (errorFilePath.isPresent()) {
@@ -202,7 +202,7 @@ public abstract class BaseExportProcessingService<M, C extends CsvExportDto> {
    * @param model source model
    * @return export DTO
    */
-  protected abstract C toExportableEntity(M model);
+  protected abstract C toExportableEntity(ExportModel model);
 
   /**
    * Retrieves a page of source data to be exported.
@@ -212,5 +212,5 @@ public abstract class BaseExportProcessingService<M, C extends CsvExportDto> {
    * @param offset starting offset for pagination
    * @return list of retrieved records
    */
-  protected abstract List<M> retrieveData(ExtractionRequest request, int pageSize, int offset);
+  protected abstract List<ExportModel> retrieveData(ExtractionRequest request, int pageSize, int offset);
 }
