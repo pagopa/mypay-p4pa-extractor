@@ -197,7 +197,7 @@ public abstract class BaseExportProcessingService<M, C extends CsvExportDto> {
   protected abstract String getZipVersion();
 
   /**
-   ** Converts a source domain model i*to its exportable CSV representation.
+   ** Converts a source domain model into its exportable CSV representation.
    *
    * @param model source model
    * @return export DTO
