@@ -7,8 +7,8 @@ import it.gov.pagopa.mypay2pu.extractor.exception.ExportFileTypeNotSupportedExce
 import it.gov.pagopa.mypay2pu.extractor.service.export.organization.OrganizationExportProcessingService;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.AfterEach;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -24,12 +24,8 @@ class DataExportFacadeServiceTest {
   @Mock
   private OrganizationExportProcessingService organizationExportProcessingServiceMock;
 
+  @InjectMocks
   private DataExportFacadeService service;
-
-  @BeforeEach
-  void setUp() {
-    service = new DataExportFacadeService(organizationExportProcessingServiceMock);
-  }
 
   @AfterEach
   void tearDown() {
