@@ -104,8 +104,9 @@ See [application.yml](src/main/resources/application.yml) for each configurable 
 #### 📦 Storage
 
 | ENV | DESCRIPTION | DEFAULT |
-|---|---|---|
-| `STORAGE_PATH` | Base path where extracted ZIP files are written (`<STORAGE_PATH>/<extractionId>/<fileType>_<date>_partN.zip`). **Must be a shared folder accessible by multiple extraction instances (WRITE_MANY/READ_MANY)** to support concurrent operations and distributed deployments. Files returned by `/extract/{id}/files` API are unencrypted (in clear); encryption is optional (`FILE_ENCRYPT_ENABLED`), and it is the responsibility of the operator to ensure temporary file handling and cleanup of sensitive data. | `/data/extractions` |
+|---|---|---------|
+| `STORAGE_PATH` | Base path where extracted ZIP files are written (`<STORAGE_PATH>/<extractionId>/<fileType>_<version>.zip`, with an optional `.cipher` suffix when encryption is enabled). **Must be a shared folder accessible by multiple extraction instances (WRITE_MANY/READ_MANY)** to support concurrent operations and distributed deployments. Files returned by `/extract/{id}/files` API are unencrypted (in clear); encryption is optional (`FILE_ENCRYPT_ENABLED`), and it is the responsibility of the operator to ensure temporary file handling and cleanup of sensitive data. | `tmp`   |
+| `TMP_FOLDER` | Absolute path towards temporary folder on file system | `/tmp`  |
 
 #### 🗄️ MyPay4 Database
 
