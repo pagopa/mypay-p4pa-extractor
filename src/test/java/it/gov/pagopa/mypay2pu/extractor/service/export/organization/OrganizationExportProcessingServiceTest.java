@@ -11,6 +11,8 @@ import it.gov.pagopa.mypay2pu.extractor.model.mp4.Organization;
 import it.gov.pagopa.mypay2pu.extractor.service.FileArchiverService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.CsvPartitionWriterService;
 import it.gov.pagopa.mypay2pu.extractor.service.files.CsvService;
+import it.gov.pagopa.mypay2pu.extractor.service.files.ZipFileService;
+import it.gov.pagopa.mypay2pu.extractor.utils.ZipUtils;
 import jakarta.validation.Validation;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,17 +25,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.zip.ZipInputStream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.inOrder;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -58,7 +56,7 @@ class OrganizationExportProcessingServiceTest {
       organizationMapperMock,
       csvService,
       new CsvPartitionWriterService(csvService),
-      new FileArchiverService(false, "test-password", new it.gov.pagopa.mypay2pu.extractor.service.files.ZipFileService()),
+      new FileArchiverService(false, "test-password", new ZipFileService()),
       Validation.buildDefaultValidatorFactory().getValidator(),
       exportProperties()
     );
@@ -101,11 +99,11 @@ class OrganizationExportProcessingServiceTest {
     assertTrue(Files.exists(exportArchivePath));
     assertTrue(Files.exists(errorArchivePath));
 
-    List<String> exportArchiveEntries = readZipEntries(exportArchivePath);
+    List<String> exportArchiveEntries = ZipUtils.readZipEntries(exportArchivePath);
     assertEquals(1, exportArchiveEntries.size());
     assertTrue(exportArchiveEntries.get(0).matches("IPA_CODE-ORGANIZATIONS-\\d{14}-1_0\\.csv"));
 
-    List<String> errorArchiveEntries = readZipEntries(errorArchivePath);
+    List<String> errorArchiveEntries = ZipUtils.readZipEntries(errorArchivePath);
     assertEquals(1, errorArchiveEntries.size());
     assertTrue(errorArchiveEntries.get(0).matches("IPA_CODE-ORGANIZATIONS-\\d{14}-1_0\\.errors\\.csv"));
     InOrder inOrder = inOrder(organizationDaoMock);
@@ -127,7 +125,7 @@ class OrganizationExportProcessingServiceTest {
 
     assertNull(result.error());
     Path archivePath = tempDir.resolve("IPA_CODE").resolve(result.files().get(0));
-    List<String> archiveEntries = readZipEntries(archivePath);
+    List<String> archiveEntries = ZipUtils.readZipEntries(archivePath);
     assertEquals(1, archiveEntries.size());
     assertTrue(archiveEntries.get(0).matches("IPA_CODE-ORGANIZATIONS-\\d{14}-1_0\\.csv"));
 
@@ -159,7 +157,7 @@ class OrganizationExportProcessingServiceTest {
     Path exportArchivePath = tempDir.resolve("IPA_CODE").resolve(exportFileName);
     assertTrue(Files.exists(exportArchivePath));
 
-    List<String> exportArchiveEntries = readZipEntries(exportArchivePath);
+    List<String> exportArchiveEntries = ZipUtils.readZipEntries(exportArchivePath);
     assertEquals(2, exportArchiveEntries.size());
     assertTrue(exportArchiveEntries.get(0).matches("IPA_CODE-ORGANIZATIONS-\\d{14}-1_0_part_001\\.csv"));
     assertTrue(exportArchiveEntries.get(1).matches("IPA_CODE-ORGANIZATIONS-\\d{14}-1_0_part_002\\.csv"));
@@ -239,16 +237,5 @@ class OrganizationExportProcessingServiceTest {
       .brokerIpaCode("IPA_CODE")
       .flagTreasury("false")
       .build();
-  }
-
-  private List<String> readZipEntries(Path archivePath) throws Exception {
-    List<String> archiveEntries = new ArrayList<>();
-    try (ZipInputStream zipInputStream = new ZipInputStream(Files.newInputStream(archivePath))) {
-      java.util.zip.ZipEntry zipEntry;
-      while ((zipEntry = zipInputStream.getNextEntry()) != null) {
-        archiveEntries.add(zipEntry.getName());
-      }
-    }
-    return archiveEntries;
   }
 }
