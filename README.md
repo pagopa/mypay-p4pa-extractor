@@ -187,6 +187,7 @@ See [application.yml](src/main/resources/application.yml) for each configurable 
 | `BROKER_CF` | Fiscal code of the broker/intermediary running the extraction (used as context metadata) | — |
 | `BROKER_IPA_CODE` | Optional IPA code of the broker/intermediary running the extraction | — |
 | `EXPORT_PAGE_SIZE_ORGANIZATIONS` | JDBC page size for `extractor.export.file-type-configurations.ORGANIZATIONS.export-page-size` | `1000` |
+| `EXPORT_PAGE_SIZE_ORG_SIL_SERVICES` | JDBC page size for `extractor.export.file-type-configurations.ORG_SIL_SERVICES.export-page-size` | `1000` |
 | `CSV_SEPARATOR_CHAR` | Separator character used when generating CSV files | `;` |
 | `CSV_QUOTE_CHAR` | Quote character used when generating CSV files | `"` |
 | `FILE_ENCRYPT_ENABLED` | Enable the encryption of the extracted files. **Files are returned unencrypted via the `/extract/{id}/files` API regardless of this setting.** When encryption is enabled, it is the responsibility of the operator to ensure secure temporary storage and cleanup of extracted data. | `false` |
