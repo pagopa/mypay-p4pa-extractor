@@ -186,11 +186,19 @@ See [application.yml](src/main/resources/application.yml) for each configurable 
 | `MYPIVOT_ENABLED` | Enable myPivot4 extraction (types 10/11/12). If `false`, Adapters related to MyPivot are skipped | `false` |
 | `BROKER_CF` | Fiscal code of the broker/intermediary running the extraction (used as context metadata) | — |
 | `BROKER_IPA_CODE` | Optional IPA code of the broker/intermediary running the extraction | — |
-| `EXPORT_PAGE_SIZE_ORGANIZATIONS` | JDBC page size for `extractor.export.file-type-configurations.ORGANIZATIONS.export-page-size` | `1000` |
-| `EXPORT_PAGE_SIZE_ORG_SIL_SERVICES` | JDBC page size for `extractor.export.file-type-configurations.ORG_SIL_SERVICES.export-page-size` | `1000` |
 | `CSV_SEPARATOR_CHAR` | Separator character used when generating CSV files | `;` |
 | `CSV_QUOTE_CHAR` | Quote character used when generating CSV files | `"` |
 | `FILE_ENCRYPT_ENABLED` | Enable the encryption of the extracted files. **Files are returned unencrypted via the `/extract/{id}/files` API regardless of this setting.** When encryption is enabled, it is the responsibility of the operator to ensure secure temporary storage and cleanup of extracted data. | `false` |
+
+##### 📌 Entity file type configurations
+
+Maximum number of records to write to an exported file before creating a new one.
+
+| ENV | DESCRIPTION | DEFAULT |
+|---|---|---|
+| `EXPORT_PAGE_SIZE_ORGANIZATIONS` | JDBC page size for `extractor.export.file-type-configurations.ORGANIZATIONS.export-page-size` | `1000` |
+| `EXPORT_PAGE_SIZE_ORG_SIL_SERVICES` | JDBC page size for `extractor.export.file-type-configurations.ORG_SIL_SERVICES.export-page-size` | `1000` |
+
 
 #### 🔑 Encryption keys
 
