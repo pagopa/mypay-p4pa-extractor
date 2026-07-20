@@ -192,12 +192,10 @@ See [application.yml](src/main/resources/application.yml) for each configurable 
 
 ##### 📌 Entity file type configurations
 
-Maximum number of records to write to an exported file before creating a new one.
-
 | ENV | DESCRIPTION | DEFAULT |
 |---|---|---|
-| `EXPORT_PAGE_SIZE_ORGANIZATIONS` | JDBC page size for `extractor.export.file-type-configurations.ORGANIZATIONS.export-page-size` | `1000` |
-| `EXPORT_PAGE_SIZE_ORG_SIL_SERVICES` | JDBC page size for `extractor.export.file-type-configurations.ORG_SIL_SERVICES.export-page-size` | `1000` |
+| `EXPORT_PAGE_SIZE_ORGANIZATIONS` | Maximum number of records to write to an exported file before creating a new one | `1000` |
+| `EXPORT_PAGE_SIZE_ORG_SIL_SERVICES` | Maximum number of records to write to an exported file before creating a new one | `1000` |
 
 
 #### 🔑 Encryption keys
