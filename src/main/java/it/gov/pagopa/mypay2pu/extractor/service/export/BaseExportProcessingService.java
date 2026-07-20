@@ -48,15 +48,18 @@ public abstract class BaseExportProcessingService<E extends ExportModel, C exten
   private static final DateTimeFormatter FILE_TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
   private final CsvService csvService;
+  private final CsvPartitionWriterService csvPartitionWriterService;
   private final FileArchiverService fileArchiverService;
   private final Validator validator;
   private final ExtractorExportProperties exportProperties;
 
   protected BaseExportProcessingService(CsvService csvService,
+                                        CsvPartitionWriterService csvPartitionWriterService,
                                         FileArchiverService fileArchiverService,
                                         Validator validator,
                                         ExtractorExportProperties exportProperties) {
     this.csvService = csvService;
+    this.csvPartitionWriterService = csvPartitionWriterService;
     this.fileArchiverService = fileArchiverService;
     this.validator = validator;
     this.exportProperties = exportProperties;
@@ -74,7 +77,7 @@ public abstract class BaseExportProcessingService<E extends ExportModel, C exten
    * @return information about the generated archive files
    * @throws IllegalStateException if the export generation or file handling fails
    */
-    public final ExportFileResult executeExport(String extractionId, ExtractionRequest request) {
+  public final ExportFileResult executeExport(String extractionId, ExtractionRequest request) {
     ExtractorExportProperties.FileTypeConfiguration configuration =
       exportProperties.resolveFileTypeConfiguration(getMigrationFileType());
     Path extractionDirectory = Path.of(exportProperties.storagePath()).resolve(extractionId);
@@ -90,13 +93,18 @@ public abstract class BaseExportProcessingService<E extends ExportModel, C exten
     Path csvFilePath = workingDirectory.resolve(exportName + ".csv");
 
     try (CsvRowErrorCollector errorCollector = new CsvRowErrorCollector(csvService, csvFilePath)) {
+      // exportPageSize intentionally drives both retrieval paging and split threshold to keep one tuning knob.
       Supplier<List<C>> rowsSupplier  = buildRowsSupplier(request, configuration.exportPageSize(), errorCollector);
-
-      // TODO follow-up: P4ADEV-4905 split large exports into multiple CSV parts instead of a single archive.
-      csvService.createCsv(csvFilePath, getDtoClass(), rowsSupplier , getZipVersion());
+      List<Path> csvFilePaths = csvPartitionWriterService.writeCsv(
+        csvFilePath,
+        getDtoClass(),
+        rowsSupplier,
+        getZipVersion(),
+        configuration.exportPageSize()
+      );
 
       Optional<Path> errorFilePath = errorCollector.writeToFile(csvFilePath);
-      List<String> archivedFiles = archiveExportFiles(List.of(csvFilePath), errorFilePath, exportName, extractionDirectory, workingDirectory);
+      List<String> archivedFiles = archiveExportFiles(csvFilePaths, errorFilePath, exportName, extractionDirectory, workingDirectory);
       return new ExportFileResult(archivedFiles, null);
     } catch (IOException e) {
       throw new IllegalStateException("Cannot generate export for " + getMigrationFileType(), e);

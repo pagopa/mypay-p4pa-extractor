@@ -9,6 +9,7 @@ import it.gov.pagopa.mypay2pu.extractor.mapper.organization.OrganizationMapper;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.Organization;
 import it.gov.pagopa.mypay2pu.extractor.service.FileArchiverService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.BaseExportProcessingService;
+import it.gov.pagopa.mypay2pu.extractor.service.export.CsvPartitionWriterService;
 import it.gov.pagopa.mypay2pu.extractor.service.files.CsvService;
 import jakarta.validation.Validator;
 import org.springframework.stereotype.Service;
@@ -21,15 +22,14 @@ public class OrganizationExportProcessingService extends BaseExportProcessingSer
   private final OrganizationDao organizationDao;
   private final OrganizationMapper organizationMapper;
 
-  public OrganizationExportProcessingService(
-    OrganizationDao organizationDao,
-    OrganizationMapper organizationMapper,
-    CsvService csvService,
-    FileArchiverService fileArchiverService,
-    Validator validator,
-    ExtractorExportProperties exportProperties
-  ) {
-    super(csvService, fileArchiverService, validator, exportProperties);
+  public OrganizationExportProcessingService(OrganizationDao organizationDao,
+                                             OrganizationMapper organizationMapper,
+                                             CsvService csvService,
+                                             CsvPartitionWriterService csvPartitionWriterService,
+                                             FileArchiverService fileArchiverService,
+                                             Validator validator,
+                                             ExtractorExportProperties exportProperties) {
+    super(csvService, csvPartitionWriterService, fileArchiverService, validator, exportProperties);
     this.organizationDao = organizationDao;
     this.organizationMapper = organizationMapper;
   }

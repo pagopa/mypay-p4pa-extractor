@@ -105,7 +105,7 @@ See [application.yml](src/main/resources/application.yml) for each configurable 
 
 | ENV | DESCRIPTION | DEFAULT |
 |---|---|---------|
-| `STORAGE_PATH` | Base path where extracted ZIP files are written (`<STORAGE_PATH>/<extractionId>/<fileType>_<version>.zip`, with an optional `.cipher` suffix when encryption is enabled). **Must be a shared folder accessible by multiple extraction instances (WRITE_MANY/READ_MANY)** to support concurrent operations and distributed deployments. Files returned by `/extract/{id}/files` API are unencrypted (in clear); encryption is optional (`FILE_ENCRYPT_ENABLED`), and it is the responsibility of the operator to ensure temporary file handling and cleanup of sensitive data. | `tmp`   |
+| `STORAGE_PATH` | Base path where extracted ZIP files are written (`<STORAGE_PATH>/<extractionId>/<fileType>_<version>.zip`, with an optional `.cipher` suffix when encryption is enabled). A ZIP may contain either one `<export>.csv` entry or multiple split entries named `<export>_part_NNN.csv`. **Must be a shared folder accessible by multiple extraction instances (WRITE_MANY/READ_MANY)** to support concurrent operations and distributed deployments. Files returned by `/extract/{id}/files` API are unencrypted (in clear); encryption is optional (`FILE_ENCRYPT_ENABLED`), and it is the responsibility of the operator to ensure temporary file handling and cleanup of sensitive data. | `tmp`   |
 | `TMP_FOLDER` | Absolute path towards temporary folder on file system | `/tmp`  |
 
 #### 🗄️ MyPay4 Database
@@ -186,7 +186,7 @@ See [application.yml](src/main/resources/application.yml) for each configurable 
 | `MYPIVOT_ENABLED` | Enable myPivot4 extraction (types 10/11/12). If `false`, Adapters related to MyPivot are skipped | `false` |
 | `BROKER_CF` | Fiscal code of the broker/intermediary running the extraction (used as context metadata) | — |
 | `BROKER_IPA_CODE` | Optional IPA code of the broker/intermediary running the extraction | — |
-| `EXPORT_PAGE_SIZE_ORGANIZATIONS` | JDBC page size for `extractor.export.file-type-configurations.ORGANIZATIONS.export-page-size` | `1000` |
+| `EXPORT_PAGE_SIZE_ORGANIZATIONS` | JDBC page size and CSV split threshold (max rows per CSV part) for `extractor.export.file-type-configurations.ORGANIZATIONS.export-page-size` | `1000` |
 | `CSV_SEPARATOR_CHAR` | Separator character used when generating CSV files | `;` |
 | `CSV_QUOTE_CHAR` | Quote character used when generating CSV files | `"` |
 | `FILE_ENCRYPT_ENABLED` | Enable the encryption of the extracted files. **Files are returned unencrypted via the `/extract/{id}/files` API regardless of this setting.** When encryption is enabled, it is the responsibility of the operator to ensure secure temporary storage and cleanup of extracted data. | `false` |
