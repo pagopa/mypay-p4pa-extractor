@@ -5,6 +5,7 @@ import it.gov.pagopa.mypay2pu.extractor.dto.ExportFileResult;
 import it.gov.pagopa.mypay2pu.extractor.dto.export.CsvExportDto;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
+import it.gov.pagopa.mypay2pu.extractor.model.ExportModel;
 import it.gov.pagopa.mypay2pu.extractor.service.FileArchiverService;
 import it.gov.pagopa.mypay2pu.extractor.service.files.CsvService;
 import jakarta.validation.Validator;
@@ -39,10 +40,10 @@ import static it.gov.pagopa.mypay2pu.extractor.utils.Constants.ZONEID;
  * <p>Concrete implementations are responsible for retrieving source data and
  * converting domain entities into exportable DTOs.
  *
- * @param <ExportModel> the interface of the source model type retrieved from the data source
+ * @param <E> source model type retrieved from the data source
  * @param <C> CSV export DTO type
  */
-public abstract class BaseExportProcessingService<ExportModel, C extends CsvExportDto> {
+public abstract class BaseExportProcessingService<E extends ExportModel, C extends CsvExportDto> {
 
   private static final DateTimeFormatter FILE_TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
@@ -202,7 +203,7 @@ public abstract class BaseExportProcessingService<ExportModel, C extends CsvExpo
    * @param model source model
    * @return export DTO
    */
-  protected abstract C toExportableEntity(ExportModel model);
+  protected abstract C toExportableEntity(E model);
 
   /**
    * Retrieves a page of source data to be exported.
@@ -212,5 +213,5 @@ public abstract class BaseExportProcessingService<ExportModel, C extends CsvExpo
    * @param offset starting offset for pagination
    * @return list of retrieved records
    */
-  protected abstract List<ExportModel> retrieveData(ExtractionRequest request, int pageSize, int offset);
+  protected abstract List<E> retrieveData(ExtractionRequest request, int pageSize, int offset);
 }
