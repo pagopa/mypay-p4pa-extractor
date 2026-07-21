@@ -12,7 +12,10 @@ public class OrganizationMapper {
   private final OrganizationDao organizationDao;
   private final ExtractorExportProperties exportProperties;
 
-  public OrganizationMapper(OrganizationDao organizationDao, ExtractorExportProperties exportProperties) {
+  public OrganizationMapper(
+    OrganizationDao organizationDao,
+    ExtractorExportProperties exportProperties
+  ) {
     this.organizationDao = organizationDao;
     this.exportProperties = exportProperties;
   }
@@ -30,12 +33,12 @@ public class OrganizationMapper {
       .segregationCode(organization.segregationCode())
       .cbillInterBankCode(organization.cbillInterBankCode())
       .orgLogo(organization.orgLogo())
-      .additionalLanguage(organization.additionalLanguage())
+      .additionalLanguage(OrganizationAdditionalLanguageCsvConverter.INSTANCE.toCsvValue(organization.additionalLanguage()))
       .startDate(organization.startDate())
       .flagNotifyIo(organization.flagNotifyIo())
       .flagNotifyIoBkp(organization.flagNotifyIoBkp())
       .flagNotifyOutcomePush(organization.flagNotifyOutcomePush())
-      .status(organization.status())
+      .status(OrganizationStatusCsvConverter.INSTANCE.toCsvValue(organization.status()))
       .brokerCf(exportProperties.brokerCf())
       .brokerIpaCode(exportProperties.brokerIpaCode())
       .ioApiKey(organization.ioApiKey())

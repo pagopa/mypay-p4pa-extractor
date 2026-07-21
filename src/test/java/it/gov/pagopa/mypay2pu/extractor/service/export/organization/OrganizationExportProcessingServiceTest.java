@@ -12,6 +12,8 @@ import it.gov.pagopa.mypay2pu.extractor.service.FileArchiverService;
 import it.gov.pagopa.mypay2pu.extractor.service.files.CsvService;
 import it.gov.pagopa.mypay2pu.extractor.service.files.ZipFileService;
 import it.gov.pagopa.mypay2pu.extractor.utils.ZipUtils;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationAdditionalLanguage;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationStatus;
 import jakarta.validation.Validation;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
@@ -155,7 +157,7 @@ class OrganizationExportProcessingServiceTest {
       .orgName(suffix)
       .flagNotifyIo(false)
       .flagNotifyOutcomePush(false)
-      .status("ACTIVE")
+      .status(OrganizationStatus.ACTIVE)
       .brokerCf("12345678901")
       .brokerIpaCode("IPA_CODE")
       .flagTreasury("false")
@@ -180,10 +182,10 @@ class OrganizationExportProcessingServiceTest {
       .iban("invalid-iban")
       .segregationCode("999")
       .cbillInterBankCode("12")
-      .additionalLanguage("TOOLONG")
+      .additionalLanguage(OrganizationAdditionalLanguage.EN)
       .flagNotifyIo(false)
       .flagNotifyOutcomePush(false)
-      .status("ACTIVE")
+      .status(OrganizationStatus.ACTIVE)
       .brokerCf("12345678901")
       .brokerIpaCode("IPA_CODE")
       .flagTreasury("false")

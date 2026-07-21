@@ -7,6 +7,8 @@ import it.gov.pagopa.mypay2pu.extractor.dto.export.PuOrganizationDTO;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.Organization;
 import it.gov.pagopa.mypay2pu.extractor.utils.TestUtils;
 import it.gov.pagopa.mypay2pu.extractor.utils.faker.OrganizationFaker;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationAdditionalLanguage;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationStatus;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,7 +32,10 @@ class OrganizationMapperTest {
 
   @BeforeEach
   void setUp() {
-    organizationMapper = new OrganizationMapper(organizationDaoMock, buildExportProperties("12345678901", "IPA_CODE"));
+    organizationMapper = new OrganizationMapper(
+      organizationDaoMock,
+      buildExportProperties("12345678901", "IPA_CODE")
+    );
   }
 
   @AfterEach
@@ -49,7 +54,9 @@ class OrganizationMapperTest {
     assertEquals("12345678901", result.getBrokerCf());
     assertEquals("IPA_CODE", result.getBrokerIpaCode());
     assertEquals("true", result.getFlagTreasury());
-    TestUtils.reflectionEqualsByName(result, organization);
+    assertEquals(OrganizationStatus.ACTIVE, result.getStatus());
+    assertEquals(OrganizationAdditionalLanguage.EN, result.getAdditionalLanguage());
+    TestUtils.reflectionEqualsByName(result, organization, "status", "additionalLanguage");
     TestUtils.checkNotNullFields(result, "externalOrganizationId", "sendApiKey", "generateNoticeApiKey");
 
   }
@@ -67,7 +74,9 @@ class OrganizationMapperTest {
     assertEquals("12345678901", result.getBrokerCf());
     assertNull(result.getBrokerIpaCode());
     assertEquals("false", result.getFlagTreasury());
-    TestUtils.reflectionEqualsByName(result, organization, "externalOrganizationId", "brokerCf", "brokerIpaCode", "sendApiKey", "generateNoticeApiKey", "flagTreasury");
+    assertEquals(OrganizationStatus.ACTIVE, result.getStatus());
+    assertNull(result.getAdditionalLanguage());
+    TestUtils.reflectionEqualsByName(result, organization, "externalOrganizationId", "brokerCf", "brokerIpaCode", "sendApiKey", "generateNoticeApiKey", "flagTreasury", "status", "additionalLanguage");
     TestUtils.checkNotNullFields(
       result,
       "externalOrganizationId",

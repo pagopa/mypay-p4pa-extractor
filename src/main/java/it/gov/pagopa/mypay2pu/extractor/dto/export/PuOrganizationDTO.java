@@ -1,6 +1,8 @@
 package it.gov.pagopa.mypay2pu.extractor.dto.export;
 
 import com.opencsv.bean.CsvBindByName;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationAdditionalLanguage;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationStatus;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -86,11 +88,7 @@ public class PuOrganizationDTO implements CsvExportDto {
   private String orgLogo;
 
   @CsvBindByName(column = "additional_language")
-  @Size(max = 2)
-  @Pattern(
-    regexp = "^$|^[A-Za-z]{2}$"
-  )
-  private String additionalLanguage;
+  private OrganizationAdditionalLanguage additionalLanguage;
 
   @CsvBindByName(column = "start_date")
   private LocalDate startDate;
@@ -107,9 +105,8 @@ public class PuOrganizationDTO implements CsvExportDto {
   private Boolean flagNotifyOutcomePush;
 
   @CsvBindByName(column = "status")
-  @NotBlank
-  @Size(max = 256)
-  private String status;
+  @NotNull
+  private OrganizationStatus status;
 
   @CsvBindByName(column = "broker_cf")
   @Size(max = 50)

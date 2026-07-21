@@ -9,7 +9,26 @@ public class OrganizationFaker {
   }
 
   public static Organization buildOrganization() {
-    return TestUtils.getPodamFactory().manufacturePojo(Organization.class);
+    Organization source = TestUtils.getPodamFactory().manufacturePojo(Organization.class);
+    return new Organization(
+      source.ipaCode(),
+      source.orgFiscalCode(),
+      source.orgName(),
+      source.orgTypeCode(),
+      source.orgEmail(),
+      source.iban(),
+      source.postalIban(),
+      source.segregationCode(),
+      source.cbillInterBankCode(),
+      source.orgLogo(),
+      "ESERCIZIO",
+      "EN",
+      source.startDate(),
+      source.flagNotifyIo(),
+      source.flagNotifyIoBkp(),
+      source.flagNotifyOutcomePush(),
+      source.ioApiKey()
+    );
   }
 
   public static Organization buildOrganizationWithNullOptionalFields() {
