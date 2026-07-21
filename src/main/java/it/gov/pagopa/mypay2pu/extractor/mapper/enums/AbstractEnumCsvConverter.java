@@ -3,6 +3,7 @@ package it.gov.pagopa.mypay2pu.extractor.mapper.enums;
 import it.gov.pagopa.mypay2pu.extractor.exception.CsvRowMappingException;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 
 /**
@@ -10,67 +11,72 @@ import java.util.function.Function;
  * destination migration system, backed by an enum (typically OpenAPI-generated and not
  * meant to be edited manually).
  * <p>
- * Two resolution strategies are supported, and can be mixed on the same converter:
- * <ul>
- *   <li>an explicit decode table ({@link #explicitMappings()}), for DB codes that do not
- *   match the enum's own value (e.g. {@code "A"} -&gt; {@code ACTIVE});</li>
- *   <li>a default resolver ({@link #defaultResolver()}), for DB values that already match
- *   the enum's value 1:1 (typically the enum's own {@code fromValue(String)} factory method).</li>
- * </ul>
- * Unrecognized DB values are reported as recoverable row-mapping failures.
+ * The decoding table is supplied once by each concrete converter and can optionally be
+ * complemented by a default resolver for values that already match the destination enum.
+ * Unrecognized DB values are reported as row-mapping failures.
  *
  * @param <E> the destination enum type
  */
 public abstract class AbstractEnumCsvConverter<E extends Enum<E>> {
 
-  public String toCsvValue(String dbValue) {
+  private final Map<String, E> mappings;
+  private final Function<String, E> defaultResolver;
+  private final Class<E> enumType;
+  private final String csvFieldName;
+
+  protected AbstractEnumCsvConverter(Map<String, E> mappings, Class<E> enumType, String csvFieldName) {
+    this(mappings, null, enumType, csvFieldName);
+  }
+
+  protected AbstractEnumCsvConverter(
+    Map<String, E> mappings,
+    Function<String, E> defaultResolver,
+    Class<E> enumType,
+    String csvFieldName
+  ) {
+    this.mappings = Map.copyOf(Objects.requireNonNull(mappings, "Mappings are required"));
+    this.defaultResolver = defaultResolver;
+    this.enumType = Objects.requireNonNull(enumType, "Enum type is required");
+    this.csvFieldName = Objects.requireNonNull(csvFieldName, "CSV field name is required");
+  }
+
+  public E toCsvValue(String dbValue) {
     if (dbValue == null) {
       return null;
     }
 
-    E enumValue = explicitMappings().get(dbValue);
+    E enumValue = mappings.get(dbValue);
     if (enumValue == null) {
       enumValue = resolveDefault(dbValue);
     }
-
-    return csvValueExtractor().apply(enumValue);
+    return enumValue;
   }
 
   private E resolveDefault(String dbValue) {
-    E resolved;
+    if (defaultResolver == null) {
+      throw mappingException(dbValue, null);
+    }
+
     try {
-      resolved = defaultResolver().apply(dbValue);
+      E resolved = defaultResolver.apply(dbValue);
+      if (resolved == null) {
+        throw mappingException(dbValue, null);
+      }
+      return resolved;
+    } catch (CsvRowMappingException e) {
+      throw e;
     } catch (RuntimeException e) {
       throw mappingException(dbValue, e);
     }
-
-    if (resolved == null) {
-      throw mappingException(dbValue, null);
-    }
-    return resolved;
   }
 
   private CsvRowMappingException mappingException(String dbValue, Throwable cause) {
     return new CsvRowMappingException(
-      csvFieldName(),
+      "EnumMapping",
+      csvFieldName,
       dbValue,
-      "Unrecognized value '" + dbValue + "' for enum " + enumType().getSimpleName(),
+      "Unrecognized value '" + dbValue + "' for enum " + enumType.getSimpleName(),
       cause
     );
   }
-
-  protected Map<String, E> explicitMappings() {
-    return Map.of();
-  }
-
-  protected abstract Function<String, E> defaultResolver();
-
-  protected abstract Function<E, String> csvValueExtractor();
-
-  protected abstract Class<E> enumType();
-
-  /**
-   * CSV field that receives this enum value and is reported when conversion fails.
-   */
-  protected abstract String csvFieldName();
 }

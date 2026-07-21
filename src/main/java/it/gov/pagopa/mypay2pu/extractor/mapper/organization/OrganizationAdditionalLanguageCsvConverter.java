@@ -2,9 +2,8 @@ package it.gov.pagopa.mypay2pu.extractor.mapper.organization;
 
 import it.gov.pagopa.mypay2pu.extractor.mapper.enums.AbstractEnumCsvConverter;
 import it.gov.pagopa.pu.organization.dto.generated.OrganizationAdditionalLanguage;
-import org.springframework.stereotype.Component;
 
-import java.util.function.Function;
+import java.util.Map;
 
 /**
  * Translates the MyPay4 {@code lingua_aggiuntiva} raw DB value into the
@@ -12,26 +11,11 @@ import java.util.function.Function;
  * <p>
  * The DB column already stores a 2-letter ISO language code, matching the enum's own value 1:1.
  */
-@Component
-public class OrganizationAdditionalLanguageCsvConverter extends AbstractEnumCsvConverter<OrganizationAdditionalLanguage> {
+public final class OrganizationAdditionalLanguageCsvConverter extends AbstractEnumCsvConverter<OrganizationAdditionalLanguage> {
 
-  @Override
-  protected Function<String, OrganizationAdditionalLanguage> defaultResolver() {
-    return OrganizationAdditionalLanguage::fromValue;
-  }
+  public static final OrganizationAdditionalLanguageCsvConverter INSTANCE = new OrganizationAdditionalLanguageCsvConverter();
 
-  @Override
-  protected Function<OrganizationAdditionalLanguage, String> csvValueExtractor() {
-    return OrganizationAdditionalLanguage::getValue;
-  }
-
-  @Override
-  protected Class<OrganizationAdditionalLanguage> enumType() {
-    return OrganizationAdditionalLanguage.class;
-  }
-
-  @Override
-  protected String csvFieldName() {
-    return "additionalLanguage";
+  private OrganizationAdditionalLanguageCsvConverter() {
+    super(Map.of(), OrganizationAdditionalLanguage::fromValue, OrganizationAdditionalLanguage.class, "additionalLanguage");
   }
 }

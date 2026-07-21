@@ -1,129 +1,91 @@
 package it.gov.pagopa.mypay2pu.extractor.service.export;
 
 import it.gov.pagopa.mypay2pu.extractor.dto.export.CsvExportDto;
-import it.gov.pagopa.mypay2pu.extractor.exception.CsvRowMappingException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
- * A decorator supplier that maps source rows to CSV DTOs, validates them, and filters invalid rows.
- * Recoverable mapping failures are collected in the CSV error report while unexpected failures are
- * propagated to stop the export.
+ * A decorator supplier that validates CSV DTO batches and filters invalid rows.
  *
- * @param <S> source row type, typically a DB model
- * @param <C> mapped CSV DTO type
+ * @param <C> the type of CSV DTO being validated
  * @see CsvRowErrorCollector
  */
-public class CsvValidatedRowSupplier<S, C extends CsvExportDto> implements Supplier<List<C>> {
+public class CsvValidatedRowSupplier<C extends CsvExportDto> implements Supplier<List<C>> {
 
   private static final long FIRST_DATA_ROW_NUMBER = 2L;
-  private static final String MAPPING_ERROR_CODE = "EnumMapping";
 
-  private final Supplier<List<S>> source;
-  private final Function<S, C> mapper;
+  private final Supplier<List<C>> source;
   private final Validator validator;
   private final CsvRowErrorCollector errorCollector;
   private final AtomicLong rowNumber = new AtomicLong(FIRST_DATA_ROW_NUMBER);
 
   /**
-   * Constructs a CSV row validation supplier for already-mapped CSV DTOs.
+   * Constructs a CSV row validation supplier that wraps the source supplier with validation logic.
+   * The source supplier must be a batch supplier: each call to supplier.get() returns a batch of rows.
+   * When the source supplier returns an empty list or null, it signals that no more data is available.
+   * The supplier will be called repeatedly across multiple get() invocations until exhausted.
    *
-   * @param source the batch supplier that provides CSV DTO rows
+   * @param source the batch supplier that provides rows to validate; must return empty/null when exhausted
    * @param validator the Jakarta Validator instance to validate rows
-   * @param errorCollector the collector to accumulate row errors
+   * @param errorCollector the collector to accumulate validation errors
    */
-  @SuppressWarnings("unchecked")
   public CsvValidatedRowSupplier(
     Supplier<List<C>> source,
     Validator validator,
     CsvRowErrorCollector errorCollector
   ) {
-    // This overload is safe because its source and target types are both C.
-    this.source = (Supplier<List<S>>) (Supplier<?>) Objects.requireNonNull(source, "Source supplier is required");
-    this.mapper = sourceRow -> (C) sourceRow;
-    this.validator = Objects.requireNonNull(validator, "Validator is required");
-    this.errorCollector = Objects.requireNonNull(errorCollector, "Error collector is required");
-  }
-
-  /**
-   * Constructs a CSV row mapping and validation supplier.
-   *
-   * @param source the batch supplier that provides source rows, typically DB models
-   * @param mapper maps a source row to a CSV DTO; recoverable mapping failures must throw
-   *               {@link CsvRowMappingException}
-   * @param validator the Jakarta Validator instance to validate mapped rows
-   * @param errorCollector the collector to accumulate mapping and validation errors
-   */
-  public CsvValidatedRowSupplier(
-    Supplier<List<S>> source,
-    Function<S, C> mapper,
-    Validator validator,
-    CsvRowErrorCollector errorCollector
-  ) {
     this.source = Objects.requireNonNull(source, "Source supplier is required");
-    this.mapper = Objects.requireNonNull(mapper, "Mapper is required");
     this.validator = Objects.requireNonNull(validator, "Validator is required");
     this.errorCollector = Objects.requireNonNull(errorCollector, "Error collector is required");
   }
 
   /**
-   * Fetches, maps and validates source batches, returning only valid CSV rows. If a batch contains
-   * only rejected rows, the next batch is fetched until a valid row is found or the source ends.
+   * Fetches and validates the next batch of rows, returning only valid rows.
+   * Behavior: fetches batches from the source supplier and validates each row.
+   * Returns the first batch that contains at least one valid row.
+   * If a batch contains only invalid rows, continues fetching from the source supplier until valid rows are found or source is exhausted.
+   * Each call to this method may invoke the source supplier multiple times internally.
+   * Calling this method repeatedly will eventually exhaust the source supplier and return empty lists.
+   *
+   * @return the valid rows from the next source batch containing valid rows, or the source result when exhausted
    */
   @Override
   public List<C> get() {
     while (true) {
-      List<S> sourceRows = source.get();
-      if (CollectionUtils.isEmpty(sourceRows)) {
-        return List.of();
+      List<C> rows = source.get();
+      if (CollectionUtils.isEmpty(rows)) {
+        return rows;
       }
-
-      List<C> validRows = new ArrayList<>();
-      for (S sourceRow : sourceRows) {
-        long currentRowNumber = rowNumber.getAndIncrement();
-        C csvRow = mapAndCollectErrors(sourceRow, currentRowNumber);
-        if (csvRow != null && validateAndCollectErrors(csvRow, currentRowNumber)) {
-          validRows.add(csvRow);
-        }
-      }
+      List<C> validRows = rows.stream().filter(this::validateAndCollectErrors).toList();
       if (!validRows.isEmpty()) {
         return validRows;
       }
     }
   }
 
-  private C mapAndCollectErrors(S sourceRow, long currentRowNumber) {
-    try {
-      return mapper.apply(sourceRow);
-    } catch (CsvRowMappingException e) {
-      errorCollector.add(
-        currentRowNumber,
-        e.getField(),
-        MAPPING_ERROR_CODE,
-        e.getMessage(),
-        e.getRejectedValue()
-      );
-      return null;
-    }
-  }
-
-  private boolean validateAndCollectErrors(C row, long currentRowNumber) {
+  /**
+   * Validates a single row and collects any constraint violations.
+   * Row number is incremented for every row to ensure accurate error reporting in the CSV error report.
+   *
+   * @param row the CSV DTO to validate
+   * @return true if the row is valid, false otherwise
+   */
+  private boolean validateAndCollectErrors(C row) {
+    long currentRowNumber = rowNumber.getAndIncrement();
     Set<ConstraintViolation<C>> violations = validator.validate(row);
     if (violations.isEmpty()) {
       return true;
     }
     violations.stream()
-      .sorted(Comparator.comparing(violation -> violation.getPropertyPath().toString()))
+      .sorted(Comparator.comparing(v -> v.getPropertyPath().toString()))
       .forEach(violation -> {
         Object rejectedValue = violation.getInvalidValue();
         errorCollector.add(
