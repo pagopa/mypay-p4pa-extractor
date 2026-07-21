@@ -18,7 +18,6 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
@@ -55,7 +54,7 @@ class ExportFileHandlerServiceTest {
     assertFalse(extractionId.isBlank());
     verify(extractorTaskExecutorMock).execute(runnableCaptor.capture());
 
-    when(dataExportFacadeServiceMock.executeExport(anyString(), eq(MigrationFileType.ORGANIZATIONS)))
+    when(dataExportFacadeServiceMock.executeExport(extractionId, request))
       .thenReturn(exportFileResult);
 
     runnableCaptor.getValue().run();
@@ -64,7 +63,7 @@ class ExportFileHandlerServiceTest {
     ArgumentCaptor<String> extractionIdCaptor = ArgumentCaptor.forClass(String.class);
     inOrder.verify(exportFileStatusServiceMock).createNew(extractionIdCaptor.capture(), eq(request));
     assertEquals(extractionId, extractionIdCaptor.getValue());
-    inOrder.verify(dataExportFacadeServiceMock).executeExport(extractionId, MigrationFileType.ORGANIZATIONS);
+    inOrder.verify(dataExportFacadeServiceMock).executeExport(extractionId, request);
     inOrder.verify(exportFileStatusServiceMock).update(extractionId, exportFileResult);
   }
 
@@ -74,14 +73,14 @@ class ExportFileHandlerServiceTest {
     ExtractionRequest request = new ExtractionRequest("IPA_CODE_TEST", MigrationFileType.ORGANIZATIONS);
     ExportFileResult exportFileResult = new ExportFileResult(List.of("organizations.csv"), null);
 
-    when(dataExportFacadeServiceMock.executeExport(extractionId, MigrationFileType.ORGANIZATIONS))
+    when(dataExportFacadeServiceMock.executeExport(extractionId, request))
       .thenReturn(exportFileResult);
 
     service.executeExport(extractionId, request);
 
     InOrder inOrder = inOrder(exportFileStatusServiceMock, dataExportFacadeServiceMock);
     inOrder.verify(exportFileStatusServiceMock).createNew(extractionId, request);
-    inOrder.verify(dataExportFacadeServiceMock).executeExport(extractionId, MigrationFileType.ORGANIZATIONS);
+    inOrder.verify(dataExportFacadeServiceMock).executeExport(extractionId, request);
     inOrder.verify(exportFileStatusServiceMock).update(extractionId, exportFileResult);
   }
 
@@ -90,14 +89,14 @@ class ExportFileHandlerServiceTest {
     String extractionId = "extraction-id";
     ExtractionRequest request = new ExtractionRequest("IPA_CODE_TEST", MigrationFileType.ORGANIZATIONS);
 
-    when(dataExportFacadeServiceMock.executeExport(extractionId, MigrationFileType.ORGANIZATIONS))
+    when(dataExportFacadeServiceMock.executeExport(extractionId, request))
       .thenThrow(new RuntimeException("export failed"));
 
     service.executeExport(extractionId, request);
 
     InOrder inOrder = inOrder(exportFileStatusServiceMock, dataExportFacadeServiceMock);
     inOrder.verify(exportFileStatusServiceMock).createNew(extractionId, request);
-    inOrder.verify(dataExportFacadeServiceMock).executeExport(extractionId, MigrationFileType.ORGANIZATIONS);
+    inOrder.verify(dataExportFacadeServiceMock).executeExport(extractionId, request);
     verify(exportFileStatusServiceMock).update(extractionId, new ExportFileResult(List.of(), "export failed"));
   }
 
@@ -107,14 +106,14 @@ class ExportFileHandlerServiceTest {
     ExtractionRequest request = new ExtractionRequest("IPA_CODE_TEST", MigrationFileType.ORGANIZATIONS);
     ExportFileResult exportFileResult = new ExportFileResult(List.of("organizations.csv"), "result error");
 
-    when(dataExportFacadeServiceMock.executeExport(extractionId, MigrationFileType.ORGANIZATIONS))
+    when(dataExportFacadeServiceMock.executeExport(extractionId, request))
       .thenReturn(exportFileResult);
 
     service.executeExport(extractionId, request);
 
     InOrder inOrder = inOrder(exportFileStatusServiceMock, dataExportFacadeServiceMock);
     inOrder.verify(exportFileStatusServiceMock).createNew(extractionId, request);
-    inOrder.verify(dataExportFacadeServiceMock).executeExport(extractionId, MigrationFileType.ORGANIZATIONS);
+    inOrder.verify(dataExportFacadeServiceMock).executeExport(extractionId, request);
     inOrder.verify(exportFileStatusServiceMock).update(extractionId, exportFileResult);
   }
 }
