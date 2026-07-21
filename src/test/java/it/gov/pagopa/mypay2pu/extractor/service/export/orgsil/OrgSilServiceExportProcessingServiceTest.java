@@ -9,6 +9,7 @@ import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.mapper.orgsil.OrgSilServiceMapper;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.OrgSilService;
 import it.gov.pagopa.mypay2pu.extractor.service.FileArchiverService;
+import it.gov.pagopa.mypay2pu.extractor.service.export.CsvPartitionWriterService;
 import it.gov.pagopa.mypay2pu.extractor.service.files.CsvService;
 import it.gov.pagopa.mypay2pu.extractor.service.files.ZipFileService;
 import it.gov.pagopa.mypay2pu.extractor.utils.ZipUtils;
@@ -50,10 +51,12 @@ class OrgSilServiceExportProcessingServiceTest {
 
   @BeforeEach
   void setUp() {
+    CsvService csvService = new CsvService(';', '"');
     service = new OrgSilServiceExportProcessingService(
       orgSilServiceDaoMock,
       orgSilServiceMapperMock,
-      new CsvService(';', '"'),
+      csvService,
+      new CsvPartitionWriterService(csvService),
       new FileArchiverService(false, "test-password", new ZipFileService()),
       Validation.buildDefaultValidatorFactory().getValidator(),
       exportProperties()
