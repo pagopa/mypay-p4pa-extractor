@@ -129,8 +129,7 @@ public abstract class BaseExportProcessingService<E extends ExportModel, C exten
       this::toExportableEntity,
       pageSize
     );
-    Supplier<List<C>> validatedRowsSupplier = new CsvValidatedRowSupplier<>(exportRowsSupplier, validator, errorCollector);
-    return new BufferedPageSupplier<>(validatedRowsSupplier, pageSize);
+    return new CsvValidatedRowSupplier<>(exportRowsSupplier, validator, errorCollector);
   }
 
   /**
