@@ -148,7 +148,7 @@ tasks.register("dependenciesBuild") {
 
   dependsOn(
     "openApiGenerate",
-    "openApiGenerateORGANIZATION"
+    "openApiGenerate_P4PAORGANIZATION"
   )
 }
 
@@ -188,12 +188,12 @@ openApiGenerate {
   )
 }
 
-tasks.register<GenerateTask>("openApiGenerateORGANIZATION") {
+tasks.register<GenerateTask>("openApiGenerate_P4PAORGANIZATION") {
   group = "AutomaticallyGeneratedCode"
   description = "Generates the destination migration system (p4pa-organization) models, including its enums, used to translate extracted DB values into the CSV values expected at import time."
 
   generatorName.set("java")
-  remoteInputSpec.set("https://raw.githubusercontent.com/pagopa/p4pa-organization/refs/heads/develop/openapi/generated.openapi.json")
+  remoteInputSpec.set("https://raw.githubusercontent.com/pagopa/p4pa-doc/refs/heads/main/openapi/main/internal/p4pa-organization.generated.openapi.json")
   outputDir.set("$projectDir/build/generated")
   invokerPackage.set("it.gov.pagopa.pu.organization.generated")
   apiPackage.set("it.gov.pagopa.pu.organization.client.generated")
