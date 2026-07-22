@@ -1,7 +1,7 @@
 package it.gov.pagopa.mypay2pu.extractor.dao;
 
 import it.gov.pagopa.mypay2pu.extractor.config.ExtractorExportProperties;
-import it.gov.pagopa.mypay2pu.extractor.config.TemplateMailEsitoPagamentoProperties;
+import it.gov.pagopa.mypay2pu.extractor.config.MyPayProperties;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.DebtPositionType;
 import it.gov.pagopa.mypay2pu.extractor.utils.SqlLoader;
 import org.junit.jupiter.api.AfterEach;
@@ -76,7 +76,10 @@ class DebtPositionTypeDaoTest {
     return new DebtPositionTypeDao(
       mp4JdbcTemplateMock,
       new ExtractorExportProperties("./build", "./build", "12345678901", "IPA_CODE", Map.of()),
-      new TemplateMailEsitoPagamentoProperties("message", "subject"),
+      new MyPayProperties(Map.of(
+        "notificaIo.markdown", "message",
+        "notificaIo.subject", "subject"
+      )),
       sqlLoaderMock
     );
   }
