@@ -100,12 +100,12 @@ public class CsvPartitionWriterService {
    * @param typeClass  CSV DTO class used for serialization
    * @param rows       rows to write to the partition
    * @param csvProfile CSV serialization profile
-   * @param <T>        CSV export DTO type
+   * @param <C>        CSV export DTO type
    * @throws IOException if the CSV partition cannot be created or written
    */
-  private <T extends CsvExportDto> void writePart(Path partPath,
-                                                  Class<T> typeClass,
-                                                  List<T> rows,
+  private <C extends CsvExportDto> void writePart(Path partPath,
+                                                  Class<C> typeClass,
+                                                  List<C> rows,
                                                   String csvProfile) throws IOException {
     AtomicBoolean delivered = new AtomicBoolean();
 
