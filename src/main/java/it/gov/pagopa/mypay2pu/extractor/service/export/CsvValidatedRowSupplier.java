@@ -2,6 +2,7 @@ package it.gov.pagopa.mypay2pu.extractor.service.export;
 
 import it.gov.pagopa.mypay2pu.extractor.dto.export.CsvExportDto;
 import it.gov.pagopa.mypay2pu.extractor.exception.CsvRowMappingException;
+import it.gov.pagopa.mypay2pu.extractor.model.ExportModel;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import org.springframework.util.CollectionUtils;
@@ -23,7 +24,7 @@ import java.util.function.Supplier;
  * @param <C> the type of CSV DTO being validated
  * @see CsvRowErrorCollector
  */
-public class CsvValidatedRowSupplier<M, C extends CsvExportDto> implements Supplier<List<C>> {
+public class CsvValidatedRowSupplier<M extends ExportModel, C extends CsvExportDto> implements Supplier<List<C>> {
 
   private static final long FIRST_DATA_ROW_NUMBER = 2L;
 
@@ -103,6 +104,14 @@ public class CsvValidatedRowSupplier<M, C extends CsvExportDto> implements Suppl
           e.getErrorCode(),
           e.getMessage(),
           e.getRejectedValue()
+        );
+      } catch (Exception e) {
+        errorCollector.add(
+          currentRowNumber,
+          null,
+          "UNEXPECTED ERROR",
+          e.getMessage(),
+          null
         );
       }
     }

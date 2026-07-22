@@ -33,8 +33,6 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.inOrder;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -202,16 +200,18 @@ class OrganizationExportProcessingServiceTest {
   }
 
   @Test
-  void whenRowMappingThrowsUnexpectedRuntimeExceptionThenWorkingDirectoryIsCleanedUp() {
-    String extractionId = "EXTRACTION_ID";
+  void whenRowMappingThrowsUnexpectedRuntimeExceptionThenDiscardRowAndCompleteExportSuccessfully() {
     ExtractionRequest request = new ExtractionRequest("IPA_CODE", MigrationFileType.ORGANIZATIONS);
     Organization first = organization("first");
 
     when(organizationDaoMock.findByFilters("IPA_CODE", null, 2, 0)).thenReturn(List.of(first));
     when(organizationMapperMock.map(first)).thenThrow(new RuntimeException("mapping failure"));
 
-    assertThrows(RuntimeException.class, () -> service.executeExport(extractionId, request));
-    assertFalse(Files.exists(tempDir.resolve(extractionId).resolve("organizations")));
+    ExportFileResult result = service.executeExport("IPA_CODE", request);
+
+    assertNull(result.error());
+    assertEquals(2, result.files().size());
+    assertTrue(result.files().stream().anyMatch(fileName -> fileName.contains(".errors.")));
   }
 
   private ExtractorExportProperties exportProperties() {

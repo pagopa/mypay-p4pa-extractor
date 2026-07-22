@@ -1,5 +1,6 @@
 package it.gov.pagopa.mypay2pu.extractor.service.export;
 
+import it.gov.pagopa.mypay2pu.extractor.model.ExportModel;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
@@ -12,7 +13,7 @@ import java.util.function.Supplier;
  *
  * @param <M> source model type
  */
-final class PaginatedExportRowsSupplier<M> implements Supplier<List<M>> {
+final class PaginatedExportRowsSupplier<M extends ExportModel> implements Supplier<List<M>> {
 
   private final BiFunction<Integer, Integer, List<M>> retriever;
   private final int pageSize;

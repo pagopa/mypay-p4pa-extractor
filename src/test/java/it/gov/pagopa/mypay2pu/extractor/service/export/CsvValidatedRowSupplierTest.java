@@ -3,6 +3,7 @@ package it.gov.pagopa.mypay2pu.extractor.service.export;
 import com.opencsv.bean.CsvBindByName;
 import it.gov.pagopa.mypay2pu.extractor.dto.export.CsvExportDto;
 import it.gov.pagopa.mypay2pu.extractor.exception.CsvRowMappingException;
+import it.gov.pagopa.mypay2pu.extractor.model.ExportModel;
 import it.gov.pagopa.mypay2pu.extractor.service.files.CsvService;
 import jakarta.validation.Validation;
 import jakarta.validation.constraints.Email;
@@ -285,6 +286,41 @@ class CsvValidatedRowSupplierTest {
     assertTrue(errorRows.get(0).contains("EnumMapping"));
   }
 
+  @Test
+  void givenUnexpectedMappingExceptionWhenGetThenDiscardRowAndCollectError() throws IOException {
+    TestDto validRow = new TestDto("Name", "name@example.com", 10);
+    TestDto failingRow = new TestDto("", "invalid-email", -5);
+    Path csvFile = tempDir.resolve("unexpected-mapping-error.csv");
+    AtomicBoolean called = new AtomicBoolean(false);
+
+    Supplier<List<TestDto>> source = () -> {
+      if (!called.getAndSet(true)) {
+        return List.of(failingRow, validRow);
+      }
+      return Collections.emptyList();
+    };
+
+    var errorCollector = new CsvRowErrorCollector(csvService, csvFile);
+    var supplier = new CsvValidatedRowSupplier<>(source,
+      sourceRow -> {
+        if (sourceRow == failingRow) {
+          throw new IllegalStateException("unexpected failure");
+        }
+        return sourceRow;
+      },
+      Validation.buildDefaultValidatorFactory().getValidator(),
+      errorCollector);
+
+    List<TestDto> result = supplier.get();
+    List<String> errorRows = readErrorRows(errorCollector, csvFile);
+
+    assertEquals(List.of(validRow), result);
+    assertEquals(1, errorRows.size());
+    assertEquals(2L, extractRowNumber(errorRows.get(0)));
+    assertTrue(errorRows.get(0).contains("UNEXPECTED ERROR"));
+    assertTrue(errorRows.get(0).contains("unexpected failure"));
+  }
+
   private List<String> readErrorRows(CsvRowErrorCollector errorCollector, Path csvFile) throws IOException {
     var errorPath = errorCollector.writeToFile(csvFile);
     if (errorPath.isEmpty()) {
@@ -301,7 +337,7 @@ class CsvValidatedRowSupplierTest {
   @Data
   @NoArgsConstructor
   @AllArgsConstructor
-  static class TestDto implements CsvExportDto {
+  static class TestDto implements CsvExportDto, ExportModel {
     @CsvBindByName
     @NotBlank(message = "name must not be blank")
     private String name;
