@@ -194,10 +194,10 @@ See [application.yml](src/main/resources/application.yml) for each configurable 
 
 The following global properties are exported for configuration in the migrated MyPay environment.
 
-| PROPERTY KEY | PROPERTY SOURCE | DESCRIPTION | DEFAULT |
+| ENV | PROPERTY KEY | DESCRIPTION | DEFAULT |
 |---|---|---|---|
-| `notificaIo.markdown` | `MYPAY_PROP_NOTIFICA_IO_MARKDOWN` | IO notification markdown exported for `DEBT_POSITIONS_TYPE` | Empty |
-| `notificaIo.subject` | `MYPAY_PROP_NOTIFICA_IO_SUBJECT` | IO notification subject exported for `DEBT_POSITIONS_TYPE` | Empty |
+| `MYPAY_PROP_NOTIFICA_IO_MARKDOWN` | `notificaIo.markdown` | IO notification markdown exported for `DEBT_POSITIONS_TYPE` |  |
+| `MYPAY_PROP_NOTIFICA_IO_SUBJECT` | `notificaIo.subject` | IO notification subject exported for `DEBT_POSITIONS_TYPE` |  |
 
 ##### 📌 Entity file type configurations
 

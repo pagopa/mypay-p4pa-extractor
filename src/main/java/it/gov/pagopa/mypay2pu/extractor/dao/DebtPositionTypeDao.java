@@ -17,8 +17,6 @@ import java.util.List;
 public class DebtPositionTypeDao {
 
   private static final String FIND_ALL_SQL_PATH = "mypay/debt-position-type/debt-position-type.sql";
-  private static final String NOTIFICA_IO_MARKDOWN_PROPERTY = "notificaIo.markdown";
-  private static final String NOTIFICA_IO_SUBJECT_PROPERTY = "notificaIo.subject";
   protected static final RowMapper<DebtPositionType> DEBT_POSITION_TYPE_ROW_MAPPER =
     DataClassRowMapper.newInstance(DebtPositionType.class);
 
@@ -46,7 +44,7 @@ public class DebtPositionTypeDao {
   private MapSqlParameterSource buildParams() {
     return new MapSqlParameterSource()
       .addValue("brokerCf", exportProperties.brokerCf())
-      .addValue("ioTemplateMessage", myPayProperties.globalProperties().get(NOTIFICA_IO_MARKDOWN_PROPERTY))
-      .addValue("ioTemplateSubject", myPayProperties.globalProperties().get(NOTIFICA_IO_SUBJECT_PROPERTY));
+      .addValue("ioTemplateMessage", myPayProperties.ioTemplateMessage())
+      .addValue("ioTemplateSubject", myPayProperties.ioTemplateSubject());
   }
 }

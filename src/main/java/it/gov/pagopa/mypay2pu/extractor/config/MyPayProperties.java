@@ -1,11 +1,11 @@
 package it.gov.pagopa.mypay2pu.extractor.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.bind.Name;
 
-import java.util.Map;
-
-@ConfigurationProperties(prefix = "mypay")
+@ConfigurationProperties(prefix = "mypay.global-properties")
 public record MyPayProperties(
-  Map<String, String> globalProperties
+  @Name("notificaIo.subject") String ioTemplateSubject,
+  @Name("notificaIo.markdown") String ioTemplateMessage
 ) {
 }
