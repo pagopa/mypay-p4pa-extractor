@@ -105,6 +105,11 @@ extractor:
     username: "\${CLIENT_ID:client}"
     password: "\${CLIENT_SECRET:secret}"
 
+template:
+  mail-esito-pagamento:
+    body: "\${TEMPLATE_MAIL_ESITO_PAGAMENTO_BODY:}"
+    subject: "\${TEMPLATE_MAIL_ESITO_PAGAMENTO_SUBJECT:}"
+
 cipher:
   file-encrypt-enabled: "\${FILE_ENCRYPT_ENABLED:false}"
   file-encrypt-psw: "\${FILE_ENCRYPT_PSW:default_password}"
