@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -44,8 +43,6 @@ import static it.gov.pagopa.mypay2pu.extractor.utils.Constants.ZONEID;
  * @param <C> CSV export DTO type
  */
 public abstract class BaseExportProcessingService<E extends ExportModel, C extends CsvExportDto> {
-
-  private static final DateTimeFormatter FILE_TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
   private final CsvService csvService;
   private final CsvPartitionWriterService csvPartitionWriterService;
@@ -80,34 +77,56 @@ public abstract class BaseExportProcessingService<E extends ExportModel, C exten
   public final ExportFileResult executeExport(String extractionId, ExtractionRequest request) {
     ExtractorExportProperties.FileTypeConfiguration configuration =
       exportProperties.resolveFileTypeConfiguration(getMigrationFileType());
-    Path extractionDirectory = Path.of(exportProperties.storagePath()).resolve(extractionId);
-    Path workingDirectory = Path.of(exportProperties.tempBaseDir()).resolve(extractionId)
+
+    Path extractionDirectory = Path.of(exportProperties.storagePath())
+      .resolve(extractionId);
+
+    Path workingDirectory = Path.of(exportProperties.tempBaseDir())
+      .resolve(extractionId)
       .resolve(getMigrationFileType().name().toLowerCase(Locale.ROOT));
 
-    String exportName = "%s-%s-%s-%s".formatted(
+    ExportFileNameBuilder fileNameBuilder = new ExportFileNameBuilder(
       exportProperties.brokerIpaCode(),
-      getMigrationFileType().name(),
-      LocalDateTime.now(ZONEID).format(FILE_TIMESTAMP_FORMATTER),
+      getMigrationFileType(),
+      LocalDateTime.now(ZONEID),
       getZipVersion()
     );
-    Path csvFilePath = workingDirectory.resolve(exportName + ".csv");
 
-    try (CsvRowErrorCollector errorCollector = new CsvRowErrorCollector(csvService, csvFilePath)) {
-      // exportPageSize intentionally drives both retrieval paging and split threshold to keep one tuning knob.
-      Supplier<List<C>> rowsSupplier  = buildRowsSupplier(request, configuration.exportPageSize(), errorCollector);
+    Path baseCsvFilePath = workingDirectory.resolve(fileNameBuilder.buildCsvFileName());
+
+    try (CsvRowErrorCollector errorCollector = new CsvRowErrorCollector(csvService, baseCsvFilePath)) {
+      Supplier<List<C>> rowsSupplier = buildRowsSupplier(
+        request,
+        configuration.exportPageSize(),
+        errorCollector
+      );
+
       List<Path> csvFilePaths = csvPartitionWriterService.writeCsv(
-        csvFilePath,
+        workingDirectory,
+        fileNameBuilder,
         getDtoClass(),
         rowsSupplier,
         getZipVersion(),
         configuration.exportPageSize()
       );
 
-      Optional<Path> errorFilePath = errorCollector.writeToFile(csvFilePath);
-      List<String> archivedFiles = archiveExportFiles(csvFilePaths, errorFilePath, exportName, extractionDirectory, workingDirectory);
+      Optional<Path> errorFilePath =
+        errorCollector.writeToFile(baseCsvFilePath);
+
+      List<String> archivedFiles = archiveExportFiles(
+        csvFilePaths,
+        errorFilePath,
+        fileNameBuilder.buildBaseName(),
+        extractionDirectory,
+        workingDirectory
+      );
+
       return new ExportFileResult(archivedFiles, null);
     } catch (IOException e) {
-      throw new IllegalStateException("Cannot generate export for " + getMigrationFileType(), e);
+      throw new IllegalStateException(
+        "Cannot generate export for " + getMigrationFileType(),
+        e
+      );
     } finally {
       cleanupWorkingDirectory(workingDirectory);
     }

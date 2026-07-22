@@ -1,5 +1,6 @@
 package it.gov.pagopa.mypay2pu.extractor.service.export;
 
+import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.service.files.CsvService;
 import it.gov.pagopa.mypay2pu.extractor.service.files.TestCsv;
 import org.junit.jupiter.api.Test;
@@ -27,18 +28,17 @@ class CsvPartitionWriterServiceTest {
 
   @Test
   void whenRowsExceedThresholdThenWriteMultiplePartsWithDeterministicNames() throws IOException {
-    Path csvFilePath = tempDir.resolve("EXPORT.csv");
     Supplier<List<TestCsv>> supplier = oneShotSupplier(List.of(
       testCsv("A1", "B1"),
       testCsv("A2", "B2"),
       testCsv("A3", "B3")
     ));
 
-    List<Path> generatedPaths = service.writeCsv(csvFilePath, TestCsv.class, supplier, "v1", 2);
+    List<Path> generatedPaths = service.writeCsv(tempDir, getFileNameBuilder(), TestCsv.class, supplier, "1_0", 2);
 
     assertEquals(2, generatedPaths.size());
-    assertEquals("EXPORT_part_001.csv", generatedPaths.get(0).getFileName().toString());
-    assertEquals("EXPORT_part_002.csv", generatedPaths.get(1).getFileName().toString());
+    assertEquals(getFileNameBuilder().buildCsvPartFileName(1), generatedPaths.get(0).getFileName().toString());
+    assertEquals(getFileNameBuilder().buildCsvPartFileName(2), generatedPaths.get(1).getFileName().toString());
     assertTrue(Files.exists(generatedPaths.get(0)));
     assertTrue(Files.exists(generatedPaths.get(1)));
     assertEquals(3, Files.readAllLines(generatedPaths.get(0)).size());
@@ -47,13 +47,13 @@ class CsvPartitionWriterServiceTest {
 
   @Test
   void whenRowsDoNotExceedThresholdThenKeepOriginalFileName() throws IOException {
-    Path csvFilePath = tempDir.resolve("EXPORT.csv");
+    Path csvFilePath = tempDir.resolve(getFileNameBuilder().buildCsvFileName());
     Supplier<List<TestCsv>> supplier = oneShotSupplier(List.of(
       testCsv("A1", "B1"),
       testCsv("A2", "B2")
     ));
 
-    List<Path> generatedPaths = service.writeCsv(csvFilePath, TestCsv.class, supplier, "v1", 2);
+    List<Path> generatedPaths = service.writeCsv(tempDir, getFileNameBuilder(), TestCsv.class, supplier, "1_0", 2);
 
     assertEquals(1, generatedPaths.size());
     assertEquals(csvFilePath, generatedPaths.get(0));
@@ -62,9 +62,9 @@ class CsvPartitionWriterServiceTest {
 
   @Test
   void whenNoRowsThenCreateSingleEmptyBaseFile() throws IOException {
-    Path csvFilePath = tempDir.resolve("EXPORT.csv");
+    Path csvFilePath = tempDir.resolve(getFileNameBuilder().buildCsvFileName());
 
-    List<Path> generatedPaths = service.writeCsv(csvFilePath, TestCsv.class, List::of, "v1", 2);
+    List<Path> generatedPaths = service.writeCsv(tempDir, getFileNameBuilder(), TestCsv.class, List::of, "1_0", 2);
 
     assertEquals(1, generatedPaths.size());
     assertEquals(csvFilePath, generatedPaths.get(0));
@@ -73,10 +73,12 @@ class CsvPartitionWriterServiceTest {
 
   @Test
   void whenThresholdIsNotPositiveThenFailFast() {
-    Path csvFilePath = tempDir.resolve("EXPORT.csv");
+    ExportFileNameBuilder fileNameBuilder = getFileNameBuilder();
     IllegalArgumentException exception = assertThrows(
       IllegalArgumentException.class,
-      () -> service.writeCsv(csvFilePath, TestCsv.class, List::of, "v1", 0)
+      () -> {
+        service.writeCsv(tempDir, fileNameBuilder, TestCsv.class, List::of, "1_0", 0);
+      }
     );
     assertEquals("Max rows per part must be positive", exception.getMessage());
   }
@@ -98,5 +100,9 @@ class CsvPartitionWriterServiceTest {
       .column2(column2)
       .column3(LocalDate.of(2026, Month.JANUARY, 1))
       .build();
+  }
+
+  private ExportFileNameBuilder getFileNameBuilder() {
+    return new ExportFileNameBuilder("IPA_CODE", MigrationFileType.ORGANIZATIONS, LocalDate.now().atStartOfDay(), "1_0");
   }
 }

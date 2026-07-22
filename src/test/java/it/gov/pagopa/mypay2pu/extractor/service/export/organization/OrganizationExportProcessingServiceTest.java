@@ -159,8 +159,8 @@ class OrganizationExportProcessingServiceTest {
 
     List<String> exportArchiveEntries = ZipUtils.readZipEntries(exportArchivePath);
     assertEquals(2, exportArchiveEntries.size());
-    assertTrue(exportArchiveEntries.get(0).matches("IPA_CODE-ORGANIZATIONS-\\d{14}-1_0_part_001\\.csv"));
-    assertTrue(exportArchiveEntries.get(1).matches("IPA_CODE-ORGANIZATIONS-\\d{14}-1_0_part_002\\.csv"));
+    assertTrue(exportArchiveEntries.get(0).matches("IPA_CODE-ORGANIZATIONS-\\d{14}-part001-1_0\\.csv"));
+    assertTrue(exportArchiveEntries.get(1).matches("IPA_CODE-ORGANIZATIONS-\\d{14}-part002-1_0\\.csv"));
 
     InOrder inOrder = inOrder(organizationDaoMock);
     inOrder.verify(organizationDaoMock).findByFilters("IPA_CODE", null, 2, 0);
