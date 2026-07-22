@@ -2,6 +2,7 @@ package it.gov.pagopa.mypay2pu.extractor.service.export;
 
 import com.opencsv.bean.CsvBindByName;
 import it.gov.pagopa.mypay2pu.extractor.dto.export.CsvExportDto;
+import it.gov.pagopa.mypay2pu.extractor.exception.CsvRowMappingException;
 import it.gov.pagopa.mypay2pu.extractor.service.files.CsvService;
 import jakarta.validation.Validation;
 import jakarta.validation.constraints.Email;
@@ -20,6 +21,7 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -48,6 +50,7 @@ class CsvValidatedRowSupplierTest {
 
     var errorCollector = new CsvRowErrorCollector(csvService, csvFile);
     var supplier = new CsvValidatedRowSupplier<>(source,
+      Function.identity(),
       Validation.buildDefaultValidatorFactory().getValidator(),
       errorCollector);
 
@@ -78,6 +81,7 @@ class CsvValidatedRowSupplierTest {
 
     var errorCollector = new CsvRowErrorCollector(csvService, csvFile);
     var supplier = new CsvValidatedRowSupplier<>(source,
+      Function.identity(),
       Validation.buildDefaultValidatorFactory().getValidator(),
       errorCollector);
 
@@ -115,6 +119,7 @@ class CsvValidatedRowSupplierTest {
 
     var errorCollector = new CsvRowErrorCollector(csvService, csvFile);
     var supplier = new CsvValidatedRowSupplier<>(source,
+      Function.identity(),
       Validation.buildDefaultValidatorFactory().getValidator(),
       errorCollector);
 
@@ -160,6 +165,7 @@ class CsvValidatedRowSupplierTest {
 
     var errorCollector = new CsvRowErrorCollector(csvService, csvFile);
     var supplier = new CsvValidatedRowSupplier<>(source,
+      Function.identity(),
       Validation.buildDefaultValidatorFactory().getValidator(),
       errorCollector);
 
@@ -198,6 +204,7 @@ class CsvValidatedRowSupplierTest {
     Supplier<List<TestDto>> source = Collections::emptyList;
 
     var supplier = new CsvValidatedRowSupplier<>(source,
+      Function.identity(),
       Validation.buildDefaultValidatorFactory().getValidator(),
       errorCollector);
 
@@ -227,6 +234,7 @@ class CsvValidatedRowSupplierTest {
 
     var errorCollector = new CsvRowErrorCollector(csvService, csvFile);
     var supplier = new CsvValidatedRowSupplier<>(source,
+      Function.identity(),
       Validation.buildDefaultValidatorFactory().getValidator(),
       errorCollector);
 
@@ -237,6 +245,44 @@ class CsvValidatedRowSupplierTest {
     // Then
     assertEquals(0, result.size());
     assertTrue(errorRows.size() > 0);
+  }
+
+  @Test
+  void givenMappingExceptionWhenGetThenDiscardRowAndCollectError() throws IOException {
+    TestDto validRow = new TestDto("Name", "name@example.com", 10);
+    TestDto sourceRowWithInvalidEnum = new TestDto("", "invalid-email", -5);
+    Path csvFile = tempDir.resolve("mapping-error.csv");
+    AtomicBoolean called = new AtomicBoolean(false);
+
+    Supplier<List<TestDto>> source = () -> {
+      if (!called.getAndSet(true)) {
+        return List.of(sourceRowWithInvalidEnum, validRow);
+      }
+      return Collections.emptyList();
+    };
+
+    var errorCollector = new CsvRowErrorCollector(csvService, csvFile);
+    var supplier = new CsvValidatedRowSupplier<>(source,
+      sourceRow -> {
+        if (sourceRow == sourceRowWithInvalidEnum) {
+          throw new CsvRowMappingException(
+            "EnumMapping", "status", "UNKNOWN", "Unrecognized value 'UNKNOWN'", null);
+        }
+        return sourceRow;
+      },
+      Validation.buildDefaultValidatorFactory().getValidator(),
+      errorCollector);
+
+    // When
+    List<TestDto> result = supplier.get();
+    List<String> errorRows = readErrorRows(errorCollector, csvFile);
+
+    // Then
+    assertEquals(List.of(validRow), result);
+    assertEquals(1, errorRows.size());
+    assertEquals(2L, extractRowNumber(errorRows.get(0)));
+    assertTrue(errorRows.get(0).contains("status"));
+    assertTrue(errorRows.get(0).contains("EnumMapping"));
   }
 
   private List<String> readErrorRows(CsvRowErrorCollector errorCollector, Path csvFile) throws IOException {

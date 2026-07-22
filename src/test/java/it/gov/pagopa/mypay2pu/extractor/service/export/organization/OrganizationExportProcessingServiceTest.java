@@ -6,6 +6,7 @@ import it.gov.pagopa.mypay2pu.extractor.dto.ExportFileResult;
 import it.gov.pagopa.mypay2pu.extractor.dto.export.PuOrganizationDTO;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
+import it.gov.pagopa.mypay2pu.extractor.exception.CsvRowMappingException;
 import it.gov.pagopa.mypay2pu.extractor.mapper.organization.OrganizationMapper;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.Organization;
 import it.gov.pagopa.mypay2pu.extractor.service.FileArchiverService;
@@ -170,7 +171,38 @@ class OrganizationExportProcessingServiceTest {
   }
 
   @Test
-  void whenRowMappingFailsThenWorkingDirectoryIsCleanedUp() {
+  void whenRowMappingThrowsCsvRowMappingExceptionThenDiscardRowAndCompleteExportSuccessfully() {
+    ExtractionRequest request = new ExtractionRequest("IPA_CODE", MigrationFileType.ORGANIZATIONS);
+    Organization first = organization("first");
+    Organization second = organization("second");
+
+    when(organizationDaoMock.findByFilters("IPA_CODE", null, 2, 0)).thenReturn(List.of(first, second));
+    when(organizationDaoMock.findByFilters("IPA_CODE", null, 2, 2)).thenReturn(List.of());
+    when(organizationMapperMock.map(first)).thenThrow(
+      new CsvRowMappingException("EnumMapping", "status", "UNKNOWN", "Unrecognized value 'UNKNOWN'", null));
+    when(organizationMapperMock.map(second)).thenReturn(dto("second"));
+
+    ExportFileResult result = service.executeExport("IPA_CODE", request);
+
+    assertNull(result.error());
+    assertEquals(2, result.files().size());
+    String exportFileName = result.files().stream()
+      .filter(fileName -> !fileName.contains(".errors."))
+      .findFirst()
+      .orElseThrow();
+    String errorFileName = result.files().stream()
+      .filter(fileName -> fileName.contains(".errors."))
+      .findFirst()
+      .orElseThrow();
+
+    Path exportArchivePath = tempDir.resolve("IPA_CODE").resolve(exportFileName);
+    Path errorArchivePath = tempDir.resolve("IPA_CODE").resolve(errorFileName);
+    assertTrue(Files.exists(exportArchivePath));
+    assertTrue(Files.exists(errorArchivePath));
+  }
+
+  @Test
+  void whenRowMappingThrowsUnexpectedRuntimeExceptionThenWorkingDirectoryIsCleanedUp() {
     String extractionId = "EXTRACTION_ID";
     ExtractionRequest request = new ExtractionRequest("IPA_CODE", MigrationFileType.ORGANIZATIONS);
     Organization first = organization("first");
