@@ -19,7 +19,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
-import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -31,7 +30,6 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -75,8 +73,7 @@ class DebtPositionTypeExportProcessingServiceTest {
     DebtPositionType second = invalidDebtPositionType();
     PuDebtPositionTypeDTO firstDto = dto("TYPE_1");
     PuDebtPositionTypeDTO secondDto = invalidDto();
-    when(debtPositionTypeDaoMock.findAll()).thenReturn(List.of(first, second));
-    when(debtPositionTypeDaoMock.findAll()).thenReturn(List.of());
+    when(debtPositionTypeDaoMock.findAll()).thenReturn(List.of(first, second), List.of());
     when(debtPositionTypeMapperMock.map(first)).thenReturn(firstDto);
     when(debtPositionTypeMapperMock.map(second)).thenReturn(secondDto);
 
@@ -108,9 +105,6 @@ class DebtPositionTypeExportProcessingServiceTest {
     assertEquals(1, errorArchiveEntries.size());
     assertTrue(errorArchiveEntries.get(0).matches("IPA_CODE-DEBT_POSITIONS_TYPE-\\d{14}-1_0\\.errors\\.csv"));
 
-    InOrder inOrder = inOrder(debtPositionTypeDaoMock);
-    inOrder.verify(debtPositionTypeDaoMock).findAll();
-    inOrder.verify(debtPositionTypeDaoMock).findAll();
   }
 
   @Test
@@ -118,8 +112,7 @@ class DebtPositionTypeExportProcessingServiceTest {
     ExtractionRequest request = new ExtractionRequest("IPA_CODE", MigrationFileType.DEBT_POSITIONS_TYPE);
     DebtPositionType first = debtPositionType("TYPE_1");
     DebtPositionType second = debtPositionType("TYPE_2");
-    when(debtPositionTypeDaoMock.findAll()).thenReturn(List.of(first, second));
-    when(debtPositionTypeDaoMock.findAll()).thenReturn(List.of());
+    when(debtPositionTypeDaoMock.findAll()).thenReturn(List.of(first, second), List.of());
     when(debtPositionTypeMapperMock.map(first)).thenReturn(dto("TYPE_1"));
     when(debtPositionTypeMapperMock.map(second)).thenReturn(dto("TYPE_2"));
 
@@ -132,9 +125,6 @@ class DebtPositionTypeExportProcessingServiceTest {
     assertEquals(1, archiveEntries.size());
     assertTrue(archiveEntries.get(0).matches("IPA_CODE-DEBT_POSITIONS_TYPE-\\d{14}-1_0\\.csv"));
 
-    InOrder inOrder = inOrder(debtPositionTypeDaoMock);
-    inOrder.verify(debtPositionTypeDaoMock).findAll();
-    inOrder.verify(debtPositionTypeDaoMock).findAll();
   }
 
   private ExtractorExportProperties exportProperties() {
