@@ -186,6 +186,8 @@ See [application.yml](src/main/resources/application.yml) for each configurable 
 | `MYPIVOT_ENABLED` | Enable myPivot4 extraction (types 10/11/12). If `false`, Adapters related to MyPivot are skipped | `false` |
 | `BROKER_CF` | Fiscal code of the broker/intermediary running the extraction (used as context metadata) | — |
 | `BROKER_IPA_CODE` | Optional IPA code of the broker/intermediary running the extraction | — |
+| `TEMPLATE_MAIL_ESITO_PAGAMENTO_BODY` | IO template message exported for `DEBT_POSITIONS_TYPE` | Empty |
+| `TEMPLATE_MAIL_ESITO_PAGAMENTO_SUBJECT` | IO template subject exported for `DEBT_POSITIONS_TYPE` | Empty |
 | `CSV_SEPARATOR_CHAR` | Separator character used when generating CSV files | `;` |
 | `CSV_QUOTE_CHAR` | Quote character used when generating CSV files | `"` |
 | `FILE_ENCRYPT_ENABLED` | Enable the encryption of the extracted files. **Files are returned unencrypted via the `/extract/{id}/files` API regardless of this setting.** When encryption is enabled, it is the responsibility of the operator to ensure secure temporary storage and cleanup of extracted data. | `false` |
@@ -216,6 +218,7 @@ To customize them, add to the classpath a resource with the same path as the que
 | organization | `/db/mypay/organization/organization.sql` | <li>ipaCode: organization IPA code (nullable)<br><li>modifiedFrom: extraction start date at 00:00 (nullable)<br><li>modifiedToExclusive: extraction end date +1 day at 00:00 (nullable)<br><li>limit: page size (> 0)<br><li>offset: page start (>= 0, nullable) | Organization entity extractor |
 | org_sil_services (paid notification outcome) | `/db/mypay/org-sil-service/paid-notification-outcome.sql` | <li>codIpaEnte: organization IPA code (nullable)<br><li>limit: page size (> 0)<br><li>offset: page start (>= 0, nullable) | ORG_SIL_SERVICES extractor for `PAID_NOTIFICATION_OUTCOME` source (`mygov_ente_sil`) |
 | org_sil_services (actualization) | `/db/mypay/org-sil-service/actualization.sql` | <li>codIpaEnte: organization IPA code (nullable)<br><li>limit: page size (> 0)<br><li>offset: page start (>= 0, nullable) | ORG_SIL_SERVICES extractor for `ACTUALIZATION` source (`mygov_ente_tipo_dovuto`) |
+| debt_positions_type | `/db/mypay/debt-position-type/debt-position-type.sql` | <li>brokerCf: intermediary fiscal code from `BROKER_CF` or `PA_IDENTIFICATIVO_INTERMEDIARIO_PA`<br><li>ioTemplateMessage: message from `TEMPLATE_MAIL_ESITO_PAGAMENTO_BODY`<br><li>ioTemplateSubject: subject from `TEMPLATE_MAIL_ESITO_PAGAMENTO_SUBJECT` | Global full-load `DEBT_POSITIONS_TYPE` extractor. Reads `mygov_ente_tipo_dovuto` joined to `mygov_ente`, keeps the lowest `mygov_ente_tipo_dovuto_id` for each `cod_tipo` using `ROW_NUMBER()`, and does not support IPA, logical-key, incremental, or pagination filters. |
 
 ### MyPivot
 
