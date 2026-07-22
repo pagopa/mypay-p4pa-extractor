@@ -31,4 +31,4 @@ SELECT
     :ioTemplateSubject AS io_template_subject
 FROM ranked
 WHERE rn = 1
-ORDER BY cod_tipo;
+ORDER BY cod_tipo ASC;
