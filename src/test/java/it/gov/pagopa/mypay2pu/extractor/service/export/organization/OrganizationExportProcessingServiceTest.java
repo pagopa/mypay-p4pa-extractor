@@ -9,6 +9,7 @@ import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.mapper.organization.OrganizationMapper;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.Organization;
 import it.gov.pagopa.mypay2pu.extractor.service.FileArchiverService;
+import it.gov.pagopa.mypay2pu.extractor.service.export.CsvPartitionWriterService;
 import it.gov.pagopa.mypay2pu.extractor.service.files.CsvService;
 import it.gov.pagopa.mypay2pu.extractor.service.files.ZipFileService;
 import it.gov.pagopa.mypay2pu.extractor.utils.ZipUtils;
@@ -29,10 +30,10 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.inOrder;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -51,10 +52,12 @@ class OrganizationExportProcessingServiceTest {
 
   @BeforeEach
   void setUp() {
+    CsvService csvService = new CsvService(';', '"');
     service = new OrganizationExportProcessingService(
       organizationDaoMock,
       organizationMapperMock,
-      new CsvService(';', '"'),
+      csvService,
+      new CsvPartitionWriterService(csvService),
       new FileArchiverService(false, "test-password", new ZipFileService()),
       Validation.buildDefaultValidatorFactory().getValidator(),
       exportProperties()
@@ -131,6 +134,52 @@ class OrganizationExportProcessingServiceTest {
     InOrder inOrder = inOrder(organizationDaoMock);
     inOrder.verify(organizationDaoMock).findByFilters("IPA_CODE", null, 2, 0);
     inOrder.verify(organizationDaoMock).findByFilters("IPA_CODE", null, 2, 2);
+  }
+
+  @Test
+  void whenRowsExceedThresholdThenArchiveContainsCsvPartsInOrder() throws Exception {
+    ExtractionRequest request = new ExtractionRequest("IPA_CODE", MigrationFileType.ORGANIZATIONS);
+    Organization first = organization("first");
+    Organization second = organization("second");
+    Organization third = organization("third");
+
+    when(organizationDaoMock.findByFilters("IPA_CODE", null, 2, 0)).thenReturn(List.of(first, second));
+    when(organizationDaoMock.findByFilters("IPA_CODE", null, 2, 2)).thenReturn(List.of(third));
+    when(organizationMapperMock.map(first)).thenReturn(dto("first"));
+    when(organizationMapperMock.map(second)).thenReturn(dto("second"));
+    when(organizationMapperMock.map(third)).thenReturn(dto("third"));
+
+    ExportFileResult result = service.executeExport("IPA_CODE", request);
+
+    assertNull(result.error());
+    assertEquals(1, result.files().size());
+    String exportFileName = result.files().get(0);
+    assertTrue(exportFileName.matches("IPA_CODE-ORGANIZATIONS-\\d{14}-1_0\\.zip"));
+
+    Path exportArchivePath = tempDir.resolve("IPA_CODE").resolve(exportFileName);
+    assertTrue(Files.exists(exportArchivePath));
+
+    List<String> exportArchiveEntries = ZipUtils.readZipEntries(exportArchivePath);
+    assertEquals(2, exportArchiveEntries.size());
+    assertTrue(exportArchiveEntries.get(0).matches("IPA_CODE-ORGANIZATIONS-\\d{14}-part001-1_0\\.csv"));
+    assertTrue(exportArchiveEntries.get(1).matches("IPA_CODE-ORGANIZATIONS-\\d{14}-part002-1_0\\.csv"));
+
+    InOrder inOrder = inOrder(organizationDaoMock);
+    inOrder.verify(organizationDaoMock).findByFilters("IPA_CODE", null, 2, 0);
+    inOrder.verify(organizationDaoMock).findByFilters("IPA_CODE", null, 2, 2);
+  }
+
+  @Test
+  void whenRowMappingFailsThenWorkingDirectoryIsCleanedUp() {
+    String extractionId = "EXTRACTION_ID";
+    ExtractionRequest request = new ExtractionRequest("IPA_CODE", MigrationFileType.ORGANIZATIONS);
+    Organization first = organization("first");
+
+    when(organizationDaoMock.findByFilters("IPA_CODE", null, 2, 0)).thenReturn(List.of(first));
+    when(organizationMapperMock.map(first)).thenThrow(new RuntimeException("mapping failure"));
+
+    assertThrows(RuntimeException.class, () -> service.executeExport(extractionId, request));
+    assertFalse(Files.exists(tempDir.resolve(extractionId).resolve("organizations")));
   }
 
   private ExtractorExportProperties exportProperties() {

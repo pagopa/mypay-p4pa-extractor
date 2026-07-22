@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -45,18 +44,19 @@ import static it.gov.pagopa.mypay2pu.extractor.utils.Constants.ZONEID;
  */
 public abstract class BaseExportProcessingService<E extends ExportModel, C extends CsvExportDto> {
 
-  private static final DateTimeFormatter FILE_TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
-
   private final CsvService csvService;
+  private final CsvPartitionWriterService csvPartitionWriterService;
   private final FileArchiverService fileArchiverService;
   private final Validator validator;
   private final ExtractorExportProperties exportProperties;
 
   protected BaseExportProcessingService(CsvService csvService,
+                                        CsvPartitionWriterService csvPartitionWriterService,
                                         FileArchiverService fileArchiverService,
                                         Validator validator,
                                         ExtractorExportProperties exportProperties) {
     this.csvService = csvService;
+    this.csvPartitionWriterService = csvPartitionWriterService;
     this.fileArchiverService = fileArchiverService;
     this.validator = validator;
     this.exportProperties = exportProperties;
@@ -74,32 +74,59 @@ public abstract class BaseExportProcessingService<E extends ExportModel, C exten
    * @return information about the generated archive files
    * @throws IllegalStateException if the export generation or file handling fails
    */
-    public final ExportFileResult executeExport(String extractionId, ExtractionRequest request) {
+  public final ExportFileResult executeExport(String extractionId, ExtractionRequest request) {
     ExtractorExportProperties.FileTypeConfiguration configuration =
       exportProperties.resolveFileTypeConfiguration(getMigrationFileType());
-    Path extractionDirectory = Path.of(exportProperties.storagePath()).resolve(extractionId);
-    Path workingDirectory = Path.of(exportProperties.tempBaseDir()).resolve(extractionId)
+
+    Path extractionDirectory = Path.of(exportProperties.storagePath())
+      .resolve(extractionId);
+
+    Path workingDirectory = Path.of(exportProperties.tempBaseDir())
+      .resolve(extractionId)
       .resolve(getMigrationFileType().name().toLowerCase(Locale.ROOT));
 
-    String exportName = "%s-%s-%s-%s".formatted(
+    ExportFileNameBuilder fileNameBuilder = new ExportFileNameBuilder(
       exportProperties.brokerIpaCode(),
-      getMigrationFileType().name(),
-      LocalDateTime.now(ZONEID).format(FILE_TIMESTAMP_FORMATTER),
+      getMigrationFileType(),
+      LocalDateTime.now(ZONEID),
       getZipVersion()
     );
-    Path csvFilePath = workingDirectory.resolve(exportName + ".csv");
 
-    try (CsvRowErrorCollector errorCollector = new CsvRowErrorCollector(csvService, csvFilePath)) {
-      Supplier<List<C>> rowsSupplier  = buildRowsSupplier(request, configuration.exportPageSize(), errorCollector);
+    Path baseCsvFilePath = workingDirectory.resolve(fileNameBuilder.buildCsvFileName());
 
-      // TODO follow-up: P4ADEV-4905 split large exports into multiple CSV parts instead of a single archive.
-      csvService.createCsv(csvFilePath, getDtoClass(), rowsSupplier , getZipVersion());
+    try (CsvRowErrorCollector errorCollector = new CsvRowErrorCollector(csvService, baseCsvFilePath)) {
+      Supplier<List<C>> rowsSupplier = buildRowsSupplier(
+        request,
+        configuration.exportPageSize(),
+        errorCollector
+      );
 
-      Optional<Path> errorFilePath = errorCollector.writeToFile(csvFilePath);
-      List<String> archivedFiles = archiveExportFiles(List.of(csvFilePath), errorFilePath, exportName, extractionDirectory, workingDirectory);
+      List<Path> csvFilePaths = csvPartitionWriterService.writeCsv(
+        workingDirectory,
+        fileNameBuilder,
+        getDtoClass(),
+        rowsSupplier,
+        getZipVersion(),
+        configuration.exportPageSize()
+      );
+
+      Optional<Path> errorFilePath =
+        errorCollector.writeToFile(baseCsvFilePath);
+
+      List<String> archivedFiles = archiveExportFiles(
+        csvFilePaths,
+        errorFilePath,
+        fileNameBuilder.buildBaseName(),
+        extractionDirectory,
+        workingDirectory
+      );
+
       return new ExportFileResult(archivedFiles, null);
     } catch (IOException e) {
-      throw new IllegalStateException("Cannot generate export for " + getMigrationFileType(), e);
+      throw new IllegalStateException(
+        "Cannot generate export for " + getMigrationFileType(),
+        e
+      );
     } finally {
       cleanupWorkingDirectory(workingDirectory);
     }
@@ -121,8 +148,7 @@ public abstract class BaseExportProcessingService<E extends ExportModel, C exten
       this::toExportableEntity,
       pageSize
     );
-    Supplier<List<C>> validatedRowsSupplier = new CsvValidatedRowSupplier<>(exportRowsSupplier, validator, errorCollector);
-    return new BufferedPageSupplier<>(validatedRowsSupplier, pageSize);
+    return new CsvValidatedRowSupplier<>(exportRowsSupplier, validator, errorCollector);
   }
 
   /**
