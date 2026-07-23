@@ -407,7 +407,7 @@
 </tr>
 <tr>
 <td><a href='https://jdbc.postgresql.org/'>org.postgresql:postgresql</a></td>
-<td>42.7.11</td>
+<td>42.7.12</td>
 <td><a href='https://opensource.org/licenses/BSD-2-Clause'>BSD-2-Clause</a></td>
 </tr>
 <tr>

@@ -105,10 +105,10 @@ extractor:
     username: "\${CLIENT_ID:client}"
     password: "\${CLIENT_SECRET:secret}"
 
-template:
-  mail-esito-pagamento:
-    body: "\${TEMPLATE_MAIL_ESITO_PAGAMENTO_BODY:}"
-    subject: "\${TEMPLATE_MAIL_ESITO_PAGAMENTO_SUBJECT:}"
+mypay:
+  global-properties:
+    notificaIo.markdown: "\${MYPAY_PROP_NOTIFICA_IO_MARKDOWN:}"
+    notificaIo.subject: "\${MYPAY_PROP_NOTIFICA_IO_SUBJECT:}"
 
 cipher:
   file-encrypt-enabled: "\${FILE_ENCRYPT_ENABLED:false}"
