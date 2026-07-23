@@ -105,6 +105,11 @@ extractor:
     username: "\${CLIENT_ID:client}"
     password: "\${CLIENT_SECRET:secret}"
 
+mypay:
+  global-properties:
+    notificaIo.markdown: "\${MYPAY_PROP_NOTIFICA_IO_MARKDOWN:}"
+    notificaIo.subject: "\${MYPAY_PROP_NOTIFICA_IO_SUBJECT:}"
+
 cipher:
   file-encrypt-enabled: "\${FILE_ENCRYPT_ENABLED:false}"
   file-encrypt-psw: "\${FILE_ENCRYPT_PSW:default_password}"
