@@ -56,7 +56,7 @@ val httpClientVersion = "5.6.1"
 val httpCoreVersion = "5.4.2"
 val kafkaAppender = "0.2.0-RC2"
 val lz4JavaVersion = "1.11.0"
-val postgresqlVersion = "42.7.11"
+val postgresqlVersion = "42.7.12"
 val openCsvVersion = "5.12.0"
 val podamVersion = "8.0.2.RELEASE"
 

@@ -143,12 +143,16 @@ public abstract class BaseExportProcessingService<E extends ExportModel, C exten
   private Supplier<List<C>> buildRowsSupplier(ExtractionRequest request,
                                               int pageSize,
                                               CsvRowErrorCollector errorCollector) {
-    Supplier<List<C>> exportRowsSupplier = new PaginatedExportRowsSupplier<>(
+    Supplier<List<E>> sourceRowsSupplier = new PaginatedExportRowsSupplier<>(
       (limit, offset) -> retrieveData(request, limit, offset),
-      this::toExportableEntity,
       pageSize
     );
-    return new CsvValidatedRowSupplier<>(exportRowsSupplier, validator, errorCollector);
+    return new CsvValidatedRowSupplier<>(
+      sourceRowsSupplier,
+      this::toExportableEntity,
+      validator,
+      errorCollector
+    );
   }
 
   /**
