@@ -1,7 +1,6 @@
 package it.gov.pagopa.mypay2pu.extractor.dao;
 
 import it.gov.pagopa.mypay2pu.extractor.config.ExtractorExportProperties;
-import it.gov.pagopa.mypay2pu.extractor.config.MyPayProperties;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.DebtPositionType;
 import it.gov.pagopa.mypay2pu.extractor.utils.SqlLoader;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -22,18 +21,15 @@ public class DebtPositionTypeDao {
 
   private final NamedParameterJdbcTemplate mp4JdbcTemplate;
   private final ExtractorExportProperties exportProperties;
-  private final MyPayProperties myPayProperties;
   private final String findAllSql;
 
   public DebtPositionTypeDao(
     @Qualifier("mp4NamedParameterJdbcTemplate") NamedParameterJdbcTemplate mp4JdbcTemplate,
     ExtractorExportProperties exportProperties,
-    MyPayProperties myPayProperties,
     SqlLoader sqlLoader
   ) {
     this.mp4JdbcTemplate = mp4JdbcTemplate;
     this.exportProperties = exportProperties;
-    this.myPayProperties = myPayProperties;
     this.findAllSql = sqlLoader.load(FIND_ALL_SQL_PATH);
   }
 
@@ -43,8 +39,6 @@ public class DebtPositionTypeDao {
 
   private MapSqlParameterSource buildParams() {
     return new MapSqlParameterSource()
-      .addValue("brokerCf", exportProperties.brokerCf())
-      .addValue("ioTemplateMessage", myPayProperties.ioTemplateMessage())
-      .addValue("ioTemplateSubject", myPayProperties.ioTemplateSubject());
+      .addValue("brokerCf", exportProperties.brokerCf());
   }
 }

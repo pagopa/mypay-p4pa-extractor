@@ -248,7 +248,7 @@ class OrganizationExportProcessingServiceTest {
   private Organization invalidOrganization() {
     return new Organization(
       "IPA_CODE", "NOT_A_FISCAL_CODE", "", "TYPE", "not-an-email",
-      "invalid-iban", null, "999", "12", null, "ACTIVE", "TOOLONG",
+      "invalid-iban", null, "999", "abcde", null, "ACTIVE", "TOOLONG",
       null, false, false, false, null
     );
   }
@@ -262,7 +262,7 @@ class OrganizationExportProcessingServiceTest {
       .orgEmail("not-an-email")
       .iban("invalid-iban")
       .segregationCode("999")
-      .cbillInterBankCode("12")
+      .cbillInterBankCode("abcde")
       .additionalLanguage(OrganizationAdditionalLanguage.EN)
       .flagNotifyIo(false)
       .flagNotifyOutcomePush(false)
