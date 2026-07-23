@@ -26,9 +26,7 @@ SELECT
     cod_tassonomico AS taxonomy_code,
     FALSE AS flag_anonymous_fiscal_code,
     FALSE AS flag_mandatory_due_date,
-    FALSE AS flag_notify_io,
-    :ioTemplateMessage AS io_template_message,
-    :ioTemplateSubject AS io_template_subject
+    FALSE AS flag_notify_io
 FROM ranked
 WHERE rn = 1
 ORDER BY cod_tipo ASC;

@@ -1,7 +1,6 @@
 package it.gov.pagopa.mypay2pu.extractor.dao;
 
 import it.gov.pagopa.mypay2pu.extractor.config.ExtractorExportProperties;
-import it.gov.pagopa.mypay2pu.extractor.config.MyPayProperties;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.DebtPositionType;
 import it.gov.pagopa.mypay2pu.extractor.utils.SqlLoader;
 import org.junit.jupiter.api.AfterEach;
@@ -51,17 +50,13 @@ class DebtPositionTypeDaoTest {
       "01.01.01",
       false,
       false,
-      false,
-      "message",
-      "subject"
+      false
     ));
     when(mp4JdbcTemplateMock.query(
       eq(FIND_ALL_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         "12345678901".equals(params.getValue("brokerCf"))
-          && "message".equals(params.getValue("ioTemplateMessage"))
-          && "subject".equals(params.getValue("ioTemplateSubject"))
-          && params.getValues().size() == 3
+          && params.getValues().size() == 1
       ),
       same(DebtPositionTypeDao.DEBT_POSITION_TYPE_ROW_MAPPER)
     )).thenReturn(expected);
@@ -76,7 +71,6 @@ class DebtPositionTypeDaoTest {
     return new DebtPositionTypeDao(
       mp4JdbcTemplateMock,
       new ExtractorExportProperties("./build", "./build", "12345678901", "IPA_CODE", Map.of()),
-      new MyPayProperties("subject", "message"),
       sqlLoaderMock
     );
   }
