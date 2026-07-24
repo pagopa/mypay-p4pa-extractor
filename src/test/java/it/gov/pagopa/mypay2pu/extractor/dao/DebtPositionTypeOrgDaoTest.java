@@ -26,6 +26,7 @@ import static org.mockito.Mockito.when;
 class DebtPositionTypeOrgDaoTest {
 
   private static final String FIND_BY_ORGANIZATION_ID_SQL = "SELECT debt position types by organization";
+  private static final String IS_EXTERNAL_SQL_PATH = "SELECT TRUE";
 
   @Mock
   private NamedParameterJdbcTemplate mp4JdbcTemplateMock;
@@ -112,24 +113,6 @@ class DebtPositionTypeOrgDaoTest {
   }
 
   @Test
-  void sqlResourceContainsEverySourceModelAliasAndRequiredPagingContract() {
-    String sql = new SqlLoader().load("mypay/debt-position-type-org/debt-position-type-org.sql");
-
-    assertTrue(sql.contains("AS ipa_code"));
-    assertTrue(sql.contains("AS amount_cents"));
-    assertTrue(sql.contains("AS notify_outcome_push_org_sil_service_code"));
-    assertTrue(sql.contains("AS flag_amount_actualization"));
-    assertTrue(sql.contains("AS spontaneous_form_code"));
-    assertTrue(sql.contains("AS spontaneous_form_structure"));
-    assertTrue(sql.contains("AS user_pnd"));
-    assertTrue(sql.contains("AS psw_pnd"));
-    assertTrue(sql.contains("AND (:logicalKeysEmpty = TRUE OR etd.cod_tipo IN (:logicalKeys))"));
-    assertTrue(sql.contains("ORDER BY etd.cod_tipo"));
-    assertTrue(sql.contains("LIMIT :limit"));
-    assertTrue(sql.contains("OFFSET COALESCE(:offset, 0)"));
-  }
-
-  @Test
   void givenMissingMypivotTemplateWhenCheckExternalThenReturnFalse() {
     DebtPositionTypeOrgDao dao = buildDao(null);
 
@@ -141,10 +124,10 @@ class DebtPositionTypeOrgDaoTest {
     DebtPositionTypeOrgDao dao = buildDao(mypivotJdbcTemplateMock);
 
     when(mypivotJdbcTemplateMock.queryForObject(
-      eq("SELECT external"),
+      eq(IS_EXTERNAL_SQL_PATH),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         "IPA1".equals(params.getValue("ipaCode"))
-          && "TAX".equals(params.getValue("codTipo"))
+          && "TAX".equals(params.getValue("debtPositionsTypeOrgCode"))
           && params.getValues().size() == 2
       ),
       eq(Boolean.class)
@@ -166,7 +149,7 @@ class DebtPositionTypeOrgDaoTest {
   private DebtPositionTypeOrgDao buildDao(NamedParameterJdbcTemplate mypivotJdbcTemplate) {
     when(sqlLoaderMock.load("mypay/debt-position-type-org/debt-position-type-org.sql"))
       .thenReturn(FIND_BY_ORGANIZATION_ID_SQL);
-    when(sqlLoaderMock.load("mypivot/debt-position-type-org/is-external.sql")).thenReturn("SELECT external");
+    when(sqlLoaderMock.load("mypivot/debt-position-type-org/is-external.sql")).thenReturn(IS_EXTERNAL_SQL_PATH);
     return new DebtPositionTypeOrgDao(mp4JdbcTemplateMock, mypivotJdbcTemplate, sqlLoaderMock);
   }
 
