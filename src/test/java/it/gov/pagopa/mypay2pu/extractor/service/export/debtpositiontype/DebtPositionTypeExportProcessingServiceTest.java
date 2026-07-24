@@ -149,9 +149,7 @@ class DebtPositionTypeExportProcessingServiceTest {
       "9/12345678901234567",
       false,
       false,
-      false,
-      "IO message",
-      "IO subject"
+      false
     );
   }
 
@@ -183,8 +181,6 @@ class DebtPositionTypeExportProcessingServiceTest {
       "",
       "",
       "",
-      null,
-      null,
       null,
       null,
       null
