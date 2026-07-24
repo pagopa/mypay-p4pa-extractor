@@ -66,6 +66,7 @@ public class DataSourceConfig {
   }
 
   @Bean("mpv4JdbcTemplate")
+  @ConditionalOnBean(name = "mpv4DataSource")
   public JdbcTemplate mpv4JdbcTemplate(@Qualifier("mpv4DataSource") DataSource dataSource) {
     return new JdbcTemplate(dataSource);
   }
