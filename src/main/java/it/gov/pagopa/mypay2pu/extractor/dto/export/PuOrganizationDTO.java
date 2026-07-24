@@ -79,12 +79,11 @@ public class PuOrganizationDTO implements CsvExportDto {
   @CsvBindByName(column = "cbill_inter_bank_code")
   @Size(max = 5)
   @Pattern(
-    regexp = "^$|^\\d{5}$"
+    regexp = "^$|^[A-Z0-9]{5}$"
   )
   private String cbillInterBankCode;
 
   @CsvBindByName(column = "org_logo")
-  @Size(max = 255)
   private String orgLogo;
 
   @CsvBindByName(column = "additional_language")

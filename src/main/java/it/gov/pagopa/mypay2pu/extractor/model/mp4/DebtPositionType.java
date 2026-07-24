@@ -13,8 +13,6 @@ public record DebtPositionType(
   String taxonomyCode,
   Boolean flagAnonymousFiscalCode,
   Boolean flagMandatoryDueDate,
-  Boolean flagNotifyIo,
-  String ioTemplateMessage,
-  String ioTemplateSubject
+  Boolean flagNotifyIo
 ) implements ExportModel {
 }
