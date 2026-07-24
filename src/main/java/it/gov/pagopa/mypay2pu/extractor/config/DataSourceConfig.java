@@ -1,8 +1,8 @@
 package it.gov.pagopa.mypay2pu.extractor.config;
 
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
@@ -57,9 +57,7 @@ public class DataSourceConfig {
 
 
   @Bean("mpv4DataSource")
-  @ConditionalOnExpression(
-    "'${MPV4_DB_HOST:}' != '' and '${MPV4_DB_USER:}' != '' and '${MPV4_DB_PASSWORD:}' != '' and '${MPV4_DB_NAME:}' != ''"
-  )
+  @ConditionalOnProperty(prefix = "PREIFX", name = "NAME", havingValue = "true")
   @ConfigurationProperties("datasource.mpv4")
   public DataSource mpv4DataSource() {
     return DataSourceBuilder.create().build();
