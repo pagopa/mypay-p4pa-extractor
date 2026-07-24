@@ -47,7 +47,7 @@ class DebtPositionTypeOrgDaoTest {
     when(mp4JdbcTemplateMock.query(
       eq(FIND_BY_ORGANIZATION_ID_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
-        "IPA1".equals(params.getValue("organizationId"))
+        "IPA1".equals(params.getValue("ipaCode"))
           && Boolean.TRUE.equals(params.getValue("logicalKeysEmpty"))
           && containsOnlyNullLogicalKey(params)
           && Integer.valueOf(50).equals(params.getValue("limit"))
@@ -70,7 +70,7 @@ class DebtPositionTypeOrgDaoTest {
     when(mp4JdbcTemplateMock.query(
       eq(FIND_BY_ORGANIZATION_ID_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
-        "IPA1".equals(params.getValue("organizationId"))
+        "IPA1".equals(params.getValue("ipaCode"))
           && Boolean.FALSE.equals(params.getValue("logicalKeysEmpty"))
           && logicalKeys.equals(params.getValue("logicalKeys"))
           && Integer.valueOf(25).equals(params.getValue("limit"))
@@ -143,7 +143,7 @@ class DebtPositionTypeOrgDaoTest {
     when(mypivotJdbcTemplateMock.queryForObject(
       eq("SELECT external"),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
-        "IPA1".equals(params.getValue("organizationId"))
+        "IPA1".equals(params.getValue("ipaCode"))
           && "TAX".equals(params.getValue("codTipo"))
           && params.getValues().size() == 2
       ),

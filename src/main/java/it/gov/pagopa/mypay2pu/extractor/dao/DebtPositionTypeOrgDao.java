@@ -40,7 +40,7 @@ public class DebtPositionTypeOrgDao {
   }
 
   public List<DebtPositionTypeOrg> findByFilters(String ipaCode,
-                                                 List<String> debtPositionsTypeOrgCodes,
+                                                 List<String> debtPositionTypeOrgCodes,
                                                  int limit,
                                                  int offset) {
     if (ipaCode == null || ipaCode.isBlank()) {
@@ -49,35 +49,35 @@ public class DebtPositionTypeOrgDao {
 
     return mp4JdbcTemplate.query(
       findByFiltersSql,
-      buildParams(ipaCode, debtPositionsTypeOrgCodes, limit, offset),
+      buildParams(ipaCode, debtPositionTypeOrgCodes, limit, offset),
       DEBT_POSITION_TYPE_ORG_ROW_MAPPER
     );
   }
 
-  public boolean isExternal(String organizationId, String debtPositionsTypeOrgCode) {
-    if (mypivotJdbcTemplate == null || organizationId == null || organizationId.isBlank()
-      || debtPositionsTypeOrgCode == null || debtPositionsTypeOrgCode.isBlank()) {
+  public boolean isExternal(String ipaCode, String debtPositionTypeOrgCode) {
+    if (mypivotJdbcTemplate == null || ipaCode == null || ipaCode.isBlank()
+      || debtPositionTypeOrgCode == null || debtPositionTypeOrgCode.isBlank()) {
       return false;
     }
 
     Boolean exists = mypivotJdbcTemplate.queryForObject(
       isExternalSql,
       new MapSqlParameterSource()
-        .addValue("organizationId", organizationId)
-        .addValue("debtPositionsTypeOrgCode", debtPositionsTypeOrgCode),
+        .addValue("ipaCode", ipaCode)
+        .addValue("debtPositionsTypeOrgCode", debtPositionTypeOrgCode),
       Boolean.class
     );
     return Boolean.TRUE.equals(exists);
   }
 
-  private MapSqlParameterSource buildParams(String organizationId,
-                                            List<String> debtPositionsTypeOrgCodes,
+  private MapSqlParameterSource buildParams(String ipaCode,
+                                            List<String> debtPositionTypeOrgCodes,
                                             int limit,
                                             int offset) {
-    boolean logicalKeysEmpty = debtPositionsTypeOrgCodes == null || debtPositionsTypeOrgCodes.isEmpty();
+    boolean logicalKeysEmpty = debtPositionTypeOrgCodes == null || debtPositionTypeOrgCodes.isEmpty();
     return QueryUtils.buildPaginatedFilterParams(limit, offset)
-      .addValue("organizationId", organizationId)
+      .addValue("ipaCode", ipaCode)
       .addValue("logicalKeysEmpty", logicalKeysEmpty)
-      .addValue("debtPositionsTypeOrgCodes", logicalKeysEmpty ? NULL_LOGICAL_KEY : debtPositionsTypeOrgCodes);
+      .addValue("logicalKeys", logicalKeysEmpty ? NULL_LOGICAL_KEY : debtPositionTypeOrgCodes);
   }
 }
