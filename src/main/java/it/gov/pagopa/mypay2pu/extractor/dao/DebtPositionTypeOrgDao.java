@@ -17,8 +17,7 @@ import java.util.List;
 @Repository
 public class DebtPositionTypeOrgDao {
 
-  private static final String FIND_BY_ORGANIZATION_ID_SQL_PATH =
-    "mypay/debt-position-type-org/debt-position-type-org.sql";
+  private static final String FIND_BY_FILTERS_SQL_PATH = "mypay/debt-position-type-org/debt-position-type-org.sql";
   private static final String IS_EXTERNAL_SQL_PATH = "mypivot/debt-position-type-org/is-external.sql";
   private static final List<String> NULL_LOGICAL_KEY = Collections.singletonList(null);
   protected static final RowMapper<DebtPositionTypeOrg> DEBT_POSITION_TYPE_ORG_ROW_MAPPER =
@@ -26,7 +25,7 @@ public class DebtPositionTypeOrgDao {
 
   private final NamedParameterJdbcTemplate mp4JdbcTemplate;
   private final NamedParameterJdbcTemplate mypivotJdbcTemplate;
-  private final String findByOrganizationIdSql;
+  private final String findByFiltersSql;
   private final String isExternalSql;
 
   public DebtPositionTypeOrgDao(
@@ -36,28 +35,28 @@ public class DebtPositionTypeOrgDao {
   ) {
     this.mp4JdbcTemplate = mp4JdbcTemplate;
     this.mypivotJdbcTemplate = mypivotJdbcTemplate;
-    this.findByOrganizationIdSql = sqlLoader.load(FIND_BY_ORGANIZATION_ID_SQL_PATH);
+    this.findByFiltersSql = sqlLoader.load(FIND_BY_FILTERS_SQL_PATH);
     this.isExternalSql = sqlLoader.load(IS_EXTERNAL_SQL_PATH);
   }
 
-  public List<DebtPositionTypeOrg> findByOrganizationId(String ipaCode,
-                                                        List<String> logicalKeys,
-                                                        int limit,
-                                                        int offset) {
+  public List<DebtPositionTypeOrg> findByFilters(String ipaCode,
+                                                 List<String> debtPositionsTypeOrgCodes,
+                                                 int limit,
+                                                 int offset) {
     if (ipaCode == null || ipaCode.isBlank()) {
       throw new IllegalArgumentException("ipaCode must not be blank");
     }
 
     return mp4JdbcTemplate.query(
-      findByOrganizationIdSql,
-      buildParams(ipaCode, logicalKeys, limit, offset),
+      findByFiltersSql,
+      buildParams(ipaCode, debtPositionsTypeOrgCodes, limit, offset),
       DEBT_POSITION_TYPE_ORG_ROW_MAPPER
     );
   }
 
-  public boolean isExternal(String organizationId, String codTipo) {
+  public boolean isExternal(String organizationId, String debtPositionsTypeOrgCode) {
     if (mypivotJdbcTemplate == null || organizationId == null || organizationId.isBlank()
-      || codTipo == null || codTipo.isBlank()) {
+      || debtPositionsTypeOrgCode == null || debtPositionsTypeOrgCode.isBlank()) {
       return false;
     }
 
@@ -65,20 +64,20 @@ public class DebtPositionTypeOrgDao {
       isExternalSql,
       new MapSqlParameterSource()
         .addValue("organizationId", organizationId)
-        .addValue("codTipo", codTipo),
+        .addValue("debtPositionsTypeOrgCode", debtPositionsTypeOrgCode),
       Boolean.class
     );
     return Boolean.TRUE.equals(exists);
   }
 
   private MapSqlParameterSource buildParams(String organizationId,
-                                            List<String> logicalKeys,
+                                            List<String> debtPositionsTypeOrgCodes,
                                             int limit,
                                             int offset) {
-    boolean logicalKeysEmpty = logicalKeys == null || logicalKeys.isEmpty();
+    boolean logicalKeysEmpty = debtPositionsTypeOrgCodes == null || debtPositionsTypeOrgCodes.isEmpty();
     return QueryUtils.buildPaginatedFilterParams(limit, offset)
       .addValue("organizationId", organizationId)
       .addValue("logicalKeysEmpty", logicalKeysEmpty)
-      .addValue("logicalKeys", logicalKeysEmpty ? NULL_LOGICAL_KEY : logicalKeys);
+      .addValue("debtPositionsTypeOrgCodes", logicalKeysEmpty ? NULL_LOGICAL_KEY : debtPositionsTypeOrgCodes);
   }
 }

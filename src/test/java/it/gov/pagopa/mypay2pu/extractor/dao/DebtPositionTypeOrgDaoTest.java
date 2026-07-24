@@ -57,7 +57,7 @@ class DebtPositionTypeOrgDaoTest {
       same(DebtPositionTypeOrgDao.DEBT_POSITION_TYPE_ORG_ROW_MAPPER)
     )).thenReturn(expected);
 
-    List<DebtPositionTypeOrg> result = dao.findByOrganizationId("IPA1", null, 50, 100);
+    List<DebtPositionTypeOrg> result = dao.findByFilters("IPA1", null, 50, 100);
 
     assertEquals(expected, result);
   }
@@ -80,7 +80,7 @@ class DebtPositionTypeOrgDaoTest {
       same(DebtPositionTypeOrgDao.DEBT_POSITION_TYPE_ORG_ROW_MAPPER)
     )).thenReturn(List.of(sourceRowWithNullableValues()));
 
-    List<DebtPositionTypeOrg> result = dao.findByOrganizationId("IPA1", logicalKeys, 25, 0);
+    List<DebtPositionTypeOrg> result = dao.findByFilters("IPA1", logicalKeys, 25, 0);
 
     assertEquals(List.of(sourceRowWithNullableValues()), result);
   }
@@ -92,10 +92,10 @@ class DebtPositionTypeOrgDaoTest {
 
     IllegalArgumentException exception = assertThrows(
       IllegalArgumentException.class,
-      () -> dao.findByOrganizationId(" ", keys, 10, 0)
+      () -> dao.findByFilters(" ", keys, 10, 0)
     );
 
-    assertEquals("organizationId must not be blank", exception.getMessage());
+    assertEquals("ipaCode must not be blank", exception.getMessage());
   }
 
   @Test
@@ -105,7 +105,7 @@ class DebtPositionTypeOrgDaoTest {
 
     IllegalArgumentException exception = assertThrows(
       IllegalArgumentException.class,
-      () -> dao.findByOrganizationId("IPA1", keys, 0, 0)
+      () -> dao.findByFilters("IPA1", keys, 0, 0)
     );
 
     assertEquals("limit must be greater than 0", exception.getMessage());
@@ -115,12 +115,12 @@ class DebtPositionTypeOrgDaoTest {
   void sqlResourceContainsEverySourceModelAliasAndRequiredPagingContract() {
     String sql = new SqlLoader().load("mypay/debt-position-type-org/debt-position-type-org.sql");
 
-    assertTrue(sql.contains("AS ente_ipa_code"));
-    assertTrue(sql.contains("AS importo_centesimi"));
-    assertTrue(sql.contains("AS cod_serv_notifica_esito_push"));
-    assertTrue(sql.contains("AS attualizzazione_importo"));
-    assertTrue(sql.contains("AS cod_xsd_causale"));
-    assertTrue(sql.contains("AS url_notifica_pnd"));
+    assertTrue(sql.contains("AS ipa_code"));
+    assertTrue(sql.contains("AS amount_cents"));
+    assertTrue(sql.contains("AS notify_outcome_push_org_sil_service_code"));
+    assertTrue(sql.contains("AS flag_amount_actualization"));
+    assertTrue(sql.contains("AS spontaneous_form_code"));
+    assertTrue(sql.contains("AS spontaneous_form_structure"));
     assertTrue(sql.contains("AS user_pnd"));
     assertTrue(sql.contains("AS psw_pnd"));
     assertTrue(sql.contains("AND (:logicalKeysEmpty = TRUE OR etd.cod_tipo IN (:logicalKeys))"));
