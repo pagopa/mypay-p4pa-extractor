@@ -101,6 +101,8 @@ extractor:
         export-page-size: "\${EXPORT_PAGE_SIZE_ORGANIZATIONS:1000}"
       ORG_SIL_SERVICES:
         export-page-size: "\${EXPORT_PAGE_SIZE_ORG_SIL_SERVICES:1000}"
+      DEBT_POSITION_TYPE:
+        export-page-size: "\${EXPORT_PAGE_SIZE_DEBT_POSITION_TYPE:1000}"
   basic-auth:
     username: "\${CLIENT_ID:client}"
     password: "\${CLIENT_SECRET:secret}"
