@@ -5,5 +5,5 @@ SELECT EXISTS (
         ON e_pv.mygov_ente_id = etd_pv.mygov_ente_id
     WHERE etd_pv.esterno
       AND e_pv.cod_ipa_ente = :ipaCode
-      AND etd_pv.cod_tipo = :codTipo
+      AND etd_pv.cod_tipo = :debtPositionsTypeOrgCode
 ) AS esterno;
