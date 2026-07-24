@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
 
 import java.util.Collections;
 import java.util.List;
@@ -55,8 +56,8 @@ public class DebtPositionTypeOrgDao {
   }
 
   public boolean isExternal(String ipaCode, String debtPositionTypeOrgCode) {
-    if (mypivotJdbcTemplate == null || ipaCode == null || ipaCode.isBlank()
-      || debtPositionTypeOrgCode == null || debtPositionTypeOrgCode.isBlank()) {
+    if (mypivotJdbcTemplate == null || StringUtils.isEmpty(ipaCode)
+      || StringUtils.isEmpty(debtPositionTypeOrgCode)) {
       return false;
     }
 
