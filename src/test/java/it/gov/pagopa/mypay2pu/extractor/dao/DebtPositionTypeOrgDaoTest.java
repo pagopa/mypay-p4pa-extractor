@@ -162,17 +162,15 @@ class DebtPositionTypeOrgDaoTest {
     return new DebtPositionTypeOrg(
       "IPA1", "BILANCIO", "TAX", "Tax", "IT60X0542811101000000123456",
       "IT60X0542811101000000123456", "123456", "Municipality", "Public administration",
-      1234L, "https://example.test/pay", "false", "true", "true", "false", "true",
-      "true", "PAYMENT_NOTIFICATION", "true", "SERVICE", "XSD", "https://pnd.test",
-      "pnd-user", "pnd-password"
-    );
+      1234L, "https://example.test/pay", false, true, true, false, true,
+      true, "PAYMENT_NOTIFICATION", true, "SERVICE", "XSD");
   }
 
   private DebtPositionTypeOrg sourceRowWithNullableValues() {
     return new DebtPositionTypeOrg(
       "IPA1", null, "FEE", "Fee", "IT60X0542811101000000123456",
-      null, null, null, null, null, null, "false", "false", "false", "false", "true",
-      "false", null, "false", null, null, null, null, null
+      null, null, null, null, null, null, false, false, false, false, true,
+      false, null, false, null, null
     );
   }
 }
