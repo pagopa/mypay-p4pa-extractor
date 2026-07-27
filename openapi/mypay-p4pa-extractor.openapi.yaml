@@ -114,6 +114,11 @@ components:
           type: string
           format: date
           example: "2026-06-18"
+        debtPositionTypeOrgCodes:
+          type: array
+          items:
+            type: string
+          example: ["TYPE_ORG_001", "TYPE_ORG_002"]
     ExtractionAcceptedResponse:
       type: object
       required:
