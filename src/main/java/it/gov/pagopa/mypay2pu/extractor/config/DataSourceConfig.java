@@ -57,7 +57,7 @@ public class DataSourceConfig {
 
 
   @Bean("mpv4DataSource")
-  @ConditionalOnProperty(prefix = "PREIFX", name = "NAME", havingValue = "true")
+  @ConditionalOnProperty(prefix = "mypivot", name = "enabled", havingValue = "true")
   @ConfigurationProperties("datasource.mpv4")
   public DataSource mpv4DataSource() {
     return DataSourceBuilder.create().build();
