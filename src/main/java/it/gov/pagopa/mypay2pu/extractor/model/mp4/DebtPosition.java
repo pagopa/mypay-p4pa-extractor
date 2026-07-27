@@ -33,7 +33,6 @@ public record DebtPosition(
   String causaleVersamento,
   String datiSpecificiRiscossione,
   Boolean flgGeneraIuv,
-  Boolean flagPagamentoPu,
   String bilancio,
   String azione,
   Boolean draft,

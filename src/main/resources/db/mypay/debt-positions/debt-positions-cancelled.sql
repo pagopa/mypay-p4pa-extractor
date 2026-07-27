@@ -25,7 +25,6 @@ SELECT
     de.de_rp_dati_vers_dati_sing_vers_causale_versamento AS causale_versamento,
     de.de_rp_dati_vers_dati_sing_vers_dati_specifici_riscossione AS dati_specifici_riscossione,
     de.flg_genera_iuv AS flg_genera_iuv,
-    TRUE AS flag_pagamento_pu,
     de.bilancio AS bilancio,
     'A' AS azione,
     FALSE AS draft,

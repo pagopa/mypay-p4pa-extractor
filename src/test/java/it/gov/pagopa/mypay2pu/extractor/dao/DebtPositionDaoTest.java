@@ -157,7 +157,6 @@ class DebtPositionDaoTest {
       "remittance",
       "metadata",
       true,
-      true,
       "balance",
       "I",
       false,
