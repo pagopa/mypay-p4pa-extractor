@@ -201,11 +201,11 @@ The following global properties are exported for configuration in the migrated M
 
 ##### 📌 Entity file type configurations
 
-| ENV | DESCRIPTION | DEFAULT |
-|---|---|---|
-| `EXPORT_PAGE_SIZE_ORGANIZATIONS` | Maximum number of records to write to an exported file before creating a new one | `1000` |
-| `EXPORT_PAGE_SIZE_ORG_SIL_SERVICES` | Maximum number of records to write to an exported file before creating a new one | `1000` |
-| `EXPORT_PAGE_SIZE_DEBT_POSITION_TYPE` | Maximum number of records to write to an exported file before creating a new one | `1000` |
+| ENV                                    | DESCRIPTION | DEFAULT |
+|----------------------------------------|---|---|
+| `EXPORT_PAGE_SIZE_ORGANIZATIONS`       | Maximum number of records to write to an exported file before creating a new one | `1000` |
+| `EXPORT_PAGE_SIZE_ORG_SIL_SERVICES`    | Maximum number of records to write to an exported file before creating a new one | `1000` |
+| `EXPORT_PAGE_SIZE_DEBT_POSITIONS_TYPE` | Maximum number of records to write to an exported file before creating a new one | `1000` |
 
 
 #### 🔑 Encryption keys

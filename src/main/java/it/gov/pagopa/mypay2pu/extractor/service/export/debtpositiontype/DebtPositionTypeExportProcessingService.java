@@ -56,6 +56,6 @@ public class DebtPositionTypeExportProcessingService extends BaseExportProcessin
 
   @Override
   protected List<DebtPositionType> retrieveData(ExtractionRequest request, int pageSize, int offset) {
-    return debtPositionTypeDao.findAll();
+    return debtPositionTypeDao.findByFilters(request.getFilters(), pageSize, offset);
   }
 }

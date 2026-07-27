@@ -65,7 +65,7 @@ class OrganizationDaoTest {
     ))
       .thenReturn(expected);
 
-    List<Organization> result = dao.findByFilters("IPA1", new ExtractionFilters(null, null));
+    List<Organization> result = dao.findByFilters("IPA1", new ExtractionFilters(null, null, null));
 
     assertEquals(expected, result);
   }
@@ -87,13 +87,13 @@ class OrganizationDaoTest {
     ))
       .thenReturn(List.of());
 
-    List<Organization> result = dao.findByFilters("IPA1", new ExtractionFilters(LocalDate.of(2026, Month.JANUARY, 1), LocalDate.of(2026, Month.JANUARY, 2)), 50, 100);
+    List<Organization> result = dao.findByFilters("IPA1", new ExtractionFilters(LocalDate.of(2026, Month.JANUARY, 1), LocalDate.of(2026, Month.JANUARY, 2), null), 50, 100);
     assertEquals(List.of(), result);
   }
 
   @Test
   void givenInvalidLimitWhenFindByFiltersThenThrowIllegalArgumentException() {
-    ExtractionFilters filters = new ExtractionFilters(null, null);
+    ExtractionFilters filters = new ExtractionFilters(null, null, null);
     OrganizationDao dao = buildDao(mpv4JdbcTemplateMock);
 
     IllegalArgumentException exception = assertThrows(
