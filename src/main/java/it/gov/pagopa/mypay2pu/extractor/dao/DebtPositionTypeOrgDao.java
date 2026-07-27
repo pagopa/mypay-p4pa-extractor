@@ -44,7 +44,7 @@ public class DebtPositionTypeOrgDao {
                                                  List<String> debtPositionTypeOrgCodes,
                                                  int limit,
                                                  int offset) {
-    if (StringUtils.isEmpty(ipaCode)) {
+    if (!StringUtils.hasText(ipaCode)) {
       throw new IllegalArgumentException("ipaCode must not be blank");
     }
 
@@ -56,8 +56,8 @@ public class DebtPositionTypeOrgDao {
   }
 
   public boolean isExternal(String ipaCode, String debtPositionTypeOrgCode) {
-    if (mypivotJdbcTemplate == null || StringUtils.isEmpty(ipaCode)
-      || StringUtils.isEmpty(debtPositionTypeOrgCode)) {
+    if (mypivotJdbcTemplate == null || !StringUtils.hasText(ipaCode)
+      || !StringUtils.hasText(debtPositionTypeOrgCode)) {
       return false;
     }
 
