@@ -85,6 +85,11 @@ datasource:
     username: "\${FESP_DB_USER}"
     password: "\${FESP_DB_PASSWORD}"
     driver-class-name: org.postgresql.Driver
+  mpv4:
+    jdbc-url: "jdbc:postgresql://\${MPV4_DB_HOST:}:\${MPV4_DB_PORT:5432}/\${MPV4_DB_NAME:}"
+    username: "\${MPV4_DB_USER:}"
+    password: "\${MPV4_DB_PASSWORD:}"
+    driver-class-name: org.postgresql.Driver
 
 extractor:
   async:
