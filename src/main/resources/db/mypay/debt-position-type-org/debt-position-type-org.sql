@@ -31,11 +31,8 @@ SELECT
         THEN 'true'
         ELSE 'false'
     END AS flag_amount_actualization,
-    etd.codice_servizio AS service_code,
-    etd.cod_xsd_causale AS spontaneous_form_code,
-    etd.url_notifica_pnd AS auth_url,
-    etd.user_pnd AS user_pnd,
-    etd.psw_pnd AS psw_pnd
+    null AS amount_actualization_org_sil_service_id,
+    etd.codice_servizio AS spontaneous_form_code
 FROM mygov_ente_tipo_dovuto etd
 JOIN mygov_ente e
     ON e.mygov_ente_id = etd.mygov_ente_id
