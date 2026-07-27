@@ -91,6 +91,9 @@ datasource:
     password: "\${MPV4_DB_PASSWORD:}"
     driver-class-name: org.postgresql.Driver
 
+mypivot:
+  enabled: "\${MYPIVOT_ENABLED:false}"
+
 extractor:
   async:
     core-pool-size: "\${ASYNC_CORE_POOL_SIZE:2}"
