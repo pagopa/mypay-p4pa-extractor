@@ -52,8 +52,8 @@ public class DebtPositionTypeOrgExportProcessingService extends BaseExportProces
   @Override
   protected List<DebtPositionTypeOrg> retrieveData(ExtractionRequest request, int pageSize, int offset) {
     return debtPositionTypeOrgDao.findByFilters(
-      null,
-      null,
+      request.getIpaCode(),
+      request.getFilters() != null ? request.getFilters().getDebtPositionTypeOrgCodes() : null,
       pageSize,
       offset
     );
