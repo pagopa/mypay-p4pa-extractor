@@ -14,6 +14,7 @@ WITH ranked AS (
     FROM mygov_ente_tipo_dovuto etd
     JOIN mygov_ente e
         ON e.mygov_ente_id = etd.mygov_ente_id
+    WHERE (:logicalKeysEmpty = TRUE OR etd.cod_tipo IN (:logicalKeys))
 )
 SELECT
     :brokerCf AS broker_cf,
@@ -29,4 +30,6 @@ SELECT
     FALSE AS flag_notify_io
 FROM ranked
 WHERE rn = 1
-ORDER BY cod_tipo ASC;
+ORDER BY cod_tipo ASC
+LIMIT :limit
+OFFSET COALESCE(:offset, 0);

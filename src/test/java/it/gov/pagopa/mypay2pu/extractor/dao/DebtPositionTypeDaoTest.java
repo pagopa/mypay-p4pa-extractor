@@ -1,6 +1,7 @@
 package it.gov.pagopa.mypay2pu.extractor.dao;
 
 import it.gov.pagopa.mypay2pu.extractor.config.ExtractorExportProperties;
+import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionFilters;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.DebtPositionType;
 import it.gov.pagopa.mypay2pu.extractor.utils.SqlLoader;
 import org.junit.jupiter.api.AfterEach;
@@ -37,7 +38,8 @@ class DebtPositionTypeDaoTest {
   }
 
   @Test
-  void givenConfiguredValuesWhenFindAllThenQueryMp4Database() {
+  void givenConfiguredValuesWhenFindByFiltersThenQueryMp4Database() {
+    ExtractionFilters filters = new ExtractionFilters(null, null, List.of("TYPE_ORG"));
     DebtPositionTypeDao dao = buildDao();
     List<DebtPositionType> expected = List.of(new DebtPositionType(
       "12345678901",
@@ -56,12 +58,15 @@ class DebtPositionTypeDaoTest {
       eq(FIND_ALL_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         "12345678901".equals(params.getValue("brokerCf"))
-          && params.getValues().size() == 1
+          && Boolean.FALSE.equals(params.getValue("logicalKeysEmpty"))
+          && List.of("TYPE_ORG").equals(params.getValue("logicalKeys"))
+          && Integer.valueOf(50).equals(params.getValue("limit"))
+          && Integer.valueOf(100).equals(params.getValue("offset"))
       ),
-      same(DebtPositionTypeDao.DEBT_POSITION_TYPE_ROW_MAPPER)
+      same(DebtPositionTypeDao.DEBT_POSITIONS_TYPE_ROW_MAPPER)
     )).thenReturn(expected);
 
-    List<DebtPositionType> result = dao.findAll();
+    List<DebtPositionType> result = dao.findByFilters(filters, 50, 100);
 
     assertEquals(expected, result);
   }
