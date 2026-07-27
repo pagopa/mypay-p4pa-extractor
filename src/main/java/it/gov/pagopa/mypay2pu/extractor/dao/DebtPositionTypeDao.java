@@ -11,6 +11,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.CollectionUtils;
 
 import java.util.Collections;
 import java.util.List;
@@ -46,10 +47,10 @@ public class DebtPositionTypeDao {
                                             int limit,
                                             int offset) {
     List<String> debtPositionTypeOrgCodes = filters != null ? filters.getDebtPositionTypeOrgCodes() : null;
-    boolean logicalKeysEmpty = debtPositionTypeOrgCodes == null || debtPositionTypeOrgCodes.isEmpty();
+    boolean isEmptyCollection = CollectionUtils.isEmpty(debtPositionTypeOrgCodes);
     return QueryUtils.buildPaginatedFilterParams(limit, offset)
       .addValue("brokerCf", exportProperties.brokerCf())
-      .addValue("logicalKeysEmpty", logicalKeysEmpty)
-      .addValue("logicalKeys", logicalKeysEmpty ? Collections.singletonList(null) : debtPositionTypeOrgCodes);
+      .addValue("isEmptyCollection", isEmptyCollection)
+      .addValue("debtPositionTypeOrgCodes", isEmptyCollection ? Collections.singletonList(null) : debtPositionTypeOrgCodes);
   }
 }

@@ -39,7 +39,7 @@ FROM mygov_ente_tipo_dovuto etd
 JOIN mygov_ente e
     ON e.mygov_ente_id = etd.mygov_ente_id
 WHERE e.cod_ipa_ente = :ipaCode
-  AND (:logicalKeysEmpty = TRUE OR etd.cod_tipo IN (:logicalKeys))
+  AND (:isEmptyCollection = TRUE OR etd.cod_tipo IN (:debtPositionTypeOrgCodes))
 ORDER BY etd.cod_tipo
 LIMIT :limit
 OFFSET COALESCE(:offset, 0);

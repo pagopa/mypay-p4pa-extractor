@@ -49,7 +49,7 @@ class DebtPositionTypeOrgDaoTest {
       eq(FIND_BY_ORGANIZATION_ID_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         "IPA1".equals(params.getValue("ipaCode"))
-          && Boolean.TRUE.equals(params.getValue("logicalKeysEmpty"))
+          && Boolean.TRUE.equals(params.getValue("isEmptyCollection"))
           && containsOnlyNullLogicalKey(params)
           && Integer.valueOf(50).equals(params.getValue("limit"))
           && Integer.valueOf(100).equals(params.getValue("offset"))
@@ -72,8 +72,8 @@ class DebtPositionTypeOrgDaoTest {
       eq(FIND_BY_ORGANIZATION_ID_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         "IPA1".equals(params.getValue("ipaCode"))
-          && Boolean.FALSE.equals(params.getValue("logicalKeysEmpty"))
-          && logicalKeys.equals(params.getValue("logicalKeys"))
+          && Boolean.FALSE.equals(params.getValue("isEmptyCollection"))
+          && logicalKeys.equals(params.getValue("debtPositionTypeOrgCodes"))
           && Integer.valueOf(25).equals(params.getValue("limit"))
           && Integer.valueOf(0).equals(params.getValue("offset"))
           && params.getValues().size() == 5
@@ -154,7 +154,7 @@ class DebtPositionTypeOrgDaoTest {
   }
 
   private boolean containsOnlyNullLogicalKey(MapSqlParameterSource params) {
-    Object logicalKeys = params.getValue("logicalKeys");
+    Object logicalKeys = params.getValue("debtPositionTypeOrgCodes");
     return logicalKeys instanceof List<?> values && values.size() == 1 && values.getFirst() == null;
   }
 

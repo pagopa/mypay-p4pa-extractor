@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.Collections;
@@ -20,7 +21,6 @@ public class DebtPositionTypeOrgDao {
 
   private static final String FIND_BY_FILTERS_SQL_PATH = "mypay/debt-position-type-org/debt-position-type-org.sql";
   private static final String IS_EXTERNAL_SQL_PATH = "mypivot/debt-position-type-org/is-external.sql";
-  private static final List<String> NULL_LOGICAL_KEY = Collections.singletonList(null);
   protected static final RowMapper<DebtPositionTypeOrg> DEBT_POSITION_TYPE_ORG_ROW_MAPPER =
     DataClassRowMapper.newInstance(DebtPositionTypeOrg.class);
 
@@ -75,10 +75,10 @@ public class DebtPositionTypeOrgDao {
                                             List<String> debtPositionTypeOrgCodes,
                                             int limit,
                                             int offset) {
-    boolean logicalKeysEmpty = debtPositionTypeOrgCodes == null || debtPositionTypeOrgCodes.isEmpty();
+    boolean isEmptyCollection = CollectionUtils.isEmpty(debtPositionTypeOrgCodes);
     return QueryUtils.buildPaginatedFilterParams(limit, offset)
       .addValue("ipaCode", ipaCode)
-      .addValue("logicalKeysEmpty", logicalKeysEmpty)
-      .addValue("logicalKeys", logicalKeysEmpty ? NULL_LOGICAL_KEY : debtPositionTypeOrgCodes);
+      .addValue("isEmptyCollection", isEmptyCollection)
+      .addValue("debtPositionTypeOrgCodes", isEmptyCollection ? Collections.singletonList(null) : debtPositionTypeOrgCodes);
   }
 }
