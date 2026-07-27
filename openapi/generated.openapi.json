@@ -148,6 +148,13 @@
             "type" : [ "string", "null" ],
             "format" : "date",
             "example" : "2026-06-18"
+          },
+          "debtPositionTypeOrgCodes" : {
+            "type" : "array",
+            "example" : "[TYPE_ORG_001, TYPE_ORG_002]",
+            "items" : {
+              "type" : "string"
+            }
           }
         }
       },
