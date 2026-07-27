@@ -44,7 +44,7 @@ public class DebtPositionTypeOrgDao {
                                                  List<String> debtPositionTypeOrgCodes,
                                                  int limit,
                                                  int offset) {
-    if (ipaCode == null || ipaCode.isBlank()) {
+    if (StringUtils.isEmpty(ipaCode)) {
       throw new IllegalArgumentException("ipaCode must not be blank");
     }
 
