@@ -71,7 +71,7 @@ class DebtPositionTypeExportProcessingServiceTest {
 
   @Test
   void whenDataIsAvailableThenExportPagedDebtPositionTypesToArchive() throws Exception {
-    ExtractionRequest request = new ExtractionRequest("IPA_CODE", MigrationFileType.DEBT_POSITIONS_TYPE, new ExtractionFilters());
+    ExtractionRequest request = new ExtractionRequest("ORG_IPA", MigrationFileType.DEBT_POSITIONS_TYPE, new ExtractionFilters());
     DebtPositionType first = debtPositionType("TYPE_1");
     DebtPositionType second = invalidDebtPositionType();
     PuDebtPositionTypeDTO firstDto = dto("TYPE_1");
@@ -81,7 +81,7 @@ class DebtPositionTypeExportProcessingServiceTest {
     when(debtPositionTypeMapperMock.map(first)).thenReturn(firstDto);
     when(debtPositionTypeMapperMock.map(second)).thenReturn(secondDto);
 
-    ExportFileResult result = service.executeExport("IPA_CODE", request);
+    ExportFileResult result = service.executeExport("BROKER_IPA", request);
 
     assertNull(result.error());
     assertEquals(2, result.files().size());
@@ -93,21 +93,21 @@ class DebtPositionTypeExportProcessingServiceTest {
       .filter(fileName -> fileName.contains(".errors."))
       .findFirst()
       .orElseThrow();
-    assertTrue(exportFileName.matches("IPA_CODE-DEBT_POSITIONS_TYPE-\\d{14}-1_0\\.zip"));
-    assertTrue(errorFileName.matches("IPA_CODE-DEBT_POSITIONS_TYPE-\\d{14}-1_0\\.errors\\.zip"));
+    assertTrue(exportFileName.matches("BROKER_IPA-DEBT_POSITIONS_TYPE-\\d{14}-1_0\\.zip"));
+    assertTrue(errorFileName.matches("BROKER_IPA-DEBT_POSITIONS_TYPE-\\d{14}-1_0\\.errors\\.zip"));
 
-    Path exportArchivePath = tempDir.resolve("IPA_CODE").resolve(exportFileName);
-    Path errorArchivePath = tempDir.resolve("IPA_CODE").resolve(errorFileName);
+    Path exportArchivePath = tempDir.resolve("BROKER_IPA").resolve(exportFileName);
+    Path errorArchivePath = tempDir.resolve("BROKER_IPA").resolve(errorFileName);
     assertTrue(Files.exists(exportArchivePath));
     assertTrue(Files.exists(errorArchivePath));
 
     List<String> exportArchiveEntries = ZipUtils.readZipEntries(exportArchivePath);
     assertEquals(1, exportArchiveEntries.size());
-    assertTrue(exportArchiveEntries.get(0).matches("IPA_CODE-DEBT_POSITIONS_TYPE-\\d{14}-1_0\\.csv"));
+    assertTrue(exportArchiveEntries.get(0).matches("ORG_IPA-DEBT_POSITIONS_TYPE-\\d{14}-1_0\\.csv"));
 
     List<String> errorArchiveEntries = ZipUtils.readZipEntries(errorArchivePath);
     assertEquals(1, errorArchiveEntries.size());
-    assertTrue(errorArchiveEntries.get(0).matches("IPA_CODE-DEBT_POSITIONS_TYPE-\\d{14}-1_0\\.errors\\.csv"));
+    assertTrue(errorArchiveEntries.get(0).matches("ORG_IPA-DEBT_POSITIONS_TYPE-\\d{14}-1_0\\.errors\\.csv"));
 
     InOrder inOrder = inOrder(debtPositionTypeDaoMock);
     inOrder.verify(debtPositionTypeDaoMock).findByFilters(request.getFilters(), 2, 0);
@@ -117,7 +117,7 @@ class DebtPositionTypeExportProcessingServiceTest {
 
   @Test
   void whenNoValidationErrorsThenArchiveContainsOnlyExportCsv() throws Exception {
-    ExtractionRequest request = new ExtractionRequest("IPA_CODE", MigrationFileType.DEBT_POSITIONS_TYPE, new ExtractionFilters());
+    ExtractionRequest request = new ExtractionRequest("ORG_IPA", MigrationFileType.DEBT_POSITIONS_TYPE, new ExtractionFilters());
     DebtPositionType first = debtPositionType("TYPE_1");
     DebtPositionType second = debtPositionType("TYPE_2");
     when(debtPositionTypeDaoMock.findByFilters(request.getFilters(), 2, 0)).thenReturn(List.of(first, second));
@@ -125,14 +125,14 @@ class DebtPositionTypeExportProcessingServiceTest {
     when(debtPositionTypeMapperMock.map(first)).thenReturn(dto("TYPE_1"));
     when(debtPositionTypeMapperMock.map(second)).thenReturn(dto("TYPE_2"));
 
-    ExportFileResult result = service.executeExport("IPA_CODE", request);
+    ExportFileResult result = service.executeExport("BROKER_IPA", request);
 
     assertNull(result.error());
     assertEquals(1, result.files().size());
-    Path archivePath = tempDir.resolve("IPA_CODE").resolve(result.files().get(0));
+    Path archivePath = tempDir.resolve("BROKER_IPA").resolve(result.files().get(0));
     List<String> archiveEntries = ZipUtils.readZipEntries(archivePath);
     assertEquals(1, archiveEntries.size());
-    assertTrue(archiveEntries.get(0).matches("IPA_CODE-DEBT_POSITIONS_TYPE-\\d{14}-1_0\\.csv"));
+    assertTrue(archiveEntries.get(0).matches("ORG_IPA-DEBT_POSITIONS_TYPE-\\d{14}-1_0\\.csv"));
 
     InOrder inOrder = inOrder(debtPositionTypeDaoMock);
     inOrder.verify(debtPositionTypeDaoMock).findByFilters(request.getFilters(), 2, 0);
@@ -145,7 +145,7 @@ class DebtPositionTypeExportProcessingServiceTest {
       tempDir.toString(),
       tempDir.toString(),
       "12345678901",
-      "IPA_CODE",
+      "BROKER_IPA",
       Map.of(MigrationFileType.DEBT_POSITIONS_TYPE, new ExtractorExportProperties.FileTypeConfiguration(2))
     );
   }
