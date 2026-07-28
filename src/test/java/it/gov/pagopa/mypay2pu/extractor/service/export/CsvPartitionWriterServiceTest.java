@@ -103,6 +103,6 @@ class CsvPartitionWriterServiceTest {
   }
 
   private ExportFileNameBuilder getFileNameBuilder() {
-    return new ExportFileNameBuilder("IPA_CODE", MigrationFileType.ORGANIZATIONS, LocalDate.now().atStartOfDay(), "1_0");
+    return new ExportFileNameBuilder("IPA_CODE", "IPA_CODE_ORG", MigrationFileType.ORGANIZATIONS, LocalDate.now().atStartOfDay(), "1_0");
   }
 }
