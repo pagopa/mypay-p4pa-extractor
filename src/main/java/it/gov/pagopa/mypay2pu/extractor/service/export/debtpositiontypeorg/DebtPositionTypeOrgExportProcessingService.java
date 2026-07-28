@@ -5,6 +5,7 @@ import it.gov.pagopa.mypay2pu.extractor.dao.DebtPositionTypeOrgDao;
 import it.gov.pagopa.mypay2pu.extractor.dto.export.PuDebtPositionTypeOrgDTO;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
+import it.gov.pagopa.mypay2pu.extractor.mapper.debtpositiontypeorg.DebtPositionTypeOrgMapper;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.DebtPositionTypeOrg;
 import it.gov.pagopa.mypay2pu.extractor.service.FileArchiverService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.BaseExportProcessingService;
@@ -19,9 +20,10 @@ import java.util.List;
 public class DebtPositionTypeOrgExportProcessingService extends BaseExportProcessingService<DebtPositionTypeOrg, PuDebtPositionTypeOrgDTO> {
 
   private final DebtPositionTypeOrgDao debtPositionTypeOrgDao;
-  //TODO add mapper
+  private final DebtPositionTypeOrgMapper debtPositionTypeOrgMapper;
 
   protected DebtPositionTypeOrgExportProcessingService(DebtPositionTypeOrgDao debtPositionTypeOrgDao,
+                                                       DebtPositionTypeOrgMapper debtPositionTypeOrgMapper,
                                                        CsvService csvService,
                                                        CsvPartitionWriterService csvPartitionWriterService,
                                                        FileArchiverService fileArchiverService,
@@ -29,6 +31,7 @@ public class DebtPositionTypeOrgExportProcessingService extends BaseExportProces
                                                        ExtractorExportProperties exportProperties) {
     super(csvService, csvPartitionWriterService, fileArchiverService, validator, exportProperties);
     this.debtPositionTypeOrgDao = debtPositionTypeOrgDao;
+    this.debtPositionTypeOrgMapper = debtPositionTypeOrgMapper;
   }
 
   @Override
@@ -46,7 +49,7 @@ public class DebtPositionTypeOrgExportProcessingService extends BaseExportProces
 
   @Override
   protected PuDebtPositionTypeOrgDTO toExportableEntity(DebtPositionTypeOrg model) {
-    return null; //TODO add mapper P4ADEV-4887
+    return debtPositionTypeOrgMapper.map(model);
   }
 
   @Override
