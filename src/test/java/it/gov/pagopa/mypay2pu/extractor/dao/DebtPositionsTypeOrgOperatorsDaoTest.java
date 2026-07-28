@@ -71,7 +71,7 @@ class DebtPositionsTypeOrgOperatorsDaoTest {
   }
 
   private DebtPositionsTypeOrgOperatorsDao buildDao() {
-    when(sqlLoaderMock.load("mypay/debt-position-type-org-operators/debt-position-type-org-operators.sql"))
+    when(sqlLoaderMock.load("mypay/debt-positions-type-org-operators/debt-positions-type-org-operators.sql"))
       .thenReturn(FIND_BY_FILTERS_SQL);
     return new DebtPositionsTypeOrgOperatorsDao(mp4JdbcTemplateMock, sqlLoaderMock);
   }
