@@ -17,8 +17,6 @@ public record DebtPositionTypeOrg(
   Boolean flagAnonymousFiscalCode,
   Boolean flagMandatoryDueDate,
   Boolean flagSpontaneous,
-  Boolean flagNotifyIo,
-  Boolean flagNotifyIoBkp,
   Boolean flagActive,
   Boolean flagNotifyOutcomePush,
   String notifyOutcomePushOrgSilServiceCode,

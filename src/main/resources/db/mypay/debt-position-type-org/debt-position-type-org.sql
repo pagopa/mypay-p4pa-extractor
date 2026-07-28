@@ -13,8 +13,6 @@ SELECT
     etd.flg_cf_anonimo AS flag_anonymous_fiscal_code,
     etd.flg_scadenza_obbligatoria AS flag_mandatory_due_date,
     etd.spontaneo AS flag_spontaneous,
-    FALSE AS flag_notify_io,
-    COALESCE(etd.flag_notify_io, FALSE) AS flag_notify_io_bkp,
     etd.flg_attivo AS flag_active,
     etd.flg_notifica_esito_push AS flag_notify_outcome_push,
     (
