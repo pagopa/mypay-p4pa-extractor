@@ -48,11 +48,12 @@ JOIN mygov_ente e
     ON f.mygov_ente_id = e.mygov_ente_id
 LEFT JOIN mygov_dovuto_multibeneficiario mb
     ON mb.mygov_dovuto_id = d.mygov_dovuto_id
-WHERE e.cod_ipa_ente = :organizationId
+WHERE e.cod_ipa_ente = :codIpaEnte
   AND (:gpdIupd IS NULL OR d.gpd_iupd = :gpdIupd)
   AND (:codIud IS NULL OR d.cod_iud = :codIud)
   AND (:updatedFrom IS NULL OR d.dt_ultima_modifica >= :updatedFrom)
   AND (:updatedToExclusive IS NULL OR d.dt_ultima_modifica < :updatedToExclusive)
+  AND (:debtPositionTypeOrgCodesEmpty = TRUE OR d.cod_tipo_dovuto IN (:debtPositionTypeOrgCodes))
 ORDER BY d.dt_ultima_modifica, d.mygov_dovuto_id
 LIMIT :limit
 OFFSET COALESCE(:offset, 0)

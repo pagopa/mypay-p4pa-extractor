@@ -1,5 +1,6 @@
 package it.gov.pagopa.mypay2pu.extractor.dao;
 
+import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionFilters;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.DebtPosition;
 import it.gov.pagopa.mypay2pu.extractor.utils.DateTimeUtils;
 import it.gov.pagopa.mypay2pu.extractor.utils.QueryUtils;
@@ -11,7 +12,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 
 @Repository
@@ -36,79 +37,81 @@ public class DebtPositionDao {
   }
 
   public List<DebtPosition> findDebtPositions(
-    String organizationId,
+    String codIpaEnte,
     String gpdIupd,
     String codIud,
-    LocalDate updatedFrom,
-    LocalDate updatedTo
+    ExtractionFilters filters
   ) {
-    return findDebtPositions(organizationId, gpdIupd, codIud, updatedFrom, updatedTo, Integer.MAX_VALUE, 0);
+    return findDebtPositions(codIpaEnte, gpdIupd, codIud, filters, Integer.MAX_VALUE, 0);
   }
 
   public List<DebtPosition> findDebtPositions(
-    String organizationId,
+    String codIpaEnte,
     String gpdIupd,
     String codIud,
-    LocalDate updatedFrom,
-    LocalDate updatedTo,
+    ExtractionFilters filters,
     int limit,
     int offset
   ) {
-    validateOrganizationId(organizationId);
-    return mp4JdbcTemplate.query(
-      findDebtPositionsSql,
-      buildParams(organizationId, gpdIupd, codIud, updatedFrom, updatedTo, limit, offset),
-      DEBT_POSITION_ROW_MAPPER
-    );
+    return findByFilters(findDebtPositionsSql, codIpaEnte, gpdIupd, codIud, filters, limit, offset);
   }
 
   public List<DebtPosition> findCancelledDebtPositions(
-    String organizationId,
+    String codIpaEnte,
     String gpdIupd,
     String codIud,
-    LocalDate updatedFrom,
-    LocalDate updatedTo
+    ExtractionFilters filters
   ) {
-    return findCancelledDebtPositions(organizationId, gpdIupd, codIud, updatedFrom, updatedTo, Integer.MAX_VALUE, 0);
+    return findCancelledDebtPositions(codIpaEnte, gpdIupd, codIud, filters, Integer.MAX_VALUE, 0);
   }
 
   public List<DebtPosition> findCancelledDebtPositions(
-    String organizationId,
+    String codIpaEnte,
     String gpdIupd,
     String codIud,
-    LocalDate updatedFrom,
-    LocalDate updatedTo,
+    ExtractionFilters filters,
     int limit,
     int offset
   ) {
-    validateOrganizationId(organizationId);
+    return findByFilters(findCancelledDebtPositionsSql, codIpaEnte, gpdIupd, codIud, filters, limit, offset);
+  }
+
+  private List<DebtPosition> findByFilters(
+    String sql,
+    String codIpaEnte,
+    String gpdIupd,
+    String codIud,
+    ExtractionFilters filters,
+    int limit,
+    int offset
+  ) {
+    if (codIpaEnte == null || codIpaEnte.isBlank()) {
+      throw new IllegalArgumentException("codIpaEnte must not be blank");
+    }
     return mp4JdbcTemplate.query(
-      findCancelledDebtPositionsSql,
-      buildParams(organizationId, gpdIupd, codIud, updatedFrom, updatedTo, limit, offset),
+      sql,
+      buildParams(codIpaEnte, gpdIupd, codIud, filters, limit, offset),
       DEBT_POSITION_ROW_MAPPER
     );
   }
 
   private MapSqlParameterSource buildParams(
-    String organizationId,
+    String codIpaEnte,
     String gpdIupd,
     String codIud,
-    LocalDate updatedFrom,
-    LocalDate updatedTo,
+    ExtractionFilters filters,
     int limit,
     int offset
   ) {
+    List<String> debtPositionTypeOrgCodes = filters != null ? filters.getDebtPositionTypeOrgCodes() : null;
+    boolean debtPositionTypeOrgCodesEmpty = debtPositionTypeOrgCodes == null || debtPositionTypeOrgCodes.isEmpty();
     return QueryUtils.buildPaginatedFilterParams(limit, offset)
-      .addValue("organizationId", organizationId)
+      .addValue("codIpaEnte", codIpaEnte)
       .addValue("gpdIupd", gpdIupd)
       .addValue("codIud", codIud)
-      .addValue("updatedFrom", DateTimeUtils.toStartOfDay(updatedFrom))
-      .addValue("updatedToExclusive", DateTimeUtils.toStartOfNextDay(updatedTo));
-  }
-
-  private void validateOrganizationId(String organizationId) {
-    if (organizationId == null || organizationId.isBlank()) {
-      throw new IllegalArgumentException("organizationId must not be blank");
-    }
+      .addValue("updatedFrom", DateTimeUtils.toStartOfDay(filters != null ? filters.getModifiedFrom() : null))
+      .addValue("updatedToExclusive", DateTimeUtils.toStartOfNextDay(filters != null ? filters.getModifiedTo() : null))
+      .addValue("debtPositionTypeOrgCodesEmpty", debtPositionTypeOrgCodesEmpty)
+      .addValue("debtPositionTypeOrgCodes", debtPositionTypeOrgCodesEmpty ? Collections.singletonList(null) : debtPositionTypeOrgCodes);
   }
 }
