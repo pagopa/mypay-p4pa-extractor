@@ -97,7 +97,7 @@ class DebtPositionDaoTest {
       same(DebtPositionDao.DEBT_POSITION_ROW_MAPPER)
     )).thenReturn(expected);
 
-    List<DebtPosition> result = dao.findCancelledDebtPositions("IPA2", null, null, null);
+    List<DebtPosition> result = dao.findCancelledDebtPositions("IPA2", null, null, null, Integer.MAX_VALUE, 0);
 
     assertEquals(expected, result);
   }
@@ -115,12 +115,12 @@ class DebtPositionDaoTest {
   }
 
   @Test
-  void givenBlankCodIpaEnteWhenFindCancelledDebtPositionsThenThrowIllegalArgumentException() {
+  void givenEmptyCodIpaEnteWhenFindCancelledDebtPositionsThenThrowIllegalArgumentException() {
     DebtPositionDao dao = buildDao();
 
     IllegalArgumentException exception = assertThrows(
       IllegalArgumentException.class,
-      () -> dao.findCancelledDebtPositions(" ", null, null, null)
+      () -> dao.findCancelledDebtPositions("", null, null, null, 10, 0)
     );
 
     assertEquals("codIpaEnte must not be blank", exception.getMessage());
@@ -161,7 +161,6 @@ class DebtPositionDaoTest {
       "metadata",
       true,
       "balance",
-      "I",
       false,
       true,
       "CFENTE",
