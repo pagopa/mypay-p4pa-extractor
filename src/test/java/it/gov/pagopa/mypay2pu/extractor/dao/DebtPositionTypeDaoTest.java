@@ -58,8 +58,8 @@ class DebtPositionTypeDaoTest {
       eq(FIND_ALL_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         "12345678901".equals(params.getValue("brokerCf"))
-          && Boolean.FALSE.equals(params.getValue("logicalKeysEmpty"))
-          && List.of("TYPE_ORG").equals(params.getValue("logicalKeys"))
+          && Boolean.FALSE.equals(params.getValue("isEmptyCollection"))
+          && List.of("TYPE_ORG").equals(params.getValue("debtPositionTypeOrgCodes"))
           && Integer.valueOf(50).equals(params.getValue("limit"))
           && Integer.valueOf(100).equals(params.getValue("offset"))
       ),
