@@ -15,7 +15,7 @@ import java.util.List;
 @Repository
 public class DebtPositionsTypeOrgOperatorsDao {
 
-  private static final String FIND_BY_FILTERS_SQL_PATH = "mypay/debt-position-type-org-operators/debt-position-type-org-operators.sql";
+  private static final String FIND_BY_FILTERS_SQL_PATH = "mypay/debt-positions-type-org-operators/debt-positions-type-org-operators.sql";
   protected static final RowMapper<DebtPositionsTypeOrgOperators> ROW_MAPPER =
     DataClassRowMapper.newInstance(DebtPositionsTypeOrgOperators.class);
 
