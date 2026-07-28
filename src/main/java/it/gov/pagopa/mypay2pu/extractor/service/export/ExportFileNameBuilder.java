@@ -8,7 +8,7 @@ import java.util.Locale;
 
 public record ExportFileNameBuilder(
   String brokerIpaCode,
-  String ipaCodeOrganization,
+  String organizationIpaCode,
   MigrationFileType migrationFileType,
   LocalDateTime timestamp,
   String version
@@ -60,6 +60,6 @@ public record ExportFileNameBuilder(
   private String resolveCsvIpaCode() {
     return migrationFileType == MigrationFileType.ORGANIZATIONS
       ? brokerIpaCode
-      : ipaCodeOrganization;
+      : organizationIpaCode;
   }
 }
