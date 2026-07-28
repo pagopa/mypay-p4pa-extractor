@@ -49,14 +49,13 @@ class DebtPositionTypeOrgMapperTest {
   void mapShouldPopulateExportDtoWithEnrichmentInputs() {
     DebtPositionTypeOrg debtPositionTypeOrg = new DebtPositionTypeOrg(
       "IPA1", "BILANCIO", "TAX", "Tax", "IT60X0542811101000000123456",
-      "IT60X0542811101000000123456", "123456", "Municipality", "Public administration",
-      1234L, "https://example.test/pay", "false", "true", "true", "false", "true",
-      "true", "PAYMENT_NOTIFICATION", "true", "SERVICE", "XSD", "https://pnd.test",
-      "pnd-user", "pnd-password"
+      "IT60X0542811101000000123456", "123456", "Municipality", "Public administration", 1234L,
+      "https://example.test/pay", false, true, true, true, true,
+      "PAYMENT_NOTIFICATION", true, null, "SPONT_FORM"
     );
     String strutturaPagamentoSpontaneo = "{\"field\":\"value\"}";
 
-    when(myDictionaryClientMock.getSpontaneousFormStructure(debtPositionTypeOrg.code()))
+    when(myDictionaryClientMock.getSpontaneousFormStructure(debtPositionTypeOrg.spontaneousFormCode()))
       .thenReturn(strutturaPagamentoSpontaneo);
     when(debtPositionTypeOrgDaoMock.isExternal(debtPositionTypeOrg.ipaCode(), debtPositionTypeOrg.code()))
       .thenReturn(true);
@@ -78,7 +77,7 @@ class DebtPositionTypeOrgMapperTest {
     assertEquals(debtPositionTypeOrg.flagAnonymousFiscalCode(), result.getFlagAnonymousFiscalCode());
     assertEquals(debtPositionTypeOrg.flagMandatoryDueDate(), result.getFlagMandatoryDueDate());
     assertEquals(debtPositionTypeOrg.flagSpontaneous(), result.getFlagSpontaneous());
-    assertEquals(debtPositionTypeOrg.flagNotifyIo(), result.getFlagNotifyIo());
+    assertEquals(false, result.getFlagNotifyIo());
     assertEquals(
       "Pagamento %posizioneDebitoria_descrizione% di %importoTotale% per %debitore_nomeCompleto% entro %dataScadenza%",
       result.getIoTemplateMessage()
@@ -88,22 +87,22 @@ class DebtPositionTypeOrgMapperTest {
     assertEquals(debtPositionTypeOrg.notifyOutcomePushOrgSilServiceCode(), result.getNotifyOutcomePushOrgSilServiceCode());
     assertEquals(debtPositionTypeOrg.flagAmountActualization(), result.getFlagAmountActualization());
     assertNull(result.getAmountActualizationOrgSilServiceCode());
-    assertEquals("true", result.getFlagExternal());
-    assertEquals(debtPositionTypeOrg.serviceCode(), result.getServiceCode());
+    assertEquals(true, result.getFlagExternal());
+    assertNull(result.getServiceCode());
     assertEquals("Oggetto %posizioneDebitoria_descrizione%", result.getIoTemplateSubject());
 
-    TestUtils.checkNotNullFields(result, "amountActualizationOrgSilServiceCode");
+    TestUtils.checkNotNullFields(result, "amountActualizationOrgSilServiceCode", "serviceCode");
   }
 
   @Test
   void mapShouldPreserveNullOptionalFields() {
     DebtPositionTypeOrg debtPositionTypeOrg = new DebtPositionTypeOrg(
       "IPA1", null, "FEE", "Fee", "IT60X0542811101000000123456",
-      null, null, null, null, null, null, "false", "false", "false", "false", "true",
-      "false", null, "false", null, null, null, null, null
+      null, null, null, null, null, null, false, false, false, true, false,
+      null, false, null, null
     );
 
-    when(myDictionaryClientMock.getSpontaneousFormStructure(debtPositionTypeOrg.code()))
+    when(myDictionaryClientMock.getSpontaneousFormStructure(debtPositionTypeOrg.spontaneousFormCode()))
       .thenReturn(null);
     when(debtPositionTypeOrgDaoMock.isExternal(debtPositionTypeOrg.ipaCode(), debtPositionTypeOrg.code()))
       .thenReturn(false);
@@ -114,14 +113,14 @@ class DebtPositionTypeOrgMapperTest {
     assertEquals("FEE", result.getCode());
     assertEquals("Fee", result.getDescription());
     assertEquals("IT60X0542811101000000123456", result.getIban());
-    assertEquals("false", result.getFlagAnonymousFiscalCode());
-    assertEquals("false", result.getFlagMandatoryDueDate());
-    assertEquals("false", result.getFlagSpontaneous());
-    assertEquals("false", result.getFlagNotifyIo());
-    assertEquals("true", result.getFlagActive());
-    assertEquals("false", result.getFlagNotifyOutcomePush());
-    assertEquals("false", result.getFlagAmountActualization());
-    assertEquals("false", result.getFlagExternal());
+    assertEquals(false, result.getFlagAnonymousFiscalCode());
+    assertEquals(false, result.getFlagMandatoryDueDate());
+    assertEquals(false, result.getFlagSpontaneous());
+    assertEquals(false, result.getFlagNotifyIo());
+    assertEquals(true, result.getFlagActive());
+    assertEquals(false, result.getFlagNotifyOutcomePush());
+    assertEquals(false, result.getFlagAmountActualization());
+    assertEquals(false, result.getFlagExternal());
     assertNull(result.getBalance());
     assertNull(result.getPostalIban());
     assertNull(result.getPostalAccountCode());
@@ -130,7 +129,7 @@ class DebtPositionTypeOrgMapperTest {
     assertNull(result.getAmountCents());
     assertNull(result.getExternalPaymentUrl());
     assertNull(result.getNotifyOutcomePushOrgSilServiceCode());
-    assertEquals("FEE", result.getSpontaneousFormCode());
+    assertNull( result.getSpontaneousFormCode());
     assertNull(result.getSpontaneousFormStructure());
     assertNull(result.getAmountActualizationOrgSilServiceCode());
     assertNull(result.getServiceCode());
@@ -147,6 +146,7 @@ class DebtPositionTypeOrgMapperTest {
       "postalAccountCode",
       "holderPostalCc",
       "orgSector",
+      "spontaneousFormCode",
       "spontaneousFormStructure",
       "amountCents",
       "externalPaymentUrl",

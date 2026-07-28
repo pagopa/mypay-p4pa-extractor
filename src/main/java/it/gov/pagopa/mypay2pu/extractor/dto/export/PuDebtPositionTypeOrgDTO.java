@@ -2,8 +2,7 @@ package it.gov.pagopa.mypay2pu.extractor.dto.export;
 
 import com.opencsv.bean.CsvBindByName;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -63,61 +62,45 @@ public class PuDebtPositionTypeOrgDTO implements CsvExportDto {
   private String externalPaymentUrl;
 
   @CsvBindByName(column = "codiceFiscaleAnonimo", required = true)
-  @NotBlank
-  @Size(max = 5)
-  @Pattern(regexp = "^(true|false)$")
-  private String flagAnonymousFiscalCode;
+  @NotNull
+  private Boolean flagAnonymousFiscalCode;
 
   @CsvBindByName(column = "scadenzaObbligatoria", required = true)
-  @NotBlank
-  @Size(max = 5)
-  @Pattern(regexp = "^(true|false)$")
-  private String flagMandatoryDueDate;
+  @NotNull
+  private Boolean flagMandatoryDueDate;
 
   @CsvBindByName(column = "pagamentoSpontaneo", required = true)
-  @NotBlank
-  @Size(max = 5)
-  @Pattern(regexp = "^(true|false)$")
-  private String flagSpontaneous;
+  @NotNull
+  private Boolean flagSpontaneous;
 
   @CsvBindByName(column = "notificaIo", required = true)
-  @NotBlank
-  @Size(max = 5)
-  @Pattern(regexp = "^(true|false)$")
-  private String flagNotifyIo;
+  @NotNull
+  private Boolean flagNotifyIo;
 
   @CsvBindByName(column = "templateMessaggioIo")
   private String ioTemplateMessage;
 
   @CsvBindByName(column = "attivo", required = true)
-  @NotBlank
-  @Size(max = 5)
-  @Pattern(regexp = "^(true|false)$")
-  private String flagActive;
+  @NotNull
+  private Boolean flagActive;
 
   @CsvBindByName(column = "notificaEsitoPush", required = true)
-  @NotBlank
-  @Size(max = 5)
-  @Pattern(regexp = "^(true|false)$")
-  private String flagNotifyOutcomePush;
+  @NotNull
+  private Boolean flagNotifyOutcomePush;
 
   @CsvBindByName(column = "codServNotificaEsitoPush")
   private String notifyOutcomePushOrgSilServiceCode;
 
   @CsvBindByName(column = "attualizzazioneImporto", required = true)
-  @NotBlank
-  @Size(max = 5)
-  @Pattern(regexp = "^(true|false)$")
-  private String flagAmountActualization;
+  @NotNull
+  private Boolean flagAmountActualization;
 
   @CsvBindByName(column = "codServAttualizzazioneImporto")
   private String amountActualizationOrgSilServiceCode;
 
   @CsvBindByName(column = "esterno", required = true)
-  @NotBlank
-  @Size(max = 5)
-  @Pattern(regexp = "^(true|false)$")
-  private String flagExternal;
+  @NotNull
+  private Boolean flagExternal;
 
   @CsvBindByName(column = "codiceServizio")
   private String serviceCode;
