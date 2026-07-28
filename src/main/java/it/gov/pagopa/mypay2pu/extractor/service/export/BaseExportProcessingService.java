@@ -117,7 +117,7 @@ public abstract class BaseExportProcessingService<E extends ExportModel, C exten
       List<String> archivedFiles = archiveExportFiles(
         csvFilePaths,
         errorFilePath,
-        fileNameBuilder.buildBaseName(),
+        fileNameBuilder.buildZipBaseName(),
         extractionDirectory,
         workingDirectory
       );
@@ -183,7 +183,7 @@ public abstract class BaseExportProcessingService<E extends ExportModel, C exten
 
     if (errorFilePath.isPresent()) {
       Path errorCsvPath = errorFilePath.get();
-      String errorZipName = errorCsvPath.getFileName().toString().replace(".csv", ".zip");
+      String errorZipName = exportName + ".errors.zip";
       Path errorZipPath = workingDirectory.resolve(errorZipName);
       fileArchiverService.compressAndArchive(List.of(errorCsvPath), errorZipPath, extractionDirectory);
       archivedFileNames.add(errorZipPath.getFileName().toString());

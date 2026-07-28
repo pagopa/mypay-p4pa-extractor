@@ -70,17 +70,17 @@ class OrganizationExportProcessingServiceTest {
 
   @Test
   void whenDataIsAvailableThenExportPagedOrganizationsToArchive() throws Exception {
-    ExtractionRequest request = new ExtractionRequest("IPA_CODE", MigrationFileType.ORGANIZATIONS);
+    ExtractionRequest request = new ExtractionRequest("ORG_IPA", MigrationFileType.ORGANIZATIONS);
     Organization first = organization("first");
     Organization second = invalidOrganization();
     PuOrganizationDTO firstDto = dto("first");
     PuOrganizationDTO secondDto = invalidDto();
-    when(organizationDaoMock.findByFilters("IPA_CODE", null, 2, 0)).thenReturn(List.of(first, second));
-    when(organizationDaoMock.findByFilters("IPA_CODE", null, 2, 2)).thenReturn(List.of());
+    when(organizationDaoMock.findByFilters("ORG_IPA", null, 2, 0)).thenReturn(List.of(first, second));
+    when(organizationDaoMock.findByFilters("ORG_IPA", null, 2, 2)).thenReturn(List.of());
     when(organizationMapperMock.map(first)).thenReturn(firstDto);
     when(organizationMapperMock.map(second)).thenReturn(secondDto);
 
-    ExportFileResult result = service.executeExport("IPA_CODE", request);
+    ExportFileResult result = service.executeExport("BROKER_IPA", request);
 
     assertNull(result.error());
     assertEquals(2, result.files().size());
@@ -92,95 +92,95 @@ class OrganizationExportProcessingServiceTest {
       .filter(fileName -> fileName.contains(".errors."))
       .findFirst()
       .orElseThrow();
-    assertTrue(exportFileName.matches("IPA_CODE-ORGANIZATIONS-\\d{14}-1_0\\.zip"));
-    assertTrue(errorFileName.matches("IPA_CODE-ORGANIZATIONS-\\d{14}-1_0\\.errors\\.zip"));
+    assertTrue(exportFileName.matches("BROKER_IPA-ORGANIZATIONS-\\d{14}-1_0\\.zip"));
+    assertTrue(errorFileName.matches("BROKER_IPA-ORGANIZATIONS-\\d{14}-1_0\\.errors\\.zip"));
 
-    Path exportArchivePath = tempDir.resolve("IPA_CODE").resolve(exportFileName);
-    Path errorArchivePath = tempDir.resolve("IPA_CODE").resolve(errorFileName);
+    Path exportArchivePath = tempDir.resolve("BROKER_IPA").resolve(exportFileName);
+    Path errorArchivePath = tempDir.resolve("BROKER_IPA").resolve(errorFileName);
     assertTrue(Files.exists(exportArchivePath));
     assertTrue(Files.exists(errorArchivePath));
 
     List<String> exportArchiveEntries = ZipUtils.readZipEntries(exportArchivePath);
     assertEquals(1, exportArchiveEntries.size());
-    assertTrue(exportArchiveEntries.get(0).matches("IPA_CODE-ORGANIZATIONS-\\d{14}-1_0\\.csv"));
+    assertTrue(exportArchiveEntries.get(0).matches("BROKER_IPA-ORGANIZATIONS-\\d{14}-1_0\\.csv"));
 
     List<String> errorArchiveEntries = ZipUtils.readZipEntries(errorArchivePath);
     assertEquals(1, errorArchiveEntries.size());
-    assertTrue(errorArchiveEntries.get(0).matches("IPA_CODE-ORGANIZATIONS-\\d{14}-1_0\\.errors\\.csv"));
+    assertTrue(errorArchiveEntries.get(0).matches("BROKER_IPA-ORGANIZATIONS-\\d{14}-1_0\\.errors\\.csv"));
     InOrder inOrder = inOrder(organizationDaoMock);
-    inOrder.verify(organizationDaoMock).findByFilters("IPA_CODE", null, 2, 0);
-    inOrder.verify(organizationDaoMock).findByFilters("IPA_CODE", null, 2, 2);
+    inOrder.verify(organizationDaoMock).findByFilters("ORG_IPA", null, 2, 0);
+    inOrder.verify(organizationDaoMock).findByFilters("ORG_IPA", null, 2, 2);
   }
 
   @Test
   void whenNoValidationErrorsThenArchiveContainsOnlyExportCsv() throws Exception {
-    ExtractionRequest request = new ExtractionRequest("IPA_CODE", MigrationFileType.ORGANIZATIONS);
+    ExtractionRequest request = new ExtractionRequest("ORG_IPA", MigrationFileType.ORGANIZATIONS);
     Organization first = organization("first");
     Organization second = organization("second");
-    when(organizationDaoMock.findByFilters("IPA_CODE", null, 2, 0)).thenReturn(List.of(first, second));
-    when(organizationDaoMock.findByFilters("IPA_CODE", null, 2, 2)).thenReturn(List.of());
+    when(organizationDaoMock.findByFilters("ORG_IPA", null, 2, 0)).thenReturn(List.of(first, second));
+    when(organizationDaoMock.findByFilters("ORG_IPA", null, 2, 2)).thenReturn(List.of());
     when(organizationMapperMock.map(first)).thenReturn(dto("first"));
     when(organizationMapperMock.map(second)).thenReturn(dto("second"));
 
-    ExportFileResult result = service.executeExport("IPA_CODE", request);
+    ExportFileResult result = service.executeExport("BROKER_IPA", request);
 
     assertNull(result.error());
-    Path archivePath = tempDir.resolve("IPA_CODE").resolve(result.files().get(0));
+    Path archivePath = tempDir.resolve("BROKER_IPA").resolve(result.files().get(0));
     List<String> archiveEntries = ZipUtils.readZipEntries(archivePath);
     assertEquals(1, archiveEntries.size());
-    assertTrue(archiveEntries.get(0).matches("IPA_CODE-ORGANIZATIONS-\\d{14}-1_0\\.csv"));
+    assertTrue(archiveEntries.get(0).matches("BROKER_IPA-ORGANIZATIONS-\\d{14}-1_0\\.csv"));
 
     InOrder inOrder = inOrder(organizationDaoMock);
-    inOrder.verify(organizationDaoMock).findByFilters("IPA_CODE", null, 2, 0);
-    inOrder.verify(organizationDaoMock).findByFilters("IPA_CODE", null, 2, 2);
+    inOrder.verify(organizationDaoMock).findByFilters("ORG_IPA", null, 2, 0);
+    inOrder.verify(organizationDaoMock).findByFilters("ORG_IPA", null, 2, 2);
   }
 
   @Test
   void whenRowsExceedThresholdThenArchiveContainsCsvPartsInOrder() throws Exception {
-    ExtractionRequest request = new ExtractionRequest("IPA_CODE", MigrationFileType.ORGANIZATIONS);
+    ExtractionRequest request = new ExtractionRequest("ORG_IPA", MigrationFileType.ORGANIZATIONS);
     Organization first = organization("first");
     Organization second = organization("second");
     Organization third = organization("third");
 
-    when(organizationDaoMock.findByFilters("IPA_CODE", null, 2, 0)).thenReturn(List.of(first, second));
-    when(organizationDaoMock.findByFilters("IPA_CODE", null, 2, 2)).thenReturn(List.of(third));
+    when(organizationDaoMock.findByFilters("ORG_IPA", null, 2, 0)).thenReturn(List.of(first, second));
+    when(organizationDaoMock.findByFilters("ORG_IPA", null, 2, 2)).thenReturn(List.of(third));
     when(organizationMapperMock.map(first)).thenReturn(dto("first"));
     when(organizationMapperMock.map(second)).thenReturn(dto("second"));
     when(organizationMapperMock.map(third)).thenReturn(dto("third"));
 
-    ExportFileResult result = service.executeExport("IPA_CODE", request);
+    ExportFileResult result = service.executeExport("BROKER_IPA", request);
 
     assertNull(result.error());
     assertEquals(1, result.files().size());
     String exportFileName = result.files().get(0);
-    assertTrue(exportFileName.matches("IPA_CODE-ORGANIZATIONS-\\d{14}-1_0\\.zip"));
+    assertTrue(exportFileName.matches("BROKER_IPA-ORGANIZATIONS-\\d{14}-1_0\\.zip"));
 
-    Path exportArchivePath = tempDir.resolve("IPA_CODE").resolve(exportFileName);
+    Path exportArchivePath = tempDir.resolve("BROKER_IPA").resolve(exportFileName);
     assertTrue(Files.exists(exportArchivePath));
 
     List<String> exportArchiveEntries = ZipUtils.readZipEntries(exportArchivePath);
     assertEquals(2, exportArchiveEntries.size());
-    assertTrue(exportArchiveEntries.get(0).matches("IPA_CODE-ORGANIZATIONS-\\d{14}-part001-1_0\\.csv"));
-    assertTrue(exportArchiveEntries.get(1).matches("IPA_CODE-ORGANIZATIONS-\\d{14}-part002-1_0\\.csv"));
+    assertTrue(exportArchiveEntries.get(0).matches("BROKER_IPA-ORGANIZATIONS-\\d{14}-part001-1_0\\.csv"));
+    assertTrue(exportArchiveEntries.get(1).matches("BROKER_IPA-ORGANIZATIONS-\\d{14}-part002-1_0\\.csv"));
 
     InOrder inOrder = inOrder(organizationDaoMock);
-    inOrder.verify(organizationDaoMock).findByFilters("IPA_CODE", null, 2, 0);
-    inOrder.verify(organizationDaoMock).findByFilters("IPA_CODE", null, 2, 2);
+    inOrder.verify(organizationDaoMock).findByFilters("ORG_IPA", null, 2, 0);
+    inOrder.verify(organizationDaoMock).findByFilters("ORG_IPA", null, 2, 2);
   }
 
   @Test
   void whenRowMappingThrowsCsvRowMappingExceptionThenDiscardRowAndCompleteExportSuccessfully() {
-    ExtractionRequest request = new ExtractionRequest("IPA_CODE", MigrationFileType.ORGANIZATIONS);
+    ExtractionRequest request = new ExtractionRequest("ORG_IPA", MigrationFileType.ORGANIZATIONS);
     Organization first = organization("first");
     Organization second = organization("second");
 
-    when(organizationDaoMock.findByFilters("IPA_CODE", null, 2, 0)).thenReturn(List.of(first, second));
-    when(organizationDaoMock.findByFilters("IPA_CODE", null, 2, 2)).thenReturn(List.of());
+    when(organizationDaoMock.findByFilters("ORG_IPA", null, 2, 0)).thenReturn(List.of(first, second));
+    when(organizationDaoMock.findByFilters("ORG_IPA", null, 2, 2)).thenReturn(List.of());
     when(organizationMapperMock.map(first)).thenThrow(
       new CsvRowMappingException("EnumMapping", "status", "UNKNOWN", "Unrecognized value 'UNKNOWN'", null));
     when(organizationMapperMock.map(second)).thenReturn(dto("second"));
 
-    ExportFileResult result = service.executeExport("IPA_CODE", request);
+    ExportFileResult result = service.executeExport("BROKER_IPA", request);
 
     assertNull(result.error());
     assertEquals(2, result.files().size());
@@ -193,21 +193,21 @@ class OrganizationExportProcessingServiceTest {
       .findFirst()
       .orElseThrow();
 
-    Path exportArchivePath = tempDir.resolve("IPA_CODE").resolve(exportFileName);
-    Path errorArchivePath = tempDir.resolve("IPA_CODE").resolve(errorFileName);
+    Path exportArchivePath = tempDir.resolve("BROKER_IPA").resolve(exportFileName);
+    Path errorArchivePath = tempDir.resolve("BROKER_IPA").resolve(errorFileName);
     assertTrue(Files.exists(exportArchivePath));
     assertTrue(Files.exists(errorArchivePath));
   }
 
   @Test
   void whenRowMappingThrowsUnexpectedRuntimeExceptionThenDiscardRowAndCompleteExportSuccessfully() {
-    ExtractionRequest request = new ExtractionRequest("IPA_CODE", MigrationFileType.ORGANIZATIONS);
+    ExtractionRequest request = new ExtractionRequest("ORG_IPA", MigrationFileType.ORGANIZATIONS);
     Organization first = organization("first");
 
-    when(organizationDaoMock.findByFilters("IPA_CODE", null, 2, 0)).thenReturn(List.of(first));
+    when(organizationDaoMock.findByFilters("ORG_IPA", null, 2, 0)).thenReturn(List.of(first));
     when(organizationMapperMock.map(first)).thenThrow(new RuntimeException("mapping failure"));
 
-    ExportFileResult result = service.executeExport("IPA_CODE", request);
+    ExportFileResult result = service.executeExport("BROKER_IPA", request);
 
     assertNull(result.error());
     assertEquals(2, result.files().size());
@@ -219,35 +219,35 @@ class OrganizationExportProcessingServiceTest {
       tempDir.toString(),
       tempDir.toString(),
       "12345678901",
-      "IPA_CODE",
+      "BROKER_IPA",
       Map.of(MigrationFileType.ORGANIZATIONS, new ExtractorExportProperties.FileTypeConfiguration(2))
     );
   }
 
   private Organization organization(String suffix) {
     return new Organization(
-      "IPA_CODE", "12345678901", suffix, "TYPE", "mail@example.com",
+      "ORG_IPA", "12345678901", suffix, "TYPE", "mail@example.com",
       null, null, null, null, null, "ACTIVE", null, null, false, false, false, null
     );
   }
 
   private PuOrganizationDTO dto(String suffix) {
     return PuOrganizationDTO.builder()
-      .ipaCode("IPA_CODE")
+      .ipaCode("ORG_IPA")
       .orgFiscalCode("12345678901")
       .orgName(suffix)
       .flagNotifyIo(false)
       .flagNotifyOutcomePush(false)
       .status(OrganizationStatus.ACTIVE)
       .brokerCf("12345678901")
-      .brokerIpaCode("IPA_CODE")
+      .brokerIpaCode("BROKER_IPA")
       .flagTreasury("false")
       .build();
   }
 
   private Organization invalidOrganization() {
     return new Organization(
-      "IPA_CODE", "NOT_A_FISCAL_CODE", "", "TYPE", "not-an-email",
+      "ORG_IPA", "NOT_A_FISCAL_CODE", "", "TYPE", "not-an-email",
       "invalid-iban", null, "999", "abcde", null, "ACTIVE", "TOOLONG",
       null, false, false, false, null
     );
@@ -255,7 +255,7 @@ class OrganizationExportProcessingServiceTest {
 
   private PuOrganizationDTO invalidDto() {
     return PuOrganizationDTO.builder()
-      .ipaCode("IPA_CODE")
+      .ipaCode("ORG_IPA")
       .orgFiscalCode("NOT_A_FISCAL_CODE")
       .orgName("")
       .orgTypeCode("TYPE")
@@ -268,7 +268,7 @@ class OrganizationExportProcessingServiceTest {
       .flagNotifyOutcomePush(false)
       .status(OrganizationStatus.ACTIVE)
       .brokerCf("12345678901")
-      .brokerIpaCode("IPA_CODE")
+      .brokerIpaCode("BROKER_IPA")
       .flagTreasury("false")
       .build();
   }
