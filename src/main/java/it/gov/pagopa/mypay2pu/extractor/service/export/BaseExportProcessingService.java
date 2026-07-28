@@ -87,6 +87,7 @@ public abstract class BaseExportProcessingService<E extends ExportModel, C exten
 
     ExportFileNameBuilder fileNameBuilder = new ExportFileNameBuilder(
       exportProperties.brokerIpaCode(),
+      request.getIpaCode(),
       getMigrationFileType(),
       LocalDateTime.now(ZONEID),
       getZipVersion()

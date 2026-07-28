@@ -8,6 +8,7 @@ import java.util.Locale;
 
 public record ExportFileNameBuilder(
   String brokerIpaCode,
+  String ipaCodeOrganization,
   MigrationFileType migrationFileType,
   LocalDateTime timestamp,
   String version
@@ -34,9 +35,11 @@ public record ExportFileNameBuilder(
 
     String formattedTimestamp = timestamp.format(TIMESTAMP_FORMATTER);
 
+    String ipaCodeFile = migrationFileType == MigrationFileType.ORGANIZATIONS ? brokerIpaCode : ipaCodeOrganization;
+
     if (partNumber == null) {
       return "%s-%s-%s-%s".formatted(
-        brokerIpaCode,
+        ipaCodeFile,
         migrationType,
         formattedTimestamp,
         version
@@ -48,7 +51,7 @@ public record ExportFileNameBuilder(
     }
 
     return "%s-%s-%s-part%03d-%s".formatted(
-      brokerIpaCode,
+      ipaCodeFile,
       migrationType,
       formattedTimestamp,
       partNumber,
