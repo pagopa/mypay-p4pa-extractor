@@ -5,6 +5,8 @@ import it.gov.pagopa.mypay2pu.extractor.model.mp4.DebtPosition;
 import it.gov.pagopa.mypay2pu.extractor.utils.DateTimeUtils;
 import it.gov.pagopa.mypay2pu.extractor.utils.QueryUtils;
 import it.gov.pagopa.mypay2pu.extractor.utils.SqlLoader;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.DataClassRowMapper;
 import org.springframework.jdbc.core.RowMapper;
@@ -40,29 +42,11 @@ public class DebtPositionDao {
     String codIpaEnte,
     String gpdIupd,
     String codIud,
-    ExtractionFilters filters
-  ) {
-    return findDebtPositions(codIpaEnte, gpdIupd, codIud, filters, Integer.MAX_VALUE, 0);
-  }
-
-  public List<DebtPosition> findDebtPositions(
-    String codIpaEnte,
-    String gpdIupd,
-    String codIud,
     ExtractionFilters filters,
     int limit,
     int offset
   ) {
     return findByFilters(findDebtPositionsSql, codIpaEnte, gpdIupd, codIud, filters, limit, offset);
-  }
-
-  public List<DebtPosition> findCancelledDebtPositions(
-    String codIpaEnte,
-    String gpdIupd,
-    String codIud,
-    ExtractionFilters filters
-  ) {
-    return findCancelledDebtPositions(codIpaEnte, gpdIupd, codIud, filters, Integer.MAX_VALUE, 0);
   }
 
   public List<DebtPosition> findCancelledDebtPositions(
@@ -85,7 +69,7 @@ public class DebtPositionDao {
     int limit,
     int offset
   ) {
-    if (codIpaEnte == null || codIpaEnte.isBlank()) {
+    if (StringUtils.isEmpty(codIpaEnte)) {
       throw new IllegalArgumentException("codIpaEnte must not be blank");
     }
     return mp4JdbcTemplate.query(
@@ -104,7 +88,7 @@ public class DebtPositionDao {
     int offset
   ) {
     List<String> debtPositionTypeOrgCodes = filters != null ? filters.getDebtPositionTypeOrgCodes() : null;
-    boolean debtPositionTypeOrgCodesEmpty = debtPositionTypeOrgCodes == null || debtPositionTypeOrgCodes.isEmpty();
+    boolean debtPositionTypeOrgCodesEmpty = CollectionUtils.isEmpty(debtPositionTypeOrgCodes);
     return QueryUtils.buildPaginatedFilterParams(limit, offset)
       .addValue("codIpaEnte", codIpaEnte)
       .addValue("gpdIupd", gpdIupd)

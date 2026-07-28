@@ -26,7 +26,6 @@ SELECT
     de.de_rp_dati_vers_dati_sing_vers_dati_specifici_riscossione AS dati_specifici_riscossione,
     de.flg_genera_iuv AS flg_genera_iuv,
     de.bilancio AS bilancio,
-    'A' AS azione,
     FALSE AS draft,
     FALSE AS flag_multi_beneficiario,
     NULL AS codice_fiscale_ente_1,

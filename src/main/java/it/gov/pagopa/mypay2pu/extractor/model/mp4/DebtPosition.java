@@ -34,7 +34,6 @@ public record DebtPosition(
   String datiSpecificiRiscossione,
   Boolean flgGeneraIuv,
   String bilancio,
-  String azione,
   Boolean draft,
   Boolean flagMultiBeneficiario,
   String codiceFiscaleEnte1,

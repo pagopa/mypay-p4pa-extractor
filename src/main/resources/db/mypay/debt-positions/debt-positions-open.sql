@@ -26,7 +26,6 @@ SELECT
     d.de_rp_dati_vers_dati_sing_vers_dati_specifici_riscossione AS dati_specifici_riscossione,
     d.flg_genera_iuv AS flg_genera_iuv,
     d.bilancio AS bilancio,
-    NULL AS azione,
     FALSE AS draft,
     EXISTS (
         SELECT 1
