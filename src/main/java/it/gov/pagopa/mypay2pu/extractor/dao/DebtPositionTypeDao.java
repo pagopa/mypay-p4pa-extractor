@@ -19,13 +19,13 @@ import java.util.List;
 @Repository
 public class DebtPositionTypeDao {
 
-  private static final String FIND_ALL_SQL_PATH = "mypay/debt-position-type/debt-position-type.sql";
+  private static final String FIND_BY_FILTERS_SQL_PATH = "mypay/debt-position-type/debt-position-type.sql";
   protected static final RowMapper<DebtPositionType> DEBT_POSITIONS_TYPE_ROW_MAPPER =
     DataClassRowMapper.newInstance(DebtPositionType.class);
 
   private final NamedParameterJdbcTemplate mp4JdbcTemplate;
   private final ExtractorExportProperties exportProperties;
-  private final String findAllSql;
+  private final String findByFiltersSql;
 
   public DebtPositionTypeDao(
     @Qualifier("mp4NamedParameterJdbcTemplate") NamedParameterJdbcTemplate mp4JdbcTemplate,
@@ -34,13 +34,13 @@ public class DebtPositionTypeDao {
   ) {
     this.mp4JdbcTemplate = mp4JdbcTemplate;
     this.exportProperties = exportProperties;
-    this.findAllSql = sqlLoader.load(FIND_ALL_SQL_PATH);
+    this.findByFiltersSql = sqlLoader.load(FIND_BY_FILTERS_SQL_PATH);
   }
 
   public List<DebtPositionType> findByFilters(ExtractionFilters filters,
                                               int limit,
                                               int offset) {
-    return mp4JdbcTemplate.query(findAllSql, buildParams(filters, limit, offset), DEBT_POSITIONS_TYPE_ROW_MAPPER);
+    return mp4JdbcTemplate.query(findByFiltersSql, buildParams(filters, limit, offset), DEBT_POSITIONS_TYPE_ROW_MAPPER);
   }
 
   private MapSqlParameterSource buildParams(ExtractionFilters filters,
@@ -50,7 +50,7 @@ public class DebtPositionTypeDao {
     boolean isEmptyCollection = CollectionUtils.isEmpty(debtPositionTypeOrgCodes);
     return QueryUtils.buildPaginatedFilterParams(limit, offset)
       .addValue("brokerCf", exportProperties.brokerCf())
-      .addValue("isEmptyCollection", isEmptyCollection)
+      .addValue("skipDebtPositionTypeOrgCodesFilter", isEmptyCollection)
       .addValue("debtPositionTypeOrgCodes", isEmptyCollection ? Collections.singletonList(null) : debtPositionTypeOrgCodes);
   }
 }

@@ -78,7 +78,7 @@ public class DebtPositionTypeOrgDao {
     boolean isEmptyCollection = CollectionUtils.isEmpty(debtPositionTypeOrgCodes);
     return QueryUtils.buildPaginatedFilterParams(limit, offset)
       .addValue("ipaCode", ipaCode)
-      .addValue("isEmptyCollection", isEmptyCollection)
+      .addValue("skipDebtPositionTypeOrgCodesFilter", isEmptyCollection)
       .addValue("debtPositionTypeOrgCodes", isEmptyCollection ? Collections.singletonList(null) : debtPositionTypeOrgCodes);
   }
 }

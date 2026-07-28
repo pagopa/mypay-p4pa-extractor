@@ -30,14 +30,13 @@ SELECT
         THEN 'true'
         ELSE 'false'
     END AS flag_amount_actualization,
-    null AS amount_actualization_org_sil_service_code,
-    etd.url_notifica_pnd AS application_name,
+    etd.url_notifica_pnd AS amount_actualization_org_sil_service_code,
     etd.cod_xsd_causale AS spontaneous_form_code
 FROM mygov_ente_tipo_dovuto etd
 JOIN mygov_ente e
     ON e.mygov_ente_id = etd.mygov_ente_id
 WHERE e.cod_ipa_ente = :ipaCode
-  AND (:isEmptyCollection = TRUE OR etd.cod_tipo IN (:debtPositionTypeOrgCodes))
+  AND (:skipDebtPositionTypeOrgCodesFilter = TRUE OR etd.cod_tipo IN (:debtPositionTypeOrgCodes))
 ORDER BY etd.cod_tipo
 LIMIT :limit
 OFFSET COALESCE(:offset, 0);
