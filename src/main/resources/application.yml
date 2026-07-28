@@ -94,6 +94,9 @@ datasource:
     password: "\${MPV4_DB_PASSWORD:}"
     driver-class-name: org.postgresql.Driver
 
+mypivot:
+  enabled: "\${MYPIVOT_ENABLED:false}"
+
 extractor:
   async:
     core-pool-size: "\${ASYNC_CORE_POOL_SIZE:2}"
@@ -109,6 +112,8 @@ extractor:
         export-page-size: "\${EXPORT_PAGE_SIZE_ORGANIZATIONS:1000}"
       ORG_SIL_SERVICES:
         export-page-size: "\${EXPORT_PAGE_SIZE_ORG_SIL_SERVICES:1000}"
+      DEBT_POSITIONS_TYPE:
+        export-page-size: "\${EXPORT_PAGE_SIZE_DEBT_POSITIONS_TYPE:1000}"
   basic-auth:
     username: "\${CLIENT_ID:client}"
     password: "\${CLIENT_SECRET:secret}"

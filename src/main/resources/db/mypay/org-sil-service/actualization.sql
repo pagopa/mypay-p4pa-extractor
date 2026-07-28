@@ -1,6 +1,6 @@
-SELECT
+SELECT DISTINCT
     e.cod_ipa_ente AS ipa_code,
-    'ACTUALIZATION' AS application_name,
+    etd.url_notifica_pnd AS application_name,
     'ACTUALIZATION' AS service_type,
     NULL AS service_url,
     TRUE AS flag_legacy,

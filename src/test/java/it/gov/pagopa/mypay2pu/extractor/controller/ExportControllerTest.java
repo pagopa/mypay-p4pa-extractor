@@ -109,7 +109,8 @@ class ExportControllerTest {
       MigrationFileType.ORGANIZATIONS,
       new ExtractionFilters(
         LocalDate.of(2026, Month.JANUARY, 2),
-        LocalDate.of(2026, Month.JANUARY, 1)
+        LocalDate.of(2026, Month.JANUARY, 1),
+        List.of()
       )
     );
 

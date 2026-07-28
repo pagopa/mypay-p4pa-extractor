@@ -14,18 +14,14 @@ public record DebtPositionTypeOrg(
   String orgSector,
   Long amountCents,
   String externalPaymentUrl,
-  String flagAnonymousFiscalCode,
-  String flagMandatoryDueDate,
-  String flagSpontaneous,
-  String flagNotifyIo,
-  String flagActive,
-  String flagNotifyOutcomePush,
+  Boolean flagAnonymousFiscalCode,
+  Boolean flagMandatoryDueDate,
+  Boolean flagSpontaneous,
+  Boolean flagActive,
+  Boolean flagNotifyOutcomePush,
   String notifyOutcomePushOrgSilServiceCode,
-  String flagAmountActualization,
-  String serviceCode,
-  String spontaneousFormCode,
-  String authUrl,
-  String userPnd,
-  String pswPnd
+  Boolean flagAmountActualization,
+  String amountActualizationOrgSilServiceCode,
+  String spontaneousFormCode
 ) implements ExportModel {
 }
