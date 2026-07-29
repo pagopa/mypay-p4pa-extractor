@@ -4,7 +4,7 @@ import it.gov.pagopa.mypay2pu.extractor.config.MyPayProperties;
 import it.gov.pagopa.mypay2pu.extractor.dao.DebtPositionTypeOrgDao;
 import it.gov.pagopa.mypay2pu.extractor.dto.export.PuDebtPositionTypeOrgDTO;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.DebtPositionTypeOrg;
-import it.gov.pagopa.mypay2pu.extractor.rest.MyDictionaryClient;
+import it.gov.pagopa.mypay2pu.extractor.connector.mydictionary.MyDictionaryClient;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -41,15 +41,16 @@ public class DebtPositionTypeOrgMapper {
       .flagAnonymousFiscalCode(debtPositionTypeOrg.flagAnonymousFiscalCode())
       .flagMandatoryDueDate(debtPositionTypeOrg.flagMandatoryDueDate())
       .flagSpontaneous(debtPositionTypeOrg.flagSpontaneous())
-      .flagNotifyIo(Boolean.FALSE)
+      .flagNotifyIo(debtPositionTypeOrg.flagNotifyIo())
+      .flagNotifyIoBkp(debtPositionTypeOrg.flagNotifyIoBkp())
       .ioTemplateMessage(transcodeTemplateTags(myPayProperties.ioTemplateMessage()))
       .flagActive(debtPositionTypeOrg.flagActive())
       .flagNotifyOutcomePush(debtPositionTypeOrg.flagNotifyOutcomePush())
       .notifyOutcomePushOrgSilServiceCode(debtPositionTypeOrg.notifyOutcomePushOrgSilServiceCode())
       .flagAmountActualization(debtPositionTypeOrg.flagAmountActualization())
-      .amountActualizationOrgSilServiceCode(null)
+      .amountActualizationOrgSilServiceCode(debtPositionTypeOrg.amountActualizationOrgSilServiceCode())
       .flagExternal(debtPositionTypeOrgDao.isExternal(debtPositionTypeOrg.ipaCode(), debtPositionTypeOrg.code()))
-      .serviceCode(null)
+      .serviceCode(debtPositionTypeOrg.serviceCode())
       .ioTemplateSubject(transcodeTemplateTags(myPayProperties.ioTemplateSubject()))
       .build();
   }

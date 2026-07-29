@@ -1,4 +1,4 @@
-package it.gov.pagopa.mypay2pu.extractor.rest;
+package it.gov.pagopa.mypay2pu.extractor.connector.mydictionary;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.restclient.RestTemplateBuilder;
@@ -13,18 +13,15 @@ public class MyDictionaryClient {
   private final String baseUrl;
 
   public MyDictionaryClient(RestTemplateBuilder restTemplateBuilder,
-                            @Value("${mydictionary.base-url:}") String baseUrl) {
+                            @Value("${rest.mydictionary.base-url}") String baseUrl) {
     this.restTemplate = restTemplateBuilder.build();
     this.baseUrl = baseUrl;
   }
 
-  public String getSpontaneousFormStructure(String debtPositionTypeCode) {
-    if (baseUrl == null || baseUrl.isBlank()) {
-      throw new IllegalStateException("mydictionary.base-url must be configured");
-    }
+  public String getSpontaneousFormStructure(String codXsdCausale) {
     String url = UriComponentsBuilder.fromUriString(baseUrl)
       .path("/get.html")
-      .queryParam("codice", debtPositionTypeCode)
+      .queryParam("codice", codXsdCausale)
       .toUriString();
     return restTemplate.getForObject(url, String.class);
   }

@@ -73,9 +73,8 @@ rest:
     timeout:
       connect-millis: "\${DEFAULT_REST_TIMEOUT_CONNECT_MILLIS:120000}"
       read-millis: "\${DEFAULT_REST_TIMEOUT_READ_MILLIS:120000}"
-
-mydictionary:
-  base-url: "\${MYDICTIONARY_BASE_URL:}"
+  mydictionary:
+    base-url: "\${MYDICTIONARY_BASE_URL:}"
 
 datasource:
   mp4:
