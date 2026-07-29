@@ -150,7 +150,7 @@ See [application.yml](src/main/resources/application.yml) for each configurable 
 
 | ENV | DESCRIPTION | DEFAULT |
 |---|---|---|
-| `MYDICTIONARY_BASE_URL` | myDictionary service base URL | — |
+| `MYDICTIONARY_BASE_URL` | myDictionary service base URL (**required at startup**) | — |
 | `MYDICT_API_KEY` | myDictionary API key | — |
 
 #### ✏️ Logging

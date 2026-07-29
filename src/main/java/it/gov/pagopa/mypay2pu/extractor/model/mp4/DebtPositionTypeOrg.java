@@ -22,6 +22,9 @@ public record DebtPositionTypeOrg(
   String notifyOutcomePushOrgSilServiceCode,
   Boolean flagAmountActualization,
   String amountActualizationOrgSilServiceCode,
-  String spontaneousFormCode
+  String spontaneousFormCode,
+  String serviceCode,
+  Boolean flagNotifyIo,
+  Boolean flagNotifyIoBkp
 ) implements ExportModel {
 }
