@@ -53,7 +53,7 @@ WHERE e.cod_ipa_ente = :codIpaEnte
   AND (:updatedFrom IS NULL OR d.dt_ultima_modifica >= :updatedFrom)
   AND (:updatedToExclusive IS NULL OR d.dt_ultima_modifica < :updatedToExclusive)
   AND (:debtPositionTypeOrgCodesEmpty = TRUE OR d.cod_tipo_dovuto IN (:debtPositionTypeOrgCodes))
-  AND case when d.flg_iuv_volatile is null then false end = false
+  AND (d.flg_iuv_volatile IS NULL OR d.flg_iuv_volatile = FALSE)
 ORDER BY d.dt_ultima_modifica, d.mygov_dovuto_id
 LIMIT :limit
 OFFSET COALESCE(:offset, 0)
