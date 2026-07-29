@@ -4,7 +4,7 @@ import it.gov.pagopa.mypay2pu.extractor.config.MyPayProperties;
 import it.gov.pagopa.mypay2pu.extractor.dao.DebtPositionTypeOrgDao;
 import it.gov.pagopa.mypay2pu.extractor.dto.export.PuDebtPositionTypeOrgDTO;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.DebtPositionTypeOrg;
-import it.gov.pagopa.mypay2pu.extractor.rest.MyDictionaryClient;
+import it.gov.pagopa.mypay2pu.extractor.connector.mydictionary.MyDictionaryClient;
 import it.gov.pagopa.mypay2pu.extractor.utils.TestUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,7 +51,7 @@ class DebtPositionTypeOrgMapperTest {
       "IPA1", "BILANCIO", "TAX", "Tax", "IT60X0542811101000000123456",
       "IT60X0542811101000000123456", "123456", "Municipality", "Public administration", 1234L,
       "https://example.test/pay", false, true, true, true, true,
-      "PAYMENT_NOTIFICATION", true, null, "SPONT_FORM"
+      "PAYMENT_NOTIFICATION", true, "https://example.test/pnd", "SPONT_FORM", "SVC_CODE", false, true
     );
     String strutturaPagamentoSpontaneo = "{\"field\":\"value\"}";
 
@@ -78,6 +78,7 @@ class DebtPositionTypeOrgMapperTest {
     assertEquals(debtPositionTypeOrg.flagMandatoryDueDate(), result.getFlagMandatoryDueDate());
     assertEquals(debtPositionTypeOrg.flagSpontaneous(), result.getFlagSpontaneous());
     assertEquals(false, result.getFlagNotifyIo());
+    assertEquals(true, result.getFlagNotifyIoBkp());
     assertEquals(
       "Pagamento %posizioneDebitoria_descrizione% di %importoTotale% per %debitore_nomeCompleto% entro %dataScadenza%",
       result.getIoTemplateMessage()
@@ -86,12 +87,12 @@ class DebtPositionTypeOrgMapperTest {
     assertEquals(debtPositionTypeOrg.flagNotifyOutcomePush(), result.getFlagNotifyOutcomePush());
     assertEquals(debtPositionTypeOrg.notifyOutcomePushOrgSilServiceCode(), result.getNotifyOutcomePushOrgSilServiceCode());
     assertEquals(debtPositionTypeOrg.flagAmountActualization(), result.getFlagAmountActualization());
-    assertNull(result.getAmountActualizationOrgSilServiceCode());
+    assertEquals("https://example.test/pnd", result.getAmountActualizationOrgSilServiceCode());
     assertEquals(true, result.getFlagExternal());
-    assertNull(result.getServiceCode());
+    assertEquals("SVC_CODE", result.getServiceCode());
     assertEquals("Oggetto %posizioneDebitoria_descrizione%", result.getIoTemplateSubject());
 
-    TestUtils.checkNotNullFields(result, "amountActualizationOrgSilServiceCode", "serviceCode");
+    TestUtils.checkNotNullFields(result);
   }
 
   @Test
@@ -99,7 +100,7 @@ class DebtPositionTypeOrgMapperTest {
     DebtPositionTypeOrg debtPositionTypeOrg = new DebtPositionTypeOrg(
       "IPA1", null, "FEE", "Fee", "IT60X0542811101000000123456",
       null, null, null, null, null, null, false, false, false, true, false,
-      null, false, null, null
+      null, false, null, null, null, false, false
     );
 
     when(myDictionaryClientMock.getSpontaneousFormStructure(debtPositionTypeOrg.spontaneousFormCode()))
@@ -117,6 +118,7 @@ class DebtPositionTypeOrgMapperTest {
     assertEquals(false, result.getFlagMandatoryDueDate());
     assertEquals(false, result.getFlagSpontaneous());
     assertEquals(false, result.getFlagNotifyIo());
+    assertEquals(false, result.getFlagNotifyIoBkp());
     assertEquals(true, result.getFlagActive());
     assertEquals(false, result.getFlagNotifyOutcomePush());
     assertEquals(false, result.getFlagAmountActualization());

@@ -77,6 +77,10 @@ public class PuDebtPositionTypeOrgDTO implements CsvExportDto {
   @NotNull
   private Boolean flagNotifyIo;
 
+  @CsvBindByName(column = "notificaIoBkp", required = true)
+  @NotNull
+  private Boolean flagNotifyIoBkp;
+
   @CsvBindByName(column = "templateMessaggioIo")
   private String ioTemplateMessage;
 
