@@ -23,7 +23,7 @@ public class DebtPositionTypeOrgMapper {
   }
 
   public PuDebtPositionTypeOrgDTO map(DebtPositionTypeOrg debtPositionTypeOrg) {
-    String strutturaPagamentoSpontaneo = myDictionaryClient.getSpontaneousFormStructure(debtPositionTypeOrg.code());
+    String strutturaPagamentoSpontaneo = myDictionaryClient.getSpontaneousFormStructure(debtPositionTypeOrg.spontaneousFormCode());
     return PuDebtPositionTypeOrgDTO.builder()
       .ipaCode(debtPositionTypeOrg.ipaCode())
       .balance(debtPositionTypeOrg.balance())
@@ -34,22 +34,22 @@ public class DebtPositionTypeOrgMapper {
       .postalAccountCode(debtPositionTypeOrg.postalAccountCode())
       .holderPostalCc(debtPositionTypeOrg.holderPostalCc())
       .orgSector(debtPositionTypeOrg.orgSector())
-      .spontaneousFormCode(debtPositionTypeOrg.code())
+      .spontaneousFormCode(debtPositionTypeOrg.spontaneousFormCode())
       .spontaneousFormStructure(strutturaPagamentoSpontaneo)
       .amountCents(debtPositionTypeOrg.amountCents())
       .externalPaymentUrl(debtPositionTypeOrg.externalPaymentUrl())
       .flagAnonymousFiscalCode(debtPositionTypeOrg.flagAnonymousFiscalCode())
       .flagMandatoryDueDate(debtPositionTypeOrg.flagMandatoryDueDate())
       .flagSpontaneous(debtPositionTypeOrg.flagSpontaneous())
-      .flagNotifyIo(debtPositionTypeOrg.flagNotifyIo())
+      .flagNotifyIo(Boolean.FALSE)
       .ioTemplateMessage(transcodeTemplateTags(myPayProperties.ioTemplateMessage()))
       .flagActive(debtPositionTypeOrg.flagActive())
       .flagNotifyOutcomePush(debtPositionTypeOrg.flagNotifyOutcomePush())
       .notifyOutcomePushOrgSilServiceCode(debtPositionTypeOrg.notifyOutcomePushOrgSilServiceCode())
       .flagAmountActualization(debtPositionTypeOrg.flagAmountActualization())
       .amountActualizationOrgSilServiceCode(null)
-      .flagExternal(Boolean.toString(debtPositionTypeOrgDao.isExternal(debtPositionTypeOrg.ipaCode(), debtPositionTypeOrg.code())))
-      .serviceCode(debtPositionTypeOrg.serviceCode())
+      .flagExternal(debtPositionTypeOrgDao.isExternal(debtPositionTypeOrg.ipaCode(), debtPositionTypeOrg.code()))
+      .serviceCode(null)
       .ioTemplateSubject(transcodeTemplateTags(myPayProperties.ioTemplateSubject()))
       .build();
   }
