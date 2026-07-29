@@ -5,6 +5,7 @@ import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.exception.ExportFileTypeNotSupportedException;
 import it.gov.pagopa.mypay2pu.extractor.service.export.debtpositiontype.DebtPositionTypeExportProcessingService;
+import it.gov.pagopa.mypay2pu.extractor.service.export.debtpositiontypeorg.DebtPositionTypeOrgExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.organization.OrganizationExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.orgsil.OrgSilServiceExportProcessingService;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,13 +30,20 @@ class DataExportFacadeServiceTest {
   private OrgSilServiceExportProcessingService orgSilServiceExportProcessingServiceMock;
   @Mock
   private DebtPositionTypeExportProcessingService debtPositionTypeExportProcessingServiceMock;
+  @Mock
+  private DebtPositionTypeOrgExportProcessingService debtPositionTypeOrgExportProcessingServiceMock;
 
   @InjectMocks
   private DataExportFacadeService service;
 
   @AfterEach
   void tearDown() {
-    verifyNoMoreInteractions(organizationExportProcessingServiceMock, orgSilServiceExportProcessingServiceMock, debtPositionTypeExportProcessingServiceMock);
+    verifyNoMoreInteractions(
+      organizationExportProcessingServiceMock,
+      orgSilServiceExportProcessingServiceMock,
+      debtPositionTypeExportProcessingServiceMock,
+      debtPositionTypeOrgExportProcessingServiceMock
+    );
   }
 
   @Test
@@ -65,6 +73,17 @@ class DataExportFacadeServiceTest {
     ExtractionRequest request = new ExtractionRequest("IPA_CODE", MigrationFileType.DEBT_POSITIONS_TYPE);
     ExportFileResult expected = new ExportFileResult(List.of("debtpositionstype_1_0.zip"), null);
     when(debtPositionTypeExportProcessingServiceMock.executeExport("extraction-id", request)).thenReturn(expected);
+
+    ExportFileResult result = service.executeExport("extraction-id", request);
+
+    assertEquals(expected, result);
+  }
+
+  @Test
+  void whenExecuteDebtPositionsTypeOrgExportThenDelegateToDebtPositionTypeOrgProcessor() {
+    ExtractionRequest request = new ExtractionRequest("IPA_CODE", MigrationFileType.DEBT_POSITIONS_TYPE_ORG);
+    ExportFileResult expected = new ExportFileResult(List.of("debtpositionstypeorg_1_0.zip"), null);
+    when(debtPositionTypeOrgExportProcessingServiceMock.executeExport("extraction-id", request)).thenReturn(expected);
 
     ExportFileResult result = service.executeExport("extraction-id", request);
 
