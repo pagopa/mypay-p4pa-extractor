@@ -150,7 +150,7 @@ See [application.yml](src/main/resources/application.yml) for each configurable 
 
 | ENV | DESCRIPTION | DEFAULT |
 |---|---|---|
-| `MYDICTIONARY_BASE_URL` | myDictionary service base URL (**required at startup**) | — |
+| `MYDICTIONARY_BASE_URL` | myDictionary service base URL | — |
 | `MYDICT_API_KEY` | myDictionary API key | — |
 
 #### ✏️ Logging
@@ -201,12 +201,12 @@ The following global properties are exported for configuration in the migrated M
 
 ##### 📌 Entity file type configurations
 
-| ENV                                    | DESCRIPTION | DEFAULT |
-|----------------------------------------|---|---|
-| `EXPORT_PAGE_SIZE_ORGANIZATIONS`       | Maximum number of records to write to an exported file before creating a new one | `1000` |
-| `EXPORT_PAGE_SIZE_ORG_SIL_SERVICES`    | Maximum number of records to write to an exported file before creating a new one | `1000` |
-| `EXPORT_PAGE_SIZE_DEBT_POSITIONS_TYPE` | Maximum number of records to write to an exported file before creating a new one | `1000` |
-
+| ENV                                        | DESCRIPTION | DEFAULT |
+|--------------------------------------------|---|---|
+| `EXPORT_PAGE_SIZE_ORGANIZATIONS`           | Maximum number of records to write to an exported file before creating a new one | `1000` |
+| `EXPORT_PAGE_SIZE_ORG_SIL_SERVICES`        | Maximum number of records to write to an exported file before creating a new one | `1000` |
+| `EXPORT_PAGE_SIZE_DEBT_POSITIONS_TYPE`     | Maximum number of records to write to an exported file before creating a new one | `1000` |
+| `EXPORT_PAGE_SIZE_DEBT_POSITIONS_TYPE_ORG` | Maximum number of records to write to an exported file before creating a new one | `1000` |
 
 #### 🔑 Encryption keys
 
