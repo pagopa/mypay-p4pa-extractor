@@ -10,8 +10,10 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Month;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 class DebtPositionMapperTest {
@@ -47,9 +49,7 @@ class DebtPositionMapperTest {
       "remittance",
       "metadata",
       true,
-      true,
       "balance",
-      "A",
       false,
       true,
       "CFENTE",
@@ -90,10 +90,17 @@ class DebtPositionMapperTest {
     assertEquals(debtPosition.causaleVersamento(), result.getRemittanceInformation());
     assertEquals(debtPosition.datiSpecificiRiscossione(), result.getLegacyPaymentMetadata());
     assertEquals(debtPosition.flgGeneraIuv(), result.getGenerateNotice());
-    assertEquals(debtPosition.flagPagamentoPu(), result.getFlagPuPagoPaPayment());
+    assertEquals(Boolean.TRUE, result.getFlagPuPagoPaPayment());
     assertEquals(debtPosition.bilancio(), result.getBalance());
     assertEquals(debtPosition.flagMultiBeneficiario(), result.getFlagMultiBeneficiary());
     assertEquals(1, result.getNumberBeneficiary());
+    assertNotNull(result.getTransfer1());
+    assertEquals(List.of("CFENTE"), List.copyOf(result.getTransfer1().get("codiceFiscaleEnte_1")));
+    assertEquals(List.of("Ente"), List.copyOf(result.getTransfer1().get("denominazioneEnte_1")));
+    assertEquals(List.of("IT60X0542811101000000123456"), List.copyOf(result.getTransfer1().get("ibanAccreditoEnte_1")));
+    assertEquals(List.of("causale"), List.copyOf(result.getTransfer1().get("causaleVersamentoEnte_1")));
+    assertEquals(List.of("1"), List.copyOf(result.getTransfer1().get("importoVersamentoEnte_1")));
+    assertEquals(List.of("9/0101101IM/"), List.copyOf(result.getTransfer1().get("codiceTassonomiaEnte_1")));
     assertEquals(Action.M, result.getAction());
     assertEquals(debtPosition.draft(), result.getDraft());
     TestUtils.checkNotNullFields(result, "transfer1", "transfer2", "transfer3", "transfer4", "transfer5", "executionConfig");
@@ -128,9 +135,7 @@ class DebtPositionMapperTest {
       "remittance",
       null,
       false,
-      true,
       null,
-      "I",
       true,
       false,
       null,
@@ -161,6 +166,7 @@ class DebtPositionMapperTest {
     assertNull(result.getDueDate());
     assertNull(result.getLegacyPaymentMetadata());
     assertNull(result.getBalance());
+    assertNull(result.getTransfer1());
     TestUtils.checkNotNullFields(
       result,
       "notificationDate",
@@ -183,5 +189,54 @@ class DebtPositionMapperTest {
       "transfer5",
       "executionConfig"
     );
+  }
+
+  @Test
+  void mapShouldSkipBlankTransferFields() {
+    DebtPosition debtPosition = new DebtPosition(
+      "IUPD-3",
+      "description",
+      LocalDate.of(2026, Month.MARCH, 15),
+      false,
+      null,
+      1,
+      "SINGLE_INSTALLMENT",
+      null,
+      "IUD-3",
+      "IUV-3",
+      "F",
+      "CF333",
+      "Name",
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      BigDecimal.ONE,
+      "TAX3",
+      "remittance",
+      null,
+      true,
+      null,
+      false,
+      true,
+      "   ",
+      "",
+      " \t",
+      null,
+      BigDecimal.TEN,
+      " ",
+      LocalDate.of(2026, Month.MARCH, 10).atStartOfDay(),
+      null
+    );
+
+    PuDebtPositionDTO result = debtPositionMapper.map(debtPosition, Action.M);
+
+    assertNotNull(result.getTransfer1());
+    assertEquals(List.of("10"), List.copyOf(result.getTransfer1().get("importoVersamentoEnte_1")));
+    assertEquals(1, result.getTransfer1().size());
   }
 }

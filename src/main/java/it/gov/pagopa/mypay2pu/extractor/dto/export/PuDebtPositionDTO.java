@@ -26,132 +26,132 @@ public class PuDebtPositionDTO implements CsvExportDto {
 
   public static final String VERSION = "2_0";
 
-  @CsvBindByName(column = "IUPD", profiles = "V2_0")
+  @CsvBindByName(column = "IUPD")
   private String iupdOrg;
 
-  @CsvBindByName(column = "descrizionePosizioneDebitoria", profiles = "V2_0")
+  @CsvBindByName(column = "descrizionePosizioneDebitoria")
   private String description;
 
-  @CsvBindByName(column = "dataValidita", profiles = "V2_0")
+  @CsvBindByName(column = "dataValidita")
   @CsvDate(value = "yyyy-MM-dd")
   private LocalDate validityDate;
 
-  @CsvBindByName(column = "coobbligato", profiles = "V2_0")
+  @CsvBindByName(column = "coobbligato")
   private Boolean multiDebtor;
 
-  @CsvBindByName(column = "dataNotifica", profiles = "V2_0")
+  @CsvBindByName(column = "dataNotifica")
   @CsvDate(value = "yyyy-MM-dd")
   private LocalDate notificationDate;
 
-  @CsvBindByName(column = "indiceOpzionePagamento", profiles = "V2_0")
+  @CsvBindByName(column = "indiceOpzionePagamento")
   @NotNull
   private Integer paymentOptionIndex;
 
-  @CsvBindByName(column = "tipoOpzionePagamento", profiles = "V2_0")
+  @CsvBindByName(column = "tipoOpzionePagamento")
   @NotBlank
   private String paymentOptionType;
 
-  @CsvBindByName(column = "descrizioneOpzionePagamento", profiles = "V2_0")
+  @CsvBindByName(column = "descrizioneOpzionePagamento")
   private String paymentOptionDescription;
 
-  @CsvBindByName(column = "IUD", profiles = "V2_0")
+  @CsvBindByName(column = "IUD")
   @NotBlank
   private String iud;
 
-  @CsvBindByName(column = "codIuv", profiles = "V2_0")
+  @CsvBindByName(column = "codIuv")
   private String iuv;
 
-  @CsvBindByName(column = "tipoIdentificativoUnivoco", profiles = "V2_0")
+  @CsvBindByName(column = "tipoIdentificativoUnivoco")
   @NotNull
   private PersonEntityType entityType;
 
-  @CsvBindByName(column = "codiceIdentificativoUnivoco", profiles = "V2_0")
+  @CsvBindByName(column = "codiceIdentificativoUnivoco")
   @NotBlank
   private String fiscalCode;
 
-  @CsvBindByName(column = "anagraficaPagatore", profiles = "V2_0")
+  @CsvBindByName(column = "anagraficaPagatore")
   @NotBlank
   private String fullName;
 
-  @CsvBindByName(column = "indirizzoPagatore", profiles = "V2_0")
+  @CsvBindByName(column = "indirizzoPagatore")
   private String address;
 
-  @CsvBindByName(column = "civicoPagatore", profiles = "V2_0")
+  @CsvBindByName(column = "civicoPagatore")
   private String civic;
 
-  @CsvBindByName(column = "capPagatore", profiles = "V2_0")
+  @CsvBindByName(column = "capPagatore")
   private String postalCode;
 
-  @CsvBindByName(column = "localitaPagatore", profiles = "V2_0")
+  @CsvBindByName(column = "localitaPagatore")
   private String location;
 
-  @CsvBindByName(column = "provinciaPagatore", profiles = "V2_0")
+  @CsvBindByName(column = "provinciaPagatore")
   private String province;
 
-  @CsvBindByName(column = "nazionePagatore", profiles = "V2_0")
+  @CsvBindByName(column = "nazionePagatore")
   private String nation;
 
-  @CsvBindByName(column = "mailPagatore", profiles = "V2_0")
+  @CsvBindByName(column = "mailPagatore")
   private String email;
 
-  @CsvBindByName(column = "dataEsecuzionePagamento", profiles = "V2_0")
+  @CsvBindByName(column = "dataEsecuzionePagamento")
   @CsvDate(value = "yyyy-MM-dd")
   private LocalDate dueDate;
 
-  @CsvBindByName(column = "importoDovuto", profiles = "V2_0")
+  @CsvBindByName(column = "importoDovuto")
   @NotNull
   private BigDecimal amount;
 
-  @CsvBindByName(column = "tipoDovuto", profiles = "V2_0")
+  @CsvBindByName(column = "tipoDovuto")
   @NotBlank
   private String debtPositionTypeCode;
 
-  @CsvBindByName(column = "causaleVersamento", profiles = "V2_0")
+  @CsvBindByName(column = "causaleVersamento")
   @NotBlank
   private String remittanceInformation;
 
-  @CsvBindByName(column = "datiSpecificiRiscossione", profiles = "V2_0")
+  @CsvBindByName(column = "datiSpecificiRiscossione")
   private String legacyPaymentMetadata;
 
-  @CsvBindByName(column = "flgGeneraIuv", profiles = "V2_0")
+  @CsvBindByName(column = "flgGeneraIuv")
   @NotNull
   private Boolean generateNotice;
 
-  @CsvBindByName(column = "flagPagamentoPu", profiles = "V2_0")
+  @CsvBindByName(column = "flagPagamentoPu")
   @NotNull
   private Boolean flagPuPagoPaPayment;
 
-  @CsvBindByName(column = "bilancio", profiles = "V2_0")
+  @CsvBindByName(column = "bilancio")
   private String balance;
 
-  @CsvBindByName(column = "flagMultiBeneficiario", profiles = "V2_0")
+  @CsvBindByName(column = "flagMultiBeneficiario")
   private Boolean flagMultiBeneficiary;
 
-  @CsvBindByName(column = "numeroBeneficiari", profiles = "V2_0")
+  @CsvBindByName(column = "numeroBeneficiari")
   private Integer numberBeneficiary;
 
-  @CsvBindAndJoinByName(column = ".*_1", elementType = String.class, profiles = "V2_0")
+  @CsvBindAndJoinByName(column = ".*_1", elementType = String.class)
   private MultiValuedMap<String, String> transfer1;
 
-  @CsvBindAndJoinByName(column = ".*_2", elementType = String.class, profiles = "V2_0")
+  @CsvBindAndJoinByName(column = ".*_2", elementType = String.class)
   private MultiValuedMap<String, String> transfer2;
 
-  @CsvBindAndJoinByName(column = ".*_3", elementType = String.class, profiles = "V2_0")
+  @CsvBindAndJoinByName(column = ".*_3", elementType = String.class)
   private MultiValuedMap<String, String> transfer3;
 
-  @CsvBindAndJoinByName(column = ".*_4", elementType = String.class, profiles = "V2_0")
+  @CsvBindAndJoinByName(column = ".*_4", elementType = String.class)
   private MultiValuedMap<String, String> transfer4;
 
-  @CsvBindAndJoinByName(column = ".*_5", elementType = String.class, profiles = "V2_0")
+  @CsvBindAndJoinByName(column = ".*_5", elementType = String.class)
   private MultiValuedMap<String, String> transfer5;
 
-  @CsvBindByName(column = "configurazioniEsecuzione", profiles = "V2_0")
+  @CsvBindByName(column = "configurazioniEsecuzione")
   private String executionConfig;
 
-  @CsvBindByName(column = "azione", profiles = "V2_0")
+  @CsvBindByName(column = "azione")
   @NotNull
   private Action action;
 
-  @CsvBindByName(column = "draft", profiles = "V2_0")
+  @CsvBindByName(column = "draft")
   private Boolean draft;
 }
