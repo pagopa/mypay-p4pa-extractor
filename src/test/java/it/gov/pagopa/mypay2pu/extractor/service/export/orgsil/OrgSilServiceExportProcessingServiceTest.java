@@ -70,19 +70,19 @@ class OrgSilServiceExportProcessingServiceTest {
 
   @Test
   void whenDataIsAvailableThenExportPagedOrgSilServicesToArchive() throws Exception {
-    ExtractionRequest request = new ExtractionRequest("IPA_CODE", MigrationFileType.ORG_SIL_SERVICES);
+    ExtractionRequest request = new ExtractionRequest("ORG_IPA", MigrationFileType.ORG_SIL_SERVICES);
     OrgSilService first = orgSilService("first");
     OrgSilService second = invalidOrgSilService();
     PuOrgSilServiceDTO firstDto = dto("first");
     PuOrgSilServiceDTO secondDto = invalidDto();
-    when(orgSilServiceDaoMock.findPaidNotificationOutcome("IPA_CODE", 2, 0)).thenReturn(List.of(first));
-    when(orgSilServiceDaoMock.findActualization("IPA_CODE", 2, 0)).thenReturn(List.of(second));
-    when(orgSilServiceDaoMock.findPaidNotificationOutcome("IPA_CODE", 2, 2)).thenReturn(List.of());
-    when(orgSilServiceDaoMock.findActualization("IPA_CODE", 2, 2)).thenReturn(List.of());
+    when(orgSilServiceDaoMock.findPaidNotificationOutcome("ORG_IPA", 2, 0)).thenReturn(List.of(first));
+    when(orgSilServiceDaoMock.findActualization("ORG_IPA", 2, 0)).thenReturn(List.of(second));
+    when(orgSilServiceDaoMock.findPaidNotificationOutcome("ORG_IPA", 2, 2)).thenReturn(List.of());
+    when(orgSilServiceDaoMock.findActualization("ORG_IPA", 2, 2)).thenReturn(List.of());
     when(orgSilServiceMapperMock.map(first)).thenReturn(firstDto);
     when(orgSilServiceMapperMock.map(second)).thenReturn(secondDto);
 
-    ExportFileResult result = service.executeExport("IPA_CODE", request);
+    ExportFileResult result = service.executeExport("BROKER_IPA", request);
 
     assertNull(result.error());
     assertEquals(2, result.files().size());
@@ -94,55 +94,55 @@ class OrgSilServiceExportProcessingServiceTest {
       .filter(fileName -> fileName.contains(".errors."))
       .findFirst()
       .orElseThrow();
-    assertTrue(exportFileName.matches("IPA_CODE-ORG_SIL_SERVICES-\\d{14}-1_0\\.zip"));
-    assertTrue(errorFileName.matches("IPA_CODE-ORG_SIL_SERVICES-\\d{14}-1_0\\.errors\\.zip"));
+    assertTrue(exportFileName.matches("BROKER_IPA-ORG_SIL_SERVICES-\\d{14}-1_0\\.zip"));
+    assertTrue(errorFileName.matches("BROKER_IPA-ORG_SIL_SERVICES-\\d{14}-1_0\\.errors\\.zip"));
 
-    Path exportArchivePath = tempDir.resolve("IPA_CODE").resolve(exportFileName);
-    Path errorArchivePath = tempDir.resolve("IPA_CODE").resolve(errorFileName);
+    Path exportArchivePath = tempDir.resolve("BROKER_IPA").resolve(exportFileName);
+    Path errorArchivePath = tempDir.resolve("BROKER_IPA").resolve(errorFileName);
     assertTrue(Files.exists(exportArchivePath));
     assertTrue(Files.exists(errorArchivePath));
 
     List<String> exportArchiveEntries = ZipUtils.readZipEntries(exportArchivePath);
     assertEquals(1, exportArchiveEntries.size());
-    assertTrue(exportArchiveEntries.get(0).matches("IPA_CODE-ORG_SIL_SERVICES-\\d{14}-1_0\\.csv"));
+    assertTrue(exportArchiveEntries.get(0).matches("ORG_IPA-ORG_SIL_SERVICES-\\d{14}-1_0\\.csv"));
 
     List<String> errorArchiveEntries = ZipUtils.readZipEntries(errorArchivePath);
     assertEquals(1, errorArchiveEntries.size());
-    assertTrue(errorArchiveEntries.get(0).matches("IPA_CODE-ORG_SIL_SERVICES-\\d{14}-1_0\\.errors\\.csv"));
+    assertTrue(errorArchiveEntries.get(0).matches("ORG_IPA-ORG_SIL_SERVICES-\\d{14}-1_0\\.errors\\.csv"));
 
     InOrder inOrder = inOrder(orgSilServiceDaoMock);
-    inOrder.verify(orgSilServiceDaoMock).findPaidNotificationOutcome("IPA_CODE", 2, 0);
-    inOrder.verify(orgSilServiceDaoMock).findActualization("IPA_CODE", 2, 0);
-    inOrder.verify(orgSilServiceDaoMock).findPaidNotificationOutcome("IPA_CODE", 2, 2);
-    inOrder.verify(orgSilServiceDaoMock).findActualization("IPA_CODE", 2, 2);
+    inOrder.verify(orgSilServiceDaoMock).findPaidNotificationOutcome("ORG_IPA", 2, 0);
+    inOrder.verify(orgSilServiceDaoMock).findActualization("ORG_IPA", 2, 0);
+    inOrder.verify(orgSilServiceDaoMock).findPaidNotificationOutcome("ORG_IPA", 2, 2);
+    inOrder.verify(orgSilServiceDaoMock).findActualization("ORG_IPA", 2, 2);
   }
 
   @Test
   void whenNoValidationErrorsThenArchiveContainsOnlyExportCsv() throws Exception {
-    ExtractionRequest request = new ExtractionRequest("IPA_CODE", MigrationFileType.ORG_SIL_SERVICES);
+    ExtractionRequest request = new ExtractionRequest("ORG_IPA", MigrationFileType.ORG_SIL_SERVICES);
     OrgSilService first = orgSilService("first");
     OrgSilService second = orgSilService("second");
-    when(orgSilServiceDaoMock.findPaidNotificationOutcome("IPA_CODE", 2, 0)).thenReturn(List.of(first));
-    when(orgSilServiceDaoMock.findActualization("IPA_CODE", 2, 0)).thenReturn(List.of(second));
-    when(orgSilServiceDaoMock.findPaidNotificationOutcome("IPA_CODE", 2, 2)).thenReturn(List.of());
-    when(orgSilServiceDaoMock.findActualization("IPA_CODE", 2, 2)).thenReturn(List.of());
+    when(orgSilServiceDaoMock.findPaidNotificationOutcome("ORG_IPA", 2, 0)).thenReturn(List.of(first));
+    when(orgSilServiceDaoMock.findActualization("ORG_IPA", 2, 0)).thenReturn(List.of(second));
+    when(orgSilServiceDaoMock.findPaidNotificationOutcome("ORG_IPA", 2, 2)).thenReturn(List.of());
+    when(orgSilServiceDaoMock.findActualization("ORG_IPA", 2, 2)).thenReturn(List.of());
     when(orgSilServiceMapperMock.map(first)).thenReturn(dto("first"));
     when(orgSilServiceMapperMock.map(second)).thenReturn(dto("second"));
 
-    ExportFileResult result = service.executeExport("IPA_CODE", request);
+    ExportFileResult result = service.executeExport("BROKER_IPA", request);
 
     assertNull(result.error());
     assertEquals(1, result.files().size());
-    Path archivePath = tempDir.resolve("IPA_CODE").resolve(result.files().get(0));
+    Path archivePath = tempDir.resolve("BROKER_IPA").resolve(result.files().get(0));
     List<String> archiveEntries = ZipUtils.readZipEntries(archivePath);
     assertEquals(1, archiveEntries.size());
-    assertTrue(archiveEntries.get(0).matches("IPA_CODE-ORG_SIL_SERVICES-\\d{14}-1_0\\.csv"));
+    assertTrue(archiveEntries.get(0).matches("ORG_IPA-ORG_SIL_SERVICES-\\d{14}-1_0\\.csv"));
 
     InOrder inOrder = inOrder(orgSilServiceDaoMock);
-    inOrder.verify(orgSilServiceDaoMock).findPaidNotificationOutcome("IPA_CODE", 2, 0);
-    inOrder.verify(orgSilServiceDaoMock).findActualization("IPA_CODE", 2, 0);
-    inOrder.verify(orgSilServiceDaoMock).findPaidNotificationOutcome("IPA_CODE", 2, 2);
-    inOrder.verify(orgSilServiceDaoMock).findActualization("IPA_CODE", 2, 2);
+    inOrder.verify(orgSilServiceDaoMock).findPaidNotificationOutcome("ORG_IPA", 2, 0);
+    inOrder.verify(orgSilServiceDaoMock).findActualization("ORG_IPA", 2, 0);
+    inOrder.verify(orgSilServiceDaoMock).findPaidNotificationOutcome("ORG_IPA", 2, 2);
+    inOrder.verify(orgSilServiceDaoMock).findActualization("ORG_IPA", 2, 2);
   }
 
   private ExtractorExportProperties exportProperties() {
@@ -150,21 +150,21 @@ class OrgSilServiceExportProcessingServiceTest {
       tempDir.toString(),
       tempDir.toString(),
       "12345678901",
-      "IPA_CODE",
+      "BROKER_IPA",
       Map.of(MigrationFileType.ORG_SIL_SERVICES, new ExtractorExportProperties.FileTypeConfiguration(2))
     );
   }
 
   private OrgSilService orgSilService(String suffix) {
     return new OrgSilService(
-      "IPA_CODE", "App" + suffix, "SERVICE_TYPE", "http://example.com",
+      "ORG_IPA", "App" + suffix, "SERVICE_TYPE", "http://example.com",
       false, null, null, null, null, null, null, null, null
     );
   }
 
   private PuOrgSilServiceDTO dto(String suffix) {
     return PuOrgSilServiceDTO.builder()
-      .ipaCode("IPA_CODE")
+      .ipaCode("ORG_IPA")
       .applicationName("App" + suffix)
       .serviceType("SERVICE_TYPE")
       .flagLegacy("false")
