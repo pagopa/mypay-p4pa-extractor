@@ -72,12 +72,13 @@ class DebtPositionTypeOrgExportProcessingServiceTest {
   @Test
   void whenDataIsAvailableThenExportPagedDebtPositionTypeOrgsToArchive() throws Exception {
     ExtractionRequest request = new ExtractionRequest("IPA_CODE", MigrationFileType.DEBT_POSITIONS_TYPE_ORG, new ExtractionFilters());
+    List<String> debtPositionTypeOrgCodes = List.of();
     DebtPositionTypeOrg first = debtPositionTypeOrg("first");
     DebtPositionTypeOrg second = invalidDebtPositionTypeOrg();
     PuDebtPositionTypeOrgDTO firstDto = dto("first");
     PuDebtPositionTypeOrgDTO secondDto = invalidDto();
-    when(debtPositionTypeOrgDaoMock.findByFilters("IPA_CODE", null, 2, 0)).thenReturn(List.of(first, second));
-    when(debtPositionTypeOrgDaoMock.findByFilters("IPA_CODE", null, 2, 2)).thenReturn(List.of());
+    when(debtPositionTypeOrgDaoMock.findByFilters("IPA_CODE", debtPositionTypeOrgCodes, 2, 0)).thenReturn(List.of(first, second));
+    when(debtPositionTypeOrgDaoMock.findByFilters("IPA_CODE", debtPositionTypeOrgCodes, 2, 2)).thenReturn(List.of());
     when(debtPositionTypeOrgMapperMock.map(first)).thenReturn(firstDto);
     when(debtPositionTypeOrgMapperMock.map(second)).thenReturn(secondDto);
 
@@ -110,17 +111,18 @@ class DebtPositionTypeOrgExportProcessingServiceTest {
     assertTrue(errorArchiveEntries.get(0).matches("IPA_CODE-DEBT_POSITIONS_TYPE_ORG-\\d{14}-1_0\\.errors\\.csv"));
 
     InOrder inOrder = inOrder(debtPositionTypeOrgDaoMock);
-    inOrder.verify(debtPositionTypeOrgDaoMock).findByFilters("IPA_CODE", null, 2, 0);
-    inOrder.verify(debtPositionTypeOrgDaoMock).findByFilters("IPA_CODE", null, 2, 2);
+    inOrder.verify(debtPositionTypeOrgDaoMock).findByFilters("IPA_CODE", debtPositionTypeOrgCodes, 2, 0);
+    inOrder.verify(debtPositionTypeOrgDaoMock).findByFilters("IPA_CODE", debtPositionTypeOrgCodes, 2, 2);
   }
 
   @Test
   void whenNoValidationErrorsThenArchiveContainsOnlyExportCsv() throws Exception {
     ExtractionRequest request = new ExtractionRequest("IPA_CODE", MigrationFileType.DEBT_POSITIONS_TYPE_ORG, new ExtractionFilters());
+    List<String> debtPositionTypeOrgCodes = List.of();
     DebtPositionTypeOrg first = debtPositionTypeOrg("first");
     DebtPositionTypeOrg second = debtPositionTypeOrg("second");
-    when(debtPositionTypeOrgDaoMock.findByFilters("IPA_CODE", null, 2, 0)).thenReturn(List.of(first, second));
-    when(debtPositionTypeOrgDaoMock.findByFilters("IPA_CODE", null, 2, 2)).thenReturn(List.of());
+    when(debtPositionTypeOrgDaoMock.findByFilters("IPA_CODE", debtPositionTypeOrgCodes, 2, 0)).thenReturn(List.of(first, second));
+    when(debtPositionTypeOrgDaoMock.findByFilters("IPA_CODE", debtPositionTypeOrgCodes, 2, 2)).thenReturn(List.of());
     when(debtPositionTypeOrgMapperMock.map(first)).thenReturn(dto("first"));
     when(debtPositionTypeOrgMapperMock.map(second)).thenReturn(dto("second"));
 
@@ -134,8 +136,8 @@ class DebtPositionTypeOrgExportProcessingServiceTest {
     assertTrue(archiveEntries.get(0).matches("IPA_CODE-DEBT_POSITIONS_TYPE_ORG-\\d{14}-1_0\\.csv"));
 
     InOrder inOrder = inOrder(debtPositionTypeOrgDaoMock);
-    inOrder.verify(debtPositionTypeOrgDaoMock).findByFilters("IPA_CODE", null, 2, 0);
-    inOrder.verify(debtPositionTypeOrgDaoMock).findByFilters("IPA_CODE", null, 2, 2);
+    inOrder.verify(debtPositionTypeOrgDaoMock).findByFilters("IPA_CODE", debtPositionTypeOrgCodes, 2, 0);
+    inOrder.verify(debtPositionTypeOrgDaoMock).findByFilters("IPA_CODE", debtPositionTypeOrgCodes, 2, 2);
   }
 
   private ExtractorExportProperties exportProperties() {
@@ -166,13 +168,13 @@ class DebtPositionTypeOrgExportProcessingServiceTest {
       true,
       false,
       false,
-      true,
+      "notifyOutcome " + suffix,
       false,
-      null,
+      "actualization " + suffix,
+      "FORM_" + suffix,
+      "service_" + suffix,
       false,
-      null,
-      "Application " + suffix,
-      "FORM_" + suffix
+      false
     );
   }
 
@@ -183,14 +185,15 @@ class DebtPositionTypeOrgExportProcessingServiceTest {
       .code("CODE_" + suffix)
       .description("Description " + suffix)
       .iban("IT60X0542811101000000123456")
-      .flagAnonymousFiscalCode("false")
-      .flagMandatoryDueDate("false")
-      .flagSpontaneous("true")
-      .flagNotifyIo("false")
-      .flagActive("true")
-      .flagNotifyOutcomePush("false")
-      .flagAmountActualization("false")
-      .flagExternal("false")
+      .flagAnonymousFiscalCode(false)
+      .flagMandatoryDueDate(false)
+      .flagSpontaneous(true)
+      .flagNotifyIo(false)
+      .flagNotifyIoBkp(false)
+      .flagActive(true)
+      .flagNotifyOutcomePush(false)
+      .flagAmountActualization(false)
+      .flagExternal(false)
       .build();
   }
 
@@ -228,14 +231,14 @@ class DebtPositionTypeOrgExportProcessingServiceTest {
       .code("")
       .description("")
       .iban("")
-      .flagAnonymousFiscalCode("INVALID")
-      .flagMandatoryDueDate("INVALID")
-      .flagSpontaneous("INVALID")
-      .flagNotifyIo("INVALID")
-      .flagActive("INVALID")
-      .flagNotifyOutcomePush("INVALID")
-      .flagAmountActualization("INVALID")
-      .flagExternal("INVALID")
+      .flagAnonymousFiscalCode(null)
+      .flagMandatoryDueDate(null)
+      .flagSpontaneous(null)
+      .flagNotifyIo(null)
+      .flagActive(null)
+      .flagNotifyOutcomePush(null)
+      .flagAmountActualization(null)
+      .flagExternal(null)
       .build();
   }
 }
