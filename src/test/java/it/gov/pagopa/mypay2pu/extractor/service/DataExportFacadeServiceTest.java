@@ -6,6 +6,7 @@ import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.exception.ExportFileTypeNotSupportedException;
 import it.gov.pagopa.mypay2pu.extractor.service.export.debtpositionstypeorgoperators.DebtPositionsTypeOrgOperatorsExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.debtpositiontype.DebtPositionTypeExportProcessingService;
+import it.gov.pagopa.mypay2pu.extractor.service.export.debtpositiontypeorg.DebtPositionTypeOrgExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.organization.OrganizationExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.orgsil.OrgSilServiceExportProcessingService;
 import org.junit.jupiter.api.AfterEach;
@@ -34,6 +35,8 @@ class DataExportFacadeServiceTest {
   @Mock
   private DebtPositionTypeExportProcessingService debtPositionTypeExportProcessingServiceMock;
   @Mock
+  private DebtPositionTypeOrgExportProcessingService debtPositionTypeOrgExportProcessingServiceMock;
+  @Mock
   private DebtPositionsTypeOrgOperatorsExportProcessingService debtPositionsTypeOrgOperatorsExportProcessingServiceMock;
 
   @InjectMocks
@@ -47,6 +50,7 @@ class DataExportFacadeServiceTest {
         organizationExportProcessingServiceMock,
         orgSilServiceExportProcessingServiceMock,
         debtPositionTypeExportProcessingServiceMock,
+        debtPositionTypeOrgExportProcessingServiceMock,
         debtPositionsTypeOrgOperatorsExportProcessingServiceMock
       )
     );
@@ -71,6 +75,10 @@ class DataExportFacadeServiceTest {
       case DEBT_POSITIONS_TYPE -> {
         expected = new ExportFileResult(List.of("debtpositionstype_1_0.zip"), null);
         when(debtPositionTypeExportProcessingServiceMock.executeExport(extractionId, request)).thenReturn(expected);
+      }
+      case DEBT_POSITIONS_TYPE_ORG -> {
+        expected = new ExportFileResult(List.of("debtpositionstypeorg_1_0.zip"), null);
+        when(debtPositionTypeOrgExportProcessingServiceMock.executeExport(extractionId, request)).thenReturn(expected);
       }
       case DEBT_POSITIONS_TYPE_ORG_OPERATORS -> {
         expected = new ExportFileResult(List.of("debtpositionstypeorgoperators_1_0.zip"), null);
