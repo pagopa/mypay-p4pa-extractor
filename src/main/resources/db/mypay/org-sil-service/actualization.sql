@@ -2,7 +2,7 @@ SELECT DISTINCT
     e.cod_ipa_ente AS ipa_code,
     etd.url_notifica_pnd AS application_name,
     'ACTUALIZATION' AS service_type,
-    NULL AS service_url,
+    etd.url_notifica_attualizzazione_pnd AS service_url,
     TRUE AS flag_legacy,
     NULL AS legacy_jwt_kid,
     NULL AS legacy_jwt_subject,
