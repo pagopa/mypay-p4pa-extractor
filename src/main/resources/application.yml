@@ -76,9 +76,6 @@ rest:
   mydictionary:
     base-url: "\${MYDICTIONARY_BASE_URL:}"
 
-mydictionary:
-  base-url: "\${MYDICTIONARY_BASE_URL:}"
-
 datasource:
   mp4:
     jdbc-url: "jdbc:postgresql://\${MP4_DB_HOST}:\${MP4_DB_PORT:5432}/\${MP4_DB_NAME}"
