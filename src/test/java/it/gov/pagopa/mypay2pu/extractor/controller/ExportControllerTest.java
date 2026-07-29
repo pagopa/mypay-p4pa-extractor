@@ -64,7 +64,7 @@ class ExportControllerTest {
   @Test
   void givenGeneratedExtractionIdWhenExecuteExportThenReturnAccepted() throws Exception {
     ExtractionRequest request = new ExtractionRequest(
-      "IPA_CODE_TEST",
+      List.of("IPA_CODE_TEST"),
       MigrationFileType.ORGANIZATIONS,
       new ExtractionFilters()
     );
@@ -84,7 +84,7 @@ class ExportControllerTest {
     String extractionId = "123e4567-e89b-42d3-a456-426614174000";
     ExtractionStatusResponse statusResponse = new ExtractionStatusResponse(
       extractionId,
-      "IPA_CODE_TEST",
+      List.of("IPA_CODE_TEST"),
       MigrationFileType.ORGANIZATIONS,
       ExtractionStatus.COMPLETED,
       now,
@@ -105,7 +105,7 @@ class ExportControllerTest {
   @Test
   void givenReversedFilterDatesWhenExecuteExportThenReturnBadRequest() throws Exception {
     ExtractionRequest request = new ExtractionRequest(
-      "IPA_CODE_TEST",
+      List.of("IPA_CODE_TEST"),
       MigrationFileType.ORGANIZATIONS,
       new ExtractionFilters(
         LocalDate.of(2026, Month.JANUARY, 2),

@@ -45,7 +45,7 @@ class ExportFileStatusServiceTest {
   @Test
   void givenRequestWhenCreateNewThenStoreRunningStatus() {
     String extractionId = "extraction-id";
-    ExtractionRequest request = new ExtractionRequest("IPA_CODE_TEST", MigrationFileType.ORGANIZATIONS);
+    ExtractionRequest request = new ExtractionRequest(List.of("IPA_CODE_TEST"), MigrationFileType.ORGANIZATIONS);
 
     service.createNew(extractionId, request);
 
@@ -54,7 +54,7 @@ class ExportFileStatusServiceTest {
 
     ExtractionStatusResponse writtenStatus = statusCaptor.getValue();
     assertEquals(extractionId, writtenStatus.getExtractionId());
-    assertEquals("IPA_CODE_TEST", writtenStatus.getIpaCode());
+    assertEquals(List.of("IPA_CODE_TEST"), writtenStatus.getIpaCodes());
     assertEquals(MigrationFileType.ORGANIZATIONS, writtenStatus.getFileTypes());
     assertEquals(ExtractionStatus.RUNNING, writtenStatus.getStatus());
     assertEquals(List.of(), writtenStatus.getFiles());
@@ -76,7 +76,7 @@ class ExportFileStatusServiceTest {
     OffsetDateTime previousUpdatedAt = OffsetDateTime.parse("2026-01-02T00:00:00Z");
     ExtractionStatusResponse currentStatus = new ExtractionStatusResponse(
       extractionId,
-      "IPA_CODE_TEST",
+      List.of("IPA_CODE_TEST"),
       MigrationFileType.ORGANIZATIONS,
       ExtractionStatus.RUNNING,
       createdAt,
@@ -94,7 +94,7 @@ class ExportFileStatusServiceTest {
 
     ExtractionStatusResponse writtenStatus = statusCaptor.getValue();
     assertEquals(extractionId, writtenStatus.getExtractionId());
-    assertEquals("IPA_CODE_TEST", writtenStatus.getIpaCode());
+    assertEquals(List.of("IPA_CODE_TEST"), writtenStatus.getIpaCodes());
     assertEquals(MigrationFileType.ORGANIZATIONS, writtenStatus.getFileTypes());
     assertEquals(createdAt, writtenStatus.getCreatedAt());
     assertEquals(expectedStatus, writtenStatus.getStatus());
@@ -109,7 +109,7 @@ class ExportFileStatusServiceTest {
     String extractionId = "extraction-id";
     ExtractionStatusResponse expectedStatus = new ExtractionStatusResponse(
       extractionId,
-      "IPA_CODE_TEST",
+      List.of("IPA_CODE_TEST"),
       MigrationFileType.ORGANIZATIONS,
       ExtractionStatus.COMPLETED,
       OffsetDateTime.parse("2026-01-01T00:00:00Z"),

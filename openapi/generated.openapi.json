@@ -82,6 +82,15 @@
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/ExtractionStatusResponse"
+                },
+                "example" : {
+                  "extractionId" : "550e8400-e29b-41d4-a716-446655440000",
+                  "ipaCodes" : [ "00493410240", "01234567890" ],
+                  "fileTypes" : "ORGANIZATIONS",
+                  "status" : "COMPLETED",
+                  "createdAt" : "2026-06-18T10:00:00Z",
+                  "updatedAt" : "2026-06-18T10:01:00Z",
+                  "files" : [ "BROKER_IPA-ORGANIZATIONS-20260618100000-1_0.zip" ]
                 }
               }
             }
@@ -161,11 +170,14 @@
       "ExtractionRequest" : {
         "type" : "object",
         "properties" : {
-          "ipaCode" : {
-            "type" : "string",
-            "example" : "00493410240",
-            "maxLength" : 2147483647,
-            "minLength" : 1
+          "ipaCodes" : {
+            "type" : "array",
+            "example" : "[00493410240, 01234567890]",
+            "items" : {
+              "type" : "string"
+            },
+            "maxItems" : 2147483647,
+            "minItems" : 1
           },
           "fileTypes" : {
             "$ref" : "#/components/schemas/MigrationFileType"
@@ -174,7 +186,7 @@
             "$ref" : "#/components/schemas/ExtractionFilters"
           }
         },
-        "required" : [ "fileTypes", "ipaCode" ]
+        "required" : [ "fileTypes", "ipaCodes" ]
       },
       "MigrationFileType" : {
         "type" : [ "string", "null" ],
@@ -190,8 +202,13 @@
           "extractionId" : {
             "type" : "string"
           },
-          "ipaCode" : {
-            "type" : [ "string", "null" ]
+          "ipaCodes" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            },
+            "maxItems" : 2147483647,
+            "minItems" : 1
           },
           "fileTypes" : {
             "$ref" : "#/components/schemas/MigrationFileType"

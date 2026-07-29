@@ -33,7 +33,7 @@ public class ExportFileHandlerService {
   }
 
   public void executeExport(String extractionId, ExtractionRequest request) {
-    log.info("Processing extraction {} for organization {} and fileTypes {}", extractionId, request.getIpaCode(), request.getFileTypes());
+    log.info("Processing extraction {} for ipaCodes {} and fileTypes {}", extractionId, request.getIpaCodes(), request.getFileTypes());
 
     exportFileStatusService.createNew(extractionId, request);
 
