@@ -25,9 +25,7 @@ SELECT
     d.de_rp_dati_vers_dati_sing_vers_causale_versamento AS causale_versamento,
     d.de_rp_dati_vers_dati_sing_vers_dati_specifici_riscossione AS dati_specifici_riscossione,
     d.flg_genera_iuv AS flg_genera_iuv,
-    FALSE AS flag_pagamento_pu,
     d.bilancio AS bilancio,
-    NULL AS azione,
     FALSE AS draft,
     EXISTS (
         SELECT 1
@@ -49,11 +47,13 @@ JOIN mygov_ente e
     ON f.mygov_ente_id = e.mygov_ente_id
 LEFT JOIN mygov_dovuto_multibeneficiario mb
     ON mb.mygov_dovuto_id = d.mygov_dovuto_id
-WHERE e.cod_ipa_ente = :organizationId
+WHERE e.cod_ipa_ente = :codIpaEnte
   AND (:gpdIupd IS NULL OR d.gpd_iupd = :gpdIupd)
   AND (:codIud IS NULL OR d.cod_iud = :codIud)
   AND (:updatedFrom IS NULL OR d.dt_ultima_modifica >= :updatedFrom)
   AND (:updatedToExclusive IS NULL OR d.dt_ultima_modifica < :updatedToExclusive)
+  AND (:debtPositionTypeOrgCodesEmpty = TRUE OR d.cod_tipo_dovuto IN (:debtPositionTypeOrgCodes))
+  AND (d.flg_iuv_volatile IS NULL OR d.flg_iuv_volatile = FALSE)
 ORDER BY d.dt_ultima_modifica, d.mygov_dovuto_id
 LIMIT :limit
 OFFSET COALESCE(:offset, 0)

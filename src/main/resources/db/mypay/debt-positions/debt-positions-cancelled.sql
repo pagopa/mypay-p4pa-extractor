@@ -25,9 +25,7 @@ SELECT
     de.de_rp_dati_vers_dati_sing_vers_causale_versamento AS causale_versamento,
     de.de_rp_dati_vers_dati_sing_vers_dati_specifici_riscossione AS dati_specifici_riscossione,
     de.flg_genera_iuv AS flg_genera_iuv,
-    TRUE AS flag_pagamento_pu,
     de.bilancio AS bilancio,
-    'A' AS azione,
     FALSE AS draft,
     FALSE AS flag_multi_beneficiario,
     NULL AS codice_fiscale_ente_1,
@@ -45,12 +43,13 @@ JOIN mygov_ente e
     ON f.mygov_ente_id = e.mygov_ente_id
 JOIN mygov_anagrafica_stato s
     ON s.mygov_anagrafica_stato_id = de.mygov_anagrafica_stato_id
-WHERE e.cod_ipa_ente = :organizationId
+WHERE e.cod_ipa_ente = :codIpaEnte
   AND s.cod_stato = 'ANNULLATO'
   AND (:gpdIupd IS NULL OR de.gpd_iupd = :gpdIupd)
   AND (:codIud IS NULL OR de.cod_iud = :codIud)
   AND (:updatedFrom IS NULL OR de.dt_creazione >= :updatedFrom)
   AND (:updatedToExclusive IS NULL OR de.dt_creazione < :updatedToExclusive)
+  AND (:debtPositionTypeOrgCodesEmpty = TRUE OR de.cod_tipo_dovuto IN (:debtPositionTypeOrgCodes))
 ORDER BY de.dt_creazione, de.mygov_dovuto_elaborato_id
 LIMIT :limit
 OFFSET COALESCE(:offset, 0)

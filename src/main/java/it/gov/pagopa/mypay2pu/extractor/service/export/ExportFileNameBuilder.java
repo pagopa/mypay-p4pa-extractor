@@ -8,6 +8,7 @@ import java.util.Locale;
 
 public record ExportFileNameBuilder(
   String brokerIpaCode,
+  String organizationIpaCode,
   MigrationFileType migrationFileType,
   LocalDateTime timestamp,
   String version
@@ -16,19 +17,19 @@ public record ExportFileNameBuilder(
   private static final DateTimeFormatter TIMESTAMP_FORMATTER =
     DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
-  public String buildBaseName() {
-    return buildBaseName(null);
+  public String buildZipBaseName() {
+    return buildBaseName(brokerIpaCode, null);
   }
 
   public String buildCsvFileName() {
-    return buildBaseName() + ".csv";
+    return buildBaseName(resolveCsvIpaCode(), null) + ".csv";
   }
 
   public String buildCsvPartFileName(int partNumber) {
-    return buildBaseName(partNumber) + ".csv";
+    return buildBaseName(resolveCsvIpaCode(), partNumber) + ".csv";
   }
 
-  private String buildBaseName(Integer partNumber) {
+  private String buildBaseName(String ipaCode, Integer partNumber) {
     String migrationType = migrationFileType.name()
       .toUpperCase(Locale.ROOT);
 
@@ -36,7 +37,7 @@ public record ExportFileNameBuilder(
 
     if (partNumber == null) {
       return "%s-%s-%s-%s".formatted(
-        brokerIpaCode,
+        ipaCode,
         migrationType,
         formattedTimestamp,
         version
@@ -48,11 +49,17 @@ public record ExportFileNameBuilder(
     }
 
     return "%s-%s-%s-part%03d-%s".formatted(
-      brokerIpaCode,
+      ipaCode,
       migrationType,
       formattedTimestamp,
       partNumber,
       version
     );
+  }
+
+  private String resolveCsvIpaCode() {
+    return migrationFileType == MigrationFileType.ORGANIZATIONS
+      ? brokerIpaCode
+      : organizationIpaCode;
   }
 }
