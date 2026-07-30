@@ -34,7 +34,7 @@ SELECT
     etd.cod_xsd_causale AS spontaneous_form_code,
     NULL AS service_code,
     FALSE AS flag_notify_io,
-    COALESCE(etd.flg_notify_io, FALSE) AS flag_notify_io_bkp
+    COALESCE(etd.flg_notifica_io, FALSE) AS flag_notify_io_bkp
 FROM mygov_ente_tipo_dovuto etd
 JOIN mygov_ente e
     ON e.mygov_ente_id = etd.mygov_ente_id
