@@ -32,7 +32,7 @@ SELECT
     END AS flag_amount_actualization,
     etd.url_notifica_pnd AS amount_actualization_org_sil_service_code,
     etd.cod_xsd_causale AS spontaneous_form_code,
-    etd.codice_servizio AS service_code,
+    NULL AS service_code,
     FALSE AS flag_notify_io,
     COALESCE(etd.flg_notify_io, FALSE) AS flag_notify_io_bkp
 FROM mygov_ente_tipo_dovuto etd
