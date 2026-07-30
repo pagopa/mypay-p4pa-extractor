@@ -23,7 +23,10 @@ public class DebtPositionTypeOrgMapper {
   }
 
   public PuDebtPositionTypeOrgDTO map(DebtPositionTypeOrg debtPositionTypeOrg) {
-    String strutturaPagamentoSpontaneo = myDictionaryClient.getSpontaneousFormStructure(debtPositionTypeOrg.spontaneousFormCode());
+    String strutturaPagamentoSpontaneo = null;
+    if (Boolean.TRUE.equals(debtPositionTypeOrg.flagSpontaneous())) {
+      strutturaPagamentoSpontaneo = myDictionaryClient.getSpontaneousFormStructure(debtPositionTypeOrg.spontaneousFormCode());
+    }
     return PuDebtPositionTypeOrgDTO.builder()
       .ipaCode(debtPositionTypeOrg.ipaCode())
       .balance(debtPositionTypeOrg.balance())

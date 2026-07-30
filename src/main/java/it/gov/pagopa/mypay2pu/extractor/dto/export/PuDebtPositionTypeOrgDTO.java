@@ -18,23 +18,22 @@ public class PuDebtPositionTypeOrgDTO implements CsvExportDto {
 
   public static final String VERSION = "1_0";
 
-  @CsvBindByName(column = "enteIpaCode", required = true)
+  @CsvBindByName(column = "enteIpaCode")
   @NotBlank
   private String ipaCode;
 
   @CsvBindByName(column = "bilancioDefault")
   private String balance;
 
-  @CsvBindByName(column = "codice", required = true)
+  @CsvBindByName(column = "codice")
   @NotBlank
   private String code;
 
-  @CsvBindByName(column = "descrizione", required = true)
+  @CsvBindByName(column = "descrizione")
   @NotBlank
   private String description;
 
-  @CsvBindByName(column = "codIban", required = true)
-  @NotBlank
+  @CsvBindByName(column = "codIban")
   private String iban;
 
   @CsvBindByName(column = "ibanPostale")
@@ -61,48 +60,48 @@ public class PuDebtPositionTypeOrgDTO implements CsvExportDto {
   @CsvBindByName(column = "urlPagamentoEsterno")
   private String externalPaymentUrl;
 
-  @CsvBindByName(column = "codiceFiscaleAnonimo", required = true)
+  @CsvBindByName(column = "codiceFiscaleAnonimo")
   @NotNull
   private Boolean flagAnonymousFiscalCode;
 
-  @CsvBindByName(column = "scadenzaObbligatoria", required = true)
+  @CsvBindByName(column = "scadenzaObbligatoria")
   @NotNull
   private Boolean flagMandatoryDueDate;
 
-  @CsvBindByName(column = "pagamentoSpontaneo", required = true)
+  @CsvBindByName(column = "pagamentoSpontaneo")
   @NotNull
   private Boolean flagSpontaneous;
 
-  @CsvBindByName(column = "notificaIo", required = true)
+  @CsvBindByName(column = "notificaIo")
   @NotNull
   private Boolean flagNotifyIo;
 
-  @CsvBindByName(column = "notificaIoBkp", required = true)
+  @CsvBindByName(column = "notificaIoBkp")
   @NotNull
   private Boolean flagNotifyIoBkp;
 
   @CsvBindByName(column = "templateMessaggioIo")
   private String ioTemplateMessage;
 
-  @CsvBindByName(column = "attivo", required = true)
+  @CsvBindByName(column = "attivo")
   @NotNull
   private Boolean flagActive;
 
-  @CsvBindByName(column = "notificaEsitoPush", required = true)
+  @CsvBindByName(column = "notificaEsitoPush")
   @NotNull
   private Boolean flagNotifyOutcomePush;
 
   @CsvBindByName(column = "codServNotificaEsitoPush")
   private String notifyOutcomePushOrgSilServiceCode;
 
-  @CsvBindByName(column = "attualizzazioneImporto", required = true)
+  @CsvBindByName(column = "attualizzazioneImporto")
   @NotNull
   private Boolean flagAmountActualization;
 
   @CsvBindByName(column = "codServAttualizzazioneImporto")
   private String amountActualizationOrgSilServiceCode;
 
-  @CsvBindByName(column = "esterno", required = true)
+  @CsvBindByName(column = "esterno")
   @NotNull
   private Boolean flagExternal;
 
