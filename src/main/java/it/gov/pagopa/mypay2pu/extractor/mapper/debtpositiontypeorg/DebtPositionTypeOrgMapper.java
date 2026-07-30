@@ -2,11 +2,17 @@ package it.gov.pagopa.mypay2pu.extractor.mapper.debtpositiontypeorg;
 
 import it.gov.pagopa.mypay2pu.extractor.config.MyPayProperties;
 import it.gov.pagopa.mypay2pu.extractor.dao.DebtPositionTypeOrgDao;
+import it.gov.pagopa.mypay2pu.extractor.exception.CsvRowMappingException;
 import it.gov.pagopa.mypay2pu.extractor.dto.export.PuDebtPositionTypeOrgDTO;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.DebtPositionTypeOrg;
 import it.gov.pagopa.mypay2pu.extractor.connector.mydictionary.MyDictionaryClient;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpServerErrorException;
 
+import static org.springframework.util.StringUtils.hasText;
+
+@Slf4j
 @Component
 public class DebtPositionTypeOrgMapper {
 
@@ -23,10 +29,7 @@ public class DebtPositionTypeOrgMapper {
   }
 
   public PuDebtPositionTypeOrgDTO map(DebtPositionTypeOrg debtPositionTypeOrg) {
-    String strutturaPagamentoSpontaneo = null;
-    if (Boolean.TRUE.equals(debtPositionTypeOrg.flagSpontaneous())) {
-      strutturaPagamentoSpontaneo = myDictionaryClient.getSpontaneousFormStructure(debtPositionTypeOrg.spontaneousFormCode());
-    }
+    String strutturaPagamentoSpontaneo = resolveSpontaneousFormStructure(debtPositionTypeOrg);
     return PuDebtPositionTypeOrgDTO.builder()
       .ipaCode(debtPositionTypeOrg.ipaCode())
       .balance(debtPositionTypeOrg.balance())
@@ -56,6 +59,34 @@ public class DebtPositionTypeOrgMapper {
       .serviceCode(debtPositionTypeOrg.serviceCode())
       .ioTemplateSubject(transcodeTemplateTags(myPayProperties.ioTemplateSubject()))
       .build();
+  }
+
+  private String resolveSpontaneousFormStructure(DebtPositionTypeOrg debtPositionTypeOrg) {
+    String spontaneousFormCode = debtPositionTypeOrg.spontaneousFormCode();
+    if (!hasText(spontaneousFormCode)) {
+      return null;
+    }
+    try {
+      return myDictionaryClient.getSpontaneousFormStructure(spontaneousFormCode);
+    } catch (HttpServerErrorException e) {
+      if (e.getStatusCode().value() == 500) {
+        if (Boolean.TRUE.equals(debtPositionTypeOrg.flagSpontaneous())) {
+          throw new CsvRowMappingException(
+            "MyDictionary",
+            "spontaneousFormStructure",
+            spontaneousFormCode,
+            "MyDictionary returned HTTP 500 for spontaneousFormCode " + spontaneousFormCode,
+            e
+          );
+        }
+        log.warn(
+          "MyDictionary returned HTTP 500 for spontaneousFormCode {} and flagSpontaneous=false. Structure will be empty.",
+          spontaneousFormCode
+        );
+        return null;
+      }
+      throw e;
+    }
   }
 
   private String transcodeTemplateTags(String template) {
