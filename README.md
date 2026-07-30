@@ -236,7 +236,7 @@ To customize them, add to the classpath a resource with the same path as the que
 
 | PU Entity | Resource | Parameters | Description |
 | ------------ | ------------------------- | ------------------------------------------------ | ----------------------------- |
-| organization (treasury check) | `/db/mypivot/organization/organization-pivot.sql` | <li>codIpaEnte: organization IPA code | Check if treasury extraction is enabled for organization |
+| organization (treasury check) | `/db/mypivot/organization/has-treasury.sql` | <li>codIpaEnte: organization IPA code | Check if treasury extraction is enabled for organization |
 | debt_positions_type_org | `/db/mypivot/debt-position-type-org/is-external.sql` | <li>ipaCode: organization IPA code<br><li>debtPositionsTypeOrgCode: debt position type logical key | Check if `DEBT_POSITIONS_TYPE_ORG` is external for the organization and logical key. |
 
 ## 🛠️ Getting Started
