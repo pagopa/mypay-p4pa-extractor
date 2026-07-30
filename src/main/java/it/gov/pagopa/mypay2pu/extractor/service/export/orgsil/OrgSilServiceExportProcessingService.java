@@ -57,9 +57,10 @@ public class OrgSilServiceExportProcessingService extends BaseExportProcessingSe
 
   @Override
   protected List<OrgSilService> retrieveData(ExtractionRequest request, int pageSize, int offset) {
+    String ipaCode = request.getIpaCodes().getFirst();
     return Stream.concat(
-      orgSilServiceDao.findPaidNotificationOutcome(request.getIpaCode(), pageSize, offset).stream(),
-      orgSilServiceDao.findActualization(request.getIpaCode(), pageSize, offset).stream()
+      orgSilServiceDao.findPaidNotificationOutcome(ipaCode, pageSize, offset).stream(),
+      orgSilServiceDao.findActualization(ipaCode, pageSize, offset).stream()
     ).toList();
   }
 }

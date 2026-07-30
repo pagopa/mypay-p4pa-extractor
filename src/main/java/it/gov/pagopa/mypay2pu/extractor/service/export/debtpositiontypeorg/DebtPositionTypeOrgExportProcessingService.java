@@ -3,6 +3,7 @@ package it.gov.pagopa.mypay2pu.extractor.service.export.debtpositiontypeorg;
 import it.gov.pagopa.mypay2pu.extractor.config.ExtractorExportProperties;
 import it.gov.pagopa.mypay2pu.extractor.dao.DebtPositionTypeOrgDao;
 import it.gov.pagopa.mypay2pu.extractor.dto.export.PuDebtPositionTypeOrgDTO;
+import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionFilters;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.mapper.debtpositiontypeorg.DebtPositionTypeOrgMapper;
@@ -15,6 +16,8 @@ import jakarta.validation.Validator;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 @Service
 public class DebtPositionTypeOrgExportProcessingService extends BaseExportProcessingService<DebtPositionTypeOrg, PuDebtPositionTypeOrgDTO> {
@@ -54,9 +57,14 @@ public class DebtPositionTypeOrgExportProcessingService extends BaseExportProces
 
   @Override
   protected List<DebtPositionTypeOrg> retrieveData(ExtractionRequest request, int pageSize, int offset) {
+    ExtractionRequest safeRequest = Objects.requireNonNull(request, "request must not be null");
+    List<String> ipaCodes = Objects.requireNonNull(safeRequest.getIpaCodes(), "request.ipaCodes must not be null");
+    List<String> debtPositionTypeOrgCodes = Optional.ofNullable(safeRequest.getFilters())
+      .map(ExtractionFilters::getDebtPositionTypeOrgCodes)
+      .orElse(null);
     return debtPositionTypeOrgDao.findByFilters(
-      request.getIpaCode(),
-      request.getFilters() != null ? request.getFilters().getDebtPositionTypeOrgCodes() : null,
+      ipaCodes.getFirst(),
+      debtPositionTypeOrgCodes,
       pageSize,
       offset
     );

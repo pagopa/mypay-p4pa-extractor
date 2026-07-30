@@ -55,7 +55,12 @@ public class OrganizationExportProcessingService extends BaseExportProcessingSer
   }
 
   @Override
+  protected boolean isAggregatedExport() {
+    return true;
+  }
+
+  @Override
   protected List<Organization> retrieveData(ExtractionRequest request, int pageSize, int offset) {
-    return organizationDao.findByFilters(request.getIpaCode(), request.getFilters(), pageSize, offset);
+    return organizationDao.findByFilters(request.getIpaCodes(), request.getFilters(), pageSize, offset);
   }
 }

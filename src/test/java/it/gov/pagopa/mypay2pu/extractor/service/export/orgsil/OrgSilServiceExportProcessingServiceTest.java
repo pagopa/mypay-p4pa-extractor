@@ -25,10 +25,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.inOrder;
@@ -70,17 +73,27 @@ class OrgSilServiceExportProcessingServiceTest {
 
   @Test
   void whenDataIsAvailableThenExportPagedOrgSilServicesToArchive() throws Exception {
-    ExtractionRequest request = new ExtractionRequest("ORG_IPA", MigrationFileType.ORG_SIL_SERVICES);
+    ExtractionRequest request = new ExtractionRequest(List.of("ORG_IPA", "ORG_IPA_2"), MigrationFileType.ORG_SIL_SERVICES);
     OrgSilService first = orgSilService("first");
+    OrgSilService first2 = orgSilService("second-source");
     OrgSilService second = invalidOrgSilService();
+    OrgSilService second2 = invalidOrgSilService("ORG_IPA_2");
     PuOrgSilServiceDTO firstDto = dto("first");
+    PuOrgSilServiceDTO firstDto2 = dto("second-source", "ORG_IPA_2");
     PuOrgSilServiceDTO secondDto = invalidDto();
+    PuOrgSilServiceDTO secondDto2 = invalidDto("ORG_IPA_2");
     when(orgSilServiceDaoMock.findPaidNotificationOutcome("ORG_IPA", 2, 0)).thenReturn(List.of(first));
     when(orgSilServiceDaoMock.findActualization("ORG_IPA", 2, 0)).thenReturn(List.of(second));
     when(orgSilServiceDaoMock.findPaidNotificationOutcome("ORG_IPA", 2, 2)).thenReturn(List.of());
     when(orgSilServiceDaoMock.findActualization("ORG_IPA", 2, 2)).thenReturn(List.of());
+    when(orgSilServiceDaoMock.findPaidNotificationOutcome("ORG_IPA_2", 2, 0)).thenReturn(List.of(first2));
+    when(orgSilServiceDaoMock.findActualization("ORG_IPA_2", 2, 0)).thenReturn(List.of(second2));
+    when(orgSilServiceDaoMock.findPaidNotificationOutcome("ORG_IPA_2", 2, 2)).thenReturn(List.of());
+    when(orgSilServiceDaoMock.findActualization("ORG_IPA_2", 2, 2)).thenReturn(List.of());
     when(orgSilServiceMapperMock.map(first)).thenReturn(firstDto);
+    when(orgSilServiceMapperMock.map(first2)).thenReturn(firstDto2);
     when(orgSilServiceMapperMock.map(second)).thenReturn(secondDto);
+    when(orgSilServiceMapperMock.map(second2)).thenReturn(secondDto2);
 
     ExportFileResult result = service.executeExport("BROKER_IPA", request);
 
@@ -103,23 +116,29 @@ class OrgSilServiceExportProcessingServiceTest {
     assertTrue(Files.exists(errorArchivePath));
 
     List<String> exportArchiveEntries = ZipUtils.readZipEntries(exportArchivePath);
-    assertEquals(1, exportArchiveEntries.size());
+    assertEquals(2, exportArchiveEntries.size());
     assertTrue(exportArchiveEntries.get(0).matches("ORG_IPA-ORG_SIL_SERVICES-\\d{14}-1_0\\.csv"));
+    assertTrue(exportArchiveEntries.get(1).matches("ORG_IPA_2-ORG_SIL_SERVICES-\\d{14}-1_0\\.csv"));
 
     List<String> errorArchiveEntries = ZipUtils.readZipEntries(errorArchivePath);
-    assertEquals(1, errorArchiveEntries.size());
+    assertEquals(2, errorArchiveEntries.size());
     assertTrue(errorArchiveEntries.get(0).matches("ORG_IPA-ORG_SIL_SERVICES-\\d{14}-1_0\\.errors\\.csv"));
+    assertTrue(errorArchiveEntries.get(1).matches("ORG_IPA_2-ORG_SIL_SERVICES-\\d{14}-1_0\\.errors\\.csv"));
 
     InOrder inOrder = inOrder(orgSilServiceDaoMock);
     inOrder.verify(orgSilServiceDaoMock).findPaidNotificationOutcome("ORG_IPA", 2, 0);
     inOrder.verify(orgSilServiceDaoMock).findActualization("ORG_IPA", 2, 0);
     inOrder.verify(orgSilServiceDaoMock).findPaidNotificationOutcome("ORG_IPA", 2, 2);
     inOrder.verify(orgSilServiceDaoMock).findActualization("ORG_IPA", 2, 2);
+    inOrder.verify(orgSilServiceDaoMock).findPaidNotificationOutcome("ORG_IPA_2", 2, 0);
+    inOrder.verify(orgSilServiceDaoMock).findActualization("ORG_IPA_2", 2, 0);
+    inOrder.verify(orgSilServiceDaoMock).findPaidNotificationOutcome("ORG_IPA_2", 2, 2);
+    inOrder.verify(orgSilServiceDaoMock).findActualization("ORG_IPA_2", 2, 2);
   }
 
   @Test
   void whenNoValidationErrorsThenArchiveContainsOnlyExportCsv() throws Exception {
-    ExtractionRequest request = new ExtractionRequest("ORG_IPA", MigrationFileType.ORG_SIL_SERVICES);
+    ExtractionRequest request = new ExtractionRequest(List.of("ORG_IPA"), MigrationFileType.ORG_SIL_SERVICES);
     OrgSilService first = orgSilService("first");
     OrgSilService second = orgSilService("second");
     when(orgSilServiceDaoMock.findPaidNotificationOutcome("ORG_IPA", 2, 0)).thenReturn(List.of(first));
@@ -145,6 +164,21 @@ class OrgSilServiceExportProcessingServiceTest {
     inOrder.verify(orgSilServiceDaoMock).findActualization("ORG_IPA", 2, 2);
   }
 
+  @Test
+  void whenCheckingAggregationModeThenReturnFalse() {
+    assertFalse(invokeIsAggregatedExport(service));
+  }
+
+  private boolean invokeIsAggregatedExport(Object target) {
+    try {
+      Method method = target.getClass().getSuperclass().getDeclaredMethod("isAggregatedExport");
+      method.setAccessible(true);
+      return (boolean) method.invoke(target);
+    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+      throw new IllegalStateException("Cannot invoke isAggregatedExport", e);
+    }
+  }
+
   private ExtractorExportProperties exportProperties() {
     return new ExtractorExportProperties(
       tempDir.toString(),
@@ -156,15 +190,23 @@ class OrgSilServiceExportProcessingServiceTest {
   }
 
   private OrgSilService orgSilService(String suffix) {
+    return orgSilService(suffix, "ORG_IPA");
+  }
+
+  private OrgSilService orgSilService(String suffix, String ipaCode) {
     return new OrgSilService(
-      "ORG_IPA", "App" + suffix, "SERVICE_TYPE", "http://example.com",
+      ipaCode, "App" + suffix, "SERVICE_TYPE", "http://example.com",
       false, null, null, null, null, null, null, null, null
     );
   }
 
   private PuOrgSilServiceDTO dto(String suffix) {
+    return dto(suffix, "ORG_IPA");
+  }
+
+  private PuOrgSilServiceDTO dto(String suffix, String ipaCode) {
     return PuOrgSilServiceDTO.builder()
-      .ipaCode("ORG_IPA")
+      .ipaCode(ipaCode)
       .applicationName("App" + suffix)
       .serviceType("SERVICE_TYPE")
       .flagLegacy("false")
@@ -179,11 +221,22 @@ class OrgSilServiceExportProcessingServiceTest {
   }
 
   private PuOrgSilServiceDTO invalidDto() {
+    return invalidDto("not_valid");
+  }
+
+  private PuOrgSilServiceDTO invalidDto(String ipaCode) {
     return PuOrgSilServiceDTO.builder()
-      .ipaCode("not_valid")
+      .ipaCode(ipaCode)
       .applicationName("")
       .serviceType("")
       .flagLegacy("INVALID")
       .build();
+  }
+
+  private OrgSilService invalidOrgSilService(String ipaCode) {
+    return new OrgSilService(
+      ipaCode, "", "", null,
+      null, null, null, null, null, null, null, null, null
+    );
   }
 }

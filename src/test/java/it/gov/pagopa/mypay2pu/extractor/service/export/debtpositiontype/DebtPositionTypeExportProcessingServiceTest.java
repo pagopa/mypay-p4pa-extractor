@@ -26,6 +26,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 
@@ -71,7 +73,7 @@ class DebtPositionTypeExportProcessingServiceTest {
 
   @Test
   void whenDataIsAvailableThenExportPagedDebtPositionTypesToArchive() throws Exception {
-    ExtractionRequest request = new ExtractionRequest("ORG_IPA", MigrationFileType.DEBT_POSITIONS_TYPE, new ExtractionFilters());
+    ExtractionRequest request = new ExtractionRequest(List.of("ORG_IPA", "ORG_IPA_2"), MigrationFileType.DEBT_POSITIONS_TYPE, new ExtractionFilters());
     DebtPositionType first = debtPositionType("TYPE_1");
     DebtPositionType second = invalidDebtPositionType();
     PuDebtPositionTypeDTO firstDto = dto("TYPE_1");
@@ -117,7 +119,7 @@ class DebtPositionTypeExportProcessingServiceTest {
 
   @Test
   void whenNoValidationErrorsThenArchiveContainsOnlyExportCsv() throws Exception {
-    ExtractionRequest request = new ExtractionRequest("ORG_IPA", MigrationFileType.DEBT_POSITIONS_TYPE, new ExtractionFilters());
+    ExtractionRequest request = new ExtractionRequest(List.of("ORG_IPA"), MigrationFileType.DEBT_POSITIONS_TYPE, new ExtractionFilters());
     DebtPositionType first = debtPositionType("TYPE_1");
     DebtPositionType second = debtPositionType("TYPE_2");
     when(debtPositionTypeDaoMock.findByFilters(request.getFilters(), 2, 0)).thenReturn(List.of(first, second));
@@ -138,6 +140,21 @@ class DebtPositionTypeExportProcessingServiceTest {
     inOrder.verify(debtPositionTypeDaoMock).findByFilters(request.getFilters(), 2, 0);
     inOrder.verify(debtPositionTypeDaoMock).findByFilters(request.getFilters(), 2, 2);
 
+  }
+
+  @Test
+  void whenCheckingAggregationModeThenReturnTrue() {
+    assertTrue(invokeIsAggregatedExport(service));
+  }
+
+  private boolean invokeIsAggregatedExport(Object target) {
+    try {
+      Method method = target.getClass().getSuperclass().getDeclaredMethod("isAggregatedExport");
+      method.setAccessible(true);
+      return (boolean) method.invoke(target);
+    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+      throw new IllegalStateException("Cannot invoke isAggregatedExport", e);
+    }
   }
 
   private ExtractorExportProperties exportProperties() {

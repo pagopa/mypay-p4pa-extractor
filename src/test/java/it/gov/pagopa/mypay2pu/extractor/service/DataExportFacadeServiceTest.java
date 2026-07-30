@@ -81,7 +81,7 @@ class DataExportFacadeServiceTest {
 
   @Test
   void whenExecuteDebtPositionsTypeOrgExportThenDelegateToDebtPositionTypeOrgProcessor() {
-    ExtractionRequest request = new ExtractionRequest("IPA_CODE", MigrationFileType.DEBT_POSITIONS_TYPE_ORG);
+    ExtractionRequest request = new ExtractionRequest(List.of("IPA_CODE"), MigrationFileType.DEBT_POSITIONS_TYPE_ORG);
     ExportFileResult expected = new ExportFileResult(List.of("debtpositionstypeorg_1_0.zip"), null);
     when(debtPositionTypeOrgExportProcessingServiceMock.executeExport("extraction-id", request)).thenReturn(expected);
 
