@@ -150,7 +150,7 @@ class OrganizationDaoTest {
 
   private OrganizationDao buildDao(NamedParameterJdbcTemplate mpv4JdbcTemplate) {
     when(sqlLoaderMock.load("mypay/organization/organization.sql")).thenReturn(FIND_BY_FILTERS_SQL);
-    when(sqlLoaderMock.load("mypivot/organization/organization-pivot.sql")).thenReturn(FIND_TREASURY_BY_IPA_SQL);
+    when(sqlLoaderMock.load("mypivot/organization/has-treasury.sql")).thenReturn(FIND_TREASURY_BY_IPA_SQL);
     return new OrganizationDao(mp4JdbcTemplateMock, mpv4JdbcTemplate, sqlLoaderMock);
   }
 }

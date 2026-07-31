@@ -19,7 +19,7 @@ import java.util.List;
 public class OrganizationDao {
 
   private static final String FIND_BY_FILTERS_SQL_PATH = "mypay/organization/organization.sql";
-  private static final String FIND_TREASURY_BY_IPA_SQL_PATH = "mypivot/organization/organization-pivot.sql";
+  private static final String FIND_TREASURY_BY_IPA_SQL_PATH = "mypivot/organization/has-treasury.sql";
   protected static final RowMapper<Organization> ORGANIZATION_ROW_MAPPER =
     DataClassRowMapper.newInstance(Organization.class);
 
