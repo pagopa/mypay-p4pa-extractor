@@ -10,6 +10,7 @@ import it.gov.pagopa.mypay2pu.extractor.exception.CsvRowMappingException;
 import it.gov.pagopa.mypay2pu.extractor.mapper.organization.OrganizationMapper;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.Organization;
 import it.gov.pagopa.mypay2pu.extractor.service.FileArchiverService;
+import it.gov.pagopa.mypay2pu.extractor.service.export.BaseExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.CsvPartitionWriterService;
 import it.gov.pagopa.mypay2pu.extractor.service.files.CsvService;
 import it.gov.pagopa.mypay2pu.extractor.service.files.ZipFileService;
@@ -28,8 +29,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 
@@ -217,18 +216,8 @@ class OrganizationExportProcessingServiceTest {
   }
 
   @Test
-  void whenCheckingExportSplitByIpaCodeThenReturnFalse() {
-    assertFalse(invokeIsExportSplitByIpaCode(service));
-  }
-
-  private boolean invokeIsExportSplitByIpaCode(Object target) {
-    try {
-      Method method = target.getClass().getSuperclass().getDeclaredMethod("isExportSplitByIpaCode");
-      method.setAccessible(true);
-      return (boolean) method.invoke(target);
-    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-      throw new IllegalStateException("Cannot invoke isExportSplitByIpaCode", e);
-    }
+  void whenCheckingSuperclassThenServiceIsAggregated() {
+    assertEquals(BaseExportProcessingService.class, service.getClass().getSuperclass());
   }
 
   private ExtractorExportProperties exportProperties() {

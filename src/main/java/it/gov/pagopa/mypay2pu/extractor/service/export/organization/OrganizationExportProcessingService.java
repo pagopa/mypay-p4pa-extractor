@@ -8,7 +8,7 @@ import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.mapper.organization.OrganizationMapper;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.Organization;
 import it.gov.pagopa.mypay2pu.extractor.service.FileArchiverService;
-import it.gov.pagopa.mypay2pu.extractor.service.export.AggregatedExportProcessingService;
+import it.gov.pagopa.mypay2pu.extractor.service.export.BaseExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.CsvPartitionWriterService;
 import it.gov.pagopa.mypay2pu.extractor.service.files.CsvService;
 import jakarta.validation.Validator;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class OrganizationExportProcessingService extends AggregatedExportProcessingService<Organization, PuOrganizationDTO> {
+public class OrganizationExportProcessingService extends BaseExportProcessingService<Organization, PuOrganizationDTO> {
 
   private final OrganizationDao organizationDao;
   private final OrganizationMapper organizationMapper;

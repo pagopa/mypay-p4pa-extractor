@@ -8,17 +8,19 @@ import it.gov.pagopa.mypay2pu.extractor.service.FileArchiverService;
 import it.gov.pagopa.mypay2pu.extractor.service.files.CsvService;
 import jakarta.validation.Validator;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 
 /**
  * Base class for export services that produce one file per requested IPA code and
  * receive the resolved IPA code directly in the data retrieval method.
  *
- * <p>Subclasses inherit a per-IPA export behaviour: {@link #isExportSplitByIpaCode()}
- * returns {@code true}, so the base service splits the request by IPA code and invokes
- * {@link #retrieveData(ExtractionRequest, int, int)} once per code.
- * This class further delegates to {@link #retrieveData(String, ExtractionRequest, int, int)},
- * sparing subclasses from extracting the IPA code from the request themselves.
+ * <p>Subclasses inherit a per-IPA export behaviour by overriding
+ * {@link #executeExport(ExtractionRequest, Path, int, List, List)} to split the request by IPA
+ * and run one export per code. This class further delegates row retrieval to
+ * {@link #retrieveData(String, ExtractionRequest, int, int)}, sparing subclasses from extracting
+ * the IPA code from the request themselves.
  *
  * @param <E> source model type retrieved from the data source
  * @param <C> CSV export DTO type
@@ -35,8 +37,24 @@ public abstract class SplitByIpaCodeBaseExportProcessingService<E extends Export
   }
 
   @Override
-  protected final boolean isExportSplitByIpaCode() {
-    return true;
+  protected void executeExport(ExtractionRequest request,
+                               Path workingDirectory,
+                               int pageSize,
+                               List<Path> csvFilePaths,
+                               List<Path> errorFilePaths) throws IOException {
+    for (String ipaCode : request.getIpaCodes()) {
+      ExtractionRequest singleRequest = request.toBuilder()
+        .ipaCodes(List.of(ipaCode))
+        .build();
+
+      super.executeExport(
+        singleRequest,
+        workingDirectory,
+        pageSize,
+        csvFilePaths,
+        errorFilePaths
+      );
+    }
   }
 
   @Override

@@ -28,8 +28,7 @@ import static it.gov.pagopa.mypay2pu.extractor.utils.Constants.ZONEID;
  *
  * <p>The export workflow performs the following steps:
  * <ol>
- *   <li>Determines whether the export is aggregated or organization-scoped.</li>
- *   <li>Runs one or more single export generations accordingly.</li>
+ *   <li>Runs one or more single export generations according to subclass strategy.</li>
  *   <li>Retrieves paginated data from the underlying source.</li>
  *   <li>Maps each domain entity into a CSV export DTO.</li>
  *   <li>Validates generated records and collects validation errors.</li>
@@ -67,10 +66,9 @@ public abstract class BaseExportProcessingService<E extends ExportModel, C exten
   /**
    * Executes the complete export process for the provided extraction request.
    *
-   * <p>If {@link #isExportSplitByIpaCode()} returns {@code false}, a single export is generated
-   * using the full request (for example, exports that are global or require a single combined dataset).
-   * If it returns {@code true}, the method iterates over all requested IPA codes and generates one
-   * export per IPA by creating a single-IPA request via {@code request.toBuilder()}.
+   * <p>Single-run versus multi-run behaviour is delegated to
+   * {@link #executeExport(ExtractionRequest, Path, int, List, List)} so subclasses can customize
+   * the splitting strategy (for example by IPA code) while preserving the common archiving workflow.
    *
    * <p>All produced CSV files are archived in one final export ZIP. When validation errors are present,
    * all produced error CSV files are archived in one final errors ZIP.
@@ -102,29 +100,13 @@ public abstract class BaseExportProcessingService<E extends ExportModel, C exten
       List<Path> csvFilePaths = new ArrayList<>();
       List<Path> errorFilePaths = new ArrayList<>();
 
-      if (!isExportSplitByIpaCode()) {
-        ExportGenerationResult result = executeSingleExport(
-          request,
-          workingDirectory,
-          configuration.exportPageSize()
-        );
-        csvFilePaths.addAll(result.csvFiles());
-        result.errorFile().ifPresent(errorFilePaths::add);
-      } else {
-        for (String ipaCode : request.getIpaCodes()) {
-          ExtractionRequest singleRequest = request.toBuilder()
-            .ipaCodes(List.of(ipaCode))
-            .build();
-
-          ExportGenerationResult result = executeSingleExport(
-            singleRequest,
-            workingDirectory,
-            configuration.exportPageSize()
-          );
-          csvFilePaths.addAll(result.csvFiles());
-          result.errorFile().ifPresent(errorFilePaths::add);
-        }
-      }
+      executeExport(
+        request,
+        workingDirectory,
+        configuration.exportPageSize(),
+        csvFilePaths,
+        errorFilePaths
+      );
 
       List<String> archivedFiles = archiveExportFiles(
         csvFilePaths,
@@ -187,6 +169,34 @@ public abstract class BaseExportProcessingService<E extends ExportModel, C exten
       Optional<Path> errorFilePath = errorCollector.writeToFile(baseCsvFilePath);
       return new ExportGenerationResult(csvFilePaths, errorFilePath);
     }
+  }
+
+  /**
+   * Executes export runs for the provided request and appends generated files into collectors.
+   *
+   * <p>Default behaviour executes a single run using the full request. Subclasses can override
+   * this method to implement split strategies while still reusing
+   * {@link #executeSingleExport(ExtractionRequest, Path, int)}.
+   *
+   * @param request extraction request to export
+   * @param workingDirectory temporary directory used to generate artifacts
+   * @param pageSize pagination and partitioning size for row retrieval/writing
+   * @param csvFilePaths collector for generated export CSV file paths
+   * @param errorFilePaths collector for generated error CSV file paths
+   * @throws IOException if CSV writing or error report generation fails
+   */
+  protected void executeExport(ExtractionRequest request,
+                               Path workingDirectory,
+                               int pageSize,
+                               List<Path> csvFilePaths,
+                               List<Path> errorFilePaths) throws IOException {
+    ExportGenerationResult result = executeSingleExport(
+      request,
+      workingDirectory,
+      pageSize
+    );
+    csvFilePaths.addAll(result.csvFiles());
+    result.errorFile().ifPresent(errorFilePaths::add);
   }
 
   /**
@@ -295,17 +305,6 @@ public abstract class BaseExportProcessingService<E extends ExportModel, C exten
    * @return export DTO
    */
   protected abstract C toExportableEntity(E model);
-
-  /**
-   * Indicates whether this export should produce one file per IPA code or a single file
-   * for the entire request.
-   *
-   * <p>When {@code true}, export generation runs once per requested IPA code.
-   * When {@code false}, export generation runs once using the full IPA list.
-   *
-   * @return {@code true} for organization-scoped (per-IPA) exports, {@code false} for aggregated exports
-   */
-  protected abstract boolean isExportSplitByIpaCode();
 
   /**
    * Retrieves a page of source data to be exported.
