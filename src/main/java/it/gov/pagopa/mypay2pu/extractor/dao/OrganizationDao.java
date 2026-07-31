@@ -39,12 +39,12 @@ public class OrganizationDao {
     this.findTreasuryByIpaSql = sqlLoader.load(FIND_TREASURY_BY_IPA_SQL_PATH);
   }
 
-  public List<Organization> findByFilters(String ipaCode, ExtractionFilters filters) {
-    return mp4JdbcTemplate.query(findByFiltersSql, buildFiltersParams(ipaCode, filters, null, null), ORGANIZATION_ROW_MAPPER);
+  public List<Organization> findByFilters(List<String> ipaCodes, ExtractionFilters filters) {
+    return mp4JdbcTemplate.query(findByFiltersSql, buildFiltersParams(ipaCodes, filters, null, null), ORGANIZATION_ROW_MAPPER);
   }
 
-  public List<Organization> findByFilters(String ipaCode, ExtractionFilters filters, int limit, int offset) {
-    MapSqlParameterSource params = buildFiltersParams(ipaCode, filters, limit, offset);
+  public List<Organization> findByFilters(List<String> ipaCodes, ExtractionFilters filters, int limit, int offset) {
+    MapSqlParameterSource params = buildFiltersParams(ipaCodes, filters, limit, offset);
     return mp4JdbcTemplate.query(findByFiltersSql, params, ORGANIZATION_ROW_MAPPER);
   }
 
@@ -57,13 +57,13 @@ public class OrganizationDao {
   }
 
   private MapSqlParameterSource buildFiltersParams(
-    String ipaCode,
+    List<String> ipaCodes,
     ExtractionFilters filters,
     Integer limit,
     Integer offset
   ) {
     return QueryUtils.buildPaginatedFilterParams(limit, offset)
-      .addValue("ipaCode", ipaCode)
+      .addValue("ipaCodes", ipaCodes)
       .addValue("modifiedFrom", DateTimeUtils.toStartOfDay(filters != null ? filters.getModifiedFrom() : null))
       .addValue("modifiedToExclusive", DateTimeUtils.toStartOfNextDay(filters != null ? filters.getModifiedTo() : null));
   }

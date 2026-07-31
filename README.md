@@ -36,7 +36,7 @@ See [OpenAPI](openapi/generated.openapi.json), exposed through the following pat
 
 | Method | Path | Description |
 |---|---|---|
-| `POST` | `/extract` | Start an extraction for one `MigrationFileType` and one organization |
+| `POST` | `/extract` | Start an extraction for one `MigrationFileType` and one or more organizations |
 | `GET` | `/extract/{id}` | Get the extraction status (`RUNNING`, `COMPLETED`, `FAILED`) |
 | `GET` | `/extract/{id}/files` | List produced ZIP files by scanning the filesystem (`STORAGE_PATH/<id>/`) |
 
