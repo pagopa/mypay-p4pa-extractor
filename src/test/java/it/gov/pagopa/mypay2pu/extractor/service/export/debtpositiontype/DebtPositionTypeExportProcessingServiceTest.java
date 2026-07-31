@@ -71,7 +71,8 @@ class DebtPositionTypeExportProcessingServiceTest {
 
   @Test
   void whenDataIsAvailableThenExportPagedDebtPositionTypesToArchive() throws Exception {
-    ExtractionRequest request = new ExtractionRequest("ORG_IPA", MigrationFileType.DEBT_POSITIONS_TYPE, new ExtractionFilters());
+    ExtractionRequest request = new ExtractionRequest("ORG_IPA", MigrationFileType.DEBT_POSITIONS_TYPE)
+      .filters(new ExtractionFilters());
     DebtPositionType first = debtPositionType("TYPE_1");
     DebtPositionType second = invalidDebtPositionType();
     PuDebtPositionTypeDTO firstDto = dto("TYPE_1");
@@ -117,7 +118,8 @@ class DebtPositionTypeExportProcessingServiceTest {
 
   @Test
   void whenNoValidationErrorsThenArchiveContainsOnlyExportCsv() throws Exception {
-    ExtractionRequest request = new ExtractionRequest("ORG_IPA", MigrationFileType.DEBT_POSITIONS_TYPE, new ExtractionFilters());
+    ExtractionRequest request = new ExtractionRequest("ORG_IPA", MigrationFileType.DEBT_POSITIONS_TYPE)
+      .filters(new ExtractionFilters());
     DebtPositionType first = debtPositionType("TYPE_1");
     DebtPositionType second = debtPositionType("TYPE_2");
     when(debtPositionTypeDaoMock.findByFilters(request.getFilters(), 2, 0)).thenReturn(List.of(first, second));

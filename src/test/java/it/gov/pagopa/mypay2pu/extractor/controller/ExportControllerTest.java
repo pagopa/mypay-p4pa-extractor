@@ -65,9 +65,8 @@ class ExportControllerTest {
   void givenGeneratedExtractionIdWhenExecuteExportThenReturnAccepted() throws Exception {
     ExtractionRequest request = new ExtractionRequest(
       "IPA_CODE_TEST",
-      MigrationFileType.ORGANIZATIONS,
-      new ExtractionFilters()
-    );
+      MigrationFileType.ORGANIZATIONS
+    ).filters(new ExtractionFilters());
     when(exportFileHandlerServiceMock.createExtraction(request)).thenReturn("generated-extraction-id");
 
     mockMvc.perform(post("/extract")
@@ -106,13 +105,12 @@ class ExportControllerTest {
   void givenReversedFilterDatesWhenExecuteExportThenReturnBadRequest() throws Exception {
     ExtractionRequest request = new ExtractionRequest(
       "IPA_CODE_TEST",
-      MigrationFileType.ORGANIZATIONS,
-      new ExtractionFilters(
+      MigrationFileType.ORGANIZATIONS
+    ).filters(new ExtractionFilters(
         LocalDate.of(2026, Month.JANUARY, 2),
         LocalDate.of(2026, Month.JANUARY, 1),
         List.of()
-      )
-    );
+      ));
 
     mockMvc.perform(post("/extract")
         .contentType(MediaType.APPLICATION_JSON)

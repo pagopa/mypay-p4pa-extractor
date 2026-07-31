@@ -170,6 +170,10 @@
           "fileTypes" : {
             "$ref" : "#/components/schemas/MigrationFileType"
           },
+          "lastExtractionDate" : {
+            "type" : [ "string", "null" ],
+            "format" : "date"
+          },
           "filters" : {
             "$ref" : "#/components/schemas/ExtractionFilters"
           }
