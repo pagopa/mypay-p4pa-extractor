@@ -8,7 +8,7 @@ import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.mapper.orgsil.OrgSilServiceMapper;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.OrgSilService;
 import it.gov.pagopa.mypay2pu.extractor.service.FileArchiverService;
-import it.gov.pagopa.mypay2pu.extractor.service.export.BaseExportProcessingService;
+import it.gov.pagopa.mypay2pu.extractor.service.export.SplitByIpaCodeBaseExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.CsvPartitionWriterService;
 import it.gov.pagopa.mypay2pu.extractor.service.files.CsvService;
 import jakarta.validation.Validator;
@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 @Service
-public class OrgSilServiceExportProcessingService extends BaseExportProcessingService<OrgSilService, PuOrgSilServiceDTO> {
+public class OrgSilServiceExportProcessingService extends SplitByIpaCodeBaseExportProcessingService<OrgSilService, PuOrgSilServiceDTO> {
 
   private final OrgSilServiceDao orgSilServiceDao;
   private final OrgSilServiceMapper orgSilServiceMapper;
@@ -56,8 +56,7 @@ public class OrgSilServiceExportProcessingService extends BaseExportProcessingSe
   }
 
   @Override
-  protected List<OrgSilService> retrieveData(ExtractionRequest request, int pageSize, int offset) {
-    String ipaCode = request.getIpaCodes().getFirst();
+  protected List<OrgSilService> retrieveData(String ipaCode, ExtractionRequest request, int pageSize, int offset) {
     return Stream.concat(
       orgSilServiceDao.findPaidNotificationOutcome(ipaCode, pageSize, offset).stream(),
       orgSilServiceDao.findActualization(ipaCode, pageSize, offset).stream()

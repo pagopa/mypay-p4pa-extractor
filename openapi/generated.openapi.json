@@ -167,7 +167,7 @@
             "items" : {
               "type" : "string"
             },
-            "maxItems" : 2147483647,
+            "maxItems" : 200,
             "minItems" : 1
           },
           "fileTypes" : {
@@ -198,7 +198,7 @@
             "items" : {
               "type" : "string"
             },
-            "maxItems" : 2147483647,
+            "maxItems" : 200,
             "minItems" : 1
           },
           "fileTypes" : {

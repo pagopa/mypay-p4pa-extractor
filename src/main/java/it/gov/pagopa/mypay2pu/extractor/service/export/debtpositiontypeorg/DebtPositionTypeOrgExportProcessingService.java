@@ -9,18 +9,17 @@ import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.mapper.debtpositiontypeorg.DebtPositionTypeOrgMapper;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.DebtPositionTypeOrg;
 import it.gov.pagopa.mypay2pu.extractor.service.FileArchiverService;
-import it.gov.pagopa.mypay2pu.extractor.service.export.BaseExportProcessingService;
+import it.gov.pagopa.mypay2pu.extractor.service.export.SplitByIpaCodeBaseExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.CsvPartitionWriterService;
 import it.gov.pagopa.mypay2pu.extractor.service.files.CsvService;
 import jakarta.validation.Validator;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @Service
-public class DebtPositionTypeOrgExportProcessingService extends BaseExportProcessingService<DebtPositionTypeOrg, PuDebtPositionTypeOrgDTO> {
+public class DebtPositionTypeOrgExportProcessingService extends SplitByIpaCodeBaseExportProcessingService<DebtPositionTypeOrg, PuDebtPositionTypeOrgDTO> {
 
   private final DebtPositionTypeOrgDao debtPositionTypeOrgDao;
   private final DebtPositionTypeOrgMapper debtPositionTypeOrgMapper;
@@ -56,14 +55,12 @@ public class DebtPositionTypeOrgExportProcessingService extends BaseExportProces
   }
 
   @Override
-  protected List<DebtPositionTypeOrg> retrieveData(ExtractionRequest request, int pageSize, int offset) {
-    ExtractionRequest safeRequest = Objects.requireNonNull(request, "request must not be null");
-    List<String> ipaCodes = Objects.requireNonNull(safeRequest.getIpaCodes(), "request.ipaCodes must not be null");
-    List<String> debtPositionTypeOrgCodes = Optional.ofNullable(safeRequest.getFilters())
+  protected List<DebtPositionTypeOrg> retrieveData(String ipaCode, ExtractionRequest request, int pageSize, int offset) {
+    List<String> debtPositionTypeOrgCodes = Optional.ofNullable(request.getFilters())
       .map(ExtractionFilters::getDebtPositionTypeOrgCodes)
       .orElse(null);
     return debtPositionTypeOrgDao.findByFilters(
-      ipaCodes.getFirst(),
+      ipaCode,
       debtPositionTypeOrgCodes,
       pageSize,
       offset

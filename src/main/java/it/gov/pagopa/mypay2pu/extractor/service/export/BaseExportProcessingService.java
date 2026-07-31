@@ -67,9 +67,9 @@ public abstract class BaseExportProcessingService<E extends ExportModel, C exten
   /**
    * Executes the complete export process for the provided extraction request.
    *
-   * <p>If {@link #isAggregatedExport()} returns {@code true}, a single export is generated
+   * <p>If {@link #isExportSplitByIpaCode()} returns {@code false}, a single export is generated
    * using the full request (for example, exports that are global or require a single combined dataset).
-   * If it returns {@code false}, the method iterates over all requested IPA codes and generates one
+   * If it returns {@code true}, the method iterates over all requested IPA codes and generates one
    * export per IPA by creating a single-IPA request via {@code request.toBuilder()}.
    *
    * <p>All produced CSV files are archived in one final export ZIP. When validation errors are present,
@@ -102,7 +102,7 @@ public abstract class BaseExportProcessingService<E extends ExportModel, C exten
       List<Path> csvFilePaths = new ArrayList<>();
       List<Path> errorFilePaths = new ArrayList<>();
 
-      if (isAggregatedExport()) {
+      if (!isExportSplitByIpaCode()) {
         ExportGenerationResult result = executeSingleExport(
           request,
           workingDirectory,
@@ -297,16 +297,15 @@ public abstract class BaseExportProcessingService<E extends ExportModel, C exten
   protected abstract C toExportableEntity(E model);
 
   /**
-   * Indicates whether this export type is aggregated.
+   * Indicates whether this export should produce one file per IPA code or a single file
+   * for the entire request.
    *
-   * <p>When {@code true}, export generation runs once using the full IPA list in the request.
-   * When {@code false}, export generation runs once per requested IPA code.
+   * <p>When {@code true}, export generation runs once per requested IPA code.
+   * When {@code false}, export generation runs once using the full IPA list.
    *
-   * @return {@code true} for aggregated exports, {@code false} for organization-scoped exports
+   * @return {@code true} for organization-scoped (per-IPA) exports, {@code false} for aggregated exports
    */
-  protected boolean isAggregatedExport() {
-    return false;
-  }
+  protected abstract boolean isExportSplitByIpaCode();
 
   /**
    * Retrieves a page of source data to be exported.

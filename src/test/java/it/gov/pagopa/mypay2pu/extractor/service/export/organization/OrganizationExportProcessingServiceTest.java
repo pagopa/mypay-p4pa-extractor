@@ -217,17 +217,17 @@ class OrganizationExportProcessingServiceTest {
   }
 
   @Test
-  void whenCheckingAggregationModeThenReturnTrue() {
-    assertTrue(invokeIsAggregatedExport(service));
+  void whenCheckingExportSplitByIpaCodeThenReturnFalse() {
+    assertFalse(invokeIsExportSplitByIpaCode(service));
   }
 
-  private boolean invokeIsAggregatedExport(Object target) {
+  private boolean invokeIsExportSplitByIpaCode(Object target) {
     try {
-      Method method = target.getClass().getSuperclass().getDeclaredMethod("isAggregatedExport");
+      Method method = target.getClass().getSuperclass().getDeclaredMethod("isExportSplitByIpaCode");
       method.setAccessible(true);
       return (boolean) method.invoke(target);
     } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-      throw new IllegalStateException("Cannot invoke isAggregatedExport", e);
+      throw new IllegalStateException("Cannot invoke isExportSplitByIpaCode", e);
     }
   }
 
