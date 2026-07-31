@@ -193,6 +193,7 @@ class OrgSilServiceExportProcessingServiceTest {
       .ipaCode(ipaCode)
       .applicationName("App" + suffix)
       .serviceType("SERVICE_TYPE")
+      .serviceUrl("http://example.com")
       .flagLegacy("false")
       .build();
   }
