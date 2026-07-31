@@ -11,11 +11,15 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.HttpStatusCodeException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -165,21 +169,15 @@ class DebtPositionTypeOrgMapperTest {
     );
   }
 
-  @Test
-  void mapShouldKeepRowWhenMyDictionaryReturns500AndFlagSpontaneousIsFalse() {
+  @ParameterizedTest
+  @MethodSource("httpErrorStatuses")
+  void mapShouldKeepRowWhenMyDictionaryReturnsHttpErrorAndFlagSpontaneousIsFalse(HttpStatusCodeException httpException) {
     DebtPositionTypeOrg debtPositionTypeOrg = new DebtPositionTypeOrg(
       "IPA1", "BILANCIO", "TAX", "Tax", "IT60X0542811101000000123456",
       null, null, null, null, null, null, false, true, false, true, false,
       null, false, null, "SPONT_FORM", null, false, false
     );
-    when(myDictionaryClientMock.getSpontaneousFormStructure("SPONT_FORM"))
-      .thenThrow(new HttpServerErrorException(
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Internal Server Error",
-        HttpHeaders.EMPTY,
-        new byte[0],
-        null
-      ));
+    when(myDictionaryClientMock.getSpontaneousFormStructure("SPONT_FORM")).thenThrow(httpException);
     when(debtPositionTypeOrgDaoMock.isExternal(debtPositionTypeOrg.ipaCode(), debtPositionTypeOrg.code()))
       .thenReturn(false);
 
@@ -189,23 +187,25 @@ class DebtPositionTypeOrgMapperTest {
     assertEquals(false, result.getFlagSpontaneous());
   }
 
-  @Test
-  void mapShouldDiscardRowWhenMyDictionaryReturns500AndFlagSpontaneousIsTrue() {
+  @ParameterizedTest
+  @MethodSource("httpErrorStatuses")
+  void mapShouldDiscardRowWhenMyDictionaryReturnsHttpErrorAndFlagSpontaneousIsTrue(HttpStatusCodeException httpException) {
     DebtPositionTypeOrg debtPositionTypeOrg = new DebtPositionTypeOrg(
       "IPA1", "BILANCIO", "TAX", "Tax", "IT60X0542811101000000123456",
       null, null, null, null, null, null, false, true, true, true, false,
       null, false, null, "SPONT_FORM", null, false, false
     );
-    when(myDictionaryClientMock.getSpontaneousFormStructure("SPONT_FORM"))
-      .thenThrow(new HttpServerErrorException(
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Internal Server Error",
-        HttpHeaders.EMPTY,
-        new byte[0],
-        null
-      ));
+    when(myDictionaryClientMock.getSpontaneousFormStructure("SPONT_FORM")).thenThrow(httpException);
 
     assertThrows(CsvRowMappingException.class, () -> debtPositionTypeOrgMapper.map(debtPositionTypeOrg));
     verify(debtPositionTypeOrgDaoMock, never()).isExternal(debtPositionTypeOrg.ipaCode(), debtPositionTypeOrg.code());
+  }
+
+  static java.util.stream.Stream<HttpStatusCodeException> httpErrorStatuses() {
+    return java.util.stream.Stream.of(
+      new HttpClientErrorException(HttpStatus.NOT_FOUND, "Not Found", HttpHeaders.EMPTY, new byte[0], null),
+      new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error", HttpHeaders.EMPTY, new byte[0], null),
+      new HttpServerErrorException(HttpStatus.SERVICE_UNAVAILABLE, "Service Unavailable", HttpHeaders.EMPTY, new byte[0], null)
+    );
   }
 }
