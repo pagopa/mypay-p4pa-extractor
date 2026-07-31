@@ -2,6 +2,7 @@ package it.gov.pagopa.mypay2pu.extractor.mapper.debtpositiontypeorg;
 
 import it.gov.pagopa.mypay2pu.extractor.config.MyPayProperties;
 import it.gov.pagopa.mypay2pu.extractor.dao.DebtPositionTypeOrgDao;
+import it.gov.pagopa.mypay2pu.extractor.exception.CsvRowMappingException;
 import it.gov.pagopa.mypay2pu.extractor.dto.export.PuDebtPositionTypeOrgDTO;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.DebtPositionTypeOrg;
 import it.gov.pagopa.mypay2pu.extractor.connector.mydictionary.MyDictionaryClient;
@@ -12,9 +13,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.client.HttpServerErrorException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -103,8 +110,6 @@ class DebtPositionTypeOrgMapperTest {
       null, false, null, null, null, false, false
     );
 
-    when(myDictionaryClientMock.getSpontaneousFormStructure(debtPositionTypeOrg.spontaneousFormCode()))
-      .thenReturn(null);
     when(debtPositionTypeOrgDaoMock.isExternal(debtPositionTypeOrg.ipaCode(), debtPositionTypeOrg.code()))
       .thenReturn(false);
 
@@ -141,6 +146,8 @@ class DebtPositionTypeOrgMapperTest {
     );
     assertEquals("Oggetto %posizioneDebitoria_descrizione%", result.getIoTemplateSubject());
 
+    verify(myDictionaryClientMock, never()).getSpontaneousFormStructure(null);
+
     TestUtils.checkNotNullFields(
       result,
       "balance",
@@ -156,5 +163,49 @@ class DebtPositionTypeOrgMapperTest {
       "amountActualizationOrgSilServiceCode",
       "serviceCode"
     );
+  }
+
+  @Test
+  void mapShouldKeepRowWhenMyDictionaryReturns500AndFlagSpontaneousIsFalse() {
+    DebtPositionTypeOrg debtPositionTypeOrg = new DebtPositionTypeOrg(
+      "IPA1", "BILANCIO", "TAX", "Tax", "IT60X0542811101000000123456",
+      null, null, null, null, null, null, false, true, false, true, false,
+      null, false, null, "SPONT_FORM", null, false, false
+    );
+    when(myDictionaryClientMock.getSpontaneousFormStructure("SPONT_FORM"))
+      .thenThrow(new HttpServerErrorException(
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        "Internal Server Error",
+        HttpHeaders.EMPTY,
+        new byte[0],
+        null
+      ));
+    when(debtPositionTypeOrgDaoMock.isExternal(debtPositionTypeOrg.ipaCode(), debtPositionTypeOrg.code()))
+      .thenReturn(false);
+
+    PuDebtPositionTypeOrgDTO result = debtPositionTypeOrgMapper.map(debtPositionTypeOrg);
+
+    assertNull(result.getSpontaneousFormStructure());
+    assertEquals(false, result.getFlagSpontaneous());
+  }
+
+  @Test
+  void mapShouldDiscardRowWhenMyDictionaryReturns500AndFlagSpontaneousIsTrue() {
+    DebtPositionTypeOrg debtPositionTypeOrg = new DebtPositionTypeOrg(
+      "IPA1", "BILANCIO", "TAX", "Tax", "IT60X0542811101000000123456",
+      null, null, null, null, null, null, false, true, true, true, false,
+      null, false, null, "SPONT_FORM", null, false, false
+    );
+    when(myDictionaryClientMock.getSpontaneousFormStructure("SPONT_FORM"))
+      .thenThrow(new HttpServerErrorException(
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        "Internal Server Error",
+        HttpHeaders.EMPTY,
+        new byte[0],
+        null
+      ));
+
+    assertThrows(CsvRowMappingException.class, () -> debtPositionTypeOrgMapper.map(debtPositionTypeOrg));
+    verify(debtPositionTypeOrgDaoMock, never()).isExternal(debtPositionTypeOrg.ipaCode(), debtPositionTypeOrg.code());
   }
 }
