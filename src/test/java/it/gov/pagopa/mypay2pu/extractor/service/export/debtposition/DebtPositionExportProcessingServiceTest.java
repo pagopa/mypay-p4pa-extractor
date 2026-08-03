@@ -30,6 +30,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.List;
 import java.util.Map;
@@ -113,6 +114,36 @@ class DebtPositionExportProcessingServiceTest {
     assertEquals(SplitByIpaCodeBaseExportProcessingService.class, service.getClass().getSuperclass());
   }
 
+  @Test
+  void whenIncrementalExtractionThenAssignsActionsToOpenAndCancelledDebtPositions() {
+    ExtractionFilters filters = new ExtractionFilters();
+    ExtractionRequest request = new ExtractionRequest(
+      List.of("ORG_IPA"),
+      MigrationFileType.DEBT_POSITIONS,
+      LocalDate.of(2026, Month.JANUARY, 15),
+      filters
+    );
+    DebtPosition inserted = debtPosition("IUPD-INSERTED", "IUD-INSERTED", LocalDate.of(2026, Month.JANUARY, 16).atStartOfDay(), null);
+    DebtPosition modified = debtPosition("IUPD-MODIFIED", "IUD-MODIFIED", LocalDate.of(2026, Month.JANUARY, 10).atStartOfDay(), LocalDate.of(2026, Month.JANUARY, 16).atStartOfDay());
+    DebtPosition unchanged = debtPosition("IUPD-UNCHANGED", "IUD-UNCHANGED", LocalDate.of(2026, Month.JANUARY, 10).atStartOfDay(), LocalDate.of(2026, Month.JANUARY, 11).atStartOfDay());
+    DebtPosition withoutLastModificationDate = debtPosition("IUPD-NO-MODIFICATION-DATE", "IUD-NO-MODIFICATION-DATE", LocalDate.of(2026, Month.JANUARY, 10).atStartOfDay(), null);
+    DebtPosition withoutCreationDate = debtPosition("IUPD-NO-CREATION-DATE", "IUD-NO-CREATION-DATE", null, LocalDate.of(2026, Month.JANUARY, 16).atStartOfDay());
+    DebtPosition cancelled = debtPosition("IUPD-CANCELLED", "IUD-CANCELLED");
+
+    when(debtPositionDaoMock.findDebtPositions("ORG_IPA", null, null, filters, 10, 0))
+      .thenReturn(List.of(inserted, modified, unchanged, withoutLastModificationDate, withoutCreationDate));
+    when(debtPositionDaoMock.findCancelledDebtPositions("ORG_IPA", null, null, filters, 10, 0))
+      .thenReturn(List.of(cancelled));
+
+    List<DebtPositionExportProcessingService.DebtPositionWithAction> result =
+      service.retrieveData("ORG_IPA", request, 10, 0);
+
+    assertEquals(
+      List.of(Action.I, Action.M, Action.I, Action.I, Action.I, Action.A),
+      result.stream().map(DebtPositionExportProcessingService.DebtPositionWithAction::action).toList()
+    );
+  }
+
   private ExtractorExportProperties exportProperties() {
     return new ExtractorExportProperties(
       tempDir.toString(),
@@ -142,6 +173,15 @@ class DebtPositionExportProcessingServiceTest {
   }
 
   private DebtPosition debtPosition(String iupd, String iud) {
+    return debtPosition(
+      iupd,
+      iud,
+      LocalDate.of(2026, Month.JANUARY, 10).atStartOfDay(),
+      LocalDate.of(2026, Month.JANUARY, 11).atStartOfDay()
+    );
+  }
+
+  private DebtPosition debtPosition(String iupd, String iud, LocalDateTime dtCreazione, LocalDateTime dtUltimaModifica) {
     return new DebtPosition(
       iupd,
       "description",
@@ -178,8 +218,8 @@ class DebtPositionExportProcessingServiceTest {
       "causale",
       BigDecimal.ONE,
       "9/0101101IM/",
-      LocalDate.of(2026, Month.JANUARY, 10).atStartOfDay(),
-      LocalDate.of(2026, Month.JANUARY, 11).atStartOfDay()
+      dtCreazione,
+      dtUltimaModifica
     );
   }
 }
