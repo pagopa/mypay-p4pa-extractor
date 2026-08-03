@@ -15,6 +15,8 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import java.time.LocalDate;
 import java.time.Month;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -53,7 +55,7 @@ class OrganizationDaoTest {
     when(mp4JdbcTemplateMock.query(
       eq(FIND_BY_FILTERS_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
-        "IPA1".equals(params.getValue("ipaCode"))
+        List.of("IPA1").equals(params.getValue("ipaCodes"))
           && !params.hasValue("limit")
           && !params.hasValue("offset")
           && params.hasValue("modifiedFrom")
@@ -65,7 +67,7 @@ class OrganizationDaoTest {
     ))
       .thenReturn(expected);
 
-    List<Organization> result = dao.findByFilters("IPA1", new ExtractionFilters(null, null, null));
+    List<Organization> result = dao.findByFilters(List.of("IPA1"), new ExtractionFilters(null, null, null));
 
     assertEquals(expected, result);
   }
@@ -77,7 +79,7 @@ class OrganizationDaoTest {
     when(mp4JdbcTemplateMock.query(
       eq(FIND_BY_FILTERS_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
-        "IPA1".equals(params.getValue("ipaCode"))
+        List.of("IPA1", "IPA2").equals(params.getValue("ipaCodes"))
           && LocalDate.of(2026, Month.JANUARY, 1).atStartOfDay().equals(params.getValue("modifiedFrom"))
           && LocalDate.of(2026, Month.JANUARY, 3).atStartOfDay().equals(params.getValue("modifiedToExclusive"))
           && Integer.valueOf(50).equals(params.getValue("limit"))
@@ -87,7 +89,12 @@ class OrganizationDaoTest {
     ))
       .thenReturn(List.of());
 
-    List<Organization> result = dao.findByFilters("IPA1", new ExtractionFilters(LocalDate.of(2026, Month.JANUARY, 1), LocalDate.of(2026, Month.JANUARY, 2), null), 50, 100);
+    List<Organization> result = dao.findByFilters(
+      List.of("IPA1", "IPA2"),
+      new ExtractionFilters(LocalDate.of(2026, Month.JANUARY, 1), LocalDate.of(2026, Month.JANUARY, 2), null),
+      50,
+      100
+    );
     assertEquals(List.of(), result);
   }
 
@@ -95,12 +102,11 @@ class OrganizationDaoTest {
   void givenInvalidLimitWhenFindByFiltersThenThrowIllegalArgumentException() {
     ExtractionFilters filters = new ExtractionFilters(null, null, null);
     OrganizationDao dao = buildDao(mpv4JdbcTemplateMock);
+    List<String> ipaCodes = List.of("IPA1");
 
     IllegalArgumentException exception = assertThrows(
       IllegalArgumentException.class,
-      () -> {
-        dao.findByFilters("IPA1", filters, 0, 0);
-      }
+      () -> dao.findByFilters(ipaCodes, filters, 0, 0)
     );
     assertEquals("limit must be greater than 0", exception.getMessage());
   }
@@ -133,6 +139,13 @@ class OrganizationDaoTest {
 
     assertTrue(dao.isTreasuryEnabled("IPA1"));
     assertFalse(dao.isTreasuryEnabled("IPA1"));
+  }
+
+  @Test
+  void givenOrganizationSqlWhenLoadedThenUsesInClauseForIpaCodes() throws Exception {
+    String sql = Files.readString(Path.of("src/main/resources/db/mypay/organization/organization.sql"));
+    assertTrue(sql.contains("ef.cod_ipa_ente IN (:ipaCodes)"));
+    assertTrue(sql.contains("e.cod_ipa_ente IN (:ipaCodes)"));
   }
 
   private OrganizationDao buildDao(NamedParameterJdbcTemplate mpv4JdbcTemplate) {

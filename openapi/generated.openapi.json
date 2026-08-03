@@ -161,11 +161,14 @@
       "ExtractionRequest" : {
         "type" : "object",
         "properties" : {
-          "ipaCode" : {
-            "type" : "string",
-            "example" : "00493410240",
-            "maxLength" : 2147483647,
-            "minLength" : 1
+          "ipaCodes" : {
+            "type" : "array",
+            "example" : "[00493410240, 01234567890]",
+            "items" : {
+              "type" : "string"
+            },
+            "maxItems" : 200,
+            "minItems" : 1
           },
           "fileTypes" : {
             "$ref" : "#/components/schemas/MigrationFileType"
@@ -174,7 +177,7 @@
             "$ref" : "#/components/schemas/ExtractionFilters"
           }
         },
-        "required" : [ "fileTypes", "ipaCode" ]
+        "required" : [ "fileTypes", "ipaCodes" ]
       },
       "MigrationFileType" : {
         "type" : [ "string", "null" ],
@@ -190,8 +193,13 @@
           "extractionId" : {
             "type" : "string"
           },
-          "ipaCode" : {
-            "type" : [ "string", "null" ]
+          "ipaCodes" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            },
+            "maxItems" : 200,
+            "minItems" : 1
           },
           "fileTypes" : {
             "$ref" : "#/components/schemas/MigrationFileType"
