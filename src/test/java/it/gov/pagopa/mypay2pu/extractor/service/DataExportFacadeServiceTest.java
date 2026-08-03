@@ -3,7 +3,7 @@ package it.gov.pagopa.mypay2pu.extractor.service;
 import it.gov.pagopa.mypay2pu.extractor.dto.ExportFileResult;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
-import it.gov.pagopa.mypay2pu.extractor.exception.ExportFileTypeNotSupportedException;
+import it.gov.pagopa.mypay2pu.extractor.service.export.debtposition.DebtPositionExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.debtpositiontype.DebtPositionTypeExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.debtpositiontypeorg.DebtPositionTypeOrgExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.organization.OrganizationExportProcessingService;
@@ -18,7 +18,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -32,6 +31,8 @@ class DataExportFacadeServiceTest {
   private DebtPositionTypeExportProcessingService debtPositionTypeExportProcessingServiceMock;
   @Mock
   private DebtPositionTypeOrgExportProcessingService debtPositionTypeOrgExportProcessingServiceMock;
+  @Mock
+  private DebtPositionExportProcessingService debtPositionExportProcessingServiceMock;
 
   @InjectMocks
   private DataExportFacadeService service;
@@ -42,7 +43,8 @@ class DataExportFacadeServiceTest {
       organizationExportProcessingServiceMock,
       orgSilServiceExportProcessingServiceMock,
       debtPositionTypeExportProcessingServiceMock,
-      debtPositionTypeOrgExportProcessingServiceMock
+      debtPositionTypeOrgExportProcessingServiceMock,
+      debtPositionExportProcessingServiceMock
     );
   }
 
@@ -91,15 +93,13 @@ class DataExportFacadeServiceTest {
   }
 
   @Test
-  void whenExecuteExportThenRejectUnsupportedFileType() {
+  void whenExecuteDebtPositionsExportThenDelegateToDebtPositionProcessor() {
     ExtractionRequest request = new ExtractionRequest(List.of("IPA_CODE"), MigrationFileType.DEBT_POSITIONS);
+    ExportFileResult expected = new ExportFileResult(List.of("debtpositions_2_0.zip"), null);
+    when(debtPositionExportProcessingServiceMock.executeExport("extraction-id", request)).thenReturn(expected);
 
-    ExportFileTypeNotSupportedException exception = assertThrows(
-      ExportFileTypeNotSupportedException.class,
-      () -> service.executeExport("extraction-id", request)
-    );
+    ExportFileResult result = service.executeExport("extraction-id", request);
 
-    assertEquals("EXPORT_FILE_NOT_SUPPORTED", exception.getCode());
-    assertEquals("Invalid export file type: DEBT_POSITIONS", exception.getMessage());
+    assertEquals(expected, result);
   }
 }
