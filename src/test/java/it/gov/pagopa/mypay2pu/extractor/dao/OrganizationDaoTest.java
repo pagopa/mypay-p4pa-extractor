@@ -67,7 +67,7 @@ class OrganizationDaoTest {
     ))
       .thenReturn(expected);
 
-    List<Organization> result = dao.findByFilters(List.of("IPA1"), new ExtractionFilters(null, null, null));
+    List<Organization> result = dao.findByFilters(List.of("IPA1"), new ExtractionFilters(null, null, null, null, null, null, null));
 
     assertEquals(expected, result);
   }
@@ -91,7 +91,7 @@ class OrganizationDaoTest {
 
     List<Organization> result = dao.findByFilters(
       List.of("IPA1", "IPA2"),
-      new ExtractionFilters(LocalDate.of(2026, Month.JANUARY, 1), LocalDate.of(2026, Month.JANUARY, 2), null),
+      new ExtractionFilters(LocalDate.of(2026, Month.JANUARY, 1), LocalDate.of(2026, Month.JANUARY, 2), null, null, null, null, null),
       50,
       100
     );
@@ -100,7 +100,7 @@ class OrganizationDaoTest {
 
   @Test
   void givenInvalidLimitWhenFindByFiltersThenThrowIllegalArgumentException() {
-    ExtractionFilters filters = new ExtractionFilters(null, null, null);
+    ExtractionFilters filters = new ExtractionFilters(null, null, null, null, null, null, null);
     OrganizationDao dao = buildDao(mpv4JdbcTemplateMock);
     List<String> ipaCodes = List.of("IPA1");
 

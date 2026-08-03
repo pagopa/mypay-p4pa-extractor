@@ -110,7 +110,11 @@ class ExportControllerTest {
       new ExtractionFilters(
         LocalDate.of(2026, Month.JANUARY, 2),
         LocalDate.of(2026, Month.JANUARY, 1),
-        List.of()
+        List.of(),
+        null,
+        null,
+        null,
+        null
       )
     );
 

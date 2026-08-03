@@ -155,6 +155,24 @@
             "items" : {
               "type" : "string"
             }
+          },
+          "iud" : {
+            "type" : [ "string", "null" ],
+            "example" : "IUD_001"
+          },
+          "iuv" : {
+            "type" : [ "string", "null" ],
+            "example" : "IUV_001"
+          },
+          "createdFrom" : {
+            "type" : [ "string", "null" ],
+            "format" : "date",
+            "example" : "2024-01-01"
+          },
+          "createdTo" : {
+            "type" : [ "string", "null" ],
+            "format" : "date",
+            "example" : "2026-06-18"
           }
         }
       },

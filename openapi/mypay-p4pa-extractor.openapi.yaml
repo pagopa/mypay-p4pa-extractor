@@ -122,6 +122,20 @@ components:
           items:
             type: string
           example: ["TYPE_ORG_001", "TYPE_ORG_002"]
+        iud:
+          type: string
+          example: "IUD_001"
+        iuv:
+          type: string
+          example: "IUV_001"
+        createdFrom:
+          type: string
+          format: date
+          example: "2024-01-01"
+        createdTo:
+          type: string
+          format: date
+          example: "2026-06-18"
     ExtractionAcceptedResponse:
       type: object
       required:
