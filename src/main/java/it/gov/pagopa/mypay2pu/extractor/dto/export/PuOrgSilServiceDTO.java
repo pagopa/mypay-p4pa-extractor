@@ -38,6 +38,7 @@ public class PuOrgSilServiceDTO implements CsvExportDto {
   private String serviceType;
 
   @CsvBindByName(column = "urlServizio")
+  @NotBlank
   @Size(max = 255)
   private String serviceUrl;
 

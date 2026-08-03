@@ -31,11 +31,11 @@ public class ExportController implements ExtractApi {
   @Override
   public ResponseEntity<ExtractionAcceptedResponse> createExtraction(@Valid ExtractionRequest request) {
     extractionRequestValidator.validate(request);
-    log.info("createExtraction: ipaCode={}, fileTypes={}", request.getIpaCode(), request.getFileTypes());
+    log.info("createExtraction: ipaCodes={}, fileTypes={}", request.getIpaCodes(), request.getFileTypes());
 
     String extractionId = exportFileHandlerService.createExtraction(request);
 
-    log.info("Accepted extraction {} for organization {} and fileTypes {}", extractionId, request.getIpaCode(), request.getFileTypes());
+    log.info("Accepted extraction {} for ipaCodes {} and fileTypes {}", extractionId, request.getIpaCodes(), request.getFileTypes());
     return ResponseEntity.accepted().body(new ExtractionAcceptedResponse(extractionId));
   }
 

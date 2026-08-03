@@ -34,7 +34,7 @@ class ExportFileStatusDaoTest {
     OffsetDateTime now = OffsetDateTime.parse("2026-01-01T00:00:00Z");
     ExtractionStatusResponse status = new ExtractionStatusResponse(
       "extraction-id",
-      "IPA_CODE_TEST",
+      List.of("IPA_CODE_TEST"),
       MigrationFileType.ORGANIZATIONS,
       ExtractionStatus.RUNNING,
       now,
@@ -47,7 +47,7 @@ class ExportFileStatusDaoTest {
 
     ExtractionStatusResponse storedStatus = service.readStatus("extraction-id");
     assertEquals("extraction-id", storedStatus.getExtractionId());
-    assertEquals("IPA_CODE_TEST", storedStatus.getIpaCode());
+    assertEquals(List.of("IPA_CODE_TEST"), storedStatus.getIpaCodes());
     assertEquals(MigrationFileType.ORGANIZATIONS, storedStatus.getFileTypes());
     assertEquals(ExtractionStatus.RUNNING, storedStatus.getStatus());
     assertEquals(List.of("organizations.csv"), storedStatus.getFiles());

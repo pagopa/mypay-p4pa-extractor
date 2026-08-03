@@ -52,7 +52,7 @@ class DataExportFacadeServiceTest {
 
   @Test
   void whenExecuteOrganizationsExportThenDelegateToOrganizationProcessor() {
-    ExtractionRequest request = new ExtractionRequest("IPA_CODE", MigrationFileType.ORGANIZATIONS);
+    ExtractionRequest request = new ExtractionRequest(List.of("IPA_CODE"), MigrationFileType.ORGANIZATIONS);
     ExportFileResult expected = new ExportFileResult(List.of("organizations_1_0.zip"), null);
     when(organizationExportProcessingServiceMock.executeExport("extraction-id", request)).thenReturn(expected);
 
@@ -63,7 +63,7 @@ class DataExportFacadeServiceTest {
 
   @Test
   void whenExecuteOrgSilServicesExportThenDelegateToOrgSilServiceProcessor() {
-    ExtractionRequest request = new ExtractionRequest("IPA_CODE", MigrationFileType.ORG_SIL_SERVICES);
+    ExtractionRequest request = new ExtractionRequest(List.of("IPA_CODE"), MigrationFileType.ORG_SIL_SERVICES);
     ExportFileResult expected = new ExportFileResult(List.of("orgsilservices_1_0.zip"), null);
     when(orgSilServiceExportProcessingServiceMock.executeExport("extraction-id", request)).thenReturn(expected);
 
@@ -74,7 +74,7 @@ class DataExportFacadeServiceTest {
 
   @Test
   void whenExecuteDebtPositionsTypeExportThenDelegateToDebtPositionTypeProcessor() {
-    ExtractionRequest request = new ExtractionRequest("IPA_CODE", MigrationFileType.DEBT_POSITIONS_TYPE);
+    ExtractionRequest request = new ExtractionRequest(List.of("IPA_CODE"), MigrationFileType.DEBT_POSITIONS_TYPE);
     ExportFileResult expected = new ExportFileResult(List.of("debtpositionstype_1_0.zip"), null);
     when(debtPositionTypeExportProcessingServiceMock.executeExport("extraction-id", request)).thenReturn(expected);
 
@@ -85,7 +85,7 @@ class DataExportFacadeServiceTest {
 
   @Test
   void whenExecuteDebtPositionsTypeOrgExportThenDelegateToDebtPositionTypeOrgProcessor() {
-    ExtractionRequest request = new ExtractionRequest("IPA_CODE", MigrationFileType.DEBT_POSITIONS_TYPE_ORG);
+    ExtractionRequest request = new ExtractionRequest(List.of("IPA_CODE"), MigrationFileType.DEBT_POSITIONS_TYPE_ORG);
     ExportFileResult expected = new ExportFileResult(List.of("debtpositionstypeorg_1_0.zip"), null);
     when(debtPositionTypeOrgExportProcessingServiceMock.executeExport("extraction-id", request)).thenReturn(expected);
 
@@ -95,19 +95,8 @@ class DataExportFacadeServiceTest {
   }
 
   @Test
-  void whenExecuteDebtPositionsExportThenDelegateToDebtPositionProcessor() {
-    ExtractionRequest request = new ExtractionRequest("IPA_CODE", MigrationFileType.DEBT_POSITIONS);
-    ExportFileResult expected = new ExportFileResult(List.of("debtpositions_2_0.zip"), null);
-    when(debtPositionExportProcessingServiceMock.executeExport("extraction-id", request)).thenReturn(expected);
-
-    ExportFileResult result = service.executeExport("extraction-id", request);
-
-    assertEquals(expected, result);
-  }
-
-  @Test
   void whenExecuteExportThenRejectUnsupportedFileType() {
-    ExtractionRequest request = new ExtractionRequest("IPA_CODE", MigrationFileType.DEBT_POSITIONS_PAID);
+    ExtractionRequest request = new ExtractionRequest(List.of("IPA_CODE"), MigrationFileType.DEBT_POSITIONS);
 
     ExportFileTypeNotSupportedException exception = assertThrows(
       ExportFileTypeNotSupportedException.class,
@@ -115,6 +104,6 @@ class DataExportFacadeServiceTest {
     );
 
     assertEquals("EXPORT_FILE_NOT_SUPPORTED", exception.getCode());
-    assertEquals("Invalid export file type: DEBT_POSITIONS_PAID", exception.getMessage());
+    assertEquals("Invalid export file type: DEBT_POSITIONS", exception.getMessage());
   }
 }

@@ -28,7 +28,7 @@ public class ExportFileStatusService {
     OffsetDateTime now = OffsetDateTime.now(ZONEID);
     ExtractionStatusResponse newStatus = ExtractionStatusResponse.builder()
       .extractionId(extractionId)
-      .ipaCode(request.getIpaCode())
+      .ipaCodes(List.copyOf(request.getIpaCodes()))
       .fileTypes(request.getFileTypes())
       .status(ExtractionStatus.RUNNING)
       .createdAt(now)

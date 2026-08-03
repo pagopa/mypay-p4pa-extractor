@@ -8,7 +8,7 @@ import it.gov.pagopa.mypay2pu.extractor.model.mp4.DebtPositionTypeOrg;
 import it.gov.pagopa.mypay2pu.extractor.connector.mydictionary.MyDictionaryClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.HttpStatusCodeException;
 
 import static org.springframework.util.StringUtils.hasText;
 
@@ -68,24 +68,22 @@ public class DebtPositionTypeOrgMapper {
     }
     try {
       return myDictionaryClient.getSpontaneousFormStructure(spontaneousFormCode);
-    } catch (HttpServerErrorException e) {
-      if (e.getStatusCode().value() == 500) {
-        if (Boolean.TRUE.equals(debtPositionTypeOrg.flagSpontaneous())) {
-          throw new CsvRowMappingException(
-            "MyDictionary",
-            "spontaneousFormStructure",
-            spontaneousFormCode,
-            "MyDictionary returned HTTP 500 for spontaneousFormCode " + spontaneousFormCode,
-            e
-          );
-        }
-        log.warn(
-          "MyDictionary returned HTTP 500 for spontaneousFormCode {} and flagSpontaneous=false. Structure will be empty.",
-          spontaneousFormCode
+    } catch (HttpStatusCodeException e) {
+      if (Boolean.TRUE.equals(debtPositionTypeOrg.flagSpontaneous())) {
+        throw new CsvRowMappingException(
+          "MyDictionary",
+          "spontaneousFormStructure",
+          spontaneousFormCode,
+          "MyDictionary returned HTTP " + e.getStatusCode().value() + " for spontaneousFormCode " + spontaneousFormCode,
+          e
         );
-        return null;
       }
-      throw e;
+      log.warn(
+        "MyDictionary returned HTTP {} for spontaneousFormCode {} and flagSpontaneous=false. Structure will be empty.",
+        e.getStatusCode().value(),
+        spontaneousFormCode
+      );
+      return null;
     }
   }
 

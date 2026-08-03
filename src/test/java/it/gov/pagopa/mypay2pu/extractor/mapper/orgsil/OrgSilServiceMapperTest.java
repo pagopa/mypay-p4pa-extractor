@@ -42,7 +42,7 @@ class OrgSilServiceMapperTest {
       "IPA2",
       "app",
       "serviceType",
-      null,
+      "https://service.example.org",
       false,
       null,
       null,
@@ -59,7 +59,7 @@ class OrgSilServiceMapperTest {
     assertEquals("IPA2", result.getIpaCode());
     assertEquals("app", result.getApplicationName());
     assertEquals("serviceType", result.getServiceType());
-    assertNull(result.getServiceUrl());
+    assertEquals("https://service.example.org", result.getServiceUrl());
     assertEquals("false", result.getFlagLegacy());
     assertNull(result.getLegacyJwtKid());
     assertNull(result.getLegacyJwtSubject());
@@ -72,7 +72,6 @@ class OrgSilServiceMapperTest {
 
     TestUtils.checkNotNullFields(
       result,
-      "serviceUrl",
       "legacyJwtKid",
       "legacyJwtSubject",
       "legacyJwtIssuer",
