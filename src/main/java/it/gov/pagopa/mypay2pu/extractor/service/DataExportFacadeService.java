@@ -3,6 +3,7 @@ package it.gov.pagopa.mypay2pu.extractor.service;
 import it.gov.pagopa.mypay2pu.extractor.dto.ExportFileResult;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.exception.ExportFileTypeNotSupportedException;
+import it.gov.pagopa.mypay2pu.extractor.service.export.debtposition.DebtPositionExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.debtpositiontype.DebtPositionTypeExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.debtpositiontypeorg.DebtPositionTypeOrgExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.organization.OrganizationExportProcessingService;
@@ -16,15 +17,18 @@ public class DataExportFacadeService {
   private final OrgSilServiceExportProcessingService orgSilServiceExportProcessingService;
   private final DebtPositionTypeExportProcessingService debtPositionTypeExportProcessingService;
   private final DebtPositionTypeOrgExportProcessingService debtPositionTypeOrgExportProcessingService;
+  private final DebtPositionExportProcessingService debtPositionExportProcessingService;
 
   public DataExportFacadeService(OrganizationExportProcessingService organizationExportProcessingService,
                                  OrgSilServiceExportProcessingService orgSilServiceExportProcessingService,
                                  DebtPositionTypeExportProcessingService debtPositionTypeExportProcessingService,
-                                 DebtPositionTypeOrgExportProcessingService debtPositionTypeOrgExportProcessingService) {
+                                 DebtPositionTypeOrgExportProcessingService debtPositionTypeOrgExportProcessingService,
+                                 DebtPositionExportProcessingService debtPositionExportProcessingService) {
     this.organizationExportProcessingService = organizationExportProcessingService;
     this.orgSilServiceExportProcessingService = orgSilServiceExportProcessingService;
     this.debtPositionTypeExportProcessingService = debtPositionTypeExportProcessingService;
     this.debtPositionTypeOrgExportProcessingService = debtPositionTypeOrgExportProcessingService;
+    this.debtPositionExportProcessingService = debtPositionExportProcessingService;
   }
 
   public ExportFileResult executeExport(String extractionId, ExtractionRequest request) {
@@ -33,6 +37,7 @@ public class DataExportFacadeService {
       case ORG_SIL_SERVICES -> orgSilServiceExportProcessingService.executeExport(extractionId, request);
       case DEBT_POSITIONS_TYPE -> debtPositionTypeExportProcessingService.executeExport(extractionId, request);
       case DEBT_POSITIONS_TYPE_ORG -> debtPositionTypeOrgExportProcessingService.executeExport(extractionId, request);
+      case DEBT_POSITIONS -> debtPositionExportProcessingService.executeExport(extractionId, request);
       default ->
         throw new ExportFileTypeNotSupportedException("Invalid export file type: " + request.getFileTypes());
     };
