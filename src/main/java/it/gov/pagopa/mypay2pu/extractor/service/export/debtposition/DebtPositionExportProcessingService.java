@@ -16,6 +16,7 @@ import it.gov.pagopa.mypay2pu.extractor.service.files.CsvService;
 import it.gov.pagopa.pu.debtposition.dto.generated.Action;
 import jakarta.validation.Validator;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -103,9 +104,10 @@ public class DebtPositionExportProcessingService extends SplitByIpaCodeBaseExpor
   }
 
   private Action resolveOpenDebtPositionAction(DebtPosition debtPosition, String ipaCode, LocalDateTime lastExtractionDateTime) {
-    LocalDateTime lastChangeDateTime = debtPosition.dtUltimaModifica() != null
-      ? debtPosition.dtUltimaModifica()
-      : debtPosition.dtCreazione();
+    LocalDateTime lastChangeDateTime = ObjectUtils.firstNonNull(
+      debtPosition.dtUltimaModifica(),
+      debtPosition.dtCreazione()
+    );
     if (lastChangeDateTime != null) {
       return lastChangeDateTime.isAfter(lastExtractionDateTime) ? Action.M : Action.I;
     }
