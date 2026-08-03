@@ -32,6 +32,7 @@ import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -120,18 +121,19 @@ class DebtPositionExportProcessingServiceTest {
     ExtractionRequest request = new ExtractionRequest(
       List.of("ORG_IPA"),
       MigrationFileType.DEBT_POSITIONS,
-      LocalDate.of(2026, Month.JANUARY, 15),
+      OffsetDateTime.parse("2026-01-15T10:00:00Z"),
       filters
     );
     DebtPosition inserted = debtPosition("IUPD-INSERTED", "IUD-INSERTED", LocalDate.of(2026, Month.JANUARY, 16).atStartOfDay(), null);
     DebtPosition modified = debtPosition("IUPD-MODIFIED", "IUD-MODIFIED", LocalDate.of(2026, Month.JANUARY, 10).atStartOfDay(), LocalDate.of(2026, Month.JANUARY, 16).atStartOfDay());
-    DebtPosition unchanged = debtPosition("IUPD-UNCHANGED", "IUD-UNCHANGED", LocalDate.of(2026, Month.JANUARY, 10).atStartOfDay(), LocalDate.of(2026, Month.JANUARY, 11).atStartOfDay());
+    DebtPosition unchanged = debtPosition("IUPD-UNCHANGED", "IUD-UNCHANGED", LocalDate.of(2026, Month.JANUARY, 10).atStartOfDay(), LocalDateTime.of(2026, Month.JANUARY, 15, 10, 30));
     DebtPosition withoutLastModificationDate = debtPosition("IUPD-NO-MODIFICATION-DATE", "IUD-NO-MODIFICATION-DATE", LocalDate.of(2026, Month.JANUARY, 10).atStartOfDay(), null);
     DebtPosition withoutCreationDate = debtPosition("IUPD-NO-CREATION-DATE", "IUD-NO-CREATION-DATE", null, LocalDate.of(2026, Month.JANUARY, 16).atStartOfDay());
+    DebtPosition withoutChangeDates = debtPosition("IUPD-NO-CHANGE-DATES", "IUD-NO-CHANGE-DATES", null, null);
     DebtPosition cancelled = debtPosition("IUPD-CANCELLED", "IUD-CANCELLED");
 
     when(debtPositionDaoMock.findDebtPositions("ORG_IPA", null, null, filters, 10, 0))
-      .thenReturn(List.of(inserted, modified, unchanged, withoutLastModificationDate, withoutCreationDate));
+      .thenReturn(List.of(inserted, modified, unchanged, withoutLastModificationDate, withoutCreationDate, withoutChangeDates));
     when(debtPositionDaoMock.findCancelledDebtPositions("ORG_IPA", null, null, filters, 10, 0))
       .thenReturn(List.of(cancelled));
 
@@ -139,7 +141,7 @@ class DebtPositionExportProcessingServiceTest {
       service.retrieveData("ORG_IPA", request, 10, 0);
 
     assertEquals(
-      List.of(Action.I, Action.M, Action.I, Action.I, Action.I, Action.A),
+      List.of(Action.M, Action.M, Action.M, Action.I, Action.M, Action.I, Action.A),
       result.stream().map(DebtPositionExportProcessingService.DebtPositionWithAction::action).toList()
     );
   }

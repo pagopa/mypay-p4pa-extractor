@@ -18,8 +18,8 @@ import jakarta.validation.Validator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -76,14 +76,14 @@ public class DebtPositionExportProcessingService extends SplitByIpaCodeBaseExpor
       offset
     );
 
-    LocalDate lastExtractionDate = request.getLastExtractionDate();
+    OffsetDateTime lastExtractionDate = request.getLastExtractionDate();
     if (lastExtractionDate == null) {
       return debtPositions.stream()
         .map(debtPosition -> new DebtPositionWithAction(debtPosition, FIRST_EXTRACTION_ACTION))
         .toList();
     }
 
-    LocalDateTime lastExtractionDateTime = lastExtractionDate.atStartOfDay();
+    LocalDateTime lastExtractionDateTime = lastExtractionDate.toLocalDateTime();
     List<DebtPosition> cancelledDebtPositions = debtPositionDao.findCancelledDebtPositions(
       ipaCode,
       null,
@@ -96,30 +96,25 @@ public class DebtPositionExportProcessingService extends SplitByIpaCodeBaseExpor
     return Stream.concat(
       debtPositions.stream().map(debtPosition -> new DebtPositionWithAction(
         debtPosition,
-        resolveOpenDebtPositionAction(debtPosition, lastExtractionDateTime)
+        resolveOpenDebtPositionAction(debtPosition, ipaCode, lastExtractionDateTime)
       )),
       cancelledDebtPositions.stream().map(debtPosition -> new DebtPositionWithAction(debtPosition, Action.A))
     ).toList();
   }
 
-  private Action resolveOpenDebtPositionAction(DebtPosition debtPosition, LocalDateTime lastExtractionDateTime) {
-    LocalDateTime dtCreazione = debtPosition.dtCreazione();
-    if (dtCreazione != null && dtCreazione.isAfter(lastExtractionDateTime)) {
-      return Action.I;
-    }
-
-    LocalDateTime dtUltimaModifica = debtPosition.dtUltimaModifica();
-    if (dtCreazione != null
-      && !dtCreazione.isAfter(lastExtractionDateTime)
-      && dtUltimaModifica != null
-      && dtUltimaModifica.isAfter(lastExtractionDateTime)) {
-      return Action.M;
+  private Action resolveOpenDebtPositionAction(DebtPosition debtPosition, String ipaCode, LocalDateTime lastExtractionDateTime) {
+    LocalDateTime lastChangeDateTime = debtPosition.dtUltimaModifica() != null
+      ? debtPosition.dtUltimaModifica()
+      : debtPosition.dtCreazione();
+    if (lastChangeDateTime != null) {
+      return lastChangeDateTime.isAfter(lastExtractionDateTime) ? Action.M : Action.I;
     }
 
     log.warn(
-      "Cannot resolve action for debt position iupd={} iud={}. Falling back to Action.I",
+      "Cannot resolve action for debt position iupd={} iud={} of organization={}. Falling back to Action.I",
       debtPosition.iupd(),
-      debtPosition.iud()
+      debtPosition.iud(),
+      ipaCode
     );
     return Action.I;
   }
