@@ -10,8 +10,8 @@ import it.gov.pagopa.mypay2pu.extractor.mapper.debtposition.DebtPositionMapper;
 import it.gov.pagopa.mypay2pu.extractor.model.ExportModel;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.DebtPosition;
 import it.gov.pagopa.mypay2pu.extractor.service.FileArchiverService;
-import it.gov.pagopa.mypay2pu.extractor.service.export.BaseExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.CsvPartitionWriterService;
+import it.gov.pagopa.mypay2pu.extractor.service.export.SplitByIpaCodeBaseExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.files.CsvService;
 import it.gov.pagopa.pu.debtposition.dto.generated.Action;
 import jakarta.validation.Validator;
@@ -25,7 +25,7 @@ import java.util.stream.Stream;
 
 @Slf4j
 @Service
-public class DebtPositionExportProcessingService extends BaseExportProcessingService<DebtPositionExportProcessingService.DebtPositionWithAction, PuDebtPositionDTO> {
+public class DebtPositionExportProcessingService extends SplitByIpaCodeBaseExportProcessingService<DebtPositionExportProcessingService.DebtPositionWithAction, PuDebtPositionDTO> {
 
   private static final Action FIRST_EXTRACTION_ACTION = Action.I;
 
@@ -65,10 +65,10 @@ public class DebtPositionExportProcessingService extends BaseExportProcessingSer
   }
 
   @Override
-  protected List<DebtPositionWithAction> retrieveData(ExtractionRequest request, int pageSize, int offset) {
+  protected List<DebtPositionWithAction> retrieveData(String ipaCode, ExtractionRequest request, int pageSize, int offset) {
     ExtractionFilters filters = request.getFilters();
     List<DebtPosition> debtPositions = debtPositionDao.findDebtPositions(
-      request.getIpaCode(),
+      ipaCode,
       null,
       null,
       filters,
@@ -85,7 +85,7 @@ public class DebtPositionExportProcessingService extends BaseExportProcessingSer
 
     LocalDateTime lastExtractionDateTime = lastExtractionDate.atStartOfDay();
     List<DebtPosition> cancelledDebtPositions = debtPositionDao.findCancelledDebtPositions(
-      request.getIpaCode(),
+      ipaCode,
       null,
       null,
       filters,

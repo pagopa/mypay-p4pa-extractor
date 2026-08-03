@@ -71,7 +71,7 @@ class DebtPositionTypeOrgExportProcessingServiceTest {
 
   @Test
   void whenDataIsAvailableThenExportPagedDebtPositionTypeOrgsToArchive() throws Exception {
-    ExtractionRequest request = new ExtractionRequest(List.of("IPA_CODE"), MigrationFileType.DEBT_POSITIONS_TYPE_ORG, new ExtractionFilters());
+    ExtractionRequest request = new ExtractionRequest(List.of("IPA_CODE"), MigrationFileType.DEBT_POSITIONS_TYPE_ORG, null, new ExtractionFilters());
     List<String> debtPositionTypeOrgCodes = List.of();
     DebtPositionTypeOrg first = debtPositionTypeOrg("first");
     DebtPositionTypeOrg second = invalidDebtPositionTypeOrg();
@@ -117,7 +117,7 @@ class DebtPositionTypeOrgExportProcessingServiceTest {
 
   @Test
   void whenNoValidationErrorsThenArchiveContainsOnlyExportCsv() throws Exception {
-    ExtractionRequest request = new ExtractionRequest(List.of("IPA_CODE"), MigrationFileType.DEBT_POSITIONS_TYPE_ORG, new ExtractionFilters());
+    ExtractionRequest request = new ExtractionRequest(List.of("IPA_CODE"), MigrationFileType.DEBT_POSITIONS_TYPE_ORG, null, new ExtractionFilters());
     List<String> debtPositionTypeOrgCodes = List.of();
     DebtPositionTypeOrg first = debtPositionTypeOrg("first");
     DebtPositionTypeOrg second = debtPositionTypeOrg("second");
