@@ -3,13 +3,11 @@ package it.gov.pagopa.mypay2pu.extractor.service.export.debtpositionstypeorgoper
 import it.gov.pagopa.mypay2pu.extractor.config.ExtractorExportProperties;
 import it.gov.pagopa.mypay2pu.extractor.dao.DebtPositionsTypeOrgOperatorsDao;
 import it.gov.pagopa.mypay2pu.extractor.dto.export.PuDebtPositionsTypeOrgOperatorsDTO;
-import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionFilters;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.mapper.debtpositionstypeorgoperators.DebtPositionsTypeOrgOperatorsMapper;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.DebtPositionsTypeOrgOperators;
 import it.gov.pagopa.mypay2pu.extractor.service.FileArchiverService;
-import it.gov.pagopa.mypay2pu.extractor.service.export.BaseExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.CsvPartitionWriterService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.SplitByIpaCodeBaseExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.files.CsvService;
