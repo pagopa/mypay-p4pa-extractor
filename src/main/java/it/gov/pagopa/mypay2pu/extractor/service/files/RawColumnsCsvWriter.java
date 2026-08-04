@@ -38,7 +38,7 @@ class RawColumnsCsvWriter extends CSVWriter {
         continue;
       }
       if (rawColumnIndexes.contains(columnIndex)) {
-        appendable.append(value);
+        appendable.append(removeLineBreaks(value));
       } else {
         appendCsvValue(value, applyQuotesToAll, appendable);
       }
@@ -55,6 +55,10 @@ class RawColumnsCsvWriter extends CSVWriter {
       }
     }
     return indexes;
+  }
+
+  private String removeLineBreaks(String value) {
+    return value.replace("\r", "").replace("\n", "");
   }
 
   private void appendCsvValue(String value, boolean applyQuotesToAll, Appendable appendable) throws IOException {

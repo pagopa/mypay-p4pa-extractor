@@ -136,7 +136,8 @@ class CsvServiceTest {
     @Test
     void testCreateCsvFromBean_writesSpontaneousFormStructureAsRawJson() throws IOException {
         Path filePath = Path.of("build", "tmp", "test", "DEBT_POSITIONS_TYPE_ORG.csv");
-        String spontaneousFormStructure = "[{\"property1\":\"value1\"}]";
+        String spontaneousFormStructure = "[{\r\n\"property1\":\"value1\"\n}]";
+        String expectedSpontaneousFormStructure = "[{\"property1\":\"value1\"}]";
         PuDebtPositionTypeOrgDTO dto = PuDebtPositionTypeOrgDTO.builder()
           .description("Description \"quoted\"")
           .spontaneousFormStructure(spontaneousFormStructure)
@@ -151,8 +152,10 @@ class CsvServiceTest {
             return List.of(dto);
         }, PuDebtPositionTypeOrgDTO.VERSION);
 
-        String row = Files.readAllLines(filePath).get(1);
-        assertTrue(row.contains(spontaneousFormStructure));
+        List<String> rows = Files.readAllLines(filePath);
+        assertEquals(2, rows.size());
+        String row = rows.get(1);
+        assertTrue(row.contains(expectedSpontaneousFormStructure));
         assertFalse(row.contains("\"[{\"\"property1\"\":\"\"value1\"\"}]\""));
         assertTrue(row.contains("\"Description \"\"quoted\"\"\""));
     }
