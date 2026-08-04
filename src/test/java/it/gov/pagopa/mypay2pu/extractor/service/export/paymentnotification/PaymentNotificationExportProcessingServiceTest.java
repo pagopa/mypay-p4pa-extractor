@@ -64,21 +64,21 @@ class PaymentNotificationExportProcessingServiceTest {
     String ipaCode = "IPA1";
     String iud = "IUD-1";
     String iuv = "IUV-1";
-    LocalDate createdFrom = LocalDate.of(2026, Month.JANUARY, 10);
-    LocalDate createdTo = LocalDate.of(2026, Month.JANUARY, 11);
+    LocalDate modifiedFrom = LocalDate.of(2026, Month.JANUARY, 10);
+    LocalDate modifiedTo = LocalDate.of(2026, Month.JANUARY, 11);
     ExtractionFilters filters = new ExtractionFilters()
       .iud(iud)
       .iuv(iuv)
-      .createdFrom(createdFrom)
-      .createdTo(createdTo);
+      .modifiedFrom(modifiedFrom)
+      .modifiedTo(modifiedTo);
     ExtractionRequest request = new ExtractionRequest(List.of(ipaCode), MigrationFileType.PAYMENT_NOTIFICATION, null, filters);
     List<PaymentNotification> expected = List.of();
     when(paymentNotificationDaoMock.findByFilters(
       ipaCode,
       iud,
       iuv,
-      createdFrom.atStartOfDay(),
-      createdTo.plusDays(1).atStartOfDay(),
+      modifiedFrom.atStartOfDay(),
+      modifiedTo.plusDays(1).atStartOfDay(),
       50,
       100
     ))
@@ -91,8 +91,8 @@ class PaymentNotificationExportProcessingServiceTest {
       ipaCode,
       iud,
       iuv,
-      createdFrom.atStartOfDay(),
-      createdTo.plusDays(1).atStartOfDay(),
+      modifiedFrom.atStartOfDay(),
+      modifiedTo.plusDays(1).atStartOfDay(),
       50,
       100
     );

@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class PaymentNotificationExportProcessingService
@@ -63,24 +62,24 @@ public class PaymentNotificationExportProcessingService
 
   @Override
   protected List<PaymentNotification> retrieveData(String ipaCode, ExtractionRequest request, int pageSize, int offset) {
-    String iud = Optional.ofNullable(request.getFilters())
-      .map(ExtractionFilters::getIud)
-      .orElse(null);
-    String iuv = Optional.ofNullable(request.getFilters())
-      .map(ExtractionFilters::getIuv)
-      .orElse(null);
-    LocalDate createdFrom = Optional.ofNullable(request.getFilters())
-      .map(ExtractionFilters::getCreatedFrom)
-      .orElse(null);
-    LocalDate createdTo = Optional.ofNullable(request.getFilters())
-      .map(ExtractionFilters::getCreatedTo)
-      .orElse(null);
+    ExtractionFilters filters = request.getFilters();
+    String iud = null;
+    String iuv = null;
+    LocalDate modifiedFrom = null;
+    LocalDate modifiedTo = null;
+    if (filters != null) {
+      iud = filters.getIud();
+      iuv = filters.getIuv();
+      modifiedFrom = filters.getModifiedFrom();
+      modifiedTo = filters.getModifiedTo();
+    }
+
     return paymentNotificationDao.findByFilters(
       ipaCode,
       iud,
       iuv,
-      DateTimeUtils.toStartOfDay(createdFrom),
-      DateTimeUtils.toStartOfNextDay(createdTo),
+      DateTimeUtils.toStartOfDay(modifiedFrom),
+      DateTimeUtils.toStartOfNextDay(modifiedTo),
       pageSize,
       offset
     );

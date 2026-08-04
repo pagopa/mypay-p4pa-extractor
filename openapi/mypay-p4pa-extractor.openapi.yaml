@@ -133,14 +133,6 @@ components:
         iuv:
           type: string
           example: "IUV_001"
-        createdFrom:
-          type: string
-          format: date
-          example: "2024-01-01"
-        createdTo:
-          type: string
-          format: date
-          example: "2026-06-18"
     ExtractionAcceptedResponse:
       type: object
       required:

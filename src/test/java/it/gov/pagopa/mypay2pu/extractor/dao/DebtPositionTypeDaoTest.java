@@ -39,7 +39,7 @@ class DebtPositionTypeDaoTest {
 
   @Test
   void givenConfiguredValuesWhenFindByFiltersThenQueryMp4Database() {
-    ExtractionFilters filters = new ExtractionFilters(null, null, List.of("TYPE_ORG"), null, null, null, null);
+    ExtractionFilters filters = new ExtractionFilters(null, null, List.of("TYPE_ORG"), null, null);
     DebtPositionTypeDao dao = buildDao();
     List<DebtPositionType> expected = List.of(new DebtPositionType(
       "12345678901",
