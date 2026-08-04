@@ -3,6 +3,7 @@ package it.gov.pagopa.mypay2pu.extractor.dto.export;
 import com.opencsv.bean.CsvBindByName;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import it.gov.pagopa.mypay2pu.extractor.service.files.CsvRawColumns;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,6 +15,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
+@CsvRawColumns("strutturaPagamentoSpontaneo")
 public class PuDebtPositionTypeOrgDTO implements CsvExportDto {
 
   public static final String VERSION = "1_0";

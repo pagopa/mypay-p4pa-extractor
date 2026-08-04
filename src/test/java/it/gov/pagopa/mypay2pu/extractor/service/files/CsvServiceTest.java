@@ -1,6 +1,7 @@
 package it.gov.pagopa.mypay2pu.extractor.service.files;
 
 import it.gov.pagopa.mypay2pu.extractor.exception.InvalidCsvRowException;
+import it.gov.pagopa.mypay2pu.extractor.dto.export.PuDebtPositionTypeOrgDTO;
 import org.junit.jupiter.api.Test;
 import uk.co.jemos.podam.api.PodamFactory;
 import uk.co.jemos.podam.api.PodamFactoryImpl;
@@ -130,6 +131,30 @@ class CsvServiceTest {
         List<String> rows = Files.readAllLines(filePath);
         assertEquals(2, rows.size(), "The csv should contain header and one data row.");
         assertEquals("Data1;Data2;", rows.get(1), "Null values should be written as unquoted empty fields.");
+    }
+
+    @Test
+    void testCreateCsvFromBean_writesSpontaneousFormStructureAsRawJson() throws IOException {
+        Path filePath = Path.of("build", "tmp", "test", "DEBT_POSITIONS_TYPE_ORG.csv");
+        String spontaneousFormStructure = "[{\"property1\":\"value1\"}]";
+        PuDebtPositionTypeOrgDTO dto = PuDebtPositionTypeOrgDTO.builder()
+          .description("Description \"quoted\"")
+          .spontaneousFormStructure(spontaneousFormStructure)
+          .build();
+        AtomicBoolean supplierCalled = new AtomicBoolean(false);
+
+        csvService.createCsv(filePath, PuDebtPositionTypeOrgDTO.class, () -> {
+            if (supplierCalled.get()) {
+                return Collections.emptyList();
+            }
+            supplierCalled.set(true);
+            return List.of(dto);
+        }, PuDebtPositionTypeOrgDTO.VERSION);
+
+        String row = Files.readAllLines(filePath).get(1);
+        assertTrue(row.contains(spontaneousFormStructure));
+        assertFalse(row.contains("\"[{\"\"property1\"\":\"\"value1\"\"}]\""));
+        assertTrue(row.contains("\"Description \"\"quoted\"\"\""));
     }
 
     @Test

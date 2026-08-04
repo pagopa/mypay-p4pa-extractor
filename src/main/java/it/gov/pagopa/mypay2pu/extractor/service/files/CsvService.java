@@ -23,6 +23,7 @@ import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Supplier;
 
 /**
@@ -102,7 +103,7 @@ public class CsvService {
       mappingStrategy.setType(typeClass);
       mappingStrategy.setProfile(csvProfile);
 
-      StatefulBeanToCsv<C> beanToCsv = new StatefulBeanToCsvBuilder<C>(writer)
+      StatefulBeanToCsv<C> beanToCsv = new StatefulBeanToCsvBuilder<C>(buildBeanWriter(writer, typeClass))
         .withProfile(csvProfile)
         .withSeparator(separator)
         .withQuotechar(quoteChar)
@@ -119,6 +120,17 @@ public class CsvService {
     } catch (CsvRequiredFieldEmptyException | CsvDataTypeMismatchException e) {
       throw new InvalidCsvRowException("Invalid CSV row: " + e.getMessage());
     }
+  }
+
+  private <C extends CsvExportDto> ICSVWriter buildBeanWriter(Writer writer, Class<C> typeClass) {
+    CsvRawColumns csvRawColumns = typeClass.getAnnotation(CsvRawColumns.class);
+    if (csvRawColumns == null) {
+      return new CSVWriterBuilder(writer)
+        .withSeparator(separator)
+        .withQuoteChar(quoteChar)
+        .build();
+    }
+    return new RawColumnsCsvWriter(writer, separator, quoteChar, Set.of(csvRawColumns.value()));
   }
 
   /**
