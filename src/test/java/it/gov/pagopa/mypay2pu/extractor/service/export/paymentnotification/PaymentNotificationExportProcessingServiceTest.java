@@ -12,6 +12,7 @@ import it.gov.pagopa.mypay2pu.extractor.service.FileArchiverService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.CsvPartitionWriterService;
 import it.gov.pagopa.mypay2pu.extractor.service.files.CsvService;
 import jakarta.validation.Validator;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -23,6 +24,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -43,6 +45,19 @@ class PaymentNotificationExportProcessingServiceTest {
   @Mock
   private ExtractorExportProperties exportPropertiesMock;
 
+  @AfterEach
+  void verifyMocks() {
+    verifyNoMoreInteractions(
+      paymentNotificationDaoMock,
+      paymentNotificationMapperMock,
+      csvServiceMock,
+      csvPartitionWriterServiceMock,
+      fileArchiverServiceMock,
+      validatorMock,
+      exportPropertiesMock
+    );
+  }
+
   @Test
   void retrieveDataShouldDelegateMultiOrganizationFiltersToDao() {
     PaymentNotificationExportProcessingService service = service();
@@ -56,7 +71,7 @@ class PaymentNotificationExportProcessingServiceTest {
       .iuv(iuv)
       .createdFrom(createdFrom)
       .createdTo(createdTo);
-    ExtractionRequest request = new ExtractionRequest(List.of(ipaCode), MigrationFileType.PAYMENT_NOTIFICATION, filters);
+    ExtractionRequest request = new ExtractionRequest(List.of(ipaCode), MigrationFileType.PAYMENT_NOTIFICATION, null, filters);
     List<PaymentNotification> expected = List.of();
     when(paymentNotificationDaoMock.findByFilters(
       ipaCode,
@@ -90,6 +105,25 @@ class PaymentNotificationExportProcessingServiceTest {
     assertEquals(MigrationFileType.PAYMENT_NOTIFICATION, service.getMigrationFileType());
     assertEquals(PuPaymentNotificationDTO.class, service.getDtoClass());
     assertEquals(PuPaymentNotificationDTO.VERSION, service.getZipVersion());
+  }
+
+  @Test
+  void retrieveDataShouldDelegateNullFiltersToDao() {
+    PaymentNotificationExportProcessingService service = service();
+    String ipaCode = "IPA1";
+    List<PaymentNotification> expected = List.of();
+    when(paymentNotificationDaoMock.findByFilters(ipaCode, null, null, null, null, 50, 100))
+      .thenReturn(expected);
+
+    List<PaymentNotification> result = service.retrieveData(
+      ipaCode,
+      new ExtractionRequest(List.of(ipaCode), MigrationFileType.PAYMENT_NOTIFICATION, null, null),
+      50,
+      100
+    );
+
+    assertEquals(expected, result);
+    verify(paymentNotificationDaoMock).findByFilters(ipaCode, null, null, null, null, 50, 100);
   }
 
   private PaymentNotificationExportProcessingService service() {

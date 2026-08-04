@@ -27,7 +27,7 @@ public class PaymentNotificationExportProcessingService
   private final PaymentNotificationDao paymentNotificationDao;
   private final PaymentNotificationMapper paymentNotificationMapper;
 
-  protected PaymentNotificationExportProcessingService(
+  public PaymentNotificationExportProcessingService(
     PaymentNotificationDao paymentNotificationDao,
     PaymentNotificationMapper paymentNotificationMapper,
     CsvService csvService,
