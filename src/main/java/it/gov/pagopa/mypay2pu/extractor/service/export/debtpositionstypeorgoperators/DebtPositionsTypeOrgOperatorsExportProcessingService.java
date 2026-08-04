@@ -11,6 +11,7 @@ import it.gov.pagopa.mypay2pu.extractor.model.mp4.DebtPositionsTypeOrgOperators;
 import it.gov.pagopa.mypay2pu.extractor.service.FileArchiverService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.BaseExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.CsvPartitionWriterService;
+import it.gov.pagopa.mypay2pu.extractor.service.export.SplitByIpaCodeBaseExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.files.CsvService;
 import jakarta.validation.Validator;
 import org.springframework.stereotype.Service;
@@ -18,7 +19,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class DebtPositionsTypeOrgOperatorsExportProcessingService extends BaseExportProcessingService<DebtPositionsTypeOrgOperators, PuDebtPositionsTypeOrgOperatorsDTO> {
+public class DebtPositionsTypeOrgOperatorsExportProcessingService extends SplitByIpaCodeBaseExportProcessingService<DebtPositionsTypeOrgOperators, PuDebtPositionsTypeOrgOperatorsDTO> {
 
   private final DebtPositionsTypeOrgOperatorsDao debtPositionsTypeOrgOperatorsDao;
   private final DebtPositionsTypeOrgOperatorsMapper debtPositionsTypeOrgOperatorsMapper;
@@ -37,7 +38,7 @@ public class DebtPositionsTypeOrgOperatorsExportProcessingService extends BaseEx
 
   @Override
   protected MigrationFileType getMigrationFileType() {
-    return MigrationFileType.DEBT_POSITIONS_TYPE;
+    return MigrationFileType.DEBT_POSITIONS_TYPE_ORG_OPERATORS;
   }
 
   @Override
@@ -56,10 +57,9 @@ public class DebtPositionsTypeOrgOperatorsExportProcessingService extends BaseEx
   }
 
   @Override
-  protected List<DebtPositionsTypeOrgOperators> retrieveData(ExtractionRequest request, int pageSize, int offset) {
-    ExtractionFilters filters = request.getFilters();
+  protected List<DebtPositionsTypeOrgOperators> retrieveData(String ipaCode, ExtractionRequest request, int pageSize, int offset) {
     return debtPositionsTypeOrgOperatorsDao.findByFilters(
-      request.getIpaCode(),
+      ipaCode,
       null,
       null,
       pageSize,

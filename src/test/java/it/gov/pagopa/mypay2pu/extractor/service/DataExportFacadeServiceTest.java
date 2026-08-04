@@ -4,6 +4,7 @@ import it.gov.pagopa.mypay2pu.extractor.dto.ExportFileResult;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.exception.ExportFileTypeNotSupportedException;
+import it.gov.pagopa.mypay2pu.extractor.service.export.debtposition.DebtPositionExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.debtpositionstypeorgoperators.DebtPositionsTypeOrgOperatorsExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.debtpositiontype.DebtPositionTypeExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.debtpositiontypeorg.DebtPositionTypeOrgExportProcessingService;
@@ -38,6 +39,8 @@ class DataExportFacadeServiceTest {
   private DebtPositionTypeOrgExportProcessingService debtPositionTypeOrgExportProcessingServiceMock;
   @Mock
   private DebtPositionsTypeOrgOperatorsExportProcessingService debtPositionsTypeOrgOperatorsExportProcessingServiceMock;
+  @Mock
+  private DebtPositionExportProcessingService debtPositionExportProcessingServiceMock;
 
   @InjectMocks
   private DataExportFacadeService service;
@@ -51,7 +54,8 @@ class DataExportFacadeServiceTest {
         orgSilServiceExportProcessingServiceMock,
         debtPositionTypeExportProcessingServiceMock,
         debtPositionTypeOrgExportProcessingServiceMock,
-        debtPositionsTypeOrgOperatorsExportProcessingServiceMock
+        debtPositionsTypeOrgOperatorsExportProcessingServiceMock,
+        debtPositionExportProcessingServiceMock
       )
     );
   }
@@ -83,6 +87,10 @@ class DataExportFacadeServiceTest {
       case DEBT_POSITIONS_TYPE_ORG_OPERATORS -> {
         expected = new ExportFileResult(List.of("debtpositionstypeorgoperators_1_0.zip"), null);
         when(debtPositionsTypeOrgOperatorsExportProcessingServiceMock.executeExport(extractionId, request)).thenReturn(expected);
+      }
+      case DEBT_POSITIONS -> {
+        expected = new ExportFileResult(List.of("debtpositions_1_0.zip"), null);
+        when(debtPositionExportProcessingServiceMock.executeExport(extractionId, request)).thenReturn(expected);
       }
       default -> {
         ExportFileTypeNotSupportedException exception = assertThrows(

@@ -25,8 +25,7 @@ public class DataExportFacadeService {
                                  OrgSilServiceExportProcessingService orgSilServiceExportProcessingService,
                                  DebtPositionTypeExportProcessingService debtPositionTypeExportProcessingService,
                                  DebtPositionTypeOrgExportProcessingService debtPositionTypeOrgExportProcessingService,
-                                 DebtPositionsTypeOrgOperatorsExportProcessingService debtPositionsTypeOrgOperatorsExportProcessingService) {
-                                 DebtPositionTypeOrgExportProcessingService debtPositionTypeOrgExportProcessingService,
+                                 DebtPositionsTypeOrgOperatorsExportProcessingService debtPositionsTypeOrgOperatorsExportProcessingService,
                                  DebtPositionExportProcessingService debtPositionExportProcessingService) {
     this.organizationExportProcessingService = organizationExportProcessingService;
     this.orgSilServiceExportProcessingService = orgSilServiceExportProcessingService;
