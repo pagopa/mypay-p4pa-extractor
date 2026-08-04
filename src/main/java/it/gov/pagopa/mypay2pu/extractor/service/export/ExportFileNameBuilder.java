@@ -9,6 +9,7 @@ import java.util.Locale;
 public record ExportFileNameBuilder(
   String brokerIpaCode,
   String organizationIpaCode,
+  boolean useBrokerIpaAsPrefix,
   MigrationFileType migrationFileType,
   LocalDateTime timestamp,
   String version
@@ -58,9 +59,6 @@ public record ExportFileNameBuilder(
   }
 
   private String resolveCsvIpaCode() {
-    return migrationFileType == MigrationFileType.ORGANIZATIONS
-      || migrationFileType == MigrationFileType.DEBT_POSITIONS_TYPE
-      ? brokerIpaCode
-      : organizationIpaCode;
+    return useBrokerIpaAsPrefix ? brokerIpaCode : organizationIpaCode;
   }
 }
