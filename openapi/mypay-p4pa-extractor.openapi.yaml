@@ -25,7 +25,7 @@ paths:
               organizationsExtraction:
                 summary: Extract organizations
                 value:
-                  ipaCode: "00493410240"
+                  ipaCodes: ["00493410240", "01234567890"]
                   fileTypes: ORGANIZATIONS
                   filters:
                     modifiedFrom: "2024-01-01"
@@ -82,21 +82,29 @@ components:
     ExtractionRequest:
       type: object
       example:
-        ipaCode: "00493410240"
+        ipaCodes: ["00493410240", "01234567890"]
         fileTypes: ORGANIZATIONS
+        lastExtractionDate: "2026-06-18T12:00:00Z"
         filters:
           modifiedFrom: "2024-01-01"
           modifiedTo: "2026-06-18"
       required:
-        - ipaCode
+        - ipaCodes
         - fileTypes
       properties:
-        ipaCode:
-          type: string
-          minLength: 1
-          example: "00493410240"
+        ipaCodes:
+          type: array
+          minItems: 1
+          maxItems: 200
+          items:
+            type: string
+          example: ["00493410240", "01234567890"]
         fileTypes:
           $ref: '#/components/schemas/MigrationFileType'
+        lastExtractionDate:
+          type: string
+          format: date-time
+          example: "2026-06-18T12:00:00Z"
         filters:
           $ref: '#/components/schemas/ExtractionFilters'
           example:
@@ -137,8 +145,12 @@ components:
       properties:
         extractionId:
           type: string
-        ipaCode:
-          type: string
+        ipaCodes:
+          type: array
+          minItems: 1
+          maxItems: 200
+          items:
+            type: string
         fileTypes:
           $ref: '#/components/schemas/MigrationFileType'
         status:

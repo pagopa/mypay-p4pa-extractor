@@ -117,6 +117,8 @@ extractor:
         export-page-size: "\${EXPORT_PAGE_SIZE_DEBT_POSITIONS_TYPE_ORG:1000}"
       DEBT_POSITIONS_TYPE_ORG_OPERATORS:
         export-page-size: "\${EXPORT_PAGE_SIZE_DEBT_POSITIONS_TYPE_ORG_OPERATORS:1000}"
+      DEBT_POSITIONS:
+        export-page-size: "\${EXPORT_PAGE_SIZE_DEBT_POSITIONS:1000}"
   basic-auth:
     username: "\${CLIENT_ID:client}"
     password: "\${CLIENT_SECRET:secret}"

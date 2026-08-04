@@ -2,6 +2,7 @@ package it.gov.pagopa.mypay2pu.extractor.mapper.debtpositiontypeorg;
 
 import it.gov.pagopa.mypay2pu.extractor.config.MyPayProperties;
 import it.gov.pagopa.mypay2pu.extractor.dao.DebtPositionTypeOrgDao;
+import it.gov.pagopa.mypay2pu.extractor.exception.CsvRowMappingException;
 import it.gov.pagopa.mypay2pu.extractor.dto.export.PuDebtPositionTypeOrgDTO;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.DebtPositionTypeOrg;
 import it.gov.pagopa.mypay2pu.extractor.connector.mydictionary.MyDictionaryClient;
@@ -10,11 +11,21 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.HttpStatusCodeException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -103,8 +114,6 @@ class DebtPositionTypeOrgMapperTest {
       null, false, null, null, null, false, false
     );
 
-    when(myDictionaryClientMock.getSpontaneousFormStructure(debtPositionTypeOrg.spontaneousFormCode()))
-      .thenReturn(null);
     when(debtPositionTypeOrgDaoMock.isExternal(debtPositionTypeOrg.ipaCode(), debtPositionTypeOrg.code()))
       .thenReturn(false);
 
@@ -141,6 +150,8 @@ class DebtPositionTypeOrgMapperTest {
     );
     assertEquals("Oggetto %posizioneDebitoria_descrizione%", result.getIoTemplateSubject());
 
+    verify(myDictionaryClientMock, never()).getSpontaneousFormStructure(null);
+
     TestUtils.checkNotNullFields(
       result,
       "balance",
@@ -155,6 +166,46 @@ class DebtPositionTypeOrgMapperTest {
       "notifyOutcomePushOrgSilServiceCode",
       "amountActualizationOrgSilServiceCode",
       "serviceCode"
+    );
+  }
+
+  @ParameterizedTest
+  @MethodSource("httpErrorStatuses")
+  void mapShouldKeepRowWhenMyDictionaryReturnsHttpErrorAndFlagSpontaneousIsFalse(HttpStatusCodeException httpException) {
+    DebtPositionTypeOrg debtPositionTypeOrg = new DebtPositionTypeOrg(
+      "IPA1", "BILANCIO", "TAX", "Tax", "IT60X0542811101000000123456",
+      null, null, null, null, null, null, false, true, false, true, false,
+      null, false, null, "SPONT_FORM", null, false, false
+    );
+    when(myDictionaryClientMock.getSpontaneousFormStructure("SPONT_FORM")).thenThrow(httpException);
+    when(debtPositionTypeOrgDaoMock.isExternal(debtPositionTypeOrg.ipaCode(), debtPositionTypeOrg.code()))
+      .thenReturn(false);
+
+    PuDebtPositionTypeOrgDTO result = debtPositionTypeOrgMapper.map(debtPositionTypeOrg);
+
+    assertNull(result.getSpontaneousFormStructure());
+    assertEquals(false, result.getFlagSpontaneous());
+  }
+
+  @ParameterizedTest
+  @MethodSource("httpErrorStatuses")
+  void mapShouldDiscardRowWhenMyDictionaryReturnsHttpErrorAndFlagSpontaneousIsTrue(HttpStatusCodeException httpException) {
+    DebtPositionTypeOrg debtPositionTypeOrg = new DebtPositionTypeOrg(
+      "IPA1", "BILANCIO", "TAX", "Tax", "IT60X0542811101000000123456",
+      null, null, null, null, null, null, false, true, true, true, false,
+      null, false, null, "SPONT_FORM", null, false, false
+    );
+    when(myDictionaryClientMock.getSpontaneousFormStructure("SPONT_FORM")).thenThrow(httpException);
+
+    assertThrows(CsvRowMappingException.class, () -> debtPositionTypeOrgMapper.map(debtPositionTypeOrg));
+    verify(debtPositionTypeOrgDaoMock, never()).isExternal(debtPositionTypeOrg.ipaCode(), debtPositionTypeOrg.code());
+  }
+
+  static java.util.stream.Stream<HttpStatusCodeException> httpErrorStatuses() {
+    return java.util.stream.Stream.of(
+      new HttpClientErrorException(HttpStatus.NOT_FOUND, "Not Found", HttpHeaders.EMPTY, new byte[0], null),
+      new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error", HttpHeaders.EMPTY, new byte[0], null),
+      new HttpServerErrorException(HttpStatus.SERVICE_UNAVAILABLE, "Service Unavailable", HttpHeaders.EMPTY, new byte[0], null)
     );
   }
 }

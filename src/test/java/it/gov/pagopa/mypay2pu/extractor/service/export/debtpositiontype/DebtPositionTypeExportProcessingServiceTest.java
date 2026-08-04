@@ -10,6 +10,7 @@ import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.mapper.debtpositiontype.DebtPositionTypeMapper;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.DebtPositionType;
 import it.gov.pagopa.mypay2pu.extractor.service.FileArchiverService;
+import it.gov.pagopa.mypay2pu.extractor.service.export.BaseExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.CsvPartitionWriterService;
 import it.gov.pagopa.mypay2pu.extractor.service.files.CsvService;
 import it.gov.pagopa.mypay2pu.extractor.service.files.ZipFileService;
@@ -71,7 +72,7 @@ class DebtPositionTypeExportProcessingServiceTest {
 
   @Test
   void whenDataIsAvailableThenExportPagedDebtPositionTypesToArchive() throws Exception {
-    ExtractionRequest request = new ExtractionRequest("ORG_IPA", MigrationFileType.DEBT_POSITIONS_TYPE, new ExtractionFilters());
+    ExtractionRequest request = new ExtractionRequest(List.of("ORG_IPA", "ORG_IPA_2"), MigrationFileType.DEBT_POSITIONS_TYPE, null, new ExtractionFilters());
     DebtPositionType first = debtPositionType("TYPE_1");
     DebtPositionType second = invalidDebtPositionType();
     PuDebtPositionTypeDTO firstDto = dto("TYPE_1");
@@ -117,7 +118,7 @@ class DebtPositionTypeExportProcessingServiceTest {
 
   @Test
   void whenNoValidationErrorsThenArchiveContainsOnlyExportCsv() throws Exception {
-    ExtractionRequest request = new ExtractionRequest("ORG_IPA", MigrationFileType.DEBT_POSITIONS_TYPE, new ExtractionFilters());
+    ExtractionRequest request = new ExtractionRequest(List.of("ORG_IPA"), MigrationFileType.DEBT_POSITIONS_TYPE, null, new ExtractionFilters());
     DebtPositionType first = debtPositionType("TYPE_1");
     DebtPositionType second = debtPositionType("TYPE_2");
     when(debtPositionTypeDaoMock.findByFilters(request.getFilters(), 2, 0)).thenReturn(List.of(first, second));
@@ -138,6 +139,11 @@ class DebtPositionTypeExportProcessingServiceTest {
     inOrder.verify(debtPositionTypeDaoMock).findByFilters(request.getFilters(), 2, 0);
     inOrder.verify(debtPositionTypeDaoMock).findByFilters(request.getFilters(), 2, 2);
 
+  }
+
+  @Test
+  void whenCheckingSuperclassThenServiceIsAggregated() {
+    assertEquals(BaseExportProcessingService.class, service.getClass().getSuperclass());
   }
 
   private ExtractorExportProperties exportProperties() {
