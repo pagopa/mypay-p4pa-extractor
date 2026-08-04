@@ -64,7 +64,7 @@ class DataExportFacadeServiceTest {
   @EnumSource(MigrationFileType.class)
   void whenExecuteExportThenRouteByFileType(MigrationFileType fileType) {
     String extractionId = "extraction-id";
-    ExtractionRequest request = new ExtractionRequest("IPA_CODE", fileType);
+    ExtractionRequest request = new ExtractionRequest(List.of("IPA_CODE"), fileType);
     ExportFileResult expected = null;
 
     switch (fileType) {
