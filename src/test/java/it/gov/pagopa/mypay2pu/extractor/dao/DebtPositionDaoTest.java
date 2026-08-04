@@ -55,9 +55,13 @@ class DebtPositionDaoTest {
       eq(FIND_DEBT_POSITIONS_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         "IPA1".equals(params.getValue("codIpaEnte"))
+          && Boolean.FALSE.equals(params.getValue("skipGpdIupdFilter"))
           && "IUPD-1".equals(params.getValue("gpdIupd"))
+          && Boolean.FALSE.equals(params.getValue("skipCodIudFilter"))
           && "IUD-1".equals(params.getValue("codIud"))
+          && Boolean.FALSE.equals(params.getValue("skipUpdatedFromFilter"))
           && LocalDate.of(2026, Month.JANUARY, 10).atStartOfDay().equals(params.getValue("updatedFrom"))
+          && Boolean.FALSE.equals(params.getValue("skipUpdatedToExclusiveFilter"))
           && LocalDate.of(2026, Month.JANUARY, 13).atStartOfDay().equals(params.getValue("updatedToExclusive"))
           && Boolean.FALSE.equals(params.getValue("debtPositionTypeOrgCodesEmpty"))
           && List.of("TYPE_1", "TYPE_2").equals(params.getValue("debtPositionTypeOrgCodes"))
@@ -81,12 +85,16 @@ class DebtPositionDaoTest {
       eq(FIND_CANCELLED_DEBT_POSITIONS_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         "IPA2".equals(params.getValue("codIpaEnte"))
+          && Boolean.TRUE.equals(params.getValue("skipGpdIupdFilter"))
           && params.hasValue("gpdIupd")
           && params.getValue("gpdIupd") == null
+          && Boolean.TRUE.equals(params.getValue("skipCodIudFilter"))
           && params.hasValue("codIud")
           && params.getValue("codIud") == null
+          && Boolean.TRUE.equals(params.getValue("skipUpdatedFromFilter"))
           && params.hasValue("updatedFrom")
           && params.getValue("updatedFrom") == null
+          && Boolean.TRUE.equals(params.getValue("skipUpdatedToExclusiveFilter"))
           && params.hasValue("updatedToExclusive")
           && params.getValue("updatedToExclusive") == null
           && Boolean.TRUE.equals(params.getValue("debtPositionTypeOrgCodesEmpty"))

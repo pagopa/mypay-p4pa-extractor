@@ -91,9 +91,13 @@ public class DebtPositionDao {
     boolean debtPositionTypeOrgCodesEmpty = CollectionUtils.isEmpty(debtPositionTypeOrgCodes);
     return QueryUtils.buildPaginatedFilterParams(limit, offset)
       .addValue("codIpaEnte", codIpaEnte)
+      .addValue("skipGpdIupdFilter", gpdIupd == null)
       .addValue("gpdIupd", gpdIupd)
+      .addValue("skipCodIudFilter", codIud == null)
       .addValue("codIud", codIud)
+      .addValue("skipUpdatedFromFilter", filters == null || filters.getModifiedFrom() == null)
       .addValue("updatedFrom", DateTimeUtils.toStartOfDay(filters != null ? filters.getModifiedFrom() : null))
+      .addValue("skipUpdatedToExclusiveFilter", filters == null || filters.getModifiedTo() == null)
       .addValue("updatedToExclusive", DateTimeUtils.toStartOfNextDay(filters != null ? filters.getModifiedTo() : null))
       .addValue("debtPositionTypeOrgCodesEmpty", debtPositionTypeOrgCodesEmpty)
       .addValue("debtPositionTypeOrgCodes", debtPositionTypeOrgCodesEmpty ? Collections.singletonList(null) : debtPositionTypeOrgCodes);
