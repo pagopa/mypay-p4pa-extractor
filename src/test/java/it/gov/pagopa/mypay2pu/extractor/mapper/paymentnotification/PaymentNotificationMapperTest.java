@@ -3,6 +3,7 @@ package it.gov.pagopa.mypay2pu.extractor.mapper.paymentnotification;
 import it.gov.pagopa.mypay2pu.extractor.dto.export.PuPaymentNotificationDTO;
 import it.gov.pagopa.mypay2pu.extractor.exception.CsvRowMappingException;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.PaymentNotification;
+import it.gov.pagopa.mypay2pu.extractor.utils.TestUtils;
 import it.gov.pagopa.pu.classification.dto.generated.PersonEntityType;
 import org.junit.jupiter.api.Test;
 
@@ -12,7 +13,6 @@ import java.time.LocalDateTime;
 import java.time.Month;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class PaymentNotificationMapperTest {
@@ -45,6 +45,7 @@ class PaymentNotificationMapperTest {
     assertEquals(paymentNotification.causaleVersamento(), result.getRemittanceInformation());
     assertEquals(paymentNotification.datiSpecificiRiscossione(), result.getTransferCategory());
     assertEquals(paymentNotification.bilancio(), result.getBalance());
+    TestUtils.checkNotNullFields(result);
   }
 
   @Test
@@ -58,14 +59,17 @@ class PaymentNotificationMapperTest {
     PuPaymentNotificationDTO result = paymentNotificationMapper.map(paymentNotification);
 
     assertEquals(PersonEntityType.G, result.getDebtorUniqueIdentifierType());
-    assertNull(result.getDebtorAddress());
-    assertNull(result.getDebtorCivic());
-    assertNull(result.getDebtorPostalCode());
-    assertNull(result.getDebtorLocation());
-    assertNull(result.getDebtorProvince());
-    assertNull(result.getDebtorNation());
-    assertNull(result.getDebtorEmail());
-    assertNull(result.getBalance());
+    TestUtils.checkNotNullFields(
+      result,
+      "debtorAddress",
+      "debtorCivic",
+      "debtorPostalCode",
+      "debtorLocation",
+      "debtorProvince",
+      "debtorNation",
+      "debtorEmail",
+      "balance"
+    );
   }
 
   @Test

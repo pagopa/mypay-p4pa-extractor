@@ -66,6 +66,7 @@ class ExportControllerTest {
     ExtractionRequest request = new ExtractionRequest(
       List.of("IPA_CODE_TEST"),
       MigrationFileType.ORGANIZATIONS,
+      null,
       new ExtractionFilters()
     );
     when(exportFileHandlerServiceMock.createExtraction(request)).thenReturn("generated-extraction-id");
@@ -107,6 +108,7 @@ class ExportControllerTest {
     ExtractionRequest request = new ExtractionRequest(
       List.of("IPA_CODE_TEST"),
       MigrationFileType.ORGANIZATIONS,
+      null,
       new ExtractionFilters(
         LocalDate.of(2026, Month.JANUARY, 2),
         LocalDate.of(2026, Month.JANUARY, 1),
