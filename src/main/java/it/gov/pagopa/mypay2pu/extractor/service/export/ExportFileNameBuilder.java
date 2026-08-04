@@ -59,6 +59,7 @@ public record ExportFileNameBuilder(
 
   private String resolveCsvIpaCode() {
     return migrationFileType == MigrationFileType.ORGANIZATIONS
+      || migrationFileType == MigrationFileType.DEBT_POSITIONS_TYPE
       ? brokerIpaCode
       : organizationIpaCode;
   }
