@@ -110,4 +110,36 @@ class MyDictionaryToMyPayMapperTest {
     assertThrows(IllegalArgumentException.class, () -> mapper.map("[\"not-a-field\"]"));
     assertThrows(IllegalArgumentException.class, () -> mapper.map("[{\"name\":\"field\"}]"));
   }
+
+  @Test
+  void mapShouldAcceptCamelCaseBooleanPropertiesFromMyDictionary() {
+    MyPayForm result = mapper.map("""
+      [{
+        "name":"sys_send_mysearch",
+        "required":false,
+        "html_render":"NONE",
+        "default_value":"true",
+        "ins_order":0,
+        "isIndexable":false,
+        "renderable_order":0,
+        "ser_order":0,
+        "lis_order":0,
+        "isInsertable":false,
+        "isRenderable":false,
+        "isSearchable":false,
+        "isListable":false,
+        "isAssociation":false,
+        "isDetailLink":false,
+        "min_occurences":0,
+        "max_occurences":0
+      }]
+      """);
+
+    FieldBean fieldBean = result.getFieldBeans().getFirst();
+
+    assertEquals(false, fieldBean.isIndexable());
+    assertEquals(false, fieldBean.isInsertable());
+    assertEquals(false, fieldBean.isRenderable());
+    assertEquals("center", fieldBean.getHtmlClass());
+  }
 }

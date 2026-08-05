@@ -11,20 +11,21 @@ import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @Component
 public class MyDictionaryToMyPayMapper {
 
   private static final Type FIELD_BEANS_TYPE = new TypeToken<List<FieldBean>>() {}.getType();
-  private static final Set<String> REQUIRED_BOOLEAN_FIELDS = Set.of(
-    "is_indexable",
-    "is_insertable",
-    "is_renderable",
-    "is_searchable",
-    "is_listable",
-    "is_association",
-    "is_detail_link"
+  private static final Map<String, String> REQUIRED_BOOLEAN_FIELDS = Map.of(
+    "isIndexable", "is_indexable",
+    "isInsertable", "is_insertable",
+    "isRenderable", "is_renderable",
+    "isSearchable", "is_searchable",
+    "isListable", "is_listable",
+    "isAssociation", "is_association",
+    "isDetailLink", "is_detail_link"
   );
   private static final Set<String> REQUIRED_NUMBER_FIELDS = Set.of(
     "ins_order",
@@ -98,7 +99,9 @@ public class MyDictionaryToMyPayMapper {
       JsonObject jsonFieldBean = fieldBean.getAsJsonObject();
       requireString(jsonFieldBean, "name");
       requireString(jsonFieldBean, "html_render");
-      REQUIRED_BOOLEAN_FIELDS.forEach(fieldName -> requireBoolean(jsonFieldBean, fieldName));
+      REQUIRED_BOOLEAN_FIELDS.forEach(
+        (camelCaseName, snakeCaseName) -> requireBoolean(jsonFieldBean, camelCaseName, snakeCaseName)
+      );
       REQUIRED_NUMBER_FIELDS.forEach(fieldName -> requireNumber(jsonFieldBean, fieldName));
 
       JsonElement subfields = jsonFieldBean.get("subfields");
@@ -132,7 +135,7 @@ public class MyDictionaryToMyPayMapper {
 
   private void copyProperty(JsonObject fieldBean, String sourceName, String targetName) {
     JsonElement property = fieldBean.get(sourceName);
-    if (property != null) {
+    if (property != null && !fieldBean.has(targetName)) {
       fieldBean.add(targetName, property);
     }
   }
@@ -145,11 +148,14 @@ public class MyDictionaryToMyPayMapper {
     }
   }
 
-  private void requireBoolean(JsonObject fieldBean, String fieldName) {
-    JsonElement fieldValue = fieldBean.get(fieldName);
+  private void requireBoolean(JsonObject fieldBean, String camelCaseName, String snakeCaseName) {
+    JsonElement fieldValue = fieldBean.get(camelCaseName);
+    if (fieldValue == null) {
+      fieldValue = fieldBean.get(snakeCaseName);
+    }
     if (fieldValue == null || fieldValue.isJsonNull() || !fieldValue.isJsonPrimitive()
       || !fieldValue.getAsJsonPrimitive().isBoolean()) {
-      throw new IllegalArgumentException("MyDictionary response body contains an invalid " + fieldName);
+      throw new IllegalArgumentException("MyDictionary response body contains an invalid " + camelCaseName);
     }
   }
 
