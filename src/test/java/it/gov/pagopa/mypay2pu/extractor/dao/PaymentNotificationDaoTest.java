@@ -33,17 +33,17 @@ class PaymentNotificationDaoTest {
   private static final String FIND_BY_FILTERS_SQL = "SELECT payment notifications";
 
   @Mock
-  private NamedParameterJdbcTemplate mp4JdbcTemplateMock;
+  private NamedParameterJdbcTemplate mypivotJdbcTemplateMock;
   @Mock
   private SqlLoader sqlLoaderMock;
 
   @AfterEach
   void tearDown() {
-    verifyNoMoreInteractions(mp4JdbcTemplateMock, sqlLoaderMock);
+    verifyNoMoreInteractions(mypivotJdbcTemplateMock, sqlLoaderMock);
   }
 
   @Test
-  void givenFiltersWhenFindThenQueryPagedMp4Database() {
+  void givenFiltersWhenFindThenQueryPagedMyPivotDatabase() {
     PaymentNotificationDao dao = buildDao();
     String ipaCode = "IPA1";
     String iud = "IUD-1";
@@ -52,7 +52,7 @@ class PaymentNotificationDaoTest {
     LocalDateTime createdTo = LocalDateTime.of(2026, Month.JANUARY, 11, 10, 30);
     List<PaymentNotification> expected = List.of(buildPaymentNotification());
 
-    when(mp4JdbcTemplateMock.query(
+    when(mypivotJdbcTemplateMock.query(
       eq(FIND_BY_FILTERS_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         ipaCode.equals(params.getValue("ipaCode"))
@@ -80,7 +80,7 @@ class PaymentNotificationDaoTest {
   void givenNoOptionalFiltersWhenFindThenSkipTheirFilters() {
     PaymentNotificationDao dao = buildDao();
 
-    when(mp4JdbcTemplateMock.query(
+    when(mypivotJdbcTemplateMock.query(
       eq(FIND_BY_FILTERS_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         "IPA1".equals(params.getValue("ipaCode"))
@@ -133,17 +133,33 @@ class PaymentNotificationDaoTest {
   }
 
   @Test
+  void givenMyPivotDisabledWhenFindThenRejectBeforeDatabaseInteraction() {
+    PaymentNotificationDao dao = buildDao(null);
+
+    IllegalStateException exception = assertThrows(
+      IllegalStateException.class,
+      () -> dao.findByFilters("IPA1", null, null, null, null, 10, 0)
+    );
+
+    assertEquals("MyPivot datasource must be enabled for payment notification extraction", exception.getMessage());
+  }
+
+  @Test
   void givenPaymentNotificationSqlWhenLoadedThenUsesIpaCodeFilterAndCreatedOrdering() throws Exception {
-    String sql = Files.readString(Path.of("src/main/resources/db/mypay/payment-notification/payment-notification.sql"));
+    String sql = Files.readString(Path.of("src/main/resources/db/mypivot/payment-notification/payment-notification.sql"));
 
     assertTrue(sql.contains("e.cod_ipa_ente = :ipaCode"));
     assertTrue(sql.contains("ORDER BY fi.dt_creazione"));
   }
 
   private PaymentNotificationDao buildDao() {
-    when(sqlLoaderMock.load("mypay/payment-notification/payment-notification.sql"))
+    return buildDao(mypivotJdbcTemplateMock);
+  }
+
+  private PaymentNotificationDao buildDao(NamedParameterJdbcTemplate mypivotJdbcTemplate) {
+    when(sqlLoaderMock.load("mypivot/payment-notification/payment-notification.sql"))
       .thenReturn(FIND_BY_FILTERS_SQL);
-    return new PaymentNotificationDao(mp4JdbcTemplateMock, sqlLoaderMock);
+    return new PaymentNotificationDao(mypivotJdbcTemplate, sqlLoaderMock);
   }
 
   private PaymentNotification buildPaymentNotification() {

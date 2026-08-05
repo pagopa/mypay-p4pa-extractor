@@ -19,7 +19,7 @@ Supports **12 MigrationFileType**:
 | 5 | `DEBT_POSITIONS_TYPE_ORG_OPERATORS` | MyPay4 | CSV |
 | 6 | `DEBT_POSITIONS` | MyPay4 | CSV |
 | 7 | `DEBT_POSITIONS_PAID` | MyPay4 | XML (RT) |
-| 8 | `PAYMENT_NOTIFICATION` | MyPay4 | CSV |
+| 8 | `PAYMENT_NOTIFICATION` | myPivot4 | CSV |
 | 9 | `PAYMENTS_REPORTING` | FESP | XML (FdR) |
 | 10 | `TREASURY_CSV_COMPLETE` | myPivot4 *(optional)* | CSV (IUF only) |
 | 11 | `ASSESSMENTS` | myPivot4 *(optional)* | CSV |
@@ -74,9 +74,9 @@ See [log configured pattern](/src/main/resources/logback-spring.xml).
 
 ### 🗄️ Resources
 
-* MyPay4 PostgreSQL database (read-only — types 1–8)
+* MyPay4 PostgreSQL database (read-only — types 1–7)
 * FESP PostgreSQL database (read-only — type 9)
-* myPivot4 PostgreSQL database (read-only — types 10–12, **optional**, enabled via `MYPIVOT_ENABLED=true`)
+* myPivot4 PostgreSQL database (read-only — types 8, 10–12, **optional**, enabled via `MYPIVOT_ENABLED=true`)
 
 ### 🌍 External
 
@@ -232,7 +232,7 @@ To customize them, add to the classpath a resource with the same path as the que
 | debt_positions_type_org                      | `/db/mypay/debt-position-type-org/debt-position-type-org.sql` | <li>ipaCode: organization IPA code<br><li>skipDebtPositionTypeOrgCodesFilter: `true` when no debt position type org code filter is provided<br><li>debtPositionTypeOrgCodes: debt position type org codes to include<br><li>limit: page size (> 0)<br><li>offset: page start (>= 0, nullable) | `DEBT_POSITIONS_TYPE_ORG` extractor scoped to one organization. Reads `mygov_ente_tipo_dovuto` joined to `mygov_ente` and supports logical-key and pagination filters. |
 | debt_positions_type_org_operators            | `/db/mypay/debt-positions-type-org-operators/debt-positions-type-org-operators.sql` | <li>ipaCode: organization IPA code<br><li>operatorFiscalCode: operator fiscal code filter (nullable)<br><li>debtPositionTypeOrgCode: debt position type org logical key filter (nullable)<br><li>limit: page size (> 0)<br><li>offset: page start (>= 0) | `DEBT_POSITIONS_TYPE_ORG_OPERATORS` extractor scoped to one organization. Reads MyPay operator associations for debt position types and supports optional operator and logical-key filters with pagination. |
 | debt_positions (open/updated)                | `/db/mypay/debt-positions/debt-positions-open.sql` | <li>codIpaEnte: organization IPA code (required)<br><li>gpdIupd: debt position external key filter on `mygov_dovuto.gpd_iupd` (nullable)<br><li>codIud: debt position IUD filter on `mygov_dovuto.cod_iud` (nullable)<br><li>debtPositionTypeOrgCodes: filter on `mygov_dovuto.cod_tipo_dovuto` using an `IN` clause (nullable list)<br><li>updatedFrom: extraction start date at 00:00 applied to `mygov_dovuto.dt_ultima_modifica` (nullable)<br><li>updatedToExclusive: extraction end date +1 day at 00:00 applied to `mygov_dovuto.dt_ultima_modifica` (nullable)<br><li>limit: page size (> 0)<br><li>offset: page start (>= 0, nullable) | `DEBT_POSITIONS` extractor for open or modified debt positions from `mygov_dovuto`, joined to `mygov_flusso` and `mygov_ente`, with optional separate filters on `gpd_iupd` and `cod_iud`. |
-| payment_notification                         | `/db/mypay/payment-notification/payment-notification.sql` | <li>ipaCode: organization IPA code (required)<br><li>iud: payment IUD (nullable)<br><li>iuv: payment IUV (nullable)<br><li>createdFrom: creation timestamp lower bound (nullable)<br><li>createdTo: creation timestamp upper bound (nullable)<br><li>skipCreatedFromFilter: flag indicating whether the lower bound creation timestamp filter should be skipped<br><li>skipCreatedToFilter: flag indicating whether the upper bound creation timestamp filter should be skipped<br><li>limit: page size (> 0)<br><li>offset: page start (>= 0, nullable) | `PAYMENT_NOTIFICATION` extractor from `mygov_flusso_import`, joined to `mygov_ente`, filtered by organization and optionally by IUD, IUV, and creation timestamps. Results are ordered by creation timestamp. |
+| payment_notification                         | `/db/mypivot/payment-notification/payment-notification.sql` | <li>ipaCode: organization IPA code (required)<br><li>iud: payment IUD (nullable)<br><li>iuv: payment IUV (nullable)<br><li>createdFrom: creation timestamp lower bound (nullable)<br><li>createdTo: creation timestamp upper bound (nullable)<br><li>skipCreatedFromFilter: flag indicating whether the lower bound creation timestamp filter should be skipped<br><li>skipCreatedToFilter: flag indicating whether the upper bound creation timestamp filter should be skipped<br><li>limit: page size (> 0)<br><li>offset: page start (>= 0, nullable) | `PAYMENT_NOTIFICATION` extractor from MyPivot `mygov_flusso_import`, joined to `mygov_ente`, filtered by organization and optionally by IUD, IUV, and creation timestamps. Results are ordered by creation timestamp. |
 | debt_positions (cancelled)                   | `/db/mypay/debt-positions/debt-positions-cancelled.sql` | <li>codIpaEnte: organization IPA code (required)<br><li>gpdIupd: debt position external key filter on `mygov_dovuto_elaborato.gpd_iupd` (nullable)<br><li>codIud: debt position IUD filter on `mygov_dovuto_elaborato.cod_iud` (nullable)<br><li>debtPositionTypeOrgCodes: filter on `mygov_dovuto_elaborato.cod_tipo_dovuto` using an `IN` clause (nullable list)<br><li>updatedFrom: extraction start date at 00:00 applied to `mygov_dovuto_elaborato.dt_creazione` (nullable)<br><li>updatedToExclusive: extraction end date +1 day at 00:00 applied to `mygov_dovuto_elaborato.dt_creazione` (nullable)<br><li>limit: page size (> 0)<br><li>offset: page start (>= 0, nullable) | `DEBT_POSITIONS` extractor for cancelled debt positions from `mygov_dovuto_elaborato`, joined to `mygov_flusso`, `mygov_ente`, and `mygov_anagrafica_stato`, constrained to `ANNULLATO` status and without `UNION` with open records. |
 
 ### MyPivot
