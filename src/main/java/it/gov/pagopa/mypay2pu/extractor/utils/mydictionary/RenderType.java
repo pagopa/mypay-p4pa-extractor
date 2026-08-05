@@ -1,0 +1,29 @@
+package it.gov.pagopa.mypay2pu.extractor.utils.mydictionary;
+
+public enum RenderType {
+  TEXT,
+  INTEGER,
+  DOUBLE,
+  BOOLEAN,
+  DATE,
+  DATETIME,
+  TEXTAREA,
+  HTMLAREA,
+  IMAGE,
+  SELECT,
+  MULTILINK,
+  FILE,
+  NONE,
+  SINGLESELECT,
+  MULTISELECT,
+  MULTIFIELD,
+  ASSOCIATION,
+  LINKGENERATOR,
+  TAGS,
+  TAB,
+  LABEL,
+  CURRENCY,
+  CURRENCY_LABEL,
+  DYNAMIC_SELECT,
+  DYNAMIC_AMOUNT_LABEL
+}
