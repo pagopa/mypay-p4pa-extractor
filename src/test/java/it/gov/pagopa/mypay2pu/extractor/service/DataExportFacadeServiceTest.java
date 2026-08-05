@@ -8,6 +8,7 @@ import it.gov.pagopa.mypay2pu.extractor.service.export.debtpositiontype.DebtPosi
 import it.gov.pagopa.mypay2pu.extractor.service.export.debtpositiontypeorg.DebtPositionTypeOrgExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.organization.OrganizationExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.orgsil.OrgSilServiceExportProcessingService;
+import it.gov.pagopa.mypay2pu.extractor.service.export.paymentnotification.PaymentNotificationExportProcessingService;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterEach;
@@ -33,6 +34,8 @@ class DataExportFacadeServiceTest {
   private DebtPositionTypeOrgExportProcessingService debtPositionTypeOrgExportProcessingServiceMock;
   @Mock
   private DebtPositionExportProcessingService debtPositionExportProcessingServiceMock;
+  @Mock
+  private PaymentNotificationExportProcessingService paymentNotificationExportProcessingServiceMock;
 
   @InjectMocks
   private DataExportFacadeService service;
@@ -44,7 +47,8 @@ class DataExportFacadeServiceTest {
       orgSilServiceExportProcessingServiceMock,
       debtPositionTypeExportProcessingServiceMock,
       debtPositionTypeOrgExportProcessingServiceMock,
-      debtPositionExportProcessingServiceMock
+      debtPositionExportProcessingServiceMock,
+      paymentNotificationExportProcessingServiceMock
     );
   }
 
@@ -97,6 +101,17 @@ class DataExportFacadeServiceTest {
     ExtractionRequest request = new ExtractionRequest(List.of("IPA_CODE"), MigrationFileType.DEBT_POSITIONS);
     ExportFileResult expected = new ExportFileResult(List.of("debtpositions_2_0.zip"), null);
     when(debtPositionExportProcessingServiceMock.executeExport("extraction-id", request)).thenReturn(expected);
+
+    ExportFileResult result = service.executeExport("extraction-id", request);
+
+    assertEquals(expected, result);
+  }
+
+  @Test
+  void whenExecutePaymentNotificationExportThenDelegateToPaymentNotificationProcessor() {
+    ExtractionRequest request = new ExtractionRequest(List.of("IPA_CODE"), MigrationFileType.PAYMENT_NOTIFICATION);
+    ExportFileResult expected = new ExportFileResult(List.of("paymentnotification_1_0.zip"), null);
+    when(paymentNotificationExportProcessingServiceMock.executeExport("extraction-id", request)).thenReturn(expected);
 
     ExportFileResult result = service.executeExport("extraction-id", request);
 
