@@ -2,7 +2,9 @@ package it.gov.pagopa.mypay2pu.extractor.validation;
 
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
+import it.gov.pagopa.mypay2pu.extractor.exception.BadRequestException;
 import it.gov.pagopa.mypay2pu.extractor.exception.ExportFileTypeNotSupportedException;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -53,6 +55,11 @@ class ExtractionValidationFacadeTest {
       default -> assertThrows(ExportFileTypeNotSupportedException.class,
         () -> validationFacade.validate(request));
     }
+  }
+
+  @Test
+  void givenNullRequestWhenValidateThenThrowException() {
+    assertThrows(BadRequestException.class, () -> validationFacade.validate(null));
   }
 
   private ExtractionRequest request(MigrationFileType fileType) {
