@@ -5,9 +5,7 @@ import it.gov.pagopa.mypay2pu.extractor.model.mp4.DebtPosition;
 import it.gov.pagopa.mypay2pu.extractor.utils.DateTimeUtils;
 import it.gov.pagopa.mypay2pu.extractor.utils.QueryUtils;
 import it.gov.pagopa.mypay2pu.extractor.utils.SqlLoader;
-import it.gov.pagopa.mypay2pu.extractor.validation.LogicalKeyPair;
-import it.gov.pagopa.mypay2pu.extractor.validation.PairedLogicalKeyValidator;
-import org.apache.commons.collections.CollectionUtils;
+import it.gov.pagopa.mypay2pu.extractor.validation.CsvLogicalKeyValidator;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.DataClassRowMapper;
@@ -15,9 +13,9 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
 
 @Repository
@@ -71,25 +69,17 @@ public class DebtPositionDao {
   }
 
   private MapSqlParameterSource buildParams(String codIpaEnte, ExtractionFilters filters, int limit, int offset) {
-    LogicalKeyPair logicalKeyPair = PairedLogicalKeyValidator.parseLogicalKey(filters != null ? filters.getLogicalKey() : null);
-    List<String> gpdIupds = logicalKeyPair.left();
-    List<String> iuds = logicalKeyPair.right();
+    List<String> iuvs = CsvLogicalKeyValidator.parseLogicalKey(filters.getLogicalKey());
     LocalDate dateFrom = filters != null ? filters.getDateFrom() : null;
     LocalDate dateTo = filters != null ? filters.getDateTo() : null;
-    boolean gpdIupdsEmpty = CollectionUtils.isEmpty(gpdIupds);
-    boolean iudsEmpty = CollectionUtils.isEmpty(iuds);
+    boolean iuvsEmpty = CollectionUtils.isEmpty(iuvs);
     return QueryUtils.buildPaginatedFilterParams(limit, offset)
       .addValue("codIpaEnte", codIpaEnte)
-      .addValue("skipGpdIupdFilter", gpdIupd == null)
-      .addValue("gpdIupd", gpdIupd)
-      .addValue("skipCodIudFilter", codIud == null)
-      .addValue("codIud", codIud)
-      .addValue("skipUpdatedFromFilter", filters == null || filters.getModifiedFrom() == null)
-      .addValue("updatedFrom", DateTimeUtils.toStartOfDay(filters != null ? filters.getModifiedFrom() : null))
-      .addValue("skipUpdatedToExclusiveFilter", filters == null || filters.getModifiedTo() == null)
-      .addValue("updatedToExclusive", DateTimeUtils.toStartOfNextDay(filters != null ? filters.getModifiedTo() : null))
-      .addValue("debtPositionTypeOrgCodesEmpty", debtPositionTypeOrgCodesEmpty)
-      .addValue("debtPositionTypeOrgCodes", debtPositionTypeOrgCodesEmpty ? Collections.singletonList(null) : debtPositionTypeOrgCodes);
-  }
+      .addValue("skipCodIuvFilter", iuvsEmpty)
+      .addValue("iuvs", iuvs)
+      .addValue("skipDateFromFilter", dateFrom == null)
+      .addValue("dateFrom", DateTimeUtils.toStartOfDay(dateFrom))
+      .addValue("skipDateToExclusiveFilter", dateTo == null)
+      .addValue("dateToExclusive", DateTimeUtils.toStartOfNextDay(dateTo));
   }
 }

@@ -56,7 +56,7 @@ class ExtractionValidationFacadeTest {
 
   @Test
   void givenPairedFileTypeWhenValidateThenInvokePairedValidator() {
-    ExtractionRequest request = request(MigrationFileType.DEBT_POSITIONS);
+    ExtractionRequest request = request(MigrationFileType.DEBT_POSITIONS_TYPE_ORG_OPERATORS);
     ExtractionValidationFacade facade = facade();
 
     facade.validate(request);
