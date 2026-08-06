@@ -111,6 +111,41 @@ class DebtPositionDaoTest {
   }
 
   @Test
+  void givenFiltersWithoutDatesWhenFindDebtPositionsThenSkipDateFilters() {
+    DebtPositionDao dao = buildDao();
+    List<DebtPosition> expected = List.of(buildDebtPosition());
+
+    when(mp4JdbcTemplateMock.query(
+      eq(FIND_DEBT_POSITIONS_SQL),
+      ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
+        "IPA1".equals(params.getValue("codIpaEnte"))
+          && Boolean.TRUE.equals(params.getValue("skipUpdatedFromFilter"))
+          && params.hasValue("updatedFrom")
+          && params.getValue("updatedFrom") == null
+          && Boolean.TRUE.equals(params.getValue("skipUpdatedToExclusiveFilter"))
+          && params.hasValue("updatedToExclusive")
+          && params.getValue("updatedToExclusive") == null
+          && Boolean.TRUE.equals(params.getValue("debtPositionTypeOrgCodesEmpty"))
+          && Collections.singletonList(null).equals(params.getValue("debtPositionTypeOrgCodes"))
+          && Integer.valueOf(10).equals(params.getValue("limit"))
+          && Integer.valueOf(0).equals(params.getValue("offset"))
+      ),
+      same(DebtPositionDao.DEBT_POSITION_ROW_MAPPER)
+    )).thenReturn(expected);
+
+    List<DebtPosition> result = dao.findDebtPositions(
+      "IPA1",
+      null,
+      null,
+      new ExtractionFilters(),
+      10,
+      0
+    );
+
+    assertEquals(expected, result);
+  }
+
+  @Test
   void givenInvalidLimitWhenFindDebtPositionsThenThrowIllegalArgumentException() {
     DebtPositionDao dao = buildDao();
 
