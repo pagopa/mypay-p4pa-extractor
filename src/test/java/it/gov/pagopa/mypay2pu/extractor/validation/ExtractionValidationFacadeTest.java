@@ -4,16 +4,18 @@ import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.exception.ExportFileTypeNotSupportedException;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ExtractionValidationFacadeTest {
@@ -25,6 +27,9 @@ class ExtractionValidationFacadeTest {
   @Mock
   private PairedLogicalKeyValidator pairedLogicalKeyValidatorMock;
 
+  @InjectMocks
+  private ExtractionValidationFacade validationFacade;
+
   @AfterEach
   void tearDown() {
     verifyNoMoreInteractions(
@@ -34,50 +39,27 @@ class ExtractionValidationFacadeTest {
     );
   }
 
-  @Test
-  void givenBaseFileTypeWhenValidateThenInvokeBaseValidator() {
-    ExtractionRequest request = request(MigrationFileType.ORGANIZATIONS);
-    ExtractionValidationFacade facade = facade();
+  @ParameterizedTest
+  @EnumSource(MigrationFileType.class)
+  void whenValidateThenRouteByFileType(MigrationFileType fileType) {
+    ExtractionRequest request = request(fileType);
 
-    facade.validate(request);
-
-    verify(extractionRequestValidatorMock).validate(request);
-  }
-
-  @Test
-  void givenCsvFileTypeWhenValidateThenInvokeCsvValidator() {
-    ExtractionRequest request = request(MigrationFileType.DEBT_POSITIONS_TYPE);
-    ExtractionValidationFacade facade = facade();
-
-    facade.validate(request);
-
-    verify(csvLogicalKeyValidatorMock).validate(request);
-  }
-
-  @Test
-  void givenPairedFileTypeWhenValidateThenInvokePairedValidator() {
-    ExtractionRequest request = request(MigrationFileType.DEBT_POSITIONS_TYPE_ORG_OPERATORS);
-    ExtractionValidationFacade facade = facade();
-
-    facade.validate(request);
-
-    verify(pairedLogicalKeyValidatorMock).validate(request);
-  }
-
-  @Test
-  void givenUnsupportedFileTypeWhenValidateThenThrowException() {
-    ExtractionRequest request = request(MigrationFileType.DEBT_POSITIONS_PAID);
-    ExtractionValidationFacade facade = facade();
-
-    assertThrows(ExportFileTypeNotSupportedException.class, () -> facade.validate(request));
-  }
-
-  private ExtractionValidationFacade facade() {
-    return new ExtractionValidationFacade(
-      extractionRequestValidatorMock,
-      csvLogicalKeyValidatorMock,
-      pairedLogicalKeyValidatorMock
-    );
+    switch (fileType) {
+      case ORGANIZATIONS, ORG_SIL_SERVICES -> {
+        doNothing().when(extractionRequestValidatorMock).validate(request);
+        assertDoesNotThrow(() -> validationFacade.validate(request));
+      }
+      case DEBT_POSITIONS_TYPE, DEBT_POSITIONS_TYPE_ORG, DEBT_POSITIONS -> {
+        doNothing().when(csvLogicalKeyValidatorMock).validate(request);
+        assertDoesNotThrow(() -> validationFacade.validate(request));
+      }
+      case DEBT_POSITIONS_TYPE_ORG_OPERATORS -> {
+        doNothing().when(pairedLogicalKeyValidatorMock).validate(request);
+        assertDoesNotThrow(() -> validationFacade.validate(request));
+      }
+      default -> assertThrows(ExportFileTypeNotSupportedException.class,
+        () -> validationFacade.validate(request));
+    }
   }
 
   private ExtractionRequest request(MigrationFileType fileType) {
