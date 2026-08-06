@@ -106,6 +106,7 @@ public class CsvService {
         .withProfile(csvProfile)
         .withSeparator(separator)
         .withQuotechar(quoteChar)
+        .withEscapechar(quoteChar)
         .withApplyQuotesToAll(false)
         .withMappingStrategy(mappingStrategy)
         .withThrowExceptions(true)
@@ -146,6 +147,7 @@ public class CsvService {
     return new CSVWriterBuilder(new FileWriter(file, append))
       .withSeparator(separator)
       .withQuoteChar(quoteChar)
+      .withEscapeChar(quoteChar)
       .build();
   }
 }
