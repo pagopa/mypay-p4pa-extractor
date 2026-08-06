@@ -1,9 +1,6 @@
 package it.gov.pagopa.mypay2pu.extractor.mapper.debtpositiontypeorg;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import it.gov.pagopa.mypay2pu.extractor.config.MyPayProperties;
 import it.gov.pagopa.mypay2pu.extractor.dao.DebtPositionTypeOrgDao;
 import it.gov.pagopa.mypay2pu.extractor.exception.CsvRowMappingException;
@@ -14,6 +11,8 @@ import it.gov.pagopa.mypay2pu.extractor.utils.mydictionary.MyDictionaryToMyPayMa
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 import static org.springframework.util.StringUtils.hasText;
 
@@ -25,7 +24,7 @@ public class DebtPositionTypeOrgMapper {
   private final MyPayProperties myPayProperties;
   private final MyDictionaryClient myDictionaryClient;
   private final MyDictionaryToMyPayMapper myDictionaryToMyPayMapper;
-  private final ObjectMapper objectMapper;
+  private final ObjectMapper spontaneousFormStructureObjectMapper;
 
   public DebtPositionTypeOrgMapper(DebtPositionTypeOrgDao debtPositionTypeOrgDao,
                                    MyPayProperties myPayProperties,
@@ -36,7 +35,9 @@ public class DebtPositionTypeOrgMapper {
     this.myPayProperties = myPayProperties;
     this.myDictionaryClient = myDictionaryClient;
     this.myDictionaryToMyPayMapper = myDictionaryToMyPayMapper;
-    this.objectMapper = objectMapper;
+    this.spontaneousFormStructureObjectMapper = objectMapper.rebuild()
+      .changeDefaultVisibility(visibility -> visibility.withFieldVisibility(JsonAutoDetect.Visibility.NONE))
+      .build();
   }
 
   public PuDebtPositionTypeOrgDTO map(DebtPositionTypeOrg debtPositionTypeOrg) {
@@ -79,9 +80,7 @@ public class DebtPositionTypeOrgMapper {
     }
     try {
       String responseBody = myDictionaryClient.getSpontaneousFormStructure(spontaneousFormCode);
-      return objectMapper.copy()
-        .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.NONE)
-        .writeValueAsString(myDictionaryToMyPayMapper.map(responseBody));
+      return spontaneousFormStructureObjectMapper.writeValueAsString(myDictionaryToMyPayMapper.map(responseBody));
     } catch (HttpStatusCodeException e) {
       if (Boolean.TRUE.equals(debtPositionTypeOrg.flagSpontaneous())) {
         throw new CsvRowMappingException(
@@ -98,7 +97,7 @@ public class DebtPositionTypeOrgMapper {
         spontaneousFormCode
       );
       return null;
-    } catch (JsonProcessingException | IllegalArgumentException e) {
+    } catch (JacksonException | IllegalArgumentException e) {
       throw new CsvRowMappingException(
         "MyDictionary",
         "spontaneousFormStructure",

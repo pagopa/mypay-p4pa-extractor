@@ -2,12 +2,12 @@ package it.gov.pagopa.mypay2pu.extractor.utils.mydictionary;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
 import lombok.*;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;

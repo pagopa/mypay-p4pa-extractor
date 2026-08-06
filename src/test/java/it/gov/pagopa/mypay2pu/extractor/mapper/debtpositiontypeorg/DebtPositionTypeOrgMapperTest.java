@@ -1,7 +1,5 @@
 package it.gov.pagopa.mypay2pu.extractor.mapper.debtpositiontypeorg;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import it.gov.pagopa.mypay2pu.extractor.config.MyPayProperties;
 import it.gov.pagopa.mypay2pu.extractor.config.json.JsonConfig;
@@ -25,6 +23,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.HttpStatusCodeException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -54,7 +54,7 @@ class DebtPositionTypeOrgMapperTest {
       new MyPayProperties(RAW_TEMPLATE_SUBJECT, RAW_TEMPLATE_MESSAGE),
       myDictionaryClientMock,
       new MyDictionaryToMyPayMapper(new Gson()),
-      new JsonConfig().objectMapper()
+      new JsonConfig().objectMapperJackson3()
     );
   }
 
