@@ -3,7 +3,6 @@ package it.gov.pagopa.mypay2pu.extractor.validation;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.exception.ExportFileTypeNotSupportedException;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -30,15 +29,6 @@ class ExtractionValidationFacadeTest {
   @InjectMocks
   private ExtractionValidationFacade validationFacade;
 
-  @AfterEach
-  void tearDown() {
-    verifyNoMoreInteractions(
-      extractionRequestValidatorMock,
-      csvLogicalKeyValidatorMock,
-      pairedLogicalKeyValidatorMock
-    );
-  }
-
   @ParameterizedTest
   @EnumSource(MigrationFileType.class)
   void whenValidateThenRouteByFileType(MigrationFileType fileType) {
@@ -48,14 +38,17 @@ class ExtractionValidationFacadeTest {
       case ORGANIZATIONS, ORG_SIL_SERVICES -> {
         doNothing().when(extractionRequestValidatorMock).validate(request);
         assertDoesNotThrow(() -> validationFacade.validate(request));
+        verifyNoMoreInteractions(extractionRequestValidatorMock);
       }
       case DEBT_POSITIONS_TYPE, DEBT_POSITIONS_TYPE_ORG, DEBT_POSITIONS -> {
         doNothing().when(csvLogicalKeyValidatorMock).validate(request);
         assertDoesNotThrow(() -> validationFacade.validate(request));
+        verifyNoMoreInteractions(csvLogicalKeyValidatorMock);
       }
       case DEBT_POSITIONS_TYPE_ORG_OPERATORS -> {
         doNothing().when(pairedLogicalKeyValidatorMock).validate(request);
         assertDoesNotThrow(() -> validationFacade.validate(request));
+        verifyNoMoreInteractions(pairedLogicalKeyValidatorMock);
       }
       default -> assertThrows(ExportFileTypeNotSupportedException.class,
         () -> validationFacade.validate(request));
