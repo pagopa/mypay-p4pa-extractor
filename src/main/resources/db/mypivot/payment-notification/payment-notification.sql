@@ -26,8 +26,8 @@ FROM mygov_flusso_import fi
 JOIN mygov_ente e
     ON fi.mygov_ente_id = e.mygov_ente_id
 WHERE e.cod_ipa_ente = :ipaCode
-  AND (:iud IS NULL OR fi.cod_iud = :iud)
-  AND (:iuv IS NULL OR fi.cod_rp_silinviarp_id_univoco_versamento = :iuv)
+  AND (:skipIudFilter = TRUE OR fi.cod_iud = :iud)
+  AND (:skipIuvFilter = TRUE OR fi.cod_rp_silinviarp_id_univoco_versamento = :iuv)
   AND (:skipCreatedFromFilter = TRUE OR fi.dt_creazione >= :createdFrom)
   AND (:skipCreatedToFilter = TRUE OR fi.dt_creazione <= :createdTo)
 ORDER BY fi.dt_creazione

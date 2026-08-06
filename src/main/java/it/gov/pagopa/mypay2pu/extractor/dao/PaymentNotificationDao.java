@@ -67,7 +67,9 @@ public class PaymentNotificationDao {
   ) {
     return QueryUtils.buildPaginatedFilterParams(limit, offset)
       .addValue("ipaCode", ipaCode)
+      .addValue("skipIudFilter", iud == null)
       .addValue("iud", iud)
+      .addValue("skipIuvFilter", iuv == null)
       .addValue("iuv", iuv)
       .addValue("skipCreatedFromFilter", createdFrom == null)
       .addValue("createdFrom", createdFrom)

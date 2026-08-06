@@ -56,7 +56,9 @@ class PaymentNotificationDaoTest {
       eq(FIND_BY_FILTERS_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         ipaCode.equals(params.getValue("ipaCode"))
+          && Boolean.FALSE.equals(params.getValue("skipIudFilter"))
           && iud.equals(params.getValue("iud"))
+          && Boolean.FALSE.equals(params.getValue("skipIuvFilter"))
           && iuv.equals(params.getValue("iuv"))
           && Boolean.FALSE.equals(params.getValue("skipCreatedFromFilter"))
           && createdFrom.equals(params.getValue("createdFrom"))
@@ -64,7 +66,7 @@ class PaymentNotificationDaoTest {
           && createdTo.equals(params.getValue("createdTo"))
           && Integer.valueOf(50).equals(params.getValue("limit"))
           && Integer.valueOf(100).equals(params.getValue("offset"))
-          && params.getValues().size() == 9
+          && params.getValues().size() == 11
       ),
       same(PaymentNotificationDao.PAYMENT_NOTIFICATION_ROW_MAPPER)
     )).thenReturn(expected);
@@ -84,8 +86,10 @@ class PaymentNotificationDaoTest {
       eq(FIND_BY_FILTERS_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         "IPA1".equals(params.getValue("ipaCode"))
+          && Boolean.TRUE.equals(params.getValue("skipIudFilter"))
           && params.hasValue("iud")
           && params.getValue("iud") == null
+          && Boolean.TRUE.equals(params.getValue("skipIuvFilter"))
           && params.hasValue("iuv")
           && params.getValue("iuv") == null
           && Boolean.TRUE.equals(params.getValue("skipCreatedFromFilter"))
@@ -96,7 +100,7 @@ class PaymentNotificationDaoTest {
           && params.getValue("createdTo") == null
           && Integer.valueOf(10).equals(params.getValue("limit"))
           && Integer.valueOf(0).equals(params.getValue("offset"))
-          && params.getValues().size() == 9
+          && params.getValues().size() == 11
       ),
       same(PaymentNotificationDao.PAYMENT_NOTIFICATION_ROW_MAPPER)
     )).thenReturn(List.of());
@@ -149,6 +153,8 @@ class PaymentNotificationDaoTest {
     String sql = Files.readString(Path.of("src/main/resources/db/mypivot/payment-notification/payment-notification.sql"));
 
     assertTrue(sql.contains("e.cod_ipa_ente = :ipaCode"));
+    assertTrue(sql.contains(":skipIudFilter = TRUE OR fi.cod_iud = :iud"));
+    assertTrue(sql.contains(":skipIuvFilter = TRUE OR fi.cod_rp_silinviarp_id_univoco_versamento = :iuv"));
     assertTrue(sql.contains("ORDER BY fi.dt_creazione"));
   }
 
