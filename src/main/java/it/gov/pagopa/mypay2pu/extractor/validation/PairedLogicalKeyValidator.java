@@ -4,7 +4,8 @@ import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionFilters;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.exception.BadRequestException;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
+
+import java.util.List;
 
 /**
  * Validates extraction requests whose logical key is composed of two comma-separated lists.
@@ -28,7 +29,10 @@ public class PairedLogicalKeyValidator extends ExtractionRequestValidator {
   }
 
   public static LogicalKeyPair parseLogicalKey(String logicalKey) {
-    if (!StringUtils.hasText(logicalKey)) {
+    if (logicalKey == null) {
+      return new LogicalKeyPair(List.of(), List.of());
+    }
+    if (logicalKey.isBlank()) {
       throw new IllegalArgumentException("filters.logicalKey must contain two non-empty comma-separated lists");
     }
 

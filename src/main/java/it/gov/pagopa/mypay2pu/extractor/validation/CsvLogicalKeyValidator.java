@@ -30,7 +30,10 @@ public class CsvLogicalKeyValidator extends ExtractionRequestValidator {
   }
 
   public static List<String> parseLogicalKey(String logicalKey) {
-    if (!StringUtils.hasText(logicalKey) || logicalKey.contains("|")) {
+    if (logicalKey == null) {
+      return List.of();
+    }
+    if (logicalKey.isBlank() || logicalKey.contains("|")) {
       throw new IllegalArgumentException("filters.logicalKey must be a non-empty comma-separated list");
     }
 
