@@ -167,6 +167,7 @@ class DebtPositionMapperTest {
     assertNull(result.getLegacyPaymentMetadata());
     assertNull(result.getBalance());
     assertNull(result.getTransfer1());
+    assertEquals(Boolean.FALSE, result.getGenerateNotice());
     TestUtils.checkNotNullFields(
       result,
       "notificationDate",
