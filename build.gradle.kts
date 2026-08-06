@@ -79,6 +79,7 @@ dependencies {
   }
   implementation("at.yawk.lz4:lz4-java:$lz4JavaVersion")
   implementation("com.opencsv:opencsv:$openCsvVersion")
+  implementation("com.google.code.gson:gson")
   implementation("org.springframework.boot:spring-boot-starter-jdbc")
   implementation("org.postgresql:postgresql:$postgresqlVersion")
   compileOnly("org.projectlombok:lombok")

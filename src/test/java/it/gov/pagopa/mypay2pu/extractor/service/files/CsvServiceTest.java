@@ -9,6 +9,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
+import java.time.Month;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -130,6 +132,29 @@ class CsvServiceTest {
         List<String> rows = Files.readAllLines(filePath);
         assertEquals(2, rows.size(), "The csv should contain header and one data row.");
         assertEquals("Data1;Data2;", rows.get(1), "Null values should be written as unquoted empty fields.");
+    }
+
+    @Test
+    void testCreateCsvFromBean_jsonValueEscapesDoubleQuotes() throws IOException {
+        Path filePath = Path.of("build", "tmp", "test", "EXPORT_JSON.csv");
+        TestCsv testCsv = TestCsv.builder()
+          .column1("Data1")
+          .column2("{\"fieldBeans\":[]}")
+          .column3(LocalDate.of(2026, Month.JANUARY, 1))
+          .build();
+        AtomicBoolean supplierCalled = new AtomicBoolean(false);
+
+        csvService.createCsv(filePath, TestCsv.class, () -> {
+            if (supplierCalled.get()) {
+                return Collections.emptyList();
+            }
+            supplierCalled.set(true);
+            return List.of(testCsv);
+        }, "v1");
+
+        List<String> rows = Files.readAllLines(filePath);
+
+        assertEquals("Data1;\"{\"\"fieldBeans\"\":[]}\";2026-01-01", rows.get(1));
     }
 
     @Test

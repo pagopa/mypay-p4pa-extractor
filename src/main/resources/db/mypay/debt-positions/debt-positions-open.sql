@@ -32,12 +32,12 @@ SELECT
         FROM mygov_dovuto_multibeneficiario mbx
         WHERE mbx.mygov_dovuto_id = d.mygov_dovuto_id
     ) AS flag_multi_beneficiario,
-    mb.codice_fiscale_ente AS codice_fiscale_ente_1,
-    mb.de_rp_ente_benef_denominazione_beneficiario AS denominazione_ente_1,
-    mb.cod_rp_dati_vers_dati_sing_vers_iban_accredito AS iban_accredito_ente_1,
-    mb.de_rp_dati_vers_dati_sing_vers_causale_versamento AS causale_versamento_ente_1,
-    mb.num_rp_dati_vers_dati_sing_vers_importo_singolo_versamento AS importo_versamento_ente_1,
-    mb.de_rp_dati_vers_dati_sing_vers_dati_specifici_riscossione AS codice_tassonomia_ente_1,
+    mb.codice_fiscale_ente AS codice_fiscale_ente1,
+    mb.de_rp_ente_benef_denominazione_beneficiario AS denominazione_ente1,
+    mb.cod_rp_dati_vers_dati_sing_vers_iban_accredito AS iban_accredito_ente1,
+    mb.de_rp_dati_vers_dati_sing_vers_causale_versamento AS causale_versamento_ente1,
+    mb.num_rp_dati_vers_dati_sing_vers_importo_singolo_versamento AS importo_versamento_ente1,
+    mb.de_rp_dati_vers_dati_sing_vers_dati_specifici_riscossione AS codice_tassonomia_ente1,
     d.dt_creazione AS dt_creazione,
     d.dt_ultima_modifica AS dt_ultima_modifica
 FROM mygov_dovuto d
@@ -48,10 +48,11 @@ JOIN mygov_ente e
 LEFT JOIN mygov_dovuto_multibeneficiario mb
     ON mb.mygov_dovuto_id = d.mygov_dovuto_id
 WHERE e.cod_ipa_ente = :codIpaEnte
-  AND (:gpdIupdsEmpty = TRUE OR d.gpd_iupd IN (:gpdIupds))
-  AND (:iudsEmpty = TRUE OR d.cod_iud IN (:iuds))
-  AND (:updatedFrom IS NULL OR d.dt_ultima_modifica >= :updatedFrom)
-  AND (:updatedToExclusive IS NULL OR d.dt_ultima_modifica < :updatedToExclusive)
+  AND (:skipGpdIupdFilter = TRUE OR d.gpd_iupd = :gpdIupd)
+  AND (:skipCodIudFilter = TRUE OR d.cod_iud = :codIud)
+  AND (:skipUpdatedFromFilter = TRUE OR d.dt_ultima_modifica >= :updatedFrom)
+  AND (:skipUpdatedToExclusiveFilter = TRUE OR d.dt_ultima_modifica < :updatedToExclusive)
+  AND (:debtPositionTypeOrgCodesEmpty = TRUE OR d.cod_tipo_dovuto IN (:debtPositionTypeOrgCodes))
   AND (d.flg_iuv_volatile IS NULL OR d.flg_iuv_volatile = FALSE)
 ORDER BY d.dt_ultima_modifica, d.mygov_dovuto_id
 LIMIT :limit

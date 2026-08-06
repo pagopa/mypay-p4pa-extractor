@@ -91,6 +91,7 @@ public abstract class BaseExportProcessingService<E extends ExportModel, C exten
     ExportFileNameBuilder zipFileNameBuilder = new ExportFileNameBuilder(
       exportProperties.brokerIpaCode(),
       resolveOrganizationIpaCode(request),
+      useBrokerIpaAsPrefix(),
       getMigrationFileType(),
       LocalDateTime.now(ZONEID),
       getZipVersion()
@@ -145,6 +146,7 @@ public abstract class BaseExportProcessingService<E extends ExportModel, C exten
     ExportFileNameBuilder fileNameBuilder = new ExportFileNameBuilder(
       exportProperties.brokerIpaCode(),
       resolveOrganizationIpaCode(request),
+      useBrokerIpaAsPrefix(),
       getMigrationFileType(),
       LocalDateTime.now(ZONEID),
       getZipVersion()
@@ -297,6 +299,15 @@ public abstract class BaseExportProcessingService<E extends ExportModel, C exten
    * @return ZIP version
    */
   protected abstract String getZipVersion();
+
+  /**
+   * Determines whether CSV filenames use the broker IPA code instead of the organization IPA code.
+   *
+   * @return {@code true} when the broker IPA code must be used as CSV filename prefix
+   */
+  protected boolean useBrokerIpaAsPrefix() {
+    return true;
+  }
 
   /**
    * Converts a source domain model into its exportable CSV representation.
