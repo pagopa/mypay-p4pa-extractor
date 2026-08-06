@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.CollectionUtils;
 
 import java.util.Collections;
 import java.util.List;
@@ -46,8 +47,8 @@ public class DebtPositionsTypeOrgOperatorsDao {
                                             List<String> debtPositionTypeOrgCodes,
                                             int limit,
                                             int offset) {
-    boolean operatorFiscalCodesEmpty = operatorFiscalCodes == null || operatorFiscalCodes.isEmpty();
-    boolean debtPositionTypeOrgCodesEmpty = debtPositionTypeOrgCodes == null || debtPositionTypeOrgCodes.isEmpty();
+    boolean operatorFiscalCodesEmpty = CollectionUtils.isEmpty(operatorFiscalCodes);
+    boolean debtPositionTypeOrgCodesEmpty = CollectionUtils.isEmpty(debtPositionTypeOrgCodes);
     return QueryUtils.buildPaginatedFilterParams(limit, offset)
       .addValue("ipaCode", ipaCode)
       .addValue("operatorFiscalCodesEmpty", operatorFiscalCodesEmpty)
