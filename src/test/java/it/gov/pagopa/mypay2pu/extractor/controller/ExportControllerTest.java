@@ -9,8 +9,7 @@ import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionStatusResponse;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.exception.ControllerExceptionHandler;
 import it.gov.pagopa.mypay2pu.extractor.service.ExportFileHandlerService;
-import it.gov.pagopa.mypay2pu.extractor.service.ExportFileStatusService;
-import it.gov.pagopa.mypay2pu.extractor.validation.ExtractionRequestValidator;
+import it.gov.pagopa.mypay2pu.extractor.exception.BadRequestException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,12 +20,12 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.time.LocalDate;
-import java.time.Month;
 import java.time.OffsetDateTime;
 import java.util.List;
 
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -38,9 +37,6 @@ class ExportControllerTest {
 
   @Mock
   private ExportFileHandlerService exportFileHandlerServiceMock;
-  @Mock
-  private ExportFileStatusService exportFileStatusServiceMock;
-
   private MockMvc mockMvc;
   private ObjectMapper objectMapper;
 
@@ -48,17 +44,14 @@ class ExportControllerTest {
   void setUp() {
     objectMapper = new JsonConfig().objectMapper();
     mockMvc = MockMvcBuilders
-      .standaloneSetup(new ExportController(
-        exportFileHandlerServiceMock,
-        exportFileStatusServiceMock,
-        new ExtractionRequestValidator()))
+      .standaloneSetup(new ExportController(exportFileHandlerServiceMock))
       .setControllerAdvice(new ControllerExceptionHandler())
       .build();
   }
 
   @AfterEach
   void tearDown() {
-    verifyNoMoreInteractions(exportFileHandlerServiceMock, exportFileStatusServiceMock);
+    verifyNoMoreInteractions(exportFileHandlerServiceMock);
   }
 
   @Test
@@ -77,6 +70,7 @@ class ExportControllerTest {
       .andExpect(status().isAccepted())
       .andExpect(jsonPath("$.extractionId").value("generated-extraction-id"));
 
+    verify(exportFileHandlerServiceMock).createExtraction(request);
   }
 
   @Test
@@ -93,7 +87,7 @@ class ExportControllerTest {
       null,
       List.of("organizations.csv")
     );
-    when(exportFileStatusServiceMock.readStatus(extractionId)).thenReturn(statusResponse);
+    when(exportFileHandlerServiceMock.getExtractionStatus(extractionId)).thenReturn(statusResponse);
 
     mockMvc.perform(get("/extract/" + extractionId))
       .andExpect(status().isOk())
@@ -101,6 +95,7 @@ class ExportControllerTest {
       .andExpect(jsonPath("$.status").value("COMPLETED"))
       .andExpect(jsonPath("$.files[0]").value("organizations.csv"));
 
+    verify(exportFileHandlerServiceMock).getExtractionStatus(extractionId);
   }
 
   @Test
@@ -109,12 +104,13 @@ class ExportControllerTest {
       List.of("IPA_CODE_TEST"),
       MigrationFileType.ORGANIZATIONS,
       null,
-      new ExtractionFilters(
-        LocalDate.of(2026, Month.JANUARY, 2),
-        LocalDate.of(2026, Month.JANUARY, 1),
-        List.of()
-      )
+      new ExtractionFilters().dateFrom(java.time.LocalDate.of(2026, java.time.Month.JANUARY, 2))
+        .dateTo(java.time.LocalDate.of(2026, java.time.Month.JANUARY, 1))
     );
+    doThrow(new BadRequestException(
+      "INVALID_EXTRACTION_FILTERS",
+      "filters.dateFrom must be before or equal to filters.dateTo"
+    )).when(exportFileHandlerServiceMock).createExtraction(request);
 
     mockMvc.perform(post("/extract")
         .contentType(MediaType.APPLICATION_JSON)
@@ -122,15 +118,24 @@ class ExportControllerTest {
       .andExpect(status().isBadRequest())
       .andExpect(jsonPath("$.category").value("BAD_REQUEST"))
       .andExpect(jsonPath("$.code").value("INVALID_EXTRACTION_FILTERS"))
-      .andExpect(jsonPath("$.message").value("[INVALID_EXTRACTION_FILTERS] filters.modifiedFrom must be before or equal to filters.modifiedTo"));
+      .andExpect(jsonPath("$.message").value("[INVALID_EXTRACTION_FILTERS] filters.dateFrom must be before or equal to filters.dateTo"));
+
+    verify(exportFileHandlerServiceMock).createExtraction(request);
   }
 
   @Test
   void givenInvalidExtractionIdWhenGetExtractionStatusThenReturnBadRequest() throws Exception {
+    doThrow(new BadRequestException(
+      "INVALID_EXTRACTION_ID",
+      "extractionId must be a valid UUID"
+    )).when(exportFileHandlerServiceMock).getExtractionStatus("not-a-uuid");
+
     mockMvc.perform(get("/extract/not-a-uuid"))
       .andExpect(status().isBadRequest())
       .andExpect(jsonPath("$.category").value("BAD_REQUEST"))
       .andExpect(jsonPath("$.code").value("INVALID_EXTRACTION_ID"))
       .andExpect(jsonPath("$.message").value("[INVALID_EXTRACTION_ID] extractionId must be a valid UUID"));
+
+    verify(exportFileHandlerServiceMock).getExtractionStatus("not-a-uuid");
   }
 }

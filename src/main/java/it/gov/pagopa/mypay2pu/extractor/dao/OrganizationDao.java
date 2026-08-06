@@ -64,8 +64,8 @@ public class OrganizationDao {
   ) {
     return QueryUtils.buildPaginatedFilterParams(limit, offset)
       .addValue("ipaCodes", ipaCodes)
-      .addValue("modifiedFrom", DateTimeUtils.toStartOfDay(filters != null ? filters.getModifiedFrom() : null))
-      .addValue("modifiedToExclusive", DateTimeUtils.toStartOfNextDay(filters != null ? filters.getModifiedTo() : null));
+      .addValue("modifiedFrom", DateTimeUtils.toStartOfDay(filters != null ? filters.getDateFrom() : null))
+      .addValue("modifiedToExclusive", DateTimeUtils.toStartOfNextDay(filters != null ? filters.getDateTo() : null));
   }
 
   private MapSqlParameterSource buildTreasuryParams(String ipaCode) {

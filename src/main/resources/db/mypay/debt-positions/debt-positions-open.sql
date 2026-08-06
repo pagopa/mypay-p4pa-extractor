@@ -48,11 +48,10 @@ JOIN mygov_ente e
 LEFT JOIN mygov_dovuto_multibeneficiario mb
     ON mb.mygov_dovuto_id = d.mygov_dovuto_id
 WHERE e.cod_ipa_ente = :codIpaEnte
-  AND (:gpdIupd IS NULL OR d.gpd_iupd = :gpdIupd)
-  AND (:codIud IS NULL OR d.cod_iud = :codIud)
+  AND (:gpdIupdsEmpty = TRUE OR d.gpd_iupd IN (:gpdIupds))
+  AND (:iudsEmpty = TRUE OR d.cod_iud IN (:iuds))
   AND (:updatedFrom IS NULL OR d.dt_ultima_modifica >= :updatedFrom)
   AND (:updatedToExclusive IS NULL OR d.dt_ultima_modifica < :updatedToExclusive)
-  AND (:debtPositionTypeOrgCodesEmpty = TRUE OR d.cod_tipo_dovuto IN (:debtPositionTypeOrgCodes))
   AND (d.flg_iuv_volatile IS NULL OR d.flg_iuv_volatile = FALSE)
 ORDER BY d.dt_ultima_modifica, d.mygov_dovuto_id
 LIMIT :limit

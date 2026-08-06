@@ -11,6 +11,8 @@ import it.gov.pagopa.mypay2pu.extractor.service.FileArchiverService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.CsvPartitionWriterService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.SplitByIpaCodeBaseExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.files.CsvService;
+import it.gov.pagopa.mypay2pu.extractor.validation.LogicalKeyPair;
+import it.gov.pagopa.mypay2pu.extractor.validation.PairedLogicalKeyValidator;
 import jakarta.validation.Validator;
 import org.springframework.stereotype.Service;
 
@@ -56,10 +58,11 @@ public class DebtPositionsTypeOrgOperatorsExportProcessingService extends SplitB
 
   @Override
   protected List<DebtPositionsTypeOrgOperators> retrieveData(String ipaCode, ExtractionRequest request, int pageSize, int offset) {
+    LogicalKeyPair logicalKeyPair = PairedLogicalKeyValidator.parseLogicalKey(request.getFilters().getLogicalKey());
     return debtPositionsTypeOrgOperatorsDao.findByFilters(
       ipaCode,
-      null,
-      null,
+      logicalKeyPair.left(),
+      logicalKeyPair.right(),
       pageSize,
       offset
     );

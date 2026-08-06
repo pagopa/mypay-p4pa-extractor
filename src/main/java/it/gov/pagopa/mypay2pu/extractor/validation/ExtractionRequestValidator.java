@@ -8,24 +8,28 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.util.UUID;
 
+/**
+ * Base validator for extraction requests and extraction identifiers.
+ */
 @Component
 public class ExtractionRequestValidator {
 
   public void validate(ExtractionRequest request) {
-    if (request == null) {
-      return;
+    if (request != null) {
+      validateFilters(request.getFilters());
     }
+  }
 
-    ExtractionFilters filters = request.getFilters();
-    if (filters == null) {
-      return;
+  protected void validateFilters(ExtractionFilters filters) {
+    if (filters != null) {
+      validateInterval(filters.getDateFrom(), filters.getDateTo());
     }
+  }
 
-    LocalDate modifiedFrom = filters.getModifiedFrom();
-    LocalDate modifiedTo = filters.getModifiedTo();
-    if (modifiedFrom != null && modifiedTo != null && modifiedFrom.isAfter(modifiedTo)) {
+  protected void validateInterval(LocalDate from, LocalDate to) {
+    if (from != null && to != null && from.isAfter(to)) {
       throw new BadRequestException("INVALID_EXTRACTION_FILTERS",
-        "filters.modifiedFrom must be before or equal to filters.modifiedTo");
+        "filters.dateFrom must be before or equal to filters.dateTo");
     }
   }
 

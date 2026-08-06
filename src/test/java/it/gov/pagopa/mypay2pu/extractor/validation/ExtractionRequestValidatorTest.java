@@ -46,13 +46,13 @@ class ExtractionRequestValidatorTest {
 
   @ParameterizedTest
   @MethodSource("provideValidateShouldNotThrowCases")
-  void givenValidFilterWhenValidateThenNoExceptionThrown(LocalDate modifiedFrom, LocalDate modifiedTo) {
-    if (modifiedFrom == null && modifiedTo == null) {
+  void givenValidFilterWhenValidateThenNoExceptionThrown(LocalDate dateFrom, LocalDate dateTo) {
+    if (dateFrom == null && dateTo == null) {
       when(requestMock.getFilters()).thenReturn(null);
     } else {
       when(requestMock.getFilters()).thenReturn(filtersMock);
-      when(filtersMock.getModifiedFrom()).thenReturn(modifiedFrom);
-      when(filtersMock.getModifiedTo()).thenReturn(modifiedTo);
+      when(filtersMock.getDateFrom()).thenReturn(dateFrom);
+      when(filtersMock.getDateTo()).thenReturn(dateTo);
     }
 
     assertDoesNotThrow(() -> validator.validate(requestMock));
@@ -72,17 +72,17 @@ class ExtractionRequestValidatorTest {
   }
 
   @Test
-  void givenRequestWithModifiedFromAfterModifiedToWhenValidateThenThrowBadRequestException() {
-    LocalDate modifiedFrom = LocalDate.of(2026, Month.JANUARY, 2);
-    LocalDate modifiedTo = LocalDate.of(2026, Month.JANUARY, 1);
+  void givenRequestWithDateFromAfterDateToWhenValidateThenThrowBadRequestException() {
+    LocalDate dateFrom = LocalDate.of(2026, Month.JANUARY, 2);
+    LocalDate dateTo = LocalDate.of(2026, Month.JANUARY, 1);
     when(requestMock.getFilters()).thenReturn(filtersMock);
-    when(filtersMock.getModifiedFrom()).thenReturn(modifiedFrom);
-    when(filtersMock.getModifiedTo()).thenReturn(modifiedTo);
+    when(filtersMock.getDateFrom()).thenReturn(dateFrom);
+    when(filtersMock.getDateTo()).thenReturn(dateTo);
 
     BadRequestException exception = assertThrows(BadRequestException.class, () -> validator.validate(requestMock));
 
     assertEquals("INVALID_EXTRACTION_FILTERS", exception.getCode());
-    assertEquals("filters.modifiedFrom must be before or equal to filters.modifiedTo", exception.getMessage());
+    assertEquals("filters.dateFrom must be before or equal to filters.dateTo", exception.getMessage());
   }
 
   @ParameterizedTest

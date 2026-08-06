@@ -70,8 +70,6 @@ public class DebtPositionExportProcessingService extends SplitByIpaCodeBaseExpor
     ExtractionFilters filters = request.getFilters();
     List<DebtPosition> debtPositions = debtPositionDao.findDebtPositions(
       ipaCode,
-      null,
-      null,
       filters,
       pageSize,
       offset
@@ -87,8 +85,6 @@ public class DebtPositionExportProcessingService extends SplitByIpaCodeBaseExpor
     LocalDateTime lastExtractionDateTime = lastExtractionDate.toLocalDateTime();
     List<DebtPosition> cancelledDebtPositions = debtPositionDao.findCancelledDebtPositions(
       ipaCode,
-      null,
-      null,
       filters,
       pageSize,
       offset

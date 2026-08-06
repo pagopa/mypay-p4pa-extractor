@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collections;
 import java.util.List;
 
 @Repository
@@ -29,25 +30,29 @@ public class DebtPositionsTypeOrgOperatorsDao {
   }
 
   public List<DebtPositionsTypeOrgOperators> findByFilters(String ipaCode,
-                                                           String operatorFiscalCode,
-                                                           String debtPositionTypeOrgCode,
+                                                           List<String> operatorFiscalCodes,
+                                                           List<String> debtPositionTypeOrgCodes,
                                                            int limit,
                                                            int offset) {
     return mp4JdbcTemplate.query(
       findByFiltersSql,
-      buildParams(ipaCode, operatorFiscalCode, debtPositionTypeOrgCode, limit, offset),
+      buildParams(ipaCode, operatorFiscalCodes, debtPositionTypeOrgCodes, limit, offset),
       ROW_MAPPER
     );
   }
 
   private MapSqlParameterSource buildParams(String ipaCode,
-                                            String operatorFiscalCode,
-                                            String debtPositionTypeOrgCode,
+                                            List<String> operatorFiscalCodes,
+                                            List<String> debtPositionTypeOrgCodes,
                                             int limit,
                                             int offset) {
+    boolean operatorFiscalCodesEmpty = operatorFiscalCodes == null || operatorFiscalCodes.isEmpty();
+    boolean debtPositionTypeOrgCodesEmpty = debtPositionTypeOrgCodes == null || debtPositionTypeOrgCodes.isEmpty();
     return QueryUtils.buildPaginatedFilterParams(limit, offset)
       .addValue("ipaCode", ipaCode)
-      .addValue("operatorFiscalCode", operatorFiscalCode)
-      .addValue("debtPositionTypeOrgCode", debtPositionTypeOrgCode);
+      .addValue("operatorFiscalCodesEmpty", operatorFiscalCodesEmpty)
+      .addValue("operatorFiscalCodes", operatorFiscalCodesEmpty ? Collections.singletonList(null) : operatorFiscalCodes)
+      .addValue("debtPositionTypeOrgCodesEmpty", debtPositionTypeOrgCodesEmpty)
+      .addValue("debtPositionTypeOrgCodes", debtPositionTypeOrgCodesEmpty ? Collections.singletonList(null) : debtPositionTypeOrgCodes);
   }
 }

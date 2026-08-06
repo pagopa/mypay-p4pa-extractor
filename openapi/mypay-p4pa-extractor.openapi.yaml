@@ -124,7 +124,13 @@ components:
           example: "2026-06-18"
         logicalKey:
           type: string
-          description: Format depends on fileTypes. It can be a single value, a comma-separated list, or two comma-separated lists separated by a vertical bar.
+          description: |-
+            Optional filter whose format depends on `fileTypes`.
+
+            - `ORGANIZATIONS`, `ORG_SIL_SERVICES`: not used.
+            - `DEBT_POSITIONS_TYPE`, `DEBT_POSITIONS_TYPE_ORG`: comma-separated list of `debtPositionTypeOrgCode` values (example: `TARI,TASI`).
+            - `DEBT_POSITIONS_TYPE_ORG_OPERATORS`: two comma-separated lists separated by `|` in the form `operatorFiscalCodes|debtPositionTypeOrgCodes`.
+            - `DEBT_POSITIONS`: two comma-separated lists separated by `|` in the form `gpdIupds|iuds`.
           examples:
             - value
             - value1,value2,value3

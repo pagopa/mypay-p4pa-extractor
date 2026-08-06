@@ -3,7 +3,6 @@ package it.gov.pagopa.mypay2pu.extractor.service.export.debtpositiontypeorg;
 import it.gov.pagopa.mypay2pu.extractor.config.ExtractorExportProperties;
 import it.gov.pagopa.mypay2pu.extractor.dao.DebtPositionTypeOrgDao;
 import it.gov.pagopa.mypay2pu.extractor.dto.export.PuDebtPositionTypeOrgDTO;
-import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionFilters;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.mapper.debtpositiontypeorg.DebtPositionTypeOrgMapper;
@@ -12,11 +11,11 @@ import it.gov.pagopa.mypay2pu.extractor.service.FileArchiverService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.SplitByIpaCodeBaseExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.CsvPartitionWriterService;
 import it.gov.pagopa.mypay2pu.extractor.service.files.CsvService;
+import it.gov.pagopa.mypay2pu.extractor.validation.CsvLogicalKeyValidator;
 import jakarta.validation.Validator;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class DebtPositionTypeOrgExportProcessingService extends SplitByIpaCodeBaseExportProcessingService<DebtPositionTypeOrg, PuDebtPositionTypeOrgDTO> {
@@ -56,12 +55,9 @@ public class DebtPositionTypeOrgExportProcessingService extends SplitByIpaCodeBa
 
   @Override
   protected List<DebtPositionTypeOrg> retrieveData(String ipaCode, ExtractionRequest request, int pageSize, int offset) {
-    List<String> debtPositionTypeOrgCodes = Optional.ofNullable(request.getFilters())
-      .map(ExtractionFilters::getDebtPositionTypeOrgCodes)
-      .orElse(null);
     return debtPositionTypeOrgDao.findByFilters(
       ipaCode,
-      debtPositionTypeOrgCodes,
+      CsvLogicalKeyValidator.parseLogicalKey(request.getFilters().getLogicalKey()),
       pageSize,
       offset
     );

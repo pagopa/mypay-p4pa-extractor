@@ -72,14 +72,14 @@ class DebtPositionsTypeOrgOperatorsExportProcessingServiceTest {
 
   @Test
   void whenDataIsAvailableThenExportPagedDebtPositionsTypeOrgOperatorsToArchive() throws Exception {
-    ExtractionRequest request = new ExtractionRequest(List.of("ORG_IPA"), MigrationFileType.DEBT_POSITIONS_TYPE_ORG_OPERATORS, null, new ExtractionFilters());
+    ExtractionRequest request = new ExtractionRequest(List.of("ORG_IPA"), MigrationFileType.DEBT_POSITIONS_TYPE_ORG_OPERATORS, null, new ExtractionFilters().logicalKey("CF1|TYPE_1"));
     DebtPositionsTypeOrgOperators first = debtPositionsTypeOrgOperators("ORG_IPA", "CF1", "TYPE_1");
     DebtPositionsTypeOrgOperators second = invalidDebtPositionsTypeOrgOperators();
     PuDebtPositionsTypeOrgOperatorsDTO firstDto = dto("ORG_IPA", "CF1", "TYPE_1");
     PuDebtPositionsTypeOrgOperatorsDTO secondDto = invalidDto();
 
-    when(debtPositionsTypeOrgOperatorsDaoMock.findByFilters("ORG_IPA", null, null, 2, 0)).thenReturn(List.of(first, second));
-    when(debtPositionsTypeOrgOperatorsDaoMock.findByFilters("ORG_IPA", null, null, 2, 2)).thenReturn(List.of());
+    when(debtPositionsTypeOrgOperatorsDaoMock.findByFilters("ORG_IPA", List.of("CF1"), List.of("TYPE_1"), 2, 0)).thenReturn(List.of(first, second));
+    when(debtPositionsTypeOrgOperatorsDaoMock.findByFilters("ORG_IPA", List.of("CF1"), List.of("TYPE_1"), 2, 2)).thenReturn(List.of());
     when(debtPositionsTypeOrgOperatorsMapperMock.map(first)).thenReturn(firstDto);
     when(debtPositionsTypeOrgOperatorsMapperMock.map(second)).thenReturn(secondDto);
 
@@ -112,18 +112,18 @@ class DebtPositionsTypeOrgOperatorsExportProcessingServiceTest {
     assertTrue(errorArchiveEntries.get(0).matches("ORG_IPA-DEBT_POSITIONS_TYPE_ORG_OPERATORS-\\d{14}-1_0\\.errors\\.csv"));
 
     InOrder inOrder = inOrder(debtPositionsTypeOrgOperatorsDaoMock);
-    inOrder.verify(debtPositionsTypeOrgOperatorsDaoMock).findByFilters("ORG_IPA", null, null, 2, 0);
-    inOrder.verify(debtPositionsTypeOrgOperatorsDaoMock).findByFilters("ORG_IPA", null, null, 2, 2);
+    inOrder.verify(debtPositionsTypeOrgOperatorsDaoMock).findByFilters("ORG_IPA", List.of("CF1"), List.of("TYPE_1"), 2, 0);
+    inOrder.verify(debtPositionsTypeOrgOperatorsDaoMock).findByFilters("ORG_IPA", List.of("CF1"), List.of("TYPE_1"), 2, 2);
   }
 
   @Test
   void whenNoValidationErrorsThenArchiveContainsOnlyExportCsv() throws Exception {
-    ExtractionRequest request = new ExtractionRequest(List.of("ORG_IPA"), MigrationFileType.DEBT_POSITIONS_TYPE_ORG_OPERATORS, null, new ExtractionFilters());
+    ExtractionRequest request = new ExtractionRequest(List.of("ORG_IPA"), MigrationFileType.DEBT_POSITIONS_TYPE_ORG_OPERATORS, null, new ExtractionFilters().logicalKey("CF1|TYPE_1"));
     DebtPositionsTypeOrgOperators first = debtPositionsTypeOrgOperators("ORG_IPA", "CF1", "TYPE_1");
     DebtPositionsTypeOrgOperators second = debtPositionsTypeOrgOperators("ORG_IPA", "CF2", "TYPE_2");
 
-    when(debtPositionsTypeOrgOperatorsDaoMock.findByFilters("ORG_IPA", null, null, 2, 0)).thenReturn(List.of(first, second));
-    when(debtPositionsTypeOrgOperatorsDaoMock.findByFilters("ORG_IPA", null, null, 2, 2)).thenReturn(List.of());
+    when(debtPositionsTypeOrgOperatorsDaoMock.findByFilters("ORG_IPA", List.of("CF1"), List.of("TYPE_1"), 2, 0)).thenReturn(List.of(first, second));
+    when(debtPositionsTypeOrgOperatorsDaoMock.findByFilters("ORG_IPA", List.of("CF1"), List.of("TYPE_1"), 2, 2)).thenReturn(List.of());
     when(debtPositionsTypeOrgOperatorsMapperMock.map(first)).thenReturn(dto("ORG_IPA", "CF1", "TYPE_1"));
     when(debtPositionsTypeOrgOperatorsMapperMock.map(second)).thenReturn(dto("ORG_IPA", "CF2", "TYPE_2"));
 
@@ -137,8 +137,8 @@ class DebtPositionsTypeOrgOperatorsExportProcessingServiceTest {
     assertTrue(archiveEntries.get(0).matches("ORG_IPA-DEBT_POSITIONS_TYPE_ORG_OPERATORS-\\d{14}-1_0\\.csv"));
 
     InOrder inOrder = inOrder(debtPositionsTypeOrgOperatorsDaoMock);
-    inOrder.verify(debtPositionsTypeOrgOperatorsDaoMock).findByFilters("ORG_IPA", null, null, 2, 0);
-    inOrder.verify(debtPositionsTypeOrgOperatorsDaoMock).findByFilters("ORG_IPA", null, null, 2, 2);
+    inOrder.verify(debtPositionsTypeOrgOperatorsDaoMock).findByFilters("ORG_IPA", List.of("CF1"), List.of("TYPE_1"), 2, 0);
+    inOrder.verify(debtPositionsTypeOrgOperatorsDaoMock).findByFilters("ORG_IPA", List.of("CF1"), List.of("TYPE_1"), 2, 2);
   }
 
   @Test
