@@ -14,6 +14,7 @@ com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.21.4=compileClasspath
 com.fasterxml.jackson:jackson-bom:2.21.4=compileClasspath
 com.fasterxml:classmate:1.7.3=compileClasspath
 com.github.danielwegener:logback-kafka-appender:0.2.0-RC2=compileClasspath
+com.google.code.gson:gson:2.13.2=compileClasspath
 com.google.errorprone:error_prone_annotations:2.38.0=compileClasspath
 com.opencsv:opencsv:5.12.0=compileClasspath
 com.zaxxer:HikariCP:7.0.2=compileClasspath
