@@ -13,7 +13,7 @@ import java.util.Optional;
 /**
  * Collects and manages validation errors for CSV rows.
  * Stores constraint violations from Jakarta Validation and can write them to a separate error report file.
- * Each error records the row number, source logical key, field name, violation code, message, and rejected value.
+ * Each error records the source logical key, field name, violation code, message, and rejected value.
  * The error report file is named as {@code {original_filename}.errors.csv} and placed in the same directory.
  * It supports two modes:
  * <ul>
@@ -29,7 +29,7 @@ import java.util.Optional;
 public class CsvRowErrorCollector implements AutoCloseable {
 
   private static final String[] ERROR_REPORT_HEADER_ROW =
-    {"rowNumber", "logicalKey", "field", "code", "message", "rejectedValue"};
+    {"logicalKey", "field", "code", "message", "rejectedValue"};
   private static final List<String[]> ERROR_REPORT_HEADER = java.util.Collections.singletonList(ERROR_REPORT_HEADER_ROW);
 
   private final CsvService csvService;
@@ -64,15 +64,14 @@ public class CsvRowErrorCollector implements AutoCloseable {
   /**
    * Adds a validation error for a row.
    *
-   * @param rowNumber the 1-based row number in the CSV file
    * @param logicalKey the source row logical key
    * @param field the field name that failed validation
    * @param code the constraint annotation class name (e.g., NotBlank, Email, etc.)
    * @param message the validation error message
    * @param rejectedValue the value that failed validation
    */
-  public void add(long rowNumber, String logicalKey, String field, String code, String message, String rejectedValue) {
-    ValidationError validationError = new ValidationError(rowNumber, logicalKey, field, code, message, rejectedValue);
+  public void add(String logicalKey, String field, String code, String message, String rejectedValue) {
+    ValidationError validationError = new ValidationError(logicalKey, field, code, message, rejectedValue);
     errorCount++;
     if (errorsCsvFilePath == null) {
       errors.add(validationError);
@@ -171,7 +170,6 @@ public class CsvRowErrorCollector implements AutoCloseable {
 
   private String[] toCsvErrorRow(ValidationError error) {
     return new String[]{
-      String.valueOf(error.rowNumber()),
       error.logicalKey(),
       error.field(),
       error.code(),
@@ -183,7 +181,6 @@ public class CsvRowErrorCollector implements AutoCloseable {
   /**
    * Immutable record representing a single validation error.
    *
-   * @param rowNumber the CSV row number (1-based, header is row 1)
    * @param logicalKey the source row logical key
    * @param field the field/column name that failed validation
    * @param code the constraint annotation type name
@@ -191,7 +188,6 @@ public class CsvRowErrorCollector implements AutoCloseable {
    * @param rejectedValue the invalid value that was rejected
    */
   public record ValidationError(
-    long rowNumber,
     String logicalKey,
     String field,
     String code,

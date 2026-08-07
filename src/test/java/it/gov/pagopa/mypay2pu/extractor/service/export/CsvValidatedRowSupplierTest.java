@@ -148,12 +148,12 @@ class CsvValidatedRowSupplierTest {
   }
 
   @Test
-  void givenMultipleBatchesWhenGetThenKeepCorrectCsvRowNumbersInErrors() throws IOException {
-    // Given - Multiple batches to test row number tracking
-    TestDto row1 = new TestDto("", "invalid1", -1);  // row 2: invalid
-    TestDto row2 = new TestDto("Name", "name@example.com", 10);  // row 3: valid
-    TestDto row3 = new TestDto("", "invalid2", -2);  // row 4: invalid
-    TestDto row4 = new TestDto("Name 2", "name2@example.com", 20);  // row 5: valid
+  void givenMultipleBatchesWhenGetThenCollectErrorsAcrossBatches() throws IOException {
+    // Given
+    TestDto row1 = new TestDto("", "invalid1", -1);
+    TestDto row2 = new TestDto("Name", "name@example.com", 10);
+    TestDto row3 = new TestDto("", "invalid2", -2);
+    TestDto row4 = new TestDto("Name 2", "name2@example.com", 20);
     Path csvFile = tempDir.resolve("row-numbering.csv");
 
     List<List<TestDto>> batches = List.of(
@@ -183,19 +183,7 @@ class CsvValidatedRowSupplierTest {
     // Second batch should contain only row4 (valid)
     assertEquals(1, result2.size());
 
-    // Errors should have correct row numbers
-    assertEquals(6, errorRows.size());  // 3 errors from row1 + 3 errors from row3
-
-    // Check row numbers: row1 is row 2, row3 is row 4
-    assertTrue(errorRows.stream()
-      .map(this::extractRowNumber)
-      .filter(rowNumber -> rowNumber == 2)
-      .count() >= 1, "Should have errors from row 2");
-
-    assertTrue(errorRows.stream()
-      .map(this::extractRowNumber)
-      .filter(rowNumber -> rowNumber == 4)
-      .count() >= 1, "Should have errors from row 4");
+    assertEquals(6, errorRows.size());
   }
 
   @Test
@@ -282,7 +270,6 @@ class CsvValidatedRowSupplierTest {
     // Then
     assertEquals(List.of(validRow), result);
     assertEquals(1, errorRows.size());
-    assertEquals(2L, extractRowNumber(errorRows.get(0)));
     assertTrue(errorRows.get(0).contains("status"));
     assertTrue(errorRows.get(0).contains("EnumMapping"));
   }
@@ -317,7 +304,6 @@ class CsvValidatedRowSupplierTest {
 
     assertEquals(List.of(validRow), result);
     assertEquals(1, errorRows.size());
-    assertEquals(2L, extractRowNumber(errorRows.get(0)));
     assertTrue(errorRows.get(0).contains("UNEXPECTED ERROR"));
     assertTrue(errorRows.get(0).contains("unexpected failure"));
   }
@@ -328,11 +314,6 @@ class CsvValidatedRowSupplierTest {
       return List.of();
     }
     return Files.readAllLines(errorPath.get(), StandardCharsets.UTF_8).stream().skip(1).toList();
-  }
-
-  private long extractRowNumber(String csvErrorRow) {
-    String normalizedRow = csvErrorRow.replace("\"", "");
-    return Long.parseLong(normalizedRow.split(";", 2)[0]);
   }
 
   @Data
