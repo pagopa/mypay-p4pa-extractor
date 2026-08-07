@@ -5,11 +5,11 @@ import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.exception.BadRequestException;
 import it.gov.pagopa.mypay2pu.extractor.exception.ExportFileTypeNotSupportedException;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -28,8 +28,16 @@ class ExtractionValidationFacadeTest {
   @Mock
   private PairedLogicalKeyValidator pairedLogicalKeyValidatorMock;
 
-  @InjectMocks
   private ExtractionValidationFacade validationFacade;
+
+  @BeforeEach
+  void setUp() {
+    validationFacade = new ExtractionValidationFacade(
+      extractionRequestValidatorMock,
+      csvLogicalKeyValidatorMock,
+      pairedLogicalKeyValidatorMock
+    );
+  }
 
   @AfterEach
   void tearDown() {
