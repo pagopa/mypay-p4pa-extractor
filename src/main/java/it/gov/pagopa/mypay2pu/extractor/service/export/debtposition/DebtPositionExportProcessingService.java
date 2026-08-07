@@ -122,5 +122,10 @@ public class DebtPositionExportProcessingService extends SplitByIpaCodeBaseExpor
   }
 
   record DebtPositionWithAction(DebtPosition debtPosition, Action action) implements ExportModel {
+
+    @Override
+    public String logicalKey() {
+      return debtPosition.logicalKey();
+    }
   }
 }

@@ -45,4 +45,9 @@ public record DebtPosition(
   LocalDateTime dtCreazione,
   LocalDateTime dtUltimaModifica
 ) implements ExportModel {
+
+  @Override
+  public String logicalKey() {
+    return codIuv;
+  }
 }

@@ -16,4 +16,10 @@ public record OrgSilService(
   String legacyBasicAuthUrl,
   String legacyBasicUser,
   String legacyBasicPsw
-) implements ExportModel {}
+) implements ExportModel {
+
+  @Override
+  public String logicalKey() {
+    return serviceType + "|" + applicationName;
+  }
+}

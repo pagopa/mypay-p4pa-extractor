@@ -94,12 +94,13 @@ public class CsvValidatedRowSupplier<M extends ExportModel, C extends CsvExportD
       long currentRowNumber = rowNumber.getAndIncrement();
       try {
         C row = mapper.apply(sourceRow);
-        if (validateAndCollectErrors(row, currentRowNumber)) {
+        if (validateAndCollectErrors(sourceRow, row, currentRowNumber)) {
           validRows.add(row);
         }
       } catch (CsvRowMappingException e) {
         errorCollector.add(
           currentRowNumber,
+          sourceRow.logicalKey(),
           e.getField(),
           e.getErrorCode(),
           e.getMessage(),
@@ -108,6 +109,7 @@ public class CsvValidatedRowSupplier<M extends ExportModel, C extends CsvExportD
       } catch (Exception e) {
         errorCollector.add(
           currentRowNumber,
+          sourceRow.logicalKey(),
           null,
           "UNEXPECTED ERROR",
           e.getMessage(),
@@ -118,7 +120,7 @@ public class CsvValidatedRowSupplier<M extends ExportModel, C extends CsvExportD
     return validRows;
   }
 
-  private boolean validateAndCollectErrors(C row, long currentRowNumber) {
+  private boolean validateAndCollectErrors(M sourceRow, C row, long currentRowNumber) {
     Set<ConstraintViolation<C>> violations = validator.validate(row);
     if (violations.isEmpty()) {
       return true;
@@ -129,6 +131,7 @@ public class CsvValidatedRowSupplier<M extends ExportModel, C extends CsvExportD
         Object rejectedValue = violation.getInvalidValue();
         errorCollector.add(
           currentRowNumber,
+          sourceRow.logicalKey(),
           violation.getPropertyPath().toString(),
           violation.getConstraintDescriptor().getAnnotation().annotationType().getSimpleName(),
           violation.getMessage(),

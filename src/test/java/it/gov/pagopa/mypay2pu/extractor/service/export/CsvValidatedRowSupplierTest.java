@@ -98,6 +98,7 @@ class CsvValidatedRowSupplierTest {
     assertTrue(errorRows.stream().anyMatch(e -> e.contains("email")));
     assertTrue(errorRows.stream().anyMatch(e -> e.contains("name")));
     assertTrue(errorRows.stream().anyMatch(e -> e.contains("value")));
+    assertTrue(errorRows.stream().allMatch(e -> e.contains("invalid-email")));
   }
 
   @Test
@@ -349,5 +350,10 @@ class CsvValidatedRowSupplierTest {
     @CsvBindByName
     @Positive(message = "value must be positive")
     private Integer value;
+
+    @Override
+    public String logicalKey() {
+      return email;
+    }
   }
 }
