@@ -10,6 +10,7 @@ import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.exception.ControllerExceptionHandler;
 import it.gov.pagopa.mypay2pu.extractor.service.ExportFileHandlerService;
 import it.gov.pagopa.mypay2pu.extractor.exception.BadRequestException;
+import it.gov.pagopa.mypay2pu.extractor.utils.Constants;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +21,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.Month;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -27,6 +31,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -104,13 +109,13 @@ class ExportControllerTest {
       List.of("IPA_CODE_TEST"),
       MigrationFileType.ORGANIZATIONS,
       null,
-      new ExtractionFilters().dateFrom(java.time.LocalDate.of(2026, java.time.Month.JANUARY, 2))
-        .dateTo(java.time.LocalDate.of(2026, java.time.Month.JANUARY, 1))
+      new ExtractionFilters().dateFrom(OffsetDateTime.of(LocalDate.of(2026, Month.JANUARY, 2), LocalTime.MIDNIGHT, Constants.ZONEOFFSET))
+        .dateTo(OffsetDateTime.of(LocalDate.of(2026, Month.JANUARY, 1), LocalTime.MIDNIGHT, Constants.ZONEOFFSET))
     );
     doThrow(new BadRequestException(
       "INVALID_EXTRACTION_FILTERS",
       "filters.dateFrom must be before or equal to filters.dateTo"
-    )).when(exportFileHandlerServiceMock).createExtraction(request);
+    )).when(exportFileHandlerServiceMock).createExtraction(argThat(ExportControllerTest::hasReversedFilterDates));
 
     mockMvc.perform(post("/extract")
         .contentType(MediaType.APPLICATION_JSON)
@@ -120,7 +125,14 @@ class ExportControllerTest {
       .andExpect(jsonPath("$.code").value("INVALID_EXTRACTION_FILTERS"))
       .andExpect(jsonPath("$.message").value("[INVALID_EXTRACTION_FILTERS] filters.dateFrom must be before or equal to filters.dateTo"));
 
-    verify(exportFileHandlerServiceMock).createExtraction(request);
+    verify(exportFileHandlerServiceMock).createExtraction(argThat(ExportControllerTest::hasReversedFilterDates));
+  }
+
+  private static boolean hasReversedFilterDates(ExtractionRequest request) {
+    return request.getFilters() != null
+      && request.getFilters().getDateFrom() != null
+      && request.getFilters().getDateTo() != null
+      && request.getFilters().getDateFrom().isAfter(request.getFilters().getDateTo());
   }
 
   @Test

@@ -2,6 +2,7 @@ package it.gov.pagopa.mypay2pu.extractor.dao;
 
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionFilters;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.Organization;
+import it.gov.pagopa.mypay2pu.extractor.utils.Constants;
 import it.gov.pagopa.mypay2pu.extractor.utils.SqlLoader;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -13,10 +14,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
-import java.time.LocalDate;
-import java.time.Month;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.Month;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -80,8 +84,8 @@ class OrganizationDaoTest {
       eq(FIND_BY_FILTERS_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         List.of("IPA1", "IPA2").equals(params.getValue("ipaCodes"))
-          && LocalDate.of(2026, Month.JANUARY, 1).atStartOfDay().equals(params.getValue("modifiedFrom"))
-          && LocalDate.of(2026, Month.JANUARY, 3).atStartOfDay().equals(params.getValue("modifiedToExclusive"))
+          && LocalDateTime.of(2026, Month.JANUARY, 10, 0, 0).equals(params.getValue("modifiedFrom"))
+          && LocalDateTime.of(2026, Month.JANUARY, 13, 0, 0).equals(params.getValue("modifiedToExclusive"))
           && Integer.valueOf(50).equals(params.getValue("limit"))
           && Integer.valueOf(100).equals(params.getValue("offset"))
       ),
@@ -91,7 +95,8 @@ class OrganizationDaoTest {
 
     List<Organization> result = dao.findByFilters(
       List.of("IPA1", "IPA2"),
-      new ExtractionFilters(LocalDate.of(2026, Month.JANUARY, 1), LocalDate.of(2026, Month.JANUARY, 2), null),
+      new ExtractionFilters(OffsetDateTime.of(LocalDate.of(2026, Month.JANUARY, 10), LocalTime.MIDNIGHT, Constants.ZONEOFFSET),
+        OffsetDateTime.of(LocalDate.of(2026, Month.JANUARY, 12), LocalTime.MIDNIGHT, Constants.ZONEOFFSET), null),
       50,
       100
     );

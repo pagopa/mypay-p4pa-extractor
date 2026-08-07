@@ -2,6 +2,7 @@ package it.gov.pagopa.mypay2pu.extractor.dao;
 
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionFilters;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.DebtPosition;
+import it.gov.pagopa.mypay2pu.extractor.utils.Constants;
 import it.gov.pagopa.mypay2pu.extractor.utils.SqlLoader;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -15,6 +16,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Month;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -46,8 +48,8 @@ class DebtPositionDaoTest {
     List<DebtPosition> expected = List.of(buildDebtPosition());
     ExtractionFilters filters = new ExtractionFilters()
       .logicalKey("IUV-1")
-      .dateFrom(LocalDate.of(2026, Month.JANUARY, 10))
-      .dateTo(LocalDate.of(2026, Month.JANUARY, 12));
+      .dateFrom(OffsetDateTime.of(2026, 1, 10, 0, 0, 0, 0, Constants.ZONEOFFSET))
+      .dateTo(OffsetDateTime.of(2026, 1, 12, 0, 0, 0, 0, Constants.ZONEOFFSET));
 
     when(mp4JdbcTemplateMock.query(
       eq(FIND_DEBT_POSITIONS_SQL),

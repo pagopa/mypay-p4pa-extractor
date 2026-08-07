@@ -5,7 +5,7 @@ import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.exception.BadRequestException;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 /**
@@ -26,7 +26,7 @@ public class ExtractionRequestValidator {
     }
   }
 
-  protected void validateInterval(LocalDate from, LocalDate to) {
+  protected void validateInterval(OffsetDateTime from, OffsetDateTime to) {
     if (from != null && to != null && from.isAfter(to)) {
       throw new BadRequestException("INVALID_EXTRACTION_FILTERS",
         "filters.dateFrom must be before or equal to filters.dateTo");

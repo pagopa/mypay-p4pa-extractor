@@ -3,6 +3,7 @@ package it.gov.pagopa.mypay2pu.extractor.validation;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionFilters;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.exception.BadRequestException;
+import it.gov.pagopa.mypay2pu.extractor.utils.Constants;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -33,11 +34,11 @@ public class CsvLogicalKeyValidator extends ExtractionRequestValidator {
     if (logicalKey == null) {
       return List.of();
     }
-    if (logicalKey.isBlank() || logicalKey.contains("|")) {
+    if (logicalKey.isBlank() || logicalKey.contains(Constants.LOGICAL_KEY_PAIR_SEPARATOR)) {
       throw new IllegalArgumentException("filters.logicalKey must be a non-empty comma-separated list");
     }
 
-    List<String> values = List.of(logicalKey.split(",", -1)).stream()
+    List<String> values = List.of(logicalKey.split(Constants.CSV_LOGICAL_KEY_SEPARATOR, -1)).stream()
       .map(String::trim)
       .toList();
     if (values.stream().anyMatch(value -> !StringUtils.hasText(value))) {

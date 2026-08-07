@@ -16,7 +16,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
 
-import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Repository
@@ -72,8 +72,8 @@ public class DebtPositionDao {
   private MapSqlParameterSource buildParams(String codIpaEnte, ExtractionFilters filters, int limit, int offset) {
     ExtractionFilters effectiveFilters = ObjectUtils.defaultIfNull(filters, new ExtractionFilters());
     List<String> iuvs = CsvLogicalKeyValidator.parseLogicalKey(effectiveFilters.getLogicalKey());
-    LocalDate dateFrom = effectiveFilters.getDateFrom();
-    LocalDate dateTo = effectiveFilters.getDateTo();
+    OffsetDateTime dateFrom = effectiveFilters.getDateFrom();
+    OffsetDateTime dateTo = effectiveFilters.getDateTo();
     boolean iuvsEmpty = CollectionUtils.isEmpty(iuvs);
     List<String> iuvsForQuery = iuvsEmpty ? List.of("") : iuvs;
     return QueryUtils.buildPaginatedFilterParams(limit, offset)

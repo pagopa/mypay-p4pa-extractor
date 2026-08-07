@@ -12,8 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDate;
-import java.time.Month;
+import java.time.OffsetDateTime;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -46,7 +45,7 @@ class ExtractionRequestValidatorTest {
 
   @ParameterizedTest
   @MethodSource("provideValidateShouldNotThrowCases")
-  void givenValidFilterWhenValidateThenNoExceptionThrown(LocalDate dateFrom, LocalDate dateTo) {
+  void givenValidFilterWhenValidateThenNoExceptionThrown(OffsetDateTime dateFrom, OffsetDateTime dateTo) {
     if (dateFrom == null && dateTo == null) {
       when(requestMock.getFilters()).thenReturn(null);
     } else {
@@ -59,8 +58,8 @@ class ExtractionRequestValidatorTest {
   }
 
   private static Stream<Arguments> provideValidateShouldNotThrowCases() {
-    LocalDate date1 = LocalDate.of(2026, Month.JANUARY, 1);
-    LocalDate date2 = LocalDate.of(2026, Month.JANUARY, 2);
+    OffsetDateTime date1 = OffsetDateTime.of(2026, 1, 1, 0, 0, 0, 0, OffsetDateTime.now().getOffset());
+    OffsetDateTime date2 = OffsetDateTime.of(2026, 1, 2, 0, 0, 0, 0, OffsetDateTime.now().getOffset());
 
     return Stream.of(
       Arguments.of(null, null),
@@ -73,8 +72,8 @@ class ExtractionRequestValidatorTest {
 
   @Test
   void givenRequestWithDateFromAfterDateToWhenValidateThenThrowBadRequestException() {
-    LocalDate dateFrom = LocalDate.of(2026, Month.JANUARY, 2);
-    LocalDate dateTo = LocalDate.of(2026, Month.JANUARY, 1);
+    OffsetDateTime dateFrom = OffsetDateTime.of(2026, 1, 2, 0, 0, 0, 0, OffsetDateTime.now().getOffset());
+    OffsetDateTime dateTo = OffsetDateTime.of(2026, 1, 1, 0, 0, 0, 0, OffsetDateTime.now().getOffset());
     when(requestMock.getFilters()).thenReturn(filtersMock);
     when(filtersMock.getDateFrom()).thenReturn(dateFrom);
     when(filtersMock.getDateTo()).thenReturn(dateTo);

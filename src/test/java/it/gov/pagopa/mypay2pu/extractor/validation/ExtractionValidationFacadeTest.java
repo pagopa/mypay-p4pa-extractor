@@ -4,6 +4,7 @@ import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.exception.BadRequestException;
 import it.gov.pagopa.mypay2pu.extractor.exception.ExportFileTypeNotSupportedException;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -14,7 +15,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
@@ -31,26 +31,32 @@ class ExtractionValidationFacadeTest {
   @InjectMocks
   private ExtractionValidationFacade validationFacade;
 
+  @AfterEach
+  void tearDown() {
+    verifyNoMoreInteractions(
+      extractionRequestValidatorMock,
+      csvLogicalKeyValidatorMock,
+      pairedLogicalKeyValidatorMock
+    );
+  }
+
   @ParameterizedTest
   @EnumSource(MigrationFileType.class)
   void whenValidateThenRouteByFileType(MigrationFileType fileType) {
     ExtractionRequest request = request(fileType);
-
+    // using verify to testing routing
     switch (fileType) {
       case ORGANIZATIONS, ORG_SIL_SERVICES -> {
-        doNothing().when(extractionRequestValidatorMock).validate(request);
-        assertDoesNotThrow(() -> validationFacade.validate(request));
-        verifyNoMoreInteractions(extractionRequestValidatorMock);
+        validationFacade.validate(request);
+        verify(extractionRequestValidatorMock).validate(request);
       }
       case DEBT_POSITIONS_TYPE, DEBT_POSITIONS_TYPE_ORG, DEBT_POSITIONS -> {
-        doNothing().when(csvLogicalKeyValidatorMock).validate(request);
-        assertDoesNotThrow(() -> validationFacade.validate(request));
-        verifyNoMoreInteractions(csvLogicalKeyValidatorMock);
+        validationFacade.validate(request);
+        verify(csvLogicalKeyValidatorMock).validate(request);
       }
       case DEBT_POSITIONS_TYPE_ORG_OPERATORS -> {
-        doNothing().when(pairedLogicalKeyValidatorMock).validate(request);
-        assertDoesNotThrow(() -> validationFacade.validate(request));
-        verifyNoMoreInteractions(pairedLogicalKeyValidatorMock);
+        validationFacade.validate(request);
+        verify(pairedLogicalKeyValidatorMock).validate(request);
       }
       default -> assertThrows(ExportFileTypeNotSupportedException.class,
         () -> validationFacade.validate(request));
