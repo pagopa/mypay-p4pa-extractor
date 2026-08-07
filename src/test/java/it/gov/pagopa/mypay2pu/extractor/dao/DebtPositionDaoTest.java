@@ -105,6 +105,33 @@ class DebtPositionDaoTest {
   }
 
   @Test
+  void givenNullLogicalKeyWhenFindDebtPositionsThenQueryMp4DatabaseWithoutIuvFilter() {
+    DebtPositionDao dao = buildDao();
+    List<DebtPosition> expected = List.of(buildDebtPosition());
+    ExtractionFilters filters = new ExtractionFilters();
+
+    when(mp4JdbcTemplateMock.query(
+      eq(FIND_DEBT_POSITIONS_SQL),
+      ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
+        "IPA1".equals(params.getValue("codIpaEnte"))
+          && Boolean.TRUE.equals(params.getValue("skipCodIuvFilter"))
+          && List.of("").equals(params.getValue("iuvs"))
+          && Boolean.TRUE.equals(params.getValue("skipDateFromFilter"))
+          && params.getValue("dateFrom") == null
+          && Boolean.TRUE.equals(params.getValue("skipDateToExclusiveFilter"))
+          && params.getValue("dateToExclusive") == null
+          && Integer.valueOf(50).equals(params.getValue("limit"))
+          && Integer.valueOf(0).equals(params.getValue("offset"))
+      ),
+      same(DebtPositionDao.DEBT_POSITION_ROW_MAPPER)
+    )).thenReturn(expected);
+
+    List<DebtPosition> result = dao.findDebtPositions("IPA1", filters, 50, 0);
+
+    assertEquals(expected, result);
+  }
+
+  @Test
   void givenInvalidLimitWhenFindDebtPositionsThenThrowIllegalArgumentException() {
     DebtPositionDao dao = buildDao();
     ExtractionFilters filters = new ExtractionFilters().logicalKey("IUV-1");

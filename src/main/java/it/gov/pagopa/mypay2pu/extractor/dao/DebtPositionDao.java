@@ -6,6 +6,7 @@ import it.gov.pagopa.mypay2pu.extractor.utils.DateTimeUtils;
 import it.gov.pagopa.mypay2pu.extractor.utils.QueryUtils;
 import it.gov.pagopa.mypay2pu.extractor.utils.SqlLoader;
 import it.gov.pagopa.mypay2pu.extractor.validation.CsvLogicalKeyValidator;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.DataClassRowMapper;
@@ -69,11 +70,12 @@ public class DebtPositionDao {
   }
 
   private MapSqlParameterSource buildParams(String codIpaEnte, ExtractionFilters filters, int limit, int offset) {
-    List<String> iuvs = CsvLogicalKeyValidator.parseLogicalKey(filters != null ? filters.getLogicalKey() : null);
-    LocalDate dateFrom = filters != null ? filters.getDateFrom() : null;
-    LocalDate dateTo = filters != null ? filters.getDateTo() : null;
+    ExtractionFilters effectiveFilters = ObjectUtils.defaultIfNull(filters, new ExtractionFilters());
+    List<String> iuvs = CsvLogicalKeyValidator.parseLogicalKey(effectiveFilters.getLogicalKey());
+    LocalDate dateFrom = effectiveFilters.getDateFrom();
+    LocalDate dateTo = effectiveFilters.getDateTo();
     boolean iuvsEmpty = CollectionUtils.isEmpty(iuvs);
-    List<String> iuvsForQuery = iuvsEmpty ? List.of(StringUtils.EMPTY) : iuvs;
+    List<String> iuvsForQuery = iuvsEmpty ? List.of("") : iuvs;
     return QueryUtils.buildPaginatedFilterParams(limit, offset)
       .addValue("codIpaEnte", codIpaEnte)
       .addValue("skipCodIuvFilter", iuvsEmpty)
