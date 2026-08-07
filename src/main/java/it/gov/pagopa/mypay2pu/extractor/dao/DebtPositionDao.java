@@ -69,14 +69,15 @@ public class DebtPositionDao {
   }
 
   private MapSqlParameterSource buildParams(String codIpaEnte, ExtractionFilters filters, int limit, int offset) {
-    List<String> iuvs = CsvLogicalKeyValidator.parseLogicalKey(filters.getLogicalKey());
+    List<String> iuvs = CsvLogicalKeyValidator.parseLogicalKey(filters != null ? filters.getLogicalKey() : null);
     LocalDate dateFrom = filters != null ? filters.getDateFrom() : null;
     LocalDate dateTo = filters != null ? filters.getDateTo() : null;
     boolean iuvsEmpty = CollectionUtils.isEmpty(iuvs);
+    List<String> iuvsForQuery = iuvsEmpty ? List.of(StringUtils.EMPTY) : iuvs;
     return QueryUtils.buildPaginatedFilterParams(limit, offset)
       .addValue("codIpaEnte", codIpaEnte)
       .addValue("skipCodIuvFilter", iuvsEmpty)
-      .addValue("iuvs", iuvs)
+      .addValue("iuvs", iuvsForQuery)
       .addValue("skipDateFromFilter", dateFrom == null)
       .addValue("dateFrom", DateTimeUtils.toStartOfDay(dateFrom))
       .addValue("skipDateToExclusiveFilter", dateTo == null)
