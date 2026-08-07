@@ -107,21 +107,17 @@ components:
           example: "2026-06-18T12:00:00Z"
         filters:
           $ref: '#/components/schemas/ExtractionFilters'
-          example:
-            ipaCode: "00493410240"
-            dateFrom: "2024-01-01"
-            dateTo: "2026-06-18"
     ExtractionFilters:
       type: object
       properties:
         dateFrom:
           type: string
-          format: date
-          example: "2024-01-01"
+          format: date-time
+          example: "2026-06-18T12:00:00Z"
         dateTo:
           type: string
-          format: date
-          example: "2026-06-18"
+          format: date-time
+          example: "2026-06-18T12:00:00Z"
         logicalKey:
           type: string
           description: |-

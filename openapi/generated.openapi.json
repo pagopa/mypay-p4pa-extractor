@@ -141,13 +141,13 @@
         "properties" : {
           "dateFrom" : {
             "type" : [ "string", "null" ],
-            "format" : "date",
-            "example" : "2024-01-01"
+            "format" : "date-time",
+            "example" : "2026-06-18T12:00:00Z"
           },
           "dateTo" : {
             "type" : [ "string", "null" ],
-            "format" : "date",
-            "example" : "2026-06-18"
+            "format" : "date-time",
+            "example" : "2026-06-18T12:00:00Z"
           },
           "logicalKey" : {
             "type" : [ "string", "null" ],
