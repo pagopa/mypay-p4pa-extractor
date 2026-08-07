@@ -13,7 +13,8 @@ import java.util.Optional;
 /**
  * Collects and manages validation errors for CSV rows.
  * Stores constraint violations from Jakarta Validation and can write them to a separate error report file.
- * Each error records the source logical key, field name, violation code, message, and rejected value.
+ * Each error records the row number, source logical key, field name, violation code, message, and rejected value.
+ * The row number is retained internally and is not included in the error report file.
  * The error report file is named as {@code {original_filename}.errors.csv} and placed in the same directory.
  * It supports two modes:
  * <ul>
@@ -64,14 +65,15 @@ public class CsvRowErrorCollector implements AutoCloseable {
   /**
    * Adds a validation error for a row.
    *
+   * @param rowNumber the 1-based row number in the source CSV file
    * @param logicalKey the source row logical key
    * @param field the field name that failed validation
    * @param code the constraint annotation class name (e.g., NotBlank, Email, etc.)
    * @param message the validation error message
    * @param rejectedValue the value that failed validation
    */
-  public void add(String logicalKey, String field, String code, String message, String rejectedValue) {
-    ValidationError validationError = new ValidationError(logicalKey, field, code, message, rejectedValue);
+  public void add(long rowNumber, String logicalKey, String field, String code, String message, String rejectedValue) {
+    ValidationError validationError = new ValidationError(rowNumber, logicalKey, field, code, message, rejectedValue);
     errorCount++;
     if (errorsCsvFilePath == null) {
       errors.add(validationError);
@@ -181,6 +183,7 @@ public class CsvRowErrorCollector implements AutoCloseable {
   /**
    * Immutable record representing a single validation error.
    *
+   * @param rowNumber the 1-based row number in the source CSV file
    * @param logicalKey the source row logical key
    * @param field the field/column name that failed validation
    * @param code the constraint annotation type name
@@ -188,6 +191,7 @@ public class CsvRowErrorCollector implements AutoCloseable {
    * @param rejectedValue the invalid value that was rejected
    */
   public record ValidationError(
+    long rowNumber,
     String logicalKey,
     String field,
     String code,

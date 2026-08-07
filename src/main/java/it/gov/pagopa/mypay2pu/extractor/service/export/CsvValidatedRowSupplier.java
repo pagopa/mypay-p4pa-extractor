@@ -12,6 +12,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -25,10 +26,13 @@ import java.util.function.Supplier;
  */
 public class CsvValidatedRowSupplier<M extends ExportModel, C extends CsvExportDto> implements Supplier<List<C>> {
 
+  private static final long FIRST_DATA_ROW_NUMBER = 2L;
+
   private final Supplier<List<M>> source;
   private final Function<M, C> mapper;
   private final Validator validator;
   private final CsvRowErrorCollector errorCollector;
+  private final AtomicLong rowNumber = new AtomicLong(FIRST_DATA_ROW_NUMBER);
 
   /**
    * Constructs a CSV row supplier that maps and validates source batches.
@@ -86,13 +90,15 @@ public class CsvValidatedRowSupplier<M extends ExportModel, C extends CsvExportD
   private List<C> mapAndValidate(List<M> sourceRows) {
     List<C> validRows = new ArrayList<>(sourceRows.size());
     for (M sourceRow : sourceRows) {
+      long currentRowNumber = rowNumber.getAndIncrement();
       try {
         C row = mapper.apply(sourceRow);
-        if (validateAndCollectErrors(sourceRow, row)) {
+        if (validateAndCollectErrors(sourceRow, row, currentRowNumber)) {
           validRows.add(row);
         }
       } catch (CsvRowMappingException e) {
         errorCollector.add(
+          currentRowNumber,
           sourceRow.logicalKey(),
           e.getField(),
           e.getErrorCode(),
@@ -101,6 +107,7 @@ public class CsvValidatedRowSupplier<M extends ExportModel, C extends CsvExportD
         );
       } catch (Exception e) {
         errorCollector.add(
+          currentRowNumber,
           sourceRow.logicalKey(),
           null,
           "UNEXPECTED ERROR",
@@ -112,7 +119,7 @@ public class CsvValidatedRowSupplier<M extends ExportModel, C extends CsvExportD
     return validRows;
   }
 
-  private boolean validateAndCollectErrors(M sourceRow, C row) {
+  private boolean validateAndCollectErrors(M sourceRow, C row, long currentRowNumber) {
     Set<ConstraintViolation<C>> violations = validator.validate(row);
     if (violations.isEmpty()) {
       return true;
@@ -122,6 +129,7 @@ public class CsvValidatedRowSupplier<M extends ExportModel, C extends CsvExportD
       .forEach(violation -> {
         Object rejectedValue = violation.getInvalidValue();
         errorCollector.add(
+          currentRowNumber,
           sourceRow.logicalKey(),
           violation.getPropertyPath().toString(),
           violation.getConstraintDescriptor().getAnnotation().annotationType().getSimpleName(),
