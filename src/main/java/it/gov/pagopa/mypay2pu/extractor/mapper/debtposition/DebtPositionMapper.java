@@ -38,7 +38,7 @@ public class DebtPositionMapper {
       .debtPositionTypeCode(debtPosition.tipoDovuto())
       .remittanceInformation(debtPosition.causaleVersamento())
       .legacyPaymentMetadata(debtPosition.datiSpecificiRiscossione())
-      .generateNotice(debtPosition.flgGeneraIuv())
+      .generateNotice(Boolean.TRUE.equals(debtPosition.flgGeneraIuv()))
       .flagPuPagoPaPayment(Boolean.TRUE)
       .balance(debtPosition.bilancio())
       .flagMultiBeneficiary(debtPosition.flagMultiBeneficiario())
