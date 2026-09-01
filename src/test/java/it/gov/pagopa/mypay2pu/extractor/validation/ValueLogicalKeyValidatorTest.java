@@ -16,19 +16,19 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class CsvLogicalKeyValidatorTest {
+class ValueLogicalKeyValidatorTest {
 
   private static final String INVALID_LOGICAL_KEY_MESSAGE =
     "filters.logicalKey must be a non-empty comma-separated list";
   private static final String EMPTY_VALUE_MESSAGE =
     "filters.logicalKey must not contain empty values";
 
-  private final CsvLogicalKeyValidator validator = new CsvLogicalKeyValidator();
+  private final ValueLogicalKeyValidator validator = new ValueLogicalKeyValidator();
 
   @ParameterizedTest
   @MethodSource("parsedLogicalKeys")
   void givenParsableLogicalKeyWhenParseThenReturnTrimmedValues(String logicalKey, List<String> expectedValues) {
-    List<String> result = CsvLogicalKeyValidator.parseLogicalKey(logicalKey);
+    List<String> result = ValueLogicalKeyValidator.parseLogicalKey(logicalKey);
 
     assertEquals(expectedValues, result);
   }
@@ -48,7 +48,7 @@ class CsvLogicalKeyValidatorTest {
     String logicalKey, String expectedMessage) {
     IllegalArgumentException exception = assertThrows(
       IllegalArgumentException.class,
-      () -> CsvLogicalKeyValidator.parseLogicalKey(logicalKey)
+      () -> ValueLogicalKeyValidator.parseLogicalKey(logicalKey)
     );
 
     assertEquals(expectedMessage, exception.getMessage());

@@ -9,8 +9,4 @@ public class DateTimeUtils {
   public static LocalDateTime toLocalDateTime(OffsetDateTime date) {
     return date == null ? null : date.toLocalDateTime();
   }
-
-  public static LocalDateTime toLocalDateTimeExclusive(OffsetDateTime date) {
-    return toLocalDateTime(date);
-  }
 }

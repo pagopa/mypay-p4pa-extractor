@@ -1,6 +1,5 @@
 package it.gov.pagopa.mypay2pu.extractor.utils;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -15,10 +14,6 @@ public class Constants {
 
   public static final String LOGICAL_KEY_VALUE_SEPARATOR = ",";
   public static final String LOGICAL_KEY_PAIR_SEPARATOR = "|";
-
-  public static ZoneOffset zoneOffsetAt(Instant instant) {
-    return ZONEID.getRules().getOffset(instant);
-  }
 
   public static ZoneOffset zoneOffsetAt(LocalDateTime localDateTime) {
     return ZONEID.getRules().getOffset(localDateTime);

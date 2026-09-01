@@ -88,6 +88,6 @@ public class DebtPositionDao {
       .addValue("skipDateFromFilter", dateFrom == null)
       .addValue("dateFrom", DateTimeUtils.toLocalDateTime(dateFrom))
       .addValue("skipDateToExclusiveFilter", dateTo == null)
-      .addValue("dateToExclusive", DateTimeUtils.toLocalDateTimeExclusive(dateTo));
+      .addValue("dateToExclusive", DateTimeUtils.toLocalDateTime(dateTo));
   }
 }

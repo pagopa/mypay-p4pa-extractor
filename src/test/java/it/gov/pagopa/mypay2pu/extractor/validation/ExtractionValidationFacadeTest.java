@@ -24,7 +24,7 @@ class ExtractionValidationFacadeTest {
   @Mock
   private ExtractionRequestValidator extractionRequestValidatorMock;
   @Mock
-  private CsvLogicalKeyValidator csvLogicalKeyValidatorMock;
+  private ValueLogicalKeyValidator valueLogicalKeyValidatorMock;
   @Mock
   private PairedLogicalKeyValidator pairedLogicalKeyValidatorMock;
 
@@ -34,7 +34,7 @@ class ExtractionValidationFacadeTest {
   void setUp() {
     validationFacade = new ExtractionValidationFacade(
       extractionRequestValidatorMock,
-      csvLogicalKeyValidatorMock,
+      valueLogicalKeyValidatorMock,
       pairedLogicalKeyValidatorMock
     );
   }
@@ -43,7 +43,7 @@ class ExtractionValidationFacadeTest {
   void tearDown() {
     verifyNoMoreInteractions(
       extractionRequestValidatorMock,
-      csvLogicalKeyValidatorMock,
+      valueLogicalKeyValidatorMock,
       pairedLogicalKeyValidatorMock
     );
   }
@@ -60,7 +60,7 @@ class ExtractionValidationFacadeTest {
       }
       case DEBT_POSITIONS_TYPE, DEBT_POSITIONS_TYPE_ORG, DEBT_POSITIONS -> {
         validationFacade.validate(request);
-        verify(csvLogicalKeyValidatorMock).validate(request);
+        verify(valueLogicalKeyValidatorMock).validate(request);
       }
       case DEBT_POSITIONS_TYPE_ORG_OPERATORS -> {
         validationFacade.validate(request);

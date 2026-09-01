@@ -13,7 +13,7 @@ import java.util.List;
  * Validates extraction requests whose logical key is a single comma-separated list.
  */
 @Component
-public class CsvLogicalKeyValidator extends ExtractionRequestValidator {
+public class ValueLogicalKeyValidator extends ExtractionRequestValidator {
 
   @Override
   public void validate(ExtractionRequest request) {

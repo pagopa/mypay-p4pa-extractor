@@ -10,7 +10,7 @@ import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.exception.ControllerExceptionHandler;
 import it.gov.pagopa.mypay2pu.extractor.service.ExportFileHandlerService;
 import it.gov.pagopa.mypay2pu.extractor.exception.BadRequestException;
-import it.gov.pagopa.mypay2pu.extractor.utils.Constants;
+import it.gov.pagopa.mypay2pu.extractor.utils.TimeUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -110,8 +110,8 @@ class ExportControllerTest {
       List.of("IPA_CODE_TEST"),
       MigrationFileType.ORGANIZATIONS,
       null,
-      new ExtractionFilters().dateFrom(OffsetDateTime.of(LocalDate.of(2026, Month.JANUARY, 2), LocalTime.MIDNIGHT, Constants.zoneOffsetAt(LocalDateTime.of(2026, Month.JANUARY, 2, 0, 0))))
-        .dateTo(OffsetDateTime.of(LocalDate.of(2026, Month.JANUARY, 1), LocalTime.MIDNIGHT, Constants.zoneOffsetAt(LocalDateTime.of(2026, Month.JANUARY, 1, 0, 0))))
+      new ExtractionFilters().dateFrom(OffsetDateTime.of(LocalDate.of(2026, Month.JANUARY, 2), LocalTime.MIDNIGHT, TimeUtils.zoneOffsetAt(LocalDateTime.of(2026, Month.JANUARY, 2, 0, 0))))
+        .dateTo(OffsetDateTime.of(LocalDate.of(2026, Month.JANUARY, 1), LocalTime.MIDNIGHT, TimeUtils.zoneOffsetAt(LocalDateTime.of(2026, Month.JANUARY, 1, 0, 0))))
     );
     doThrow(new BadRequestException(
       "INVALID_EXTRACTION_FILTERS",

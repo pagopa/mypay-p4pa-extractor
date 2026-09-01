@@ -43,8 +43,8 @@ public class PairedLogicalKeyValidator extends ExtractionRequestValidator {
       throw new IllegalArgumentException("filters.logicalKey must contain exactly one vertical bar");
     }
     return new LogicalKeyPair(
-      CsvLogicalKeyValidator.parseLogicalKey(parts[0]),
-      CsvLogicalKeyValidator.parseLogicalKey(parts[1])
+      ValueLogicalKeyValidator.parseLogicalKey(parts[0]),
+      ValueLogicalKeyValidator.parseLogicalKey(parts[1])
     );
   }
 }

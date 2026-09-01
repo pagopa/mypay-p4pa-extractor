@@ -2,8 +2,8 @@ package it.gov.pagopa.mypay2pu.extractor.dao;
 
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionFilters;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.Organization;
-import it.gov.pagopa.mypay2pu.extractor.utils.Constants;
 import it.gov.pagopa.mypay2pu.extractor.utils.SqlLoader;
+import it.gov.pagopa.mypay2pu.extractor.utils.TimeUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -95,8 +95,8 @@ class OrganizationDaoTest {
 
     List<Organization> result = dao.findByFilters(
       List.of("IPA1", "IPA2"),
-      new ExtractionFilters(OffsetDateTime.of(LocalDate.of(2026, Month.JANUARY, 10), LocalTime.MIDNIGHT, Constants.zoneOffsetAt(LocalDateTime.of(2026, Month.JANUARY, 10, 0, 0))),
-        OffsetDateTime.of(LocalDate.of(2026, Month.JANUARY, 12), LocalTime.MIDNIGHT, Constants.zoneOffsetAt(LocalDateTime.of(2026, Month.JANUARY, 12, 0, 0))), null),
+      new ExtractionFilters(OffsetDateTime.of(LocalDate.of(2026, Month.JANUARY, 10), LocalTime.MIDNIGHT, TimeUtils.zoneOffsetAt(LocalDateTime.of(2026, Month.JANUARY, 10, 0, 0))),
+        OffsetDateTime.of(LocalDate.of(2026, Month.JANUARY, 12), LocalTime.MIDNIGHT, TimeUtils.zoneOffsetAt(LocalDateTime.of(2026, Month.JANUARY, 12, 0, 0))), null),
       50,
       100
     );

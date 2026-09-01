@@ -11,7 +11,7 @@ import it.gov.pagopa.mypay2pu.extractor.service.FileArchiverService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.BaseExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.CsvPartitionWriterService;
 import it.gov.pagopa.mypay2pu.extractor.service.files.CsvService;
-import it.gov.pagopa.mypay2pu.extractor.validation.CsvLogicalKeyValidator;
+import it.gov.pagopa.mypay2pu.extractor.validation.ValueLogicalKeyValidator;
 import jakarta.validation.Validator;
 import org.springframework.stereotype.Service;
 
@@ -58,7 +58,7 @@ public class DebtPositionTypeExportProcessingService extends BaseExportProcessin
   @Override
   protected List<DebtPositionType> retrieveData(ExtractionRequest request, int pageSize, int offset) {
     return debtPositionTypeDao.findByFilters(
-      CsvLogicalKeyValidator.parseLogicalKey(request.getFilters().getLogicalKey()),
+      ValueLogicalKeyValidator.parseLogicalKey(request.getFilters().getLogicalKey()),
       pageSize,
       offset
     );

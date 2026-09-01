@@ -28,21 +28,4 @@ class DateTimeUtilsTest {
       DateTimeUtils.toLocalDateTime(input)
     );
   }
-
-  @Test
-  void givenNullDateWhenToLocalDateTimeExclusiveThenReturnNull() {
-    assertNull(DateTimeUtils.toLocalDateTimeExclusive(null));
-  }
-
-  @Test
-  void givenDateWhenToLocalDateTimeExclusiveThenReturnLocalDateTime() {
-    OffsetDateTime input = OffsetDateTime.of(
-      LocalDateTime.of(2026, Month.JANUARY, 2, 23, 59),
-      ZoneOffset.ofHours(1)
-    );
-    assertEquals(
-      LocalDateTime.of(2026, Month.JANUARY, 2, 23, 59),
-      DateTimeUtils.toLocalDateTimeExclusive(input)
-    );
-  }
 }
