@@ -10,9 +10,11 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 @Repository
@@ -35,8 +37,8 @@ public class PaymentNotificationDao {
 
   public List<PaymentNotification> findByFilters(
     String ipaCode,
-    String iud,
-    String iuv,
+    List<String> iuds,
+    List<String> iuvs,
     LocalDateTime createdFrom,
     LocalDateTime createdTo,
     int limit,
@@ -51,26 +53,28 @@ public class PaymentNotificationDao {
 
     return mypivotJdbcTemplate.query(
       findByFiltersSql,
-      buildParams(ipaCode, iud, iuv, createdFrom, createdTo, limit, offset),
+      buildParams(ipaCode, iuds, iuvs, createdFrom, createdTo, limit, offset),
       PAYMENT_NOTIFICATION_ROW_MAPPER
     );
   }
 
   private MapSqlParameterSource buildParams(
     String ipaCode,
-    String iud,
-    String iuv,
+    List<String> iuds,
+    List<String> iuvs,
     LocalDateTime createdFrom,
     LocalDateTime createdTo,
     int limit,
     int offset
   ) {
+    boolean iudsEmpty = CollectionUtils.isEmpty(iuds);
+    boolean iuvsEmpty = CollectionUtils.isEmpty(iuvs);
     return QueryUtils.buildPaginatedFilterParams(limit, offset)
       .addValue("ipaCode", ipaCode)
-      .addValue("skipIudFilter", iud == null)
-      .addValue("iud", iud)
-      .addValue("skipIuvFilter", iuv == null)
-      .addValue("iuv", iuv)
+      .addValue("iudsEmpty", iudsEmpty)
+      .addValue("iuds", iudsEmpty ? Collections.singletonList(null) : iuds)
+      .addValue("iuvsEmpty", iuvsEmpty)
+      .addValue("iuvs", iuvsEmpty ? Collections.singletonList(null) : iuvs)
       .addValue("skipCreatedFromFilter", createdFrom == null)
       .addValue("createdFrom", createdFrom)
       .addValue("skipCreatedToFilter", createdTo == null)

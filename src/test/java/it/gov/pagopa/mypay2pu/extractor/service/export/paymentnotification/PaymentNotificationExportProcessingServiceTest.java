@@ -18,8 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDate;
-import java.time.Month;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -59,26 +58,23 @@ class PaymentNotificationExportProcessingServiceTest {
   }
 
   @Test
-  void retrieveDataShouldDelegateMultiOrganizationFiltersToDao() {
+  void retrieveDataShouldDelegateDateFiltersToDao() {
     PaymentNotificationExportProcessingService service = service();
     String ipaCode = "IPA1";
-    String iud = "IUD-1";
-    String iuv = "IUV-1";
-    LocalDate modifiedFrom = LocalDate.of(2026, Month.JANUARY, 10);
-    LocalDate modifiedTo = LocalDate.of(2026, Month.JANUARY, 11);
+    OffsetDateTime dateFrom = OffsetDateTime.parse("2026-01-10T10:30:00Z");
+    OffsetDateTime dateTo = OffsetDateTime.parse("2026-01-11T10:30:00Z");
     ExtractionFilters filters = new ExtractionFilters()
-      .iud(iud)
-      .iuv(iuv)
-      .modifiedFrom(modifiedFrom)
-      .modifiedTo(modifiedTo);
+      .dateFrom(dateFrom)
+      .dateTo(dateTo)
+      .logicalKey("IUD-1,IUD-2|IUV-1,IUV-2");
     ExtractionRequest request = new ExtractionRequest(List.of(ipaCode), MigrationFileType.PAYMENT_NOTIFICATION, null, filters);
     List<PaymentNotification> expected = List.of();
     when(paymentNotificationDaoMock.findByFilters(
       ipaCode,
-      iud,
-      iuv,
-      modifiedFrom.atStartOfDay(),
-      modifiedTo.plusDays(1).atStartOfDay(),
+      List.of("IUD-1", "IUD-2"),
+      List.of("IUV-1", "IUV-2"),
+      dateFrom.toLocalDateTime(),
+      dateTo.toLocalDateTime(),
       50,
       100
     ))
@@ -89,10 +85,10 @@ class PaymentNotificationExportProcessingServiceTest {
     assertEquals(expected, result);
     verify(paymentNotificationDaoMock).findByFilters(
       ipaCode,
-      iud,
-      iuv,
-      modifiedFrom.atStartOfDay(),
-      modifiedTo.plusDays(1).atStartOfDay(),
+      List.of("IUD-1", "IUD-2"),
+      List.of("IUV-1", "IUV-2"),
+      dateFrom.toLocalDateTime(),
+      dateTo.toLocalDateTime(),
       50,
       100
     );
@@ -112,7 +108,7 @@ class PaymentNotificationExportProcessingServiceTest {
     PaymentNotificationExportProcessingService service = service();
     String ipaCode = "IPA1";
     List<PaymentNotification> expected = List.of();
-    when(paymentNotificationDaoMock.findByFilters(ipaCode, null, null, null, null, 50, 100))
+    when(paymentNotificationDaoMock.findByFilters(ipaCode, List.of(), List.of(), null, null, 50, 100))
       .thenReturn(expected);
 
     List<PaymentNotification> result = service.retrieveData(
@@ -123,7 +119,7 @@ class PaymentNotificationExportProcessingServiceTest {
     );
 
     assertEquals(expected, result);
-    verify(paymentNotificationDaoMock).findByFilters(ipaCode, null, null, null, null, 50, 100);
+    verify(paymentNotificationDaoMock).findByFilters(ipaCode, List.of(), List.of(), null, null, 50, 100);
   }
 
   private PaymentNotificationExportProcessingService service() {

@@ -13,10 +13,11 @@ import it.gov.pagopa.mypay2pu.extractor.service.export.CsvPartitionWriterService
 import it.gov.pagopa.mypay2pu.extractor.service.export.SplitByIpaCodeBaseExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.files.CsvService;
 import it.gov.pagopa.mypay2pu.extractor.utils.DateTimeUtils;
+import it.gov.pagopa.mypay2pu.extractor.validation.LogicalKeyPair;
+import it.gov.pagopa.mypay2pu.extractor.validation.PairedLogicalKeyValidator;
 import jakarta.validation.Validator;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -63,23 +64,15 @@ public class PaymentNotificationExportProcessingService
   @Override
   protected List<PaymentNotification> retrieveData(String ipaCode, ExtractionRequest request, int pageSize, int offset) {
     ExtractionFilters filters = request.getFilters();
-    String iud = null;
-    String iuv = null;
-    LocalDate modifiedFrom = null;
-    LocalDate modifiedTo = null;
-    if (filters != null) {
-      iud = filters.getIud();
-      iuv = filters.getIuv();
-      modifiedFrom = filters.getModifiedFrom();
-      modifiedTo = filters.getModifiedTo();
-    }
-
+    LogicalKeyPair logicalKeyPair = PairedLogicalKeyValidator.parseLogicalKey(
+      filters != null ? filters.getLogicalKey() : null
+    );
     return paymentNotificationDao.findByFilters(
       ipaCode,
-      iud,
-      iuv,
-      DateTimeUtils.toStartOfDay(modifiedFrom),
-      DateTimeUtils.toStartOfNextDay(modifiedTo),
+      logicalKeyPair.left(),
+      logicalKeyPair.right(),
+      DateTimeUtils.toLocalDateTime(filters != null ? filters.getDateFrom() : null),
+      DateTimeUtils.toLocalDateTime(filters != null ? filters.getDateTo() : null),
       pageSize,
       offset
     );

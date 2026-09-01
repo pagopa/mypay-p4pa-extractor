@@ -127,6 +127,7 @@ components:
             - `DEBT_POSITIONS_TYPE`, `DEBT_POSITIONS_TYPE_ORG`: comma-separated list of `debtPositionTypeOrgCode` values (example: `TARI,TASI`).
             - `DEBT_POSITIONS_TYPE_ORG_OPERATORS`: two comma-separated lists separated by `|` in the form `operatorFiscalCodes|debtPositionTypeOrgCodes`.
             - `DEBT_POSITIONS`: comma-separated list of `iuvs` values (example: `0101234567890001,0101234567890002`).
+            - `PAYMENT_NOTIFICATION`: two comma-separated IUD and IUV lists separated by `|` in the form `iud1,iud2|iuv1,iuv2`.
           examples:
             - value
             - value1,value2,value3
