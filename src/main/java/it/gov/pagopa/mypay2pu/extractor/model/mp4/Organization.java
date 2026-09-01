@@ -24,4 +24,9 @@ public record Organization(
   String ioApiKey
 
 ) implements ExportModel {
+
+  @Override
+  public String logicalKey() {
+    return ipaCode;
+  }
 }

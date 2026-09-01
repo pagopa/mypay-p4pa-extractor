@@ -43,5 +43,10 @@ class PaginatedExportRowsSupplierTest {
   }
 
   private record TestExportModel(String value) implements ExportModel {
+
+    @Override
+    public String logicalKey() {
+      return value;
+    }
   }
 }

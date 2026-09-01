@@ -37,8 +37,8 @@ class CsvRowErrorCollectorTest {
     // Given
     Path csvFile = tempDir.resolve("output.csv");
     CsvRowErrorCollector collector = new CsvRowErrorCollector(csvService);
-    collector.add(2, "email", "Email", "must be a well-formed email address", "invalid-email");
-    collector.add(3, "name", "NotBlank", "must not be blank", "");
+    collector.add(2, "IUPD-1", "email", "Email", "must be a well-formed email address", "invalid-email");
+    collector.add(3, "IUPD-2", "name", "NotBlank", "must not be blank", "");
 
     // When
     var result = collector.writeToFile(csvFile);
@@ -54,9 +54,9 @@ class CsvRowErrorCollectorTest {
 
     // Header + 2 error rows
     assertEquals(3, lines.length);
-    assertTrue(lines[0].contains("rowNumber") && lines[0].contains("field"));
-    assertTrue(lines[1].contains("2") && lines[1].contains("email"));
-    assertTrue(lines[2].contains("3") && lines[2].contains("name"));
+    assertTrue(lines[0].contains("logicalKey") && lines[0].contains("field"));
+    assertTrue(lines[1].contains("IUPD-1") && lines[1].contains("email"));
+    assertTrue(lines[2].contains("IUPD-2") && lines[2].contains("name"));
   }
 
   @Test
@@ -64,7 +64,7 @@ class CsvRowErrorCollectorTest {
     // Given
     Path csvFile = tempDir.resolve("output");
     CsvRowErrorCollector collector = new CsvRowErrorCollector(csvService);
-    collector.add(2, "email", "Email", "must be a well-formed email address", "invalid-email");
+    collector.add(2, "IUPD-1", "email", "Email", "must be a well-formed email address", "invalid-email");
 
     // When
     var result = collector.writeToFile(csvFile);
@@ -83,7 +83,7 @@ class CsvRowErrorCollectorTest {
     Files.createDirectories(csvFile.getParent());
 
     CsvRowErrorCollector collector = new CsvRowErrorCollector(csvService);
-    collector.add(2, "field1", "NotNull", "must not be null", "");
+    collector.add(2, "IUPD-1", "field1", "NotNull", "must not be null", "");
 
     // When
     var result = collector.writeToFile(csvFile);
@@ -102,7 +102,7 @@ class CsvRowErrorCollectorTest {
     CsvRowErrorCollector collector = new CsvRowErrorCollector(csvService);
 
     for (int i = 2; i <= 10; i++) {
-      collector.add(i, "field" + i, "Code" + i, "Error message " + i, "value" + i);
+      collector.add(i, "IUPD-" + i, "field" + i, "Code" + i, "Error message " + i, "value" + i);
     }
 
     // When
@@ -125,8 +125,8 @@ class CsvRowErrorCollectorTest {
     // Given
     Path csvFile = tempDir.resolve("output.csv");
     CsvRowErrorCollector collector = new CsvRowErrorCollector(csvService, csvFile);
-    collector.add(2, "email", "Email", "must be a well-formed email address", "invalid-email");
-    collector.add(3, "name", "NotBlank", "must not be blank", "");
+    collector.add(2, "IUPD-1", "email", "Email", "must be a well-formed email address", "invalid-email");
+    collector.add(3, "IUPD-2", "name", "NotBlank", "must not be blank", "");
 
     // When
     var result = collector.writeToFile(csvFile);
@@ -140,8 +140,8 @@ class CsvRowErrorCollectorTest {
     String content = Files.readString(errorFile, StandardCharsets.UTF_8);
     String[] lines = content.split("\n");
     assertEquals(3, lines.length);
-    assertTrue(lines[1].contains("2") && lines[1].contains("email"));
-    assertTrue(lines[2].contains("3") && lines[2].contains("name"));
+    assertTrue(lines[1].contains("IUPD-1") && lines[1].contains("email"));
+    assertTrue(lines[2].contains("IUPD-2") && lines[2].contains("name"));
   }
 
   @Test
@@ -150,7 +150,7 @@ class CsvRowErrorCollectorTest {
     Path constructorCsvFile = tempDir.resolve("constructor.csv");
     Path ignoredMethodCsvFile = tempDir.resolve("ignored.csv");
     CsvRowErrorCollector collector = new CsvRowErrorCollector(csvService, constructorCsvFile);
-    collector.add(2, "email", "Email", "must be a well-formed email address", "invalid-email");
+    collector.add(2, "IUPD-1", "email", "Email", "must be a well-formed email address", "invalid-email");
 
     // When
     var result = collector.writeToFile(ignoredMethodCsvFile);
@@ -167,12 +167,14 @@ class CsvRowErrorCollectorTest {
     Path csvFile = tempDir.resolve("output.csv");
     Path errorFile = tempDir.resolve("output.errors.csv");
     Files.writeString(errorFile,
-      "\"rowNumber\";\"field\";\"code\";\"message\";\"rejectedValue\"\n" +
-      "\"2\";\"email\";\"Email\";\"must be a well-formed email address\";\"bad\"\n",
+      """
+        "logicalKey";"field";"code";"message";"rejectedValue"
+        "IUPD-1";"email";"Email";"must be a well-formed email address";"bad"
+        """,
       StandardCharsets.UTF_8);
 
     CsvRowErrorCollector collector = new CsvRowErrorCollector(csvService, csvFile);
-    collector.add(3, "name", "NotBlank", "must not be blank", "");
+    collector.add(3, "IUPD-2", "name", "NotBlank", "must not be blank", "");
 
     // When
     var result = collector.writeToFile(csvFile);
@@ -182,7 +184,7 @@ class CsvRowErrorCollectorTest {
     String content = Files.readString(errorFile, StandardCharsets.UTF_8);
     String[] lines = content.split("\n");
     assertEquals(2, lines.length);
-    assertTrue(lines[0].contains("rowNumber"));
+    assertTrue(lines[0].contains("logicalKey"));
     assertTrue(lines[1].contains("name"));
     assertFalse(content.contains("email"));
   }
@@ -192,7 +194,7 @@ class CsvRowErrorCollectorTest {
     // Given
     Path csvFile = tempDir.resolve("output.csv");
     Path errorFile = tempDir.resolve("output.errors.csv");
-    Files.writeString(errorFile, "rowNumber;field;code;message;rejectedValue\n", StandardCharsets.UTF_8);
+    Files.writeString(errorFile, "logicalKey;field;code;message;rejectedValue\n", StandardCharsets.UTF_8);
     CsvRowErrorCollector collector = new CsvRowErrorCollector(csvService, csvFile);
 
     // When
