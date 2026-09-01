@@ -45,15 +45,23 @@ class DebtPositionsTypeOrgOperatorsDaoTest {
       eq(FIND_BY_FILTERS_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         "IPA_CODE".equals(params.getValue("ipaCode"))
-          && "OPERATOR_CF".equals(params.getValue("operatorFiscalCode"))
-          && "TYPE_ORG_CODE".equals(params.getValue("debtPositionTypeOrgCode"))
+          && Boolean.FALSE.equals(params.getValue("operatorFiscalCodesEmpty"))
+          && List.of("OPERATOR_CF").equals(params.getValue("operatorFiscalCodes"))
+          && Boolean.FALSE.equals(params.getValue("debtPositionTypeOrgCodesEmpty"))
+          && List.of("TYPE_ORG_CODE").equals(params.getValue("debtPositionTypeOrgCodes"))
           && Integer.valueOf(50).equals(params.getValue("limit"))
           && Integer.valueOf(100).equals(params.getValue("offset"))
       ),
       same(DebtPositionsTypeOrgOperatorsDao.ROW_MAPPER)
     )).thenReturn(expected);
 
-    List<DebtPositionsTypeOrgOperators> result = dao.findByFilters("IPA_CODE", "OPERATOR_CF", "TYPE_ORG_CODE", 50, 100);
+    List<DebtPositionsTypeOrgOperators> result = dao.findByFilters(
+      "IPA_CODE",
+      List.of("OPERATOR_CF"),
+      List.of("TYPE_ORG_CODE"),
+      50,
+      100
+    );
 
     assertEquals(expected, result);
   }
@@ -61,10 +69,14 @@ class DebtPositionsTypeOrgOperatorsDaoTest {
   @Test
   void givenInvalidLimitWhenFindByFiltersThenThrowIllegalArgumentException() {
     DebtPositionsTypeOrgOperatorsDao dao = buildDao();
+    List<String> operatorCf = List.of("OPERATOR_CF");
+    List<String> typeOrgCode = List.of("TYPE_ORG_CODE");
 
     IllegalArgumentException exception = assertThrows(
       IllegalArgumentException.class,
-      () -> dao.findByFilters("IPA_CODE", "OPERATOR_CF", "TYPE_ORG_CODE", 0, 100)
+      () -> {
+        dao.findByFilters("IPA_CODE", operatorCf, typeOrgCode, 0, 100);
+      }
     );
 
     assertEquals("limit must be greater than 0", exception.getMessage());

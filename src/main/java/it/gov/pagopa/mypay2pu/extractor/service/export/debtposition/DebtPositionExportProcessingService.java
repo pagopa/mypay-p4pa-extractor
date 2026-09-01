@@ -13,6 +13,7 @@ import it.gov.pagopa.mypay2pu.extractor.service.FileArchiverService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.CsvPartitionWriterService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.SplitByIpaCodeBaseExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.files.CsvService;
+import it.gov.pagopa.mypay2pu.extractor.validation.ValueLogicalKeyValidator;
 import it.gov.pagopa.pu.debtposition.dto.generated.Action;
 import jakarta.validation.Validator;
 import lombok.extern.slf4j.Slf4j;
@@ -68,11 +69,14 @@ public class DebtPositionExportProcessingService extends SplitByIpaCodeBaseExpor
   @Override
   protected List<DebtPositionWithAction> retrieveData(String ipaCode, ExtractionRequest request, int pageSize, int offset) {
     ExtractionFilters filters = request.getFilters();
+    List<String> iuvs = ValueLogicalKeyValidator.parseLogicalKey(filters != null ? filters.getLogicalKey() : null);
+    OffsetDateTime dateFrom = filters != null ? filters.getDateFrom() : null;
+    OffsetDateTime dateTo = filters != null ? filters.getDateTo() : null;
     List<DebtPosition> debtPositions = debtPositionDao.findDebtPositions(
       ipaCode,
-      null,
-      null,
-      filters,
+      iuvs,
+      dateFrom,
+      dateTo,
       pageSize,
       offset
     );
@@ -87,9 +91,9 @@ public class DebtPositionExportProcessingService extends SplitByIpaCodeBaseExpor
     LocalDateTime lastExtractionDateTime = lastExtractionDate.toLocalDateTime();
     List<DebtPosition> cancelledDebtPositions = debtPositionDao.findCancelledDebtPositions(
       ipaCode,
-      null,
-      null,
-      filters,
+      iuvs,
+      dateFrom,
+      dateTo,
       pageSize,
       offset
     );
@@ -122,5 +126,10 @@ public class DebtPositionExportProcessingService extends SplitByIpaCodeBaseExpor
   }
 
   record DebtPositionWithAction(DebtPosition debtPosition, Action action) implements ExportModel {
+
+    @Override
+    public String logicalKey() {
+      return debtPosition.logicalKey();
+    }
   }
 }

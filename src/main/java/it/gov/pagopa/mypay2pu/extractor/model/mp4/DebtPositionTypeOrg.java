@@ -27,4 +27,9 @@ public record DebtPositionTypeOrg(
   Boolean flagNotifyIo,
   Boolean flagNotifyIoBkp
 ) implements ExportModel {
+
+  @Override
+  public String logicalKey() {
+    return code;
+  }
 }

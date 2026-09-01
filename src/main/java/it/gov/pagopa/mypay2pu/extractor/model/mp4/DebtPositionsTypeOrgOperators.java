@@ -7,4 +7,9 @@ public record DebtPositionsTypeOrgOperators(
   String operatorFiscalCode,
   String debtPositionsTypeOrgCode
 ) implements ExportModel {
+
+  @Override
+  public String logicalKey() {
+    return debtPositionsTypeOrgCode + "|" + operatorFiscalCode;
+  }
 }

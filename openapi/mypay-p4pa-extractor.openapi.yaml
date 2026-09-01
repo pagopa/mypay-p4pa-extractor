@@ -28,8 +28,8 @@ paths:
                   ipaCodes: ["00493410240", "01234567890"]
                   fileTypes: ORGANIZATIONS
                   filters:
-                    modifiedFrom: "2024-01-01"
-                    modifiedTo: "2026-06-18"
+                    dateFrom: "2024-01-01"
+                    dateTo: "2026-06-18"
       responses:
         '202':
           description: Extraction accepted
@@ -86,8 +86,8 @@ components:
         fileTypes: ORGANIZATIONS
         lastExtractionDate: "2026-06-18T12:00:00Z"
         filters:
-          modifiedFrom: "2024-01-01"
-          modifiedTo: "2026-06-18"
+          dateFrom: "2024-01-01"
+          dateTo: "2026-06-18"
       required:
         - ipaCodes
         - fileTypes
@@ -107,26 +107,30 @@ components:
           example: "2026-06-18T12:00:00Z"
         filters:
           $ref: '#/components/schemas/ExtractionFilters'
-          example:
-            ipaCode: "00493410240"
-            modifiedFrom: "2024-01-01"
-            modifiedTo: "2026-06-18"
     ExtractionFilters:
       type: object
       properties:
-        modifiedFrom:
+        dateFrom:
           type: string
-          format: date
-          example: "2024-01-01"
-        modifiedTo:
+          format: date-time
+          example: "2026-06-18T12:00:00Z"
+        dateTo:
           type: string
-          format: date
-          example: "2026-06-18"
-        debtPositionTypeOrgCodes:
-          type: array
-          items:
-            type: string
-          example: ["TYPE_ORG_001", "TYPE_ORG_002"]
+          format: date-time
+          example: "2026-06-18T12:00:00Z"
+        logicalKey:
+          type: string
+          description: |-
+            Optional filter whose format depends on `fileTypes`.
+
+            - `ORGANIZATIONS`, `ORG_SIL_SERVICES`: not used.
+            - `DEBT_POSITIONS_TYPE`, `DEBT_POSITIONS_TYPE_ORG`: comma-separated list of `debtPositionTypeOrgCode` values (example: `TARI,TASI`).
+            - `DEBT_POSITIONS_TYPE_ORG_OPERATORS`: two comma-separated lists separated by `|` in the form `operatorFiscalCodes|debtPositionTypeOrgCodes`.
+            - `DEBT_POSITIONS`: comma-separated list of `iuvs` values (example: `0101234567890001,0101234567890002`).
+          examples:
+            - value
+            - value1,value2,value3
+            - value1,value2|value3,value4
     ExtractionAcceptedResponse:
       type: object
       required:

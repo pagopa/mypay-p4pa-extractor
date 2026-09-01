@@ -28,12 +28,12 @@ SELECT
     de.bilancio AS bilancio,
     FALSE AS draft,
     FALSE AS flag_multi_beneficiario,
-    NULL AS codice_fiscale_ente1,
-    NULL AS denominazione_ente1,
-    NULL AS iban_accredito_ente1,
-    NULL AS causale_versamento_ente1,
-    NULL AS importo_versamento_ente1,
-    NULL AS codice_tassonomia_ente1,
+    NULL AS codice_fiscale_ente_1,
+    NULL AS denominazione_ente_1,
+    NULL AS iban_accredito_ente_1,
+    NULL AS causale_versamento_ente_1,
+    NULL AS importo_versamento_ente_1,
+    NULL AS codice_tassonomia_ente_1,
     de.dt_creazione AS dt_creazione,
     NULL AS dt_ultima_modifica
 FROM mygov_dovuto_elaborato de
@@ -45,11 +45,9 @@ JOIN mygov_anagrafica_stato s
     ON s.mygov_anagrafica_stato_id = de.mygov_anagrafica_stato_id
 WHERE e.cod_ipa_ente = :codIpaEnte
   AND s.cod_stato = 'ANNULLATO'
-  AND (:skipGpdIupdFilter = TRUE OR de.gpd_iupd = :gpdIupd)
-  AND (:skipCodIudFilter = TRUE OR de.cod_iud = :codIud)
-  AND (:skipUpdatedFromFilter = TRUE OR de.dt_creazione >= :updatedFrom)
-  AND (:skipUpdatedToExclusiveFilter = TRUE OR de.dt_creazione < :updatedToExclusive)
-  AND (:debtPositionTypeOrgCodesEmpty = TRUE OR de.cod_tipo_dovuto IN (:debtPositionTypeOrgCodes))
+  AND (:skipCodIuvFilter = TRUE OR de.cod_iuv IN (:iuvs))
+  AND (:skipDateFromFilter = TRUE OR de.dt_creazione >= :dateFrom)
+  AND (:skipDateToExclusiveFilter = TRUE OR de.dt_creazione < :dateToExclusive)
 ORDER BY de.dt_creazione, de.mygov_dovuto_elaborato_id
 LIMIT :limit
 OFFSET COALESCE(:offset, 0)
