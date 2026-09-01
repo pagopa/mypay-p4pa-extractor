@@ -1,6 +1,5 @@
 package it.gov.pagopa.mypay2pu.extractor.dao;
 
-import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionFilters;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.DebtPosition;
 import it.gov.pagopa.mypay2pu.extractor.utils.SqlLoader;
 import org.junit.jupiter.api.AfterEach;
@@ -14,7 +13,10 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.Month;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
 
@@ -45,33 +47,34 @@ class DebtPositionDaoTest {
   void givenOpenFiltersWhenFindDebtPositionsThenQueryMp4Database() {
     DebtPositionDao dao = buildDao();
     List<DebtPosition> expected = List.of(buildDebtPosition());
-
-    ExtractionFilters filters = new ExtractionFilters()
-      .modifiedFrom(LocalDate.of(2026, Month.JANUARY, 10))
-      .modifiedTo(LocalDate.of(2026, Month.JANUARY, 12))
-      .debtPositionTypeOrgCodes(List.of("TYPE_1", "TYPE_2"));
+    List<String> iuvs = List.of("IUV-1");
+    OffsetDateTime dateFrom = OffsetDateTime.of(LocalDateTime.of(2026, Month.JANUARY, 10, 8, 45), ZoneOffset.ofHours(1));
+    OffsetDateTime dateTo = OffsetDateTime.of(LocalDateTime.of(2026, Month.JANUARY, 12, 17, 30), ZoneOffset.ofHours(1));
 
     when(mp4JdbcTemplateMock.query(
       eq(FIND_DEBT_POSITIONS_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         "IPA1".equals(params.getValue("codIpaEnte"))
-          && Boolean.FALSE.equals(params.getValue("skipGpdIupdFilter"))
-          && "IUPD-1".equals(params.getValue("gpdIupd"))
-          && Boolean.FALSE.equals(params.getValue("skipCodIudFilter"))
-          && "IUD-1".equals(params.getValue("codIud"))
-          && Boolean.FALSE.equals(params.getValue("skipUpdatedFromFilter"))
-          && LocalDate.of(2026, Month.JANUARY, 10).atStartOfDay().equals(params.getValue("updatedFrom"))
-          && Boolean.FALSE.equals(params.getValue("skipUpdatedToExclusiveFilter"))
-          && LocalDate.of(2026, Month.JANUARY, 13).atStartOfDay().equals(params.getValue("updatedToExclusive"))
-          && Boolean.FALSE.equals(params.getValue("debtPositionTypeOrgCodesEmpty"))
-          && List.of("TYPE_1", "TYPE_2").equals(params.getValue("debtPositionTypeOrgCodes"))
+          && Boolean.FALSE.equals(params.getValue("skipCodIuvFilter"))
+          && List.of("IUV-1").equals(params.getValue("iuvs"))
+          && Boolean.FALSE.equals(params.getValue("skipDateFromFilter"))
+          && LocalDateTime.of(2026, Month.JANUARY, 10, 8, 45).equals(params.getValue("dateFrom"))
+          && Boolean.FALSE.equals(params.getValue("skipDateToExclusiveFilter"))
+          && LocalDateTime.of(2026, Month.JANUARY, 12, 17, 30).equals(params.getValue("dateToExclusive"))
           && Integer.valueOf(50).equals(params.getValue("limit"))
           && Integer.valueOf(100).equals(params.getValue("offset"))
       ),
       same(DebtPositionDao.DEBT_POSITION_ROW_MAPPER)
     )).thenReturn(expected);
 
-    List<DebtPosition> result = dao.findDebtPositions("IPA1", "IUPD-1", "IUD-1", filters, 50, 100);
+    List<DebtPosition> result = dao.findDebtPositions(
+      "IPA1",
+      iuvs,
+      dateFrom,
+      dateTo,
+      50,
+      100
+    );
 
     assertEquals(expected, result);
   }
@@ -80,38 +83,33 @@ class DebtPositionDaoTest {
   void givenNullOptionalFiltersWhenFindCancelledDebtPositionsThenQueryMp4Database() {
     DebtPositionDao dao = buildDao();
     List<DebtPosition> expected = List.of(buildDebtPosition());
+    List<String> iuvs = List.of("IUV-2");
 
     when(mp4JdbcTemplateMock.query(
       eq(FIND_CANCELLED_DEBT_POSITIONS_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         "IPA2".equals(params.getValue("codIpaEnte"))
-          && Boolean.TRUE.equals(params.getValue("skipGpdIupdFilter"))
-          && params.hasValue("gpdIupd")
-          && params.getValue("gpdIupd") == null
-          && Boolean.TRUE.equals(params.getValue("skipCodIudFilter"))
-          && params.hasValue("codIud")
-          && params.getValue("codIud") == null
-          && Boolean.TRUE.equals(params.getValue("skipUpdatedFromFilter"))
-          && params.hasValue("updatedFrom")
-          && params.getValue("updatedFrom") == null
-          && Boolean.TRUE.equals(params.getValue("skipUpdatedToExclusiveFilter"))
-          && params.hasValue("updatedToExclusive")
-          && params.getValue("updatedToExclusive") == null
-          && Boolean.TRUE.equals(params.getValue("debtPositionTypeOrgCodesEmpty"))
-          && Collections.singletonList(null).equals(params.getValue("debtPositionTypeOrgCodes"))
+          && Boolean.FALSE.equals(params.getValue("skipCodIuvFilter"))
+          && List.of("IUV-2").equals(params.getValue("iuvs"))
+          && Boolean.TRUE.equals(params.getValue("skipDateFromFilter"))
+          && params.hasValue("dateFrom")
+          && params.getValue("dateFrom") == null
+          && Boolean.TRUE.equals(params.getValue("skipDateToExclusiveFilter"))
+          && params.hasValue("dateToExclusive")
+          && params.getValue("dateToExclusive") == null
           && Integer.valueOf(Integer.MAX_VALUE).equals(params.getValue("limit"))
           && Integer.valueOf(0).equals(params.getValue("offset"))
       ),
       same(DebtPositionDao.DEBT_POSITION_ROW_MAPPER)
     )).thenReturn(expected);
 
-    List<DebtPosition> result = dao.findCancelledDebtPositions("IPA2", null, null, null, Integer.MAX_VALUE, 0);
+    List<DebtPosition> result = dao.findCancelledDebtPositions("IPA2", iuvs, null, null, Integer.MAX_VALUE, 0);
 
     assertEquals(expected, result);
   }
 
   @Test
-  void givenFiltersWithoutDatesWhenFindDebtPositionsThenSkipDateFilters() {
+  void givenEmptyIuvsWhenFindDebtPositionsThenQueryMp4DatabaseWithoutIuvFilter() {
     DebtPositionDao dao = buildDao();
     List<DebtPosition> expected = List.of(buildDebtPosition());
 
@@ -119,28 +117,19 @@ class DebtPositionDaoTest {
       eq(FIND_DEBT_POSITIONS_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         "IPA1".equals(params.getValue("codIpaEnte"))
-          && Boolean.TRUE.equals(params.getValue("skipUpdatedFromFilter"))
-          && params.hasValue("updatedFrom")
-          && params.getValue("updatedFrom") == null
-          && Boolean.TRUE.equals(params.getValue("skipUpdatedToExclusiveFilter"))
-          && params.hasValue("updatedToExclusive")
-          && params.getValue("updatedToExclusive") == null
-          && Boolean.TRUE.equals(params.getValue("debtPositionTypeOrgCodesEmpty"))
-          && Collections.singletonList(null).equals(params.getValue("debtPositionTypeOrgCodes"))
-          && Integer.valueOf(10).equals(params.getValue("limit"))
+          && Boolean.TRUE.equals(params.getValue("skipCodIuvFilter"))
+          && Collections.singletonList(null).equals(params.getValue("iuvs"))
+          && Boolean.TRUE.equals(params.getValue("skipDateFromFilter"))
+          && params.getValue("dateFrom") == null
+          && Boolean.TRUE.equals(params.getValue("skipDateToExclusiveFilter"))
+          && params.getValue("dateToExclusive") == null
+          && Integer.valueOf(50).equals(params.getValue("limit"))
           && Integer.valueOf(0).equals(params.getValue("offset"))
       ),
       same(DebtPositionDao.DEBT_POSITION_ROW_MAPPER)
     )).thenReturn(expected);
 
-    List<DebtPosition> result = dao.findDebtPositions(
-      "IPA1",
-      null,
-      null,
-      new ExtractionFilters(),
-      10,
-      0
-    );
+    List<DebtPosition> result = dao.findDebtPositions("IPA1", List.of(), null, null, 50, 0);
 
     assertEquals(expected, result);
   }
@@ -148,13 +137,16 @@ class DebtPositionDaoTest {
   @Test
   void givenInvalidLimitWhenFindDebtPositionsThenThrowIllegalArgumentException() {
     DebtPositionDao dao = buildDao();
+    List<String> iuvs = List.of("IUV-1");
 
-    IllegalArgumentException exception = assertThrows(
+    assertThrows(
       IllegalArgumentException.class,
-      () -> dao.findDebtPositions("IPA1", null, null, null, 0, 0)
+      () -> {
+        dao.findDebtPositions("IPA1", iuvs, null, null, 0, 0);
+      },
+      "limit must be greater than 0"
     );
 
-    assertEquals("limit must be greater than 0", exception.getMessage());
   }
 
   @Test

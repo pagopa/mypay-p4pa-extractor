@@ -1,7 +1,6 @@
 package it.gov.pagopa.mypay2pu.extractor.dao;
 
 import it.gov.pagopa.mypay2pu.extractor.config.ExtractorExportProperties;
-import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionFilters;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.DebtPositionType;
 import it.gov.pagopa.mypay2pu.extractor.utils.QueryUtils;
 import it.gov.pagopa.mypay2pu.extractor.utils.SqlLoader;
@@ -37,16 +36,19 @@ public class DebtPositionTypeDao {
     this.findByFiltersSql = sqlLoader.load(FIND_BY_FILTERS_SQL_PATH);
   }
 
-  public List<DebtPositionType> findByFilters(ExtractionFilters filters,
+  public List<DebtPositionType> findByFilters(List<String> debtPositionTypeOrgCodes,
                                               int limit,
                                               int offset) {
-    return mp4JdbcTemplate.query(findByFiltersSql, buildParams(filters, limit, offset), DEBT_POSITIONS_TYPE_ROW_MAPPER);
+    return mp4JdbcTemplate.query(
+      findByFiltersSql,
+      buildParams(debtPositionTypeOrgCodes, limit, offset),
+      DEBT_POSITIONS_TYPE_ROW_MAPPER
+    );
   }
 
-  private MapSqlParameterSource buildParams(ExtractionFilters filters,
+  private MapSqlParameterSource buildParams(List<String> debtPositionTypeOrgCodes,
                                             int limit,
                                             int offset) {
-    List<String> debtPositionTypeOrgCodes = filters != null ? filters.getDebtPositionTypeOrgCodes() : null;
     boolean isEmptyCollection = CollectionUtils.isEmpty(debtPositionTypeOrgCodes);
     return QueryUtils.buildPaginatedFilterParams(limit, offset)
       .addValue("brokerCf", exportProperties.brokerCf())
