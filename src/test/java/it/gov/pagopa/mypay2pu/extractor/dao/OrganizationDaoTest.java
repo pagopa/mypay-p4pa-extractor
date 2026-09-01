@@ -85,7 +85,7 @@ class OrganizationDaoTest {
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         List.of("IPA1", "IPA2").equals(params.getValue("ipaCodes"))
           && LocalDateTime.of(2026, Month.JANUARY, 10, 0, 0).equals(params.getValue("modifiedFrom"))
-          && LocalDateTime.of(2026, Month.JANUARY, 13, 0, 0).equals(params.getValue("modifiedToExclusive"))
+          && LocalDateTime.of(2026, Month.JANUARY, 12, 0, 0).equals(params.getValue("modifiedToExclusive"))
           && Integer.valueOf(50).equals(params.getValue("limit"))
           && Integer.valueOf(100).equals(params.getValue("offset"))
       ),
@@ -95,8 +95,8 @@ class OrganizationDaoTest {
 
     List<Organization> result = dao.findByFilters(
       List.of("IPA1", "IPA2"),
-      new ExtractionFilters(OffsetDateTime.of(LocalDate.of(2026, Month.JANUARY, 10), LocalTime.MIDNIGHT, Constants.ZONEOFFSET),
-        OffsetDateTime.of(LocalDate.of(2026, Month.JANUARY, 12), LocalTime.MIDNIGHT, Constants.ZONEOFFSET), null),
+      new ExtractionFilters(OffsetDateTime.of(LocalDate.of(2026, Month.JANUARY, 10), LocalTime.MIDNIGHT, Constants.zoneOffsetAt(LocalDateTime.of(2026, Month.JANUARY, 10, 0, 0))),
+        OffsetDateTime.of(LocalDate.of(2026, Month.JANUARY, 12), LocalTime.MIDNIGHT, Constants.zoneOffsetAt(LocalDateTime.of(2026, Month.JANUARY, 12, 0, 0))), null),
       50,
       100
     );

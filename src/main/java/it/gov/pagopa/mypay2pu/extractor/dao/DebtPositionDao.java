@@ -1,12 +1,9 @@
 package it.gov.pagopa.mypay2pu.extractor.dao;
 
-import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionFilters;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.DebtPosition;
 import it.gov.pagopa.mypay2pu.extractor.utils.DateTimeUtils;
 import it.gov.pagopa.mypay2pu.extractor.utils.QueryUtils;
 import it.gov.pagopa.mypay2pu.extractor.utils.SqlLoader;
-import it.gov.pagopa.mypay2pu.extractor.validation.CsvLogicalKeyValidator;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.DataClassRowMapper;
@@ -17,6 +14,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
 
 import java.time.OffsetDateTime;
+import java.util.Collections;
 import java.util.List;
 
 @Repository
@@ -41,22 +39,28 @@ public class DebtPositionDao {
   }
 
   public List<DebtPosition> findDebtPositions(String codIpaEnte,
-                                              ExtractionFilters filters,
+                                              List<String> iuvs,
+                                              OffsetDateTime dateFrom,
+                                              OffsetDateTime dateTo,
                                               int limit,
                                               int offset) {
-    return findByFilters(findDebtPositionsSql, codIpaEnte, filters, limit, offset);
+    return findByFilters(findDebtPositionsSql, codIpaEnte, iuvs, dateFrom, dateTo, limit, offset);
   }
 
   public List<DebtPosition> findCancelledDebtPositions(String codIpaEnte,
-                                                       ExtractionFilters filters,
+                                                       List<String> iuvs,
+                                                       OffsetDateTime dateFrom,
+                                                       OffsetDateTime dateTo,
                                                        int limit,
                                                        int offset) {
-    return findByFilters(findCancelledDebtPositionsSql, codIpaEnte, filters, limit, offset);
+    return findByFilters(findCancelledDebtPositionsSql, codIpaEnte, iuvs, dateFrom, dateTo, limit, offset);
   }
 
   private List<DebtPosition> findByFilters(String sql,
                                            String codIpaEnte,
-                                           ExtractionFilters filters,
+                                           List<String> iuvs,
+                                           OffsetDateTime dateFrom,
+                                           OffsetDateTime dateTo,
                                            int limit,
                                            int offset) {
     if (StringUtils.isEmpty(codIpaEnte)) {
@@ -64,25 +68,26 @@ public class DebtPositionDao {
     }
     return mp4JdbcTemplate.query(
       sql,
-      buildParams(codIpaEnte, filters, limit, offset),
+      buildParams(codIpaEnte, iuvs, dateFrom, dateTo, limit, offset),
       DEBT_POSITION_ROW_MAPPER
     );
   }
 
-  private MapSqlParameterSource buildParams(String codIpaEnte, ExtractionFilters filters, int limit, int offset) {
-    ExtractionFilters effectiveFilters = ObjectUtils.defaultIfNull(filters, new ExtractionFilters());
-    List<String> iuvs = CsvLogicalKeyValidator.parseLogicalKey(effectiveFilters.getLogicalKey());
-    OffsetDateTime dateFrom = effectiveFilters.getDateFrom();
-    OffsetDateTime dateTo = effectiveFilters.getDateTo();
+  private MapSqlParameterSource buildParams(String codIpaEnte,
+                                            List<String> iuvs,
+                                            OffsetDateTime dateFrom,
+                                            OffsetDateTime dateTo,
+                                            int limit,
+                                            int offset) {
     boolean iuvsEmpty = CollectionUtils.isEmpty(iuvs);
-    List<String> iuvsForQuery = iuvsEmpty ? List.of("") : iuvs;
+
     return QueryUtils.buildPaginatedFilterParams(limit, offset)
       .addValue("codIpaEnte", codIpaEnte)
       .addValue("skipCodIuvFilter", iuvsEmpty)
-      .addValue("iuvs", iuvsForQuery)
+      .addValue("iuvs", iuvsEmpty ? Collections.singletonList(null) : iuvs)
       .addValue("skipDateFromFilter", dateFrom == null)
-      .addValue("dateFrom", DateTimeUtils.toStartOfDay(dateFrom))
+      .addValue("dateFrom", DateTimeUtils.toLocalDateTime(dateFrom))
       .addValue("skipDateToExclusiveFilter", dateTo == null)
-      .addValue("dateToExclusive", DateTimeUtils.toStartOfNextDay(dateTo));
+      .addValue("dateToExclusive", DateTimeUtils.toLocalDateTimeExclusive(dateTo));
   }
 }

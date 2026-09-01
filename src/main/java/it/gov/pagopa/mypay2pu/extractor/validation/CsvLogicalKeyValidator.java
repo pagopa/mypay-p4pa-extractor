@@ -38,7 +38,7 @@ public class CsvLogicalKeyValidator extends ExtractionRequestValidator {
       throw new IllegalArgumentException("filters.logicalKey must be a non-empty comma-separated list");
     }
 
-    List<String> values = List.of(logicalKey.split(Constants.CSV_LOGICAL_KEY_SEPARATOR, -1)).stream()
+    List<String> values = List.of(logicalKey.split(Constants.LOGICAL_KEY_VALUE_SEPARATOR, -1)).stream()
       .map(String::trim)
       .toList();
     if (values.stream().anyMatch(value -> !StringUtils.hasText(value))) {

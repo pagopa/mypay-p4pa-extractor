@@ -78,7 +78,7 @@ class DebtPositionExportProcessingServiceTest {
 
   @Test
   void whenMultipleIpaCodesThenExportDebtPositionsByIpaCode() throws Exception {
-    ExtractionFilters filters = new ExtractionFilters().logicalKey("IUPD-1|IUD-1");
+    ExtractionFilters filters = new ExtractionFilters().logicalKey("IUV-1");
     ExtractionRequest request = new ExtractionRequest(
       List.of("ORG_IPA", "ORG_IPA_2"),
       MigrationFileType.DEBT_POSITIONS,
@@ -88,8 +88,8 @@ class DebtPositionExportProcessingServiceTest {
     DebtPosition first = debtPosition("IUPD-1", "IUD-1");
     DebtPosition second = debtPosition("IUPD-2", "IUD-2");
 
-    when(debtPositionDaoMock.findDebtPositions("ORG_IPA", filters, 2, 0)).thenReturn(List.of(first));
-    when(debtPositionDaoMock.findDebtPositions("ORG_IPA_2", filters, 2, 0)).thenReturn(List.of(second));
+    when(debtPositionDaoMock.findDebtPositions("ORG_IPA", List.of("IUV-1"), null, null, 2, 0)).thenReturn(List.of(first));
+    when(debtPositionDaoMock.findDebtPositions("ORG_IPA_2", List.of("IUV-1"), null, null, 2, 0)).thenReturn(List.of(second));
     when(debtPositionMapperMock.map(first, Action.I)).thenReturn(validDto("IUD-1"));
     when(debtPositionMapperMock.map(second, Action.I)).thenReturn(validDto("IUD-2"));
 
@@ -107,8 +107,8 @@ class DebtPositionExportProcessingServiceTest {
     assertTrue(exportArchiveEntries.get(1).matches("ORG_IPA_2-DEBT_POSITIONS-\\d{14}-2_0\\.csv"));
 
     InOrder inOrder = inOrder(debtPositionDaoMock);
-    inOrder.verify(debtPositionDaoMock).findDebtPositions("ORG_IPA", filters, 2, 0);
-    inOrder.verify(debtPositionDaoMock).findDebtPositions("ORG_IPA_2", filters, 2, 0);
+    inOrder.verify(debtPositionDaoMock).findDebtPositions("ORG_IPA", List.of("IUV-1"), null, null, 2, 0);
+    inOrder.verify(debtPositionDaoMock).findDebtPositions("ORG_IPA_2", List.of("IUV-1"), null, null, 2, 0);
   }
 
   @Test
@@ -118,7 +118,7 @@ class DebtPositionExportProcessingServiceTest {
 
   @Test
   void whenIncrementalExtractionThenAssignsActionsToOpenAndCancelledDebtPositions() {
-    ExtractionFilters filters = new ExtractionFilters().logicalKey("IUPD-1|IUD-1");
+    ExtractionFilters filters = new ExtractionFilters().logicalKey("IUV-1");
     ExtractionRequest request = new ExtractionRequest(
       List.of("ORG_IPA"),
       MigrationFileType.DEBT_POSITIONS,
@@ -133,9 +133,9 @@ class DebtPositionExportProcessingServiceTest {
     DebtPosition withoutChangeDates = debtPosition("IUPD-NO-CHANGE-DATES", "IUD-NO-CHANGE-DATES", null, null);
     DebtPosition cancelled = debtPosition("IUPD-CANCELLED", "IUD-CANCELLED");
 
-    when(debtPositionDaoMock.findDebtPositions("ORG_IPA", filters, 10, 0))
+    when(debtPositionDaoMock.findDebtPositions("ORG_IPA", List.of("IUV-1"), null, null, 10, 0))
       .thenReturn(List.of(inserted, modified, unchanged, withoutLastModificationDate, withoutCreationDate, withoutChangeDates));
-    when(debtPositionDaoMock.findCancelledDebtPositions("ORG_IPA", filters, 10, 0))
+    when(debtPositionDaoMock.findCancelledDebtPositions("ORG_IPA", List.of("IUV-1"), null, null, 10, 0))
       .thenReturn(List.of(cancelled));
 
     List<DebtPositionExportProcessingService.DebtPositionWithAction> result =

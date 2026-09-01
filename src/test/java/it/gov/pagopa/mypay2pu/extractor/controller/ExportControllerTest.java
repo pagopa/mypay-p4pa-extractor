@@ -22,6 +22,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.Month;
 import java.time.OffsetDateTime;
@@ -109,8 +110,8 @@ class ExportControllerTest {
       List.of("IPA_CODE_TEST"),
       MigrationFileType.ORGANIZATIONS,
       null,
-      new ExtractionFilters().dateFrom(OffsetDateTime.of(LocalDate.of(2026, Month.JANUARY, 2), LocalTime.MIDNIGHT, Constants.ZONEOFFSET))
-        .dateTo(OffsetDateTime.of(LocalDate.of(2026, Month.JANUARY, 1), LocalTime.MIDNIGHT, Constants.ZONEOFFSET))
+      new ExtractionFilters().dateFrom(OffsetDateTime.of(LocalDate.of(2026, Month.JANUARY, 2), LocalTime.MIDNIGHT, Constants.zoneOffsetAt(LocalDateTime.of(2026, Month.JANUARY, 2, 0, 0))))
+        .dateTo(OffsetDateTime.of(LocalDate.of(2026, Month.JANUARY, 1), LocalTime.MIDNIGHT, Constants.zoneOffsetAt(LocalDateTime.of(2026, Month.JANUARY, 1, 0, 0))))
     );
     doThrow(new BadRequestException(
       "INVALID_EXTRACTION_FILTERS",

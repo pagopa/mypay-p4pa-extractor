@@ -1,8 +1,6 @@
 package it.gov.pagopa.mypay2pu.extractor.dao;
 
-import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionFilters;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.DebtPosition;
-import it.gov.pagopa.mypay2pu.extractor.utils.Constants;
 import it.gov.pagopa.mypay2pu.extractor.utils.SqlLoader;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -15,8 +13,11 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -46,10 +47,9 @@ class DebtPositionDaoTest {
   void givenOpenFiltersWhenFindDebtPositionsThenQueryMp4Database() {
     DebtPositionDao dao = buildDao();
     List<DebtPosition> expected = List.of(buildDebtPosition());
-    ExtractionFilters filters = new ExtractionFilters()
-      .logicalKey("IUV-1")
-      .dateFrom(OffsetDateTime.of(2026, 1, 10, 0, 0, 0, 0, Constants.ZONEOFFSET))
-      .dateTo(OffsetDateTime.of(2026, 1, 12, 0, 0, 0, 0, Constants.ZONEOFFSET));
+    List<String> iuvs = List.of("IUV-1");
+    OffsetDateTime dateFrom = OffsetDateTime.of(LocalDateTime.of(2026, Month.JANUARY, 10, 8, 45), ZoneOffset.ofHours(1));
+    OffsetDateTime dateTo = OffsetDateTime.of(LocalDateTime.of(2026, Month.JANUARY, 12, 17, 30), ZoneOffset.ofHours(1));
 
     when(mp4JdbcTemplateMock.query(
       eq(FIND_DEBT_POSITIONS_SQL),
@@ -58,9 +58,9 @@ class DebtPositionDaoTest {
           && Boolean.FALSE.equals(params.getValue("skipCodIuvFilter"))
           && List.of("IUV-1").equals(params.getValue("iuvs"))
           && Boolean.FALSE.equals(params.getValue("skipDateFromFilter"))
-          && LocalDate.of(2026, Month.JANUARY, 10).atStartOfDay().equals(params.getValue("dateFrom"))
+          && LocalDateTime.of(2026, Month.JANUARY, 10, 8, 45).equals(params.getValue("dateFrom"))
           && Boolean.FALSE.equals(params.getValue("skipDateToExclusiveFilter"))
-          && LocalDate.of(2026, Month.JANUARY, 13).atStartOfDay().equals(params.getValue("dateToExclusive"))
+          && LocalDateTime.of(2026, Month.JANUARY, 12, 17, 30).equals(params.getValue("dateToExclusive"))
           && Integer.valueOf(50).equals(params.getValue("limit"))
           && Integer.valueOf(100).equals(params.getValue("offset"))
       ),
@@ -69,7 +69,9 @@ class DebtPositionDaoTest {
 
     List<DebtPosition> result = dao.findDebtPositions(
       "IPA1",
-      filters,
+      iuvs,
+      dateFrom,
+      dateTo,
       50,
       100
     );
@@ -81,7 +83,7 @@ class DebtPositionDaoTest {
   void givenNullOptionalFiltersWhenFindCancelledDebtPositionsThenQueryMp4Database() {
     DebtPositionDao dao = buildDao();
     List<DebtPosition> expected = List.of(buildDebtPosition());
-    ExtractionFilters filters = new ExtractionFilters().logicalKey("IUV-2");
+    List<String> iuvs = List.of("IUV-2");
 
     when(mp4JdbcTemplateMock.query(
       eq(FIND_CANCELLED_DEBT_POSITIONS_SQL),
@@ -101,23 +103,22 @@ class DebtPositionDaoTest {
       same(DebtPositionDao.DEBT_POSITION_ROW_MAPPER)
     )).thenReturn(expected);
 
-    List<DebtPosition> result = dao.findCancelledDebtPositions("IPA2", filters, Integer.MAX_VALUE, 0);
+    List<DebtPosition> result = dao.findCancelledDebtPositions("IPA2", iuvs, null, null, Integer.MAX_VALUE, 0);
 
     assertEquals(expected, result);
   }
 
   @Test
-  void givenNullLogicalKeyWhenFindDebtPositionsThenQueryMp4DatabaseWithoutIuvFilter() {
+  void givenEmptyIuvsWhenFindDebtPositionsThenQueryMp4DatabaseWithoutIuvFilter() {
     DebtPositionDao dao = buildDao();
     List<DebtPosition> expected = List.of(buildDebtPosition());
-    ExtractionFilters filters = new ExtractionFilters();
 
     when(mp4JdbcTemplateMock.query(
       eq(FIND_DEBT_POSITIONS_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         "IPA1".equals(params.getValue("codIpaEnte"))
           && Boolean.TRUE.equals(params.getValue("skipCodIuvFilter"))
-          && List.of("").equals(params.getValue("iuvs"))
+          && Collections.singletonList(null).equals(params.getValue("iuvs"))
           && Boolean.TRUE.equals(params.getValue("skipDateFromFilter"))
           && params.getValue("dateFrom") == null
           && Boolean.TRUE.equals(params.getValue("skipDateToExclusiveFilter"))
@@ -128,7 +129,7 @@ class DebtPositionDaoTest {
       same(DebtPositionDao.DEBT_POSITION_ROW_MAPPER)
     )).thenReturn(expected);
 
-    List<DebtPosition> result = dao.findDebtPositions("IPA1", filters, 50, 0);
+    List<DebtPosition> result = dao.findDebtPositions("IPA1", List.of(), null, null, 50, 0);
 
     assertEquals(expected, result);
   }
@@ -136,29 +137,16 @@ class DebtPositionDaoTest {
   @Test
   void givenInvalidLimitWhenFindDebtPositionsThenThrowIllegalArgumentException() {
     DebtPositionDao dao = buildDao();
-    ExtractionFilters filters = new ExtractionFilters().logicalKey("IUV-1");
+    List<String> iuvs = List.of("IUV-1");
 
     assertThrows(
       IllegalArgumentException.class,
       () -> {
-        dao.findDebtPositions("IPA1", filters, 0, 0);
+        dao.findDebtPositions("IPA1", iuvs, null, null, 0, 0);
       },
       "limit must be greater than 0"
     );
 
-  }
-
-  @Test
-  void givenInvalidLogicalKeyWhenFindDebtPositionsThenThrowIllegalArgumentException() {
-    DebtPositionDao dao = buildDao();
-    ExtractionFilters filters = new ExtractionFilters().logicalKey("IUV-1|IUD-1");
-
-    IllegalArgumentException exception = assertThrows(
-      IllegalArgumentException.class,
-      () -> dao.findDebtPositions("IPA1", filters, 10, 0)
-    );
-
-    assertEquals("filters.logicalKey must be a non-empty comma-separated list", exception.getMessage());
   }
 
   @Test
@@ -167,7 +155,7 @@ class DebtPositionDaoTest {
 
     IllegalArgumentException exception = assertThrows(
       IllegalArgumentException.class,
-      () -> dao.findCancelledDebtPositions("", null, 10, 0)
+      () -> dao.findCancelledDebtPositions("", null, null, null, 10, 0)
     );
 
     assertEquals("codIpaEnte must not be blank", exception.getMessage());
