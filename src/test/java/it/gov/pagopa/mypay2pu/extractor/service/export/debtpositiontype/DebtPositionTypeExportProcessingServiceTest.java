@@ -72,13 +72,13 @@ class DebtPositionTypeExportProcessingServiceTest {
 
   @Test
   void whenDataIsAvailableThenExportPagedDebtPositionTypesToArchive() throws Exception {
-    ExtractionRequest request = new ExtractionRequest(List.of("ORG_IPA", "ORG_IPA_2"), MigrationFileType.DEBT_POSITIONS_TYPE, null, new ExtractionFilters());
+    ExtractionRequest request = new ExtractionRequest(List.of("ORG_IPA", "ORG_IPA_2"), MigrationFileType.DEBT_POSITIONS_TYPE, null, new ExtractionFilters().logicalKey("TYPE_1"));
     DebtPositionType first = debtPositionType("TYPE_1");
     DebtPositionType second = invalidDebtPositionType();
     PuDebtPositionTypeDTO firstDto = dto("TYPE_1");
     PuDebtPositionTypeDTO secondDto = invalidDto();
-    when(debtPositionTypeDaoMock.findByFilters(request.getFilters(), 2, 0)).thenReturn(List.of(first, second));
-    when(debtPositionTypeDaoMock.findByFilters(request.getFilters(), 2, 2)).thenReturn(List.of());
+    when(debtPositionTypeDaoMock.findByFilters(List.of("TYPE_1"), 2, 0)).thenReturn(List.of(first, second));
+    when(debtPositionTypeDaoMock.findByFilters(List.of("TYPE_1"), 2, 2)).thenReturn(List.of());
     when(debtPositionTypeMapperMock.map(first)).thenReturn(firstDto);
     when(debtPositionTypeMapperMock.map(second)).thenReturn(secondDto);
 
@@ -104,25 +104,25 @@ class DebtPositionTypeExportProcessingServiceTest {
 
     List<String> exportArchiveEntries = ZipUtils.readZipEntries(exportArchivePath);
     assertEquals(1, exportArchiveEntries.size());
-    assertTrue(exportArchiveEntries.get(0).matches("ORG_IPA-DEBT_POSITIONS_TYPE-\\d{14}-1_0\\.csv"));
+    assertTrue(exportArchiveEntries.get(0).matches("BROKER_IPA-DEBT_POSITIONS_TYPE-\\d{14}-1_0\\.csv"));
 
     List<String> errorArchiveEntries = ZipUtils.readZipEntries(errorArchivePath);
     assertEquals(1, errorArchiveEntries.size());
-    assertTrue(errorArchiveEntries.get(0).matches("ORG_IPA-DEBT_POSITIONS_TYPE-\\d{14}-1_0\\.errors\\.csv"));
+    assertTrue(errorArchiveEntries.get(0).matches("BROKER_IPA-DEBT_POSITIONS_TYPE-\\d{14}-1_0\\.errors\\.csv"));
 
     InOrder inOrder = inOrder(debtPositionTypeDaoMock);
-    inOrder.verify(debtPositionTypeDaoMock).findByFilters(request.getFilters(), 2, 0);
-    inOrder.verify(debtPositionTypeDaoMock).findByFilters(request.getFilters(), 2, 2);
+    inOrder.verify(debtPositionTypeDaoMock).findByFilters(List.of("TYPE_1"), 2, 0);
+    inOrder.verify(debtPositionTypeDaoMock).findByFilters(List.of("TYPE_1"), 2, 2);
 
   }
 
   @Test
   void whenNoValidationErrorsThenArchiveContainsOnlyExportCsv() throws Exception {
-    ExtractionRequest request = new ExtractionRequest(List.of("ORG_IPA"), MigrationFileType.DEBT_POSITIONS_TYPE, null, new ExtractionFilters());
+    ExtractionRequest request = new ExtractionRequest(List.of("ORG_IPA"), MigrationFileType.DEBT_POSITIONS_TYPE, null, new ExtractionFilters().logicalKey("TYPE_1"));
     DebtPositionType first = debtPositionType("TYPE_1");
     DebtPositionType second = debtPositionType("TYPE_2");
-    when(debtPositionTypeDaoMock.findByFilters(request.getFilters(), 2, 0)).thenReturn(List.of(first, second));
-    when(debtPositionTypeDaoMock.findByFilters(request.getFilters(), 2, 2)).thenReturn(List.of());
+    when(debtPositionTypeDaoMock.findByFilters(List.of("TYPE_1"), 2, 0)).thenReturn(List.of(first, second));
+    when(debtPositionTypeDaoMock.findByFilters(List.of("TYPE_1"), 2, 2)).thenReturn(List.of());
     when(debtPositionTypeMapperMock.map(first)).thenReturn(dto("TYPE_1"));
     when(debtPositionTypeMapperMock.map(second)).thenReturn(dto("TYPE_2"));
 
@@ -133,11 +133,11 @@ class DebtPositionTypeExportProcessingServiceTest {
     Path archivePath = tempDir.resolve("BROKER_IPA").resolve(result.files().get(0));
     List<String> archiveEntries = ZipUtils.readZipEntries(archivePath);
     assertEquals(1, archiveEntries.size());
-    assertTrue(archiveEntries.get(0).matches("ORG_IPA-DEBT_POSITIONS_TYPE-\\d{14}-1_0\\.csv"));
+    assertTrue(archiveEntries.get(0).matches("BROKER_IPA-DEBT_POSITIONS_TYPE-\\d{14}-1_0\\.csv"));
 
     InOrder inOrder = inOrder(debtPositionTypeDaoMock);
-    inOrder.verify(debtPositionTypeDaoMock).findByFilters(request.getFilters(), 2, 0);
-    inOrder.verify(debtPositionTypeDaoMock).findByFilters(request.getFilters(), 2, 2);
+    inOrder.verify(debtPositionTypeDaoMock).findByFilters(List.of("TYPE_1"), 2, 0);
+    inOrder.verify(debtPositionTypeDaoMock).findByFilters(List.of("TYPE_1"), 2, 2);
 
   }
 

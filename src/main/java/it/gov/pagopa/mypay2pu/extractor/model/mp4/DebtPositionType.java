@@ -15,4 +15,9 @@ public record DebtPositionType(
   Boolean flagMandatoryDueDate,
   Boolean flagNotifyIo
 ) implements ExportModel {
+
+  @Override
+  public String logicalKey() {
+    return debtPositionTypeCode;
+  }
 }

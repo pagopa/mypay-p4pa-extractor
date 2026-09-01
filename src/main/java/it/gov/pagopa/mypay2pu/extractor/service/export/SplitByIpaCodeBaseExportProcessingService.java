@@ -63,6 +63,11 @@ public abstract class SplitByIpaCodeBaseExportProcessingService<E extends Export
     return retrieveData(ipaCode, request, pageSize, offset);
   }
 
+  @Override
+  protected boolean useBrokerIpaAsPrefix() {
+    return false;
+  }
+
   /**
    * Retrieves a page of source data for a single IPA code.
    *

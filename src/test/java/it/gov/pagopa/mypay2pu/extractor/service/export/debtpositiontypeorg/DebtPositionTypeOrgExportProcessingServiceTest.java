@@ -71,8 +71,8 @@ class DebtPositionTypeOrgExportProcessingServiceTest {
 
   @Test
   void whenDataIsAvailableThenExportPagedDebtPositionTypeOrgsToArchive() throws Exception {
-    ExtractionRequest request = new ExtractionRequest(List.of("IPA_CODE"), MigrationFileType.DEBT_POSITIONS_TYPE_ORG, null, new ExtractionFilters());
-    List<String> debtPositionTypeOrgCodes = List.of();
+    ExtractionRequest request = new ExtractionRequest(List.of("IPA_CODE"), MigrationFileType.DEBT_POSITIONS_TYPE_ORG, null, new ExtractionFilters().logicalKey("TYPE_1,TYPE_2"));
+    List<String> debtPositionTypeOrgCodes = List.of("TYPE_1", "TYPE_2");
     DebtPositionTypeOrg first = debtPositionTypeOrg("first");
     DebtPositionTypeOrg second = invalidDebtPositionTypeOrg();
     PuDebtPositionTypeOrgDTO firstDto = dto("first");
@@ -117,8 +117,8 @@ class DebtPositionTypeOrgExportProcessingServiceTest {
 
   @Test
   void whenNoValidationErrorsThenArchiveContainsOnlyExportCsv() throws Exception {
-    ExtractionRequest request = new ExtractionRequest(List.of("IPA_CODE"), MigrationFileType.DEBT_POSITIONS_TYPE_ORG, null, new ExtractionFilters());
-    List<String> debtPositionTypeOrgCodes = List.of();
+    ExtractionRequest request = new ExtractionRequest(List.of("IPA_CODE"), MigrationFileType.DEBT_POSITIONS_TYPE_ORG, null, new ExtractionFilters().logicalKey("TYPE_1,TYPE_2"));
+    List<String> debtPositionTypeOrgCodes = List.of("TYPE_1", "TYPE_2");
     DebtPositionTypeOrg first = debtPositionTypeOrg("first");
     DebtPositionTypeOrg second = debtPositionTypeOrg("second");
     when(debtPositionTypeOrgDaoMock.findByFilters("IPA_CODE", debtPositionTypeOrgCodes, 2, 0)).thenReturn(List.of(first, second));

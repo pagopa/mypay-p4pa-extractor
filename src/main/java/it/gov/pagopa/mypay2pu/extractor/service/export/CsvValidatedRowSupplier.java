@@ -82,8 +82,7 @@ public class CsvValidatedRowSupplier<M extends ExportModel, C extends CsvExportD
   }
 
   /**
-   * Maps and validates a source row, collecting mapping or validation errors.
-   * Row number is incremented for every row to ensure accurate error reporting in the CSV error report.
+   * Maps and validates source rows, collecting mapping or validation errors.
    *
    * @param sourceRow the source model to map and validate
    * @return the valid mapped rows
@@ -94,12 +93,13 @@ public class CsvValidatedRowSupplier<M extends ExportModel, C extends CsvExportD
       long currentRowNumber = rowNumber.getAndIncrement();
       try {
         C row = mapper.apply(sourceRow);
-        if (validateAndCollectErrors(row, currentRowNumber)) {
+        if (validateAndCollectErrors(sourceRow, row, currentRowNumber)) {
           validRows.add(row);
         }
       } catch (CsvRowMappingException e) {
         errorCollector.add(
           currentRowNumber,
+          sourceRow.logicalKey(),
           e.getField(),
           e.getErrorCode(),
           e.getMessage(),
@@ -108,6 +108,7 @@ public class CsvValidatedRowSupplier<M extends ExportModel, C extends CsvExportD
       } catch (Exception e) {
         errorCollector.add(
           currentRowNumber,
+          sourceRow.logicalKey(),
           null,
           "UNEXPECTED ERROR",
           e.getMessage(),
@@ -118,7 +119,7 @@ public class CsvValidatedRowSupplier<M extends ExportModel, C extends CsvExportD
     return validRows;
   }
 
-  private boolean validateAndCollectErrors(C row, long currentRowNumber) {
+  private boolean validateAndCollectErrors(M sourceRow, C row, long currentRowNumber) {
     Set<ConstraintViolation<C>> violations = validator.validate(row);
     if (violations.isEmpty()) {
       return true;
@@ -129,6 +130,7 @@ public class CsvValidatedRowSupplier<M extends ExportModel, C extends CsvExportD
         Object rejectedValue = violation.getInvalidValue();
         errorCollector.add(
           currentRowNumber,
+          sourceRow.logicalKey(),
           violation.getPropertyPath().toString(),
           violation.getConstraintDescriptor().getAnnotation().annotationType().getSimpleName(),
           violation.getMessage(),

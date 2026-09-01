@@ -10,8 +10,8 @@ JOIN mygov_ente_tipo_dovuto etd
 JOIN mygov_ente e
     ON etd.mygov_ente_id = e.mygov_ente_id
 WHERE e.cod_ipa_ente = :ipaCode
-AND (:debtPositionTypeOrgCode IS NULL OR etd.cod_tipo = :debtPositionTypeOrgCode) -- not mandatory: targeted extraction
-AND (:operatorFiscalCode IS NULL OR o.cod_fed_user_id = :operatorFiscalCode)      -- not mandatory: targeted extraction
+AND (:debtPositionTypeOrgCodesEmpty = TRUE OR etd.cod_tipo IN (:debtPositionTypeOrgCodes))
+AND (:operatorFiscalCodesEmpty = TRUE OR o.cod_fed_user_id IN (:operatorFiscalCodes))
 ORDER BY etd.cod_tipo, o.cod_fed_user_id
 LIMIT :limit
 OFFSET COALESCE(:offset, 0);

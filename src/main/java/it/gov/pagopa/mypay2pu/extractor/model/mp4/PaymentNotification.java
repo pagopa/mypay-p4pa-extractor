@@ -31,4 +31,9 @@ public record PaymentNotification(
   LocalDateTime dtCreazione,
   LocalDateTime dtUltimaModifica
 ) implements ExportModel {
+
+  @Override
+  public String logicalKey() {
+    return iud;
+  }
 }

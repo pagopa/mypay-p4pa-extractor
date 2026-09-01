@@ -45,11 +45,9 @@ JOIN mygov_anagrafica_stato s
     ON s.mygov_anagrafica_stato_id = de.mygov_anagrafica_stato_id
 WHERE e.cod_ipa_ente = :codIpaEnte
   AND s.cod_stato = 'ANNULLATO'
-  AND (:gpdIupd IS NULL OR de.gpd_iupd = :gpdIupd)
-  AND (:codIud IS NULL OR de.cod_iud = :codIud)
-  AND (:updatedFrom IS NULL OR de.dt_creazione >= :updatedFrom)
-  AND (:updatedToExclusive IS NULL OR de.dt_creazione < :updatedToExclusive)
-  AND (:debtPositionTypeOrgCodesEmpty = TRUE OR de.cod_tipo_dovuto IN (:debtPositionTypeOrgCodes))
+  AND (:skipCodIuvFilter = TRUE OR de.cod_iuv IN (:iuvs))
+  AND (:skipDateFromFilter = TRUE OR de.dt_creazione >= :dateFrom)
+  AND (:skipDateToExclusiveFilter = TRUE OR de.dt_creazione < :dateToExclusive)
 ORDER BY de.dt_creazione, de.mygov_dovuto_elaborato_id
 LIMIT :limit
 OFFSET COALESCE(:offset, 0)
