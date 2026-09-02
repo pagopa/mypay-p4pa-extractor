@@ -6,24 +6,10 @@ import it.gov.pagopa.mypay2pu.extractor.model.mp4.DebtPositionPaid;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Set;
-
 @Component
 public class DebtPositionPaidMapper {
 
-  private static final Set<String> SUPPORTED_VERSIONS = Set.of(
-    PuDebtPositionPaidDTO.V1_0,
-    PuDebtPositionPaidDTO.V1_1,
-    PuDebtPositionPaidDTO.V1_2,
-    PuDebtPositionPaidDTO.V1_3
-  );
-
-  public PuDebtPositionPaidDTO map(DebtPositionPaid debtPositionPaid, String version) {
-    if (!SUPPORTED_VERSIONS.contains(version)) {
-      throw new IllegalArgumentException("Unsupported DEBT_POSITIONS_PAID version: " + version);
-    }
-
-    boolean receiptFieldsSupported = PuDebtPositionPaidDTO.V1_3.equals(version);
+  public PuDebtPositionPaidDTO map(DebtPositionPaid debtPositionPaid) {
     return PuDebtPositionPaidDTO.builder()
       .iuf(debtPositionPaid.getIuf())
       .numRigaFlusso(debtPositionPaid.getNumRigaFlusso() == null ? null : Math.toIntExact(debtPositionPaid.getNumRigaFlusso()))
@@ -100,9 +86,9 @@ public class DebtPositionPaidMapper {
       .allegatoRicevutaTipo(debtPositionPaid.getCodEDatiPagDatiSingPagAllegatoRicevutaTipo())
       .allegatoRicevutaTest(toUtf8String(debtPositionPaid.getBlbEDatiPagDatiSingPagAllegatoRicevutaTest()))
       .bilancio(debtPositionPaid.getBilancio())
-      .codFiscalePa1(receiptFieldsSupported ? debtPositionPaid.getCodFiscalePa1() : null)
-      .deNomePa1(receiptFieldsSupported ? debtPositionPaid.getDeNomePa1() : null)
-      .codTassonomicoDovutoPa1(receiptFieldsSupported ? debtPositionPaid.getCodTassonomicoDovutoPa1() : null)
+      .codFiscalePa1(debtPositionPaid.getCodFiscalePa1())
+      .deNomePa1(debtPositionPaid.getDeNomePa1())
+      .codTassonomicoDovutoPa1(debtPositionPaid.getCodTassonomicoDovutoPa1())
       .build();
   }
 

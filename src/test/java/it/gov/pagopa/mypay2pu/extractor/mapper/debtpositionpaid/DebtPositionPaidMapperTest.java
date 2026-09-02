@@ -6,8 +6,6 @@ import it.gov.pagopa.mypay2pu.extractor.service.files.CsvService;
 import it.gov.pagopa.mypay2pu.extractor.utils.TestUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import uk.co.jemos.podam.api.PodamFactory;
 import uk.co.jemos.podam.api.PodamFactoryImpl;
 
@@ -35,14 +33,14 @@ class DebtPositionPaidMapperTest {
   private Path tempDir;
 
   @Test
-  void mapShouldPopulateCsvDtoIncludingIufAndReceiptFieldsForVersion13() {
+  void mapShouldPopulateCsvDtoIncludingIufAndReceiptFields() {
     DebtPositionPaid debtPositionPaid = completeDebtPositionPaid();
     debtPositionPaid.setIuf("IUF-1");
     debtPositionPaid.setCodFiscalePa1("CF-PA1");
     debtPositionPaid.setDeNomePa1("PA One");
     debtPositionPaid.setCodTassonomicoDovutoPa1("9/0101101IM/");
 
-    PuDebtPositionPaidDTO result = mapper.map(debtPositionPaid, PuDebtPositionPaidDTO.V1_3);
+    PuDebtPositionPaidDTO result = mapper.map(debtPositionPaid);
 
     assertEquals("IUF-1", result.getIuf());
     assertEquals(debtPositionPaid.getCodRpSilinviarpIdUnivocoVersamento(), result.getCodIuv());
@@ -54,32 +52,13 @@ class DebtPositionPaidMapperTest {
     TestUtils.checkNotNullFields(result);
   }
 
-  @ParameterizedTest
-  @ValueSource(strings = {
-    PuDebtPositionPaidDTO.V1_0,
-    PuDebtPositionPaidDTO.V1_1,
-    PuDebtPositionPaidDTO.V1_2
-  })
-  void mapShouldExcludeReceiptFieldsForHistoricalVersions(String version) {
-    DebtPositionPaid debtPositionPaid = completeDebtPositionPaid();
-    debtPositionPaid.setCodFiscalePa1("CF-PA1");
-    debtPositionPaid.setDeNomePa1("PA One");
-    debtPositionPaid.setCodTassonomicoDovutoPa1("9/0101101IM/");
-
-    PuDebtPositionPaidDTO result = mapper.map(debtPositionPaid, version);
-
-    assertNull(result.getCodFiscalePa1());
-    assertNull(result.getDeNomePa1());
-    assertNull(result.getCodTassonomicoDovutoPa1());
-  }
-
   @Test
-  void mapShouldPreserveNullOptionalFieldsForVersion13() {
+  void mapShouldPreserveNullOptionalFields() {
     DebtPositionPaid debtPositionPaid = new DebtPositionPaid();
     debtPositionPaid.setDtEDataOraMessaggioRicevuta(LocalDateTime.of(2026, Month.JANUARY, 15, 10, 30));
     debtPositionPaid.setNumEDatiPagImportoTotalePagato(BigDecimal.TEN);
 
-    PuDebtPositionPaidDTO result = mapper.map(debtPositionPaid, PuDebtPositionPaidDTO.V1_3);
+    PuDebtPositionPaidDTO result = mapper.map(debtPositionPaid);
 
     assertNull(result.getIuf());
     assertNull(result.getCodiceContestoPagamento());
@@ -99,11 +78,11 @@ class DebtPositionPaidMapperTest {
     debtPositionPaid.setDeNomePa1("Pà Uno");
     debtPositionPaid.setBlbRtPayload(null);
     debtPositionPaid.setBlbEDatiPagDatiSingPagAllegatoRicevutaTest(null);
-    PuDebtPositionPaidDTO dto = mapper.map(debtPositionPaid, PuDebtPositionPaidDTO.V1_3);
+    PuDebtPositionPaidDTO dto = mapper.map(debtPositionPaid);
     AtomicBoolean supplied = new AtomicBoolean();
 
     new CsvService(';', '"').createCsv(csvPath, PuDebtPositionPaidDTO.class, () ->
-      supplied.compareAndSet(false, true) ? List.of(dto) : List.of(), PuDebtPositionPaidDTO.V1_3);
+      supplied.compareAndSet(false, true) ? List.of(dto) : List.of(), "");
 
     List<String> rows = Files.readAllLines(csvPath, StandardCharsets.UTF_8);
     String[] header = rows.getFirst().split(";", -1);

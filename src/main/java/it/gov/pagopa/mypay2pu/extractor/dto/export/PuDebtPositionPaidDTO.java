@@ -2,7 +2,6 @@ package it.gov.pagopa.mypay2pu.extractor.dto.export;
 
 import com.opencsv.bean.CsvBindByName;
 import com.opencsv.bean.CsvDate;
-import com.opencsv.bean.CsvIgnore;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import it.gov.pagopa.pu.debtposition.dto.generated.PersonEntityType;
@@ -20,11 +19,6 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class PuDebtPositionPaidDTO implements CsvExportDto {
-
-  public static final String V1_0 = "1_0";
-  public static final String V1_1 = "1_1";
-  public static final String V1_2 = "1_2";
-  public static final String V1_3 = "1_3";
 
   @CsvBindByName(column = "iuf")
   private String iuf;
@@ -186,16 +180,12 @@ public class PuDebtPositionPaidDTO implements CsvExportDto {
   @CsvBindByName(column = "blbRtDatiPagDatiSingPagAllegatoRicevutaTest")
   private String allegatoRicevutaTest;
   @CsvBindByName(column = "bilancio")
-  @CsvIgnore(profiles = {V1_0, V1_1})
   private String bilancio;
   @CsvBindByName(column = "cod_fiscale_pa1", required = true)
-  @CsvIgnore(profiles = {V1_0, V1_1, V1_2})
   private String codFiscalePa1;
   @CsvBindByName(column = "de_nome_pa1")
-  @CsvIgnore(profiles = {V1_0, V1_1, V1_2})
   private String deNomePa1;
   @CsvBindByName(column = "cod_tassonomico_dovuto_pa1")
-  @CsvIgnore(profiles = {V1_0, V1_1, V1_2})
   private String codTassonomicoDovutoPa1;
 
   public enum EntityIdType {
