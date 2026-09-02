@@ -151,7 +151,7 @@
           },
           "logicalKey" : {
             "type" : [ "string", "null" ],
-            "description" : "Optional filter whose format depends on `fileTypes`.  - `ORGANIZATIONS`, `ORG_SIL_SERVICES`: not used. - `DEBT_POSITIONS_TYPE`, `DEBT_POSITIONS_TYPE_ORG`: comma-separated list of `debtPositionTypeOrgCode` values (example: `TARI,TASI`). - `DEBT_POSITIONS_TYPE_ORG_OPERATORS`: two comma-separated lists separated by `|` in the form `operatorFiscalCodes|debtPositionTypeOrgCodes`. - `DEBT_POSITIONS`: comma-separated list of `iuvs` values (example: `0101234567890001,0101234567890002`). - `PAYMENT_NOTIFICATION`: IUD and IUV separated by `|` in the form `iud|iuv`."
+            "description" : "Optional filter whose format depends on `fileTypes`.  - `ORGANIZATIONS`, `ORG_SIL_SERVICES`: not used. - `DEBT_POSITIONS_TYPE`, `DEBT_POSITIONS_TYPE_ORG`: comma-separated list of `debtPositionTypeOrgCode` values (example: `TARI,TASI`). - `DEBT_POSITIONS_TYPE_ORG_OPERATORS`: two comma-separated lists separated by `|` in the form `operatorFiscalCodes|debtPositionTypeOrgCodes`. - `DEBT_POSITIONS`: comma-separated list of `iuvs` values (example: `0101234567890001,0101234567890002`). - `PAYMENT_NOTIFICATION`: two comma-separated IUD and IUV lists separated by `|` in the form `iud1,iud2|iuv1,iuv2`."
           }
         }
       },
