@@ -2,7 +2,7 @@ package it.gov.pagopa.mypay2pu.extractor.mapper.paymentnotification;
 
 import it.gov.pagopa.mypay2pu.extractor.dto.export.PuPaymentNotificationDTO;
 import it.gov.pagopa.mypay2pu.extractor.exception.CsvRowMappingException;
-import it.gov.pagopa.mypay2pu.extractor.model.mp4.PaymentNotification;
+import it.gov.pagopa.mypay2pu.extractor.model.mpv4.PaymentNotification;
 import it.gov.pagopa.mypay2pu.extractor.utils.TestUtils;
 import it.gov.pagopa.pu.classification.dto.generated.PersonEntityType;
 import org.junit.jupiter.api.Test;
