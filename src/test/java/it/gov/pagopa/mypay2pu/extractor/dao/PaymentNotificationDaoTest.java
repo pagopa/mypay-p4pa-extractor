@@ -1,6 +1,6 @@
 package it.gov.pagopa.mypay2pu.extractor.dao;
 
-import it.gov.pagopa.mypay2pu.extractor.model.mp4.PaymentNotification;
+import it.gov.pagopa.mypay2pu.extractor.model.mpv4.PaymentNotification;
 import it.gov.pagopa.mypay2pu.extractor.utils.SqlLoader;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -17,6 +17,7 @@ import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -33,44 +34,46 @@ class PaymentNotificationDaoTest {
   private static final String FIND_BY_FILTERS_SQL = "SELECT payment notifications";
 
   @Mock
-  private NamedParameterJdbcTemplate mp4JdbcTemplateMock;
+  private NamedParameterJdbcTemplate mypivotJdbcTemplateMock;
   @Mock
   private SqlLoader sqlLoaderMock;
 
   @AfterEach
   void tearDown() {
-    verifyNoMoreInteractions(mp4JdbcTemplateMock, sqlLoaderMock);
+    verifyNoMoreInteractions(mypivotJdbcTemplateMock, sqlLoaderMock);
   }
 
   @Test
-  void givenFiltersWhenFindThenQueryPagedMp4Database() {
+  void givenFiltersWhenFindThenQueryPagedMyPivotDatabase() {
     PaymentNotificationDao dao = buildDao();
     String ipaCode = "IPA1";
-    String iud = "IUD-1";
-    String iuv = "IUV-1";
+    List<String> iuds = List.of("IUD-1", "IUD-2");
+    List<String> iuvs = List.of("IUV-1", "IUV-2");
     LocalDateTime createdFrom = LocalDateTime.of(2026, Month.JANUARY, 10, 10, 30);
     LocalDateTime createdTo = LocalDateTime.of(2026, Month.JANUARY, 11, 10, 30);
     List<PaymentNotification> expected = List.of(buildPaymentNotification());
 
-    when(mp4JdbcTemplateMock.query(
+    when(mypivotJdbcTemplateMock.query(
       eq(FIND_BY_FILTERS_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         ipaCode.equals(params.getValue("ipaCode"))
-          && iud.equals(params.getValue("iud"))
-          && iuv.equals(params.getValue("iuv"))
+          && Boolean.FALSE.equals(params.getValue("iudsEmpty"))
+          && iuds.equals(params.getValue("iuds"))
+          && Boolean.FALSE.equals(params.getValue("iuvsEmpty"))
+          && iuvs.equals(params.getValue("iuvs"))
           && Boolean.FALSE.equals(params.getValue("skipCreatedFromFilter"))
           && createdFrom.equals(params.getValue("createdFrom"))
           && Boolean.FALSE.equals(params.getValue("skipCreatedToFilter"))
           && createdTo.equals(params.getValue("createdTo"))
           && Integer.valueOf(50).equals(params.getValue("limit"))
           && Integer.valueOf(100).equals(params.getValue("offset"))
-          && params.getValues().size() == 9
+          && params.getValues().size() == 11
       ),
       same(PaymentNotificationDao.PAYMENT_NOTIFICATION_ROW_MAPPER)
     )).thenReturn(expected);
 
     List<PaymentNotification> result = dao.findByFilters(
-      ipaCode, iud, iuv, createdFrom, createdTo, 50, 100
+      ipaCode, iuds, iuvs, createdFrom, createdTo, 50, 100
     );
 
     assertEquals(expected, result);
@@ -80,14 +83,14 @@ class PaymentNotificationDaoTest {
   void givenNoOptionalFiltersWhenFindThenSkipTheirFilters() {
     PaymentNotificationDao dao = buildDao();
 
-    when(mp4JdbcTemplateMock.query(
+    when(mypivotJdbcTemplateMock.query(
       eq(FIND_BY_FILTERS_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         "IPA1".equals(params.getValue("ipaCode"))
-          && params.hasValue("iud")
-          && params.getValue("iud") == null
-          && params.hasValue("iuv")
-          && params.getValue("iuv") == null
+          && Boolean.TRUE.equals(params.getValue("iudsEmpty"))
+          && Collections.singletonList(null).equals(params.getValue("iuds"))
+          && Boolean.TRUE.equals(params.getValue("iuvsEmpty"))
+          && Collections.singletonList(null).equals(params.getValue("iuvs"))
           && Boolean.TRUE.equals(params.getValue("skipCreatedFromFilter"))
           && params.hasValue("createdFrom")
           && params.getValue("createdFrom") == null
@@ -96,13 +99,13 @@ class PaymentNotificationDaoTest {
           && params.getValue("createdTo") == null
           && Integer.valueOf(10).equals(params.getValue("limit"))
           && Integer.valueOf(0).equals(params.getValue("offset"))
-          && params.getValues().size() == 9
+          && params.getValues().size() == 11
       ),
       same(PaymentNotificationDao.PAYMENT_NOTIFICATION_ROW_MAPPER)
     )).thenReturn(List.of());
 
     List<PaymentNotification> result = dao.findByFilters(
-      "IPA1", null, null, null, null, 10, 0
+      "IPA1", List.of(), List.of(), null, null, 10, 0
     );
 
     assertEquals(List.of(), result);
@@ -114,7 +117,7 @@ class PaymentNotificationDaoTest {
 
     IllegalArgumentException exception = assertThrows(
       IllegalArgumentException.class,
-      () -> dao.findByFilters("IPA1", null, null, null, null, 0, 0)
+      () -> dao.findByFilters("IPA1", List.of(), List.of(), null, null, 0, 0)
     );
 
     assertEquals("limit must be greater than 0", exception.getMessage());
@@ -126,24 +129,42 @@ class PaymentNotificationDaoTest {
 
     IllegalArgumentException exception = assertThrows(
       IllegalArgumentException.class,
-      () -> dao.findByFilters(" ", null, null, null, null, 10, 0)
+      () -> dao.findByFilters(" ", List.of(), List.of(), null, null, 10, 0)
     );
 
     assertEquals("ipaCode must not be blank", exception.getMessage());
   }
 
   @Test
+  void givenMyPivotDisabledWhenFindThenRejectBeforeDatabaseInteraction() {
+    PaymentNotificationDao dao = buildDao(null);
+
+    IllegalStateException exception = assertThrows(
+      IllegalStateException.class,
+      () -> dao.findByFilters("IPA1", List.of(), List.of(), null, null, 10, 0)
+    );
+
+    assertEquals("MyPivot datasource must be enabled for payment notification extraction", exception.getMessage());
+  }
+
+  @Test
   void givenPaymentNotificationSqlWhenLoadedThenUsesIpaCodeFilterAndCreatedOrdering() throws Exception {
-    String sql = Files.readString(Path.of("src/main/resources/db/mypay/payment-notification/payment-notification.sql"));
+    String sql = Files.readString(Path.of("src/main/resources/db/mypivot/payment-notification/payment-notification.sql"));
 
     assertTrue(sql.contains("e.cod_ipa_ente = :ipaCode"));
+    assertTrue(sql.contains(":iudsEmpty = TRUE OR fi.cod_iud IN (:iuds)"));
+    assertTrue(sql.contains(":iuvsEmpty = TRUE OR fi.cod_rp_silinviarp_id_univoco_versamento IN (:iuvs)"));
     assertTrue(sql.contains("ORDER BY fi.dt_creazione"));
   }
 
   private PaymentNotificationDao buildDao() {
-    when(sqlLoaderMock.load("mypay/payment-notification/payment-notification.sql"))
+    return buildDao(mypivotJdbcTemplateMock);
+  }
+
+  private PaymentNotificationDao buildDao(NamedParameterJdbcTemplate mypivotJdbcTemplate) {
+    when(sqlLoaderMock.load("mypivot/payment-notification/payment-notification.sql"))
       .thenReturn(FIND_BY_FILTERS_SQL);
-    return new PaymentNotificationDao(mp4JdbcTemplateMock, sqlLoaderMock);
+    return new PaymentNotificationDao(mypivotJdbcTemplate, sqlLoaderMock);
   }
 
   private PaymentNotification buildPaymentNotification() {

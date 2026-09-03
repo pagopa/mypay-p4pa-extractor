@@ -21,6 +21,8 @@ import java.time.LocalDate;
 @EqualsAndHashCode(callSuper = false)
 public class PuPaymentNotificationDTO implements CsvExportDto {
 
+  public static final String VERSION = "1_0";
+
   @CsvBindByName(column = "IUD")
   @NotBlank
   private String iud;
