@@ -15,13 +15,11 @@ import it.gov.pagopa.mypay2pu.extractor.service.files.CsvService;
 import it.gov.pagopa.mypay2pu.extractor.validation.LogicalKeyPair;
 import it.gov.pagopa.mypay2pu.extractor.validation.PairedLogicalKeyValidator;
 import jakarta.validation.Validator;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
 import java.util.List;
 
-@Slf4j
 @Service
 public class DebtPositionPaidExportProcessingService
   extends SplitByIpaCodeBaseExportProcessingService<DebtPositionPaid, PuDebtPositionPaidDTO> {
@@ -72,7 +70,7 @@ public class DebtPositionPaidExportProcessingService
     OffsetDateTime createdFrom = filters != null ? filters.getDateFrom() : null;
     OffsetDateTime createdTo = filters != null ? filters.getDateTo() : null;
 
-    List<DebtPositionPaid> debtPositionsPaid = debtPositionPaidDao.findByFilters(
+    return debtPositionPaidDao.findByFilters(
       ipaCode,
       logicalKeyPair.left(),
       logicalKeyPair.right(),
@@ -81,8 +79,5 @@ public class DebtPositionPaidExportProcessingService
       pageSize,
       offset
     );
-    log.info("Extracted {} paid debt position(s): ipaCode={}, offset={}",
-      debtPositionsPaid.size(), ipaCode, offset);
-    return debtPositionsPaid;
   }
 }
