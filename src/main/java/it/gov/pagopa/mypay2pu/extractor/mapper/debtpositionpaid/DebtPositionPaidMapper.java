@@ -33,7 +33,11 @@ public class DebtPositionPaidMapper {
       .localitaAttestante(debtPositionPaid.getDeEIstitAttLocalitaAttestante())
       .provinciaAttestante(debtPositionPaid.getDeEIstitAttProvinciaAttestante())
       .nazioneAttestante(debtPositionPaid.getCodEIstitAttNazioneAttestante())
-      .enteBenefTipoIdentificativoUnivoco(toEntityIdType(debtPositionPaid.getCodEEnteBenefIdUnivBenefTipoIdUnivoco()))
+      .enteBenefTipoIdentificativoUnivoco(
+        DebtPositionPaidBeneficiaryEntityIdTypeCsvConverter.INSTANCE.toCsvValue(
+          toString(debtPositionPaid.getCodEEnteBenefIdUnivBenefTipoIdUnivoco())
+        )
+      )
       .enteBenefCodiceIdentificativoUnivoco(debtPositionPaid.getCodEEnteBenefIdUnivBenefCodiceIdUnivoco())
       .denominazioneBeneficiario(debtPositionPaid.getDeEEnteBenefDenominazioneBeneficiario())
       .codiceUnitOperBeneficiario(debtPositionPaid.getCodEEnteBenefCodiceUnitOperBeneficiario())
@@ -94,10 +98,6 @@ public class DebtPositionPaidMapper {
 
   private String toString(Character value) {
     return value == null ? null : value.toString();
-  }
-
-  private PuDebtPositionPaidDTO.EntityIdType toEntityIdType(Character value) {
-    return value == null ? null : PuDebtPositionPaidDTO.EntityIdType.valueOf(value.toString());
   }
 
   private java.time.LocalDate toLocalDate(java.time.LocalDateTime value) {

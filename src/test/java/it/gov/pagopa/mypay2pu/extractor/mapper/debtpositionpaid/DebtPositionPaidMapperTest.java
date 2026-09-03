@@ -1,6 +1,7 @@
 package it.gov.pagopa.mypay2pu.extractor.mapper.debtpositionpaid;
 
 import it.gov.pagopa.mypay2pu.extractor.dto.export.PuDebtPositionPaidDTO;
+import it.gov.pagopa.mypay2pu.extractor.exception.CsvRowMappingException;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.DebtPositionPaid;
 import it.gov.pagopa.mypay2pu.extractor.service.files.CsvService;
 import it.gov.pagopa.mypay2pu.extractor.utils.TestUtils;
@@ -23,6 +24,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class DebtPositionPaidMapperTest {
 
@@ -68,6 +70,20 @@ class DebtPositionPaidMapperTest {
     assertNull(result.getCodTassonomicoDovutoPa1());
     assertEquals(LocalDateTime.of(2026, Month.JANUARY, 15, 10, 30), result.getDataOraMessaggioRicevuta());
     assertEquals(BigDecimal.TEN, result.getImportoTotalePagato());
+  }
+
+  @Test
+  void mapShouldRejectUnsupportedBeneficiaryEntityIdType() {
+    DebtPositionPaid debtPositionPaid = new DebtPositionPaid();
+    debtPositionPaid.setCodEEnteBenefIdUnivBenefTipoIdUnivoco('F');
+
+    CsvRowMappingException exception = assertThrows(
+      CsvRowMappingException.class,
+      () -> mapper.map(debtPositionPaid)
+    );
+
+    assertEquals("enteBenefTipoIdentificativoUnivoco", exception.getField());
+    assertEquals("F", exception.getRejectedValue());
   }
 
   @Test
