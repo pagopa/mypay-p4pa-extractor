@@ -20,4 +20,6 @@ WHERE ad.cod_ipa_ente = :codIpaEnte
       THEN a.dt_ultima_modifica BETWEEN :dateFrom AND :dateTo
     ELSE a.dt_ultima_modifica > :lastExtractionDate
   END
-ORDER BY a.de_nome_accertamento, ad.cod_iuv;
+ORDER BY a.de_nome_accertamento, ad.cod_iuv
+LIMIT :limit
+OFFSET COALESCE(:offset, 0);

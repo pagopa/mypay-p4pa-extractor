@@ -18,6 +18,7 @@ import java.time.ZoneOffset;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.same;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -54,12 +55,14 @@ class AssessmentsDaoTest {
           && lastExtractionDate.equals(params.getValue("lastExtractionDate"))
           && params.getValue("dateFrom") == null
           && params.getValue("dateTo") == null
-          && params.getValues().size() == 4
+          && Integer.valueOf(50).equals(params.getValue("limit"))
+          && Integer.valueOf(0).equals(params.getValue("offset"))
+          && params.getValues().size() == 6
       ),
       same(AssessmentsDao.ASSESSMENTS_ROW_MAPPER)
     )).thenReturn(List.of());
 
-    List<Assessments> result = dao.findByFilters("IPA1", lastExtractionDate, null, null);
+    List<Assessments> result = dao.findByFilters("IPA1", lastExtractionDate, null, null, 50, 0);
 
     assertEquals(List.of(), result);
   }
@@ -87,14 +90,28 @@ class AssessmentsDaoTest {
           && lastExtractionDate.equals(params.getValue("lastExtractionDate"))
           && from.equals(params.getValue("dateFrom"))
           && to.equals(params.getValue("dateTo"))
-          && params.getValues().size() == 4
+          && Integer.valueOf(25).equals(params.getValue("limit"))
+          && Integer.valueOf(10).equals(params.getValue("offset"))
+          && params.getValues().size() == 6
       ),
       same(AssessmentsDao.ASSESSMENTS_ROW_MAPPER)
     )).thenReturn(List.of());
 
-    List<Assessments> result = dao.findByFilters("IPA1", lastExtractionDate, from, to);
+    List<Assessments> result = dao.findByFilters("IPA1", lastExtractionDate, from, to, 25, 10);
 
     assertEquals(List.of(), result);
+  }
+
+  @Test
+  void givenInvalidLimitWhenFindByFiltersThenThrowIllegalArgumentException() {
+    AssessmentsDao dao = buildDao();
+
+    IllegalArgumentException exception = assertThrows(
+      IllegalArgumentException.class,
+      () -> dao.findByFilters("IPA1", null, null, null, 0, 0)
+    );
+
+    assertEquals("limit must be greater than 0", exception.getMessage());
   }
 
   private AssessmentsDao buildDao() {

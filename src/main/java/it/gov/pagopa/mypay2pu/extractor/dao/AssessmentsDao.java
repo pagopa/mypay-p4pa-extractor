@@ -1,6 +1,7 @@
 package it.gov.pagopa.mypay2pu.extractor.dao;
 
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.Assessments;
+import it.gov.pagopa.mypay2pu.extractor.utils.QueryUtils;
 import it.gov.pagopa.mypay2pu.extractor.utils.SqlLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -34,10 +35,12 @@ public class AssessmentsDao {
   public List<Assessments> findByFilters(String codIpaEnte,
                                          OffsetDateTime lastExtractionDate,
                                          OffsetDateTime dateFrom,
-                                         OffsetDateTime dateTo) {
+                                         OffsetDateTime dateTo,
+                                         int limit,
+                                         int offset) {
     return mypivotJdbcTemplate.query(
       findByFiltersSql,
-      buildParams(codIpaEnte, lastExtractionDate, dateFrom, dateTo),
+      buildParams(codIpaEnte, lastExtractionDate, dateFrom, dateTo, limit, offset),
       ASSESSMENTS_ROW_MAPPER
     );
   }
@@ -45,8 +48,10 @@ public class AssessmentsDao {
   private MapSqlParameterSource buildParams(String codIpaEnte,
                                             OffsetDateTime lastExtractionDate,
                                             OffsetDateTime dateFrom,
-                                            OffsetDateTime dateTo) {
-    return new MapSqlParameterSource()
+                                            OffsetDateTime dateTo,
+                                            int limit,
+                                            int offset) {
+    return QueryUtils.buildPaginatedFilterParams(limit, offset)
       .addValue("codIpaEnte", codIpaEnte)
       .addValue("lastExtractionDate", lastExtractionDate)
       .addValue("dateFrom", dateFrom)
