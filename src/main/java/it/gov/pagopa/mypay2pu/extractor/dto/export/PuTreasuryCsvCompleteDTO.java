@@ -8,7 +8,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -17,92 +16,92 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @EqualsAndHashCode(callSuper = false)
-public class TreasuryCsvCompleteDTO implements CsvExportDto {
+public class PuTreasuryCsvCompleteDTO implements CsvExportDto {
 
   @CsvBindByName(column = "annoBolletta")
-  private String annoBolletta;
+  private String billYear;
   @CsvBindByName(column = "codBolletta")
-  private String codBolletta;
+  private String billCode;
   @CsvBindByName(column = "codEnteBT")
-  private String codEnteBT;
+  private String orgBtCode;
   @CsvBindByName(column = "codIstatEnte")
-  private String codIstatEnte;
+  private String orgIstatCode;
   @CsvBindByName(column = "enteIpaCode")
-  private String enteIpaCode;
+  private String organizationIpaCode;
   @CsvBindByName(column = "iuf")
   private String iuf;
   @CsvBindByName(column = "iuv")
   private String iuv;
   @CsvBindByName(column = "codConto")
-  private String codConto;
+  private String accountCode;
   @CsvBindByName(column = "codIdDominio")
-  private String codIdDominio;
+  private String domainIdCode;
   @CsvBindByName(column = "codTipoMovimento")
-  private String codTipoMovimento;
+  private String transactionTypeCode;
   @CsvBindByName(column = "codCausale")
-  private String codCausale;
-  @CsvBindByName(column = "deCausale")
-  private String deCausale;
+  private String remittanceCode;
+  @CsvBindByName(column = "causale")
+  private String remittanceDescription;
   @CsvBindByName(column = "importoCentesimi")
-  private BigDecimal importoCentesimi;
+  private Long billAmountCents;
   @CsvBindByName(column = "dataBolletta")
   @CsvDate(value = "yyyy-MM-dd")
-  private LocalDate dataBolletta;
+  private LocalDate billDate;
   @CsvBindByName(column = "dataRicezione")
   @CsvDate(value = "yyyy-MM-dd'T'HH:mm:ss")
-  private LocalDateTime dataRicezione;
+  private LocalDateTime receptionDate;
   @CsvBindByName(column = "annoDocumento")
-  private String annoDocumento;
+  private String documentYear;
   @CsvBindByName(column = "codDocumento")
-  private String codDocumento;
+  private String documentCode;
   @CsvBindByName(column = "codBollo")
-  private String codBollo;
-  @CsvBindByName(column = "cognome")
-  private String cognome;
-  @CsvBindByName(column = "nome")
-  private String nome;
-  @CsvBindByName(column = "via")
-  private String via;
-  @CsvBindByName(column = "cap")
-  private String cap;
-  @CsvBindByName(column = "citta")
-  private String citta;
-  @CsvBindByName(column = "codiceFiscale")
-  private String codiceFiscale;
-  @CsvBindByName(column = "partitaIva")
-  private String partitaIva;
+  private String sealCode;
+  @CsvBindByName(column = "pspCognome")
+  private String pspLastName;
+  @CsvBindByName(column = "pspNome")
+  private String pspFirstName;
+  @CsvBindByName(column = "pspIndirizzo")
+  private String pspAddress;
+  @CsvBindByName(column = "pspCodicePostale")
+  private String pspPostalCode;
+  @CsvBindByName(column = "pspCitta")
+  private String pspCity;
+  @CsvBindByName(column = "pspCf")
+  private String pspFiscalCode;
+  @CsvBindByName(column = "pspPiva")
+  private String pspVatNumber;
   @CsvBindByName(column = "codAbi")
-  private String codAbi;
+  private String abiCode;
   @CsvBindByName(column = "codCab")
-  private String codCab;
+  private String cabCode;
   @CsvBindByName(column = "codIban")
-  private String codIban;
+  private String ibanCode;
   @CsvBindByName(column = "codContoAnagrafica")
-  private String codContoAnagrafica;
-  @CsvBindByName(column = "deAeProvvisorio")
-  private String deAeProvvisorio;
+  private String accountRegistryCode;
+  @CsvBindByName(column = "aeProvvisorio")
+  private String provisionalAe;
   @CsvBindByName(column = "codProvvisorio")
-  private String codProvvisorio;
+  private String provisionalCode;
   @CsvBindByName(column = "codTipoConto")
-  private String codTipoConto;
+  private String accountTypeCode;
   @CsvBindByName(column = "codProcesso")
-  private String codProcesso;
+  private String processCode;
   @CsvBindByName(column = "codPgEsecuzione")
-  private String codPgEsecuzione;
+  private String executionPgCode;
   @CsvBindByName(column = "codPgTrasferimento")
-  private String codPgTrasferimento;
+  private String transferPgCode;
   @CsvBindByName(column = "numPgProcesso")
-  private Long numPgProcesso;
+  private Long processPgNumber;
   @CsvBindByName(column = "dataValutaRegione")
   @CsvDate(value = "yyyy-MM-dd")
-  private LocalDate dataValutaRegione;
+  private LocalDate regionValueDate;
   @CsvBindByName(column = "flgRegolarizzata")
-  private Boolean flgRegolarizzata;
+  private Boolean isRegularized;
   @CsvBindByName(column = "dataEffettivaSospeso")
   @CsvDate(value = "yyyy-MM-dd")
-  private LocalDate dataEffettivaSospeso;
-  @CsvBindByName(column = "codiceGestionaleProvvisorio")
-  private String codiceGestionaleProvvisorio;
+  private LocalDate actualSuspensionDate;
+  @CsvBindByName(column = "codGestionaleProvvisorio")
+  private String managementProvisionalCode;
   @CsvBindByName(column = "endToEndId")
-  private String endToEndId;
+  private String endToEndCode;
 }

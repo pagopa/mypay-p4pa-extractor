@@ -1,77 +1,66 @@
 package it.gov.pagopa.mypay2pu.extractor.mapper.treasurycsvcomplete;
 
-import it.gov.pagopa.mypay2pu.extractor.dto.export.TreasuryCsvCompleteDTO;
+import it.gov.pagopa.mypay2pu.extractor.dto.export.PuTreasuryCsvCompleteDTO;
 import it.gov.pagopa.mypay2pu.extractor.model.mpv4.TreasuryCsvComplete;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Component
 public class TreasuryCsvCompleteMapper {
 
-  public TreasuryCsvCompleteDTO map(TreasuryCsvComplete treasury) {
-    return TreasuryCsvCompleteDTO.builder()
-      .annoBolletta(treasury.deAnnoBolletta())
-      .codBolletta(treasury.codBolletta())
-      .codEnteBT(null)
-      .codIstatEnte(null)
-      .enteIpaCode(treasury.codIpaEnte())
+  public PuTreasuryCsvCompleteDTO map(TreasuryCsvComplete treasury) {
+    return PuTreasuryCsvCompleteDTO.builder()
+      .billYear(treasury.deAnnoBolletta())
+      .billCode(treasury.codBolletta())
+      .orgBtCode(null)
+      .orgIstatCode(null)
+      .organizationIpaCode(treasury.codIpaEnte())
       .iuf(treasury.codIdUnivocoFlusso())
       .iuv(treasury.codIdUnivocoVersamento())
-      .codConto(treasury.codConto())
-      .codIdDominio(treasury.codIdDominio())
-      .codTipoMovimento(treasury.codTipoMovimento())
-      .codCausale(treasury.codCausale())
-      .deCausale(treasury.deCausale())
-      .importoCentesimi(toBigDecimal(treasury.numIpBolletta()))
-      .dataBolletta(toLocalDate(treasury.dtBolletta()))
-      .dataRicezione(treasury.dtRicezione())
-      .annoDocumento(treasury.deAnnoDocumento())
-      .codDocumento(treasury.codDocumento())
-      .codBollo(treasury.codBollo())
-      .cognome(treasury.deCognome())
-      .nome(treasury.deNome())
-      .via(treasury.deVia())
-      .cap(treasury.deCap())
-      .citta(treasury.deCitta())
-      .codiceFiscale(treasury.codCodiceFiscale())
-      .partitaIva(treasury.codPartitaIva())
-      .codAbi(treasury.codAbi())
-      .codCab(treasury.codCab())
-      .codIban(treasury.codIban())
-      .codContoAnagrafica(treasury.codContoAnagrafica())
-      .deAeProvvisorio(treasury.deAeProvvisorio())
-      .codProvvisorio(treasury.codProvvisorio())
-      .codTipoConto(treasury.codTipoConto())
-      .codProcesso(treasury.codProcesso())
-      .codPgEsecuzione(treasury.codPgEsecuzione())
-      .codPgTrasferimento(treasury.codPgTrasferimento())
-      .numPgProcesso(toLong(treasury.numPgProcesso()))
-      .dataValutaRegione(toLocalDate(treasury.dtDataValutaRegione()))
-      .flgRegolarizzata(treasury.flgRegolarizzata())
-      .dataEffettivaSospeso(toLocalDate(treasury.dtEffettivaSospeso()))
-      .codiceGestionaleProvvisorio(treasury.codiceGestionaleProvvisorio())
-      .endToEndId(treasury.endToEndId())
+      .accountCode(treasury.codConto())
+      .domainIdCode(treasury.codIdDominio())
+      .transactionTypeCode(treasury.codTipoMovimento())
+      .remittanceCode(treasury.codCausale())
+      .remittanceDescription(treasury.deCausale())
+      .billAmountCents(toCents(treasury.numIpBolletta()))
+      .billDate(toLocalDate(treasury.dtBolletta()))
+      .receptionDate(treasury.dtRicezione())
+      .documentYear(treasury.deAnnoDocumento())
+      .documentCode(treasury.codDocumento())
+      .sealCode(treasury.codBollo())
+      .pspLastName(treasury.deCognome())
+      .pspFirstName(treasury.deNome())
+      .pspAddress(treasury.deVia())
+      .pspPostalCode(treasury.deCap())
+      .pspCity(treasury.deCitta())
+      .pspFiscalCode(treasury.codCodiceFiscale())
+      .pspVatNumber(treasury.codPartitaIva())
+      .abiCode(treasury.codAbi())
+      .cabCode(treasury.codCab())
+      .ibanCode(treasury.codIban())
+      .accountRegistryCode(treasury.codContoAnagrafica())
+      .provisionalAe(treasury.deAeProvvisorio())
+      .provisionalCode(treasury.codProvvisorio())
+      .accountTypeCode(treasury.codTipoConto())
+      .processCode(treasury.codProcesso())
+      .executionPgCode(treasury.codPgEsecuzione())
+      .transferPgCode(treasury.codPgTrasferimento())
+      .processPgNumber(treasury.numPgProcesso())
+      .regionValueDate(toLocalDate(treasury.dtDataValutaRegione()))
+      .isRegularized(treasury.flgRegolarizzata())
+      .actualSuspensionDate(toLocalDate(treasury.dtEffettivaSospeso()))
+      .managementProvisionalCode(treasury.codiceGestionaleProvvisorio())
+      .endToEndCode(treasury.endToEndId())
       .build();
   }
 
-  public String buildLogicalKey(TreasuryCsvComplete treasury) {
-    return buildLogicalKey(treasury.deAnnoBolletta(), treasury.codBolletta());
+  private Long toCents(BigDecimal value) {
+    return value == null ? null : value.movePointRight(2).longValueExact();
   }
 
-  public String buildLogicalKey(String annoBolletta, String codBolletta) {
-    return annoBolletta + "|" + codBolletta;
-  }
-
-  private BigDecimal toBigDecimal(String value) {
-    return value == null ? null : new BigDecimal(value);
-  }
-
-  private Long toLong(String value) {
-    return value == null ? null : Long.valueOf(value);
-  }
-
-  private java.time.LocalDate toLocalDate(java.time.LocalDateTime value) {
+  private java.time.LocalDate toLocalDate(LocalDateTime value) {
     return value == null ? null : value.toLocalDate();
   }
 }
