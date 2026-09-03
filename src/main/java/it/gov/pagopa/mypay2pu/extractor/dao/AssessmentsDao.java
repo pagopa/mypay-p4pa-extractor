@@ -16,41 +16,40 @@ import java.util.List;
 @Repository
 public class AssessmentsDao {
 
-  private static final String FIND_BY_LAST_MIGRATION_SQL_PATH = "mypivot/assessments/assessments-export-by-last-migration.sql";
-  private static final String FIND_BY_DATE_RANGE_SQL_PATH = "mypivot/assessments/assessments-export-by-date-range.sql";
+  private static final String FIND_BY_FILTERS_SQL_PATH = "mypivot/assessments/assessments-export.sql";
   protected static final RowMapper<Assessments> ASSESSMENTS_ROW_MAPPER =
     DataClassRowMapper.newInstance(Assessments.class);
 
   private final NamedParameterJdbcTemplate mypivotJdbcTemplate;
-  private final String findByLastMigrationSql;
-  private final String findByDateRangeSql;
+  private final String findByFiltersSql;
 
   public AssessmentsDao(
     @Autowired(required = false) @Qualifier("mpv4NamedParameterJdbcTemplate") NamedParameterJdbcTemplate mypivotJdbcTemplate,
     SqlLoader sqlLoader
   ) {
     this.mypivotJdbcTemplate = mypivotJdbcTemplate;
-    this.findByLastMigrationSql = sqlLoader.load(FIND_BY_LAST_MIGRATION_SQL_PATH);
-    this.findByDateRangeSql = sqlLoader.load(FIND_BY_DATE_RANGE_SQL_PATH);
+    this.findByFiltersSql = sqlLoader.load(FIND_BY_FILTERS_SQL_PATH);
   }
 
-  public List<Assessments> findByFilters(String codIpaEnte, OffsetDateTime dateFrom, OffsetDateTime dateTo) {
+  public List<Assessments> findByFilters(String codIpaEnte,
+                                         OffsetDateTime lastExtractionDate,
+                                         OffsetDateTime dateFrom,
+                                         OffsetDateTime dateTo) {
     return mypivotJdbcTemplate.query(
-      dateFrom != null && dateTo != null ? findByDateRangeSql : findByLastMigrationSql,
-      buildParams(codIpaEnte, dateFrom, dateTo),
+      findByFiltersSql,
+      buildParams(codIpaEnte, lastExtractionDate, dateFrom, dateTo),
       ASSESSMENTS_ROW_MAPPER
     );
   }
 
-  private MapSqlParameterSource buildParams(String codIpaEnte, OffsetDateTime dateFrom, OffsetDateTime dateTo) {
-    MapSqlParameterSource params = new MapSqlParameterSource()
-      .addValue("codIpaEnte", codIpaEnte);
-    if (dateFrom != null && dateTo != null) {
-      params.addValue("dateFrom", dateFrom)
-        .addValue("dateTo", dateTo);
-    } else {
-      params.addValue("dataUltimaMigrazione", dateFrom);
-    }
-    return params;
+  private MapSqlParameterSource buildParams(String codIpaEnte,
+                                            OffsetDateTime lastExtractionDate,
+                                            OffsetDateTime dateFrom,
+                                            OffsetDateTime dateTo) {
+    return new MapSqlParameterSource()
+      .addValue("codIpaEnte", codIpaEnte)
+      .addValue("lastExtractionDate", lastExtractionDate)
+      .addValue("dateFrom", dateFrom)
+      .addValue("dateTo", dateTo);
   }
 }

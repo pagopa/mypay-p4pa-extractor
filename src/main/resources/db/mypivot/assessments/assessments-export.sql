@@ -15,5 +15,9 @@ SELECT
 FROM mygov_accertamento a
 JOIN mygov_accertamento_dettaglio ad ON ad.mygov_accertamento_id = a.mygov_accertamento_id
 WHERE ad.cod_ipa_ente = :codIpaEnte
-  AND a.dt_ultima_modifica BETWEEN :dateFrom AND :dateTo
+  AND CASE
+    WHEN :dateFrom IS NOT NULL AND :dateTo IS NOT NULL
+      THEN a.dt_ultima_modifica BETWEEN :dateFrom AND :dateTo
+    ELSE a.dt_ultima_modifica > :lastExtractionDate
+  END
 ORDER BY a.de_nome_accertamento, ad.cod_iuv;
