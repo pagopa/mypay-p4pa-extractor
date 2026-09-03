@@ -41,7 +41,7 @@ licenseReport {
   outputDir = "$projectDir/dependency-licenses"
   filters = arrayOf(SpdxLicenseBundleNormalizer())
 }
-tasks.classes {
+tasks.dependencies {
   finalizedBy(tasks.generateLicenseReport)
 }
 
@@ -59,6 +59,9 @@ val lz4JavaVersion = "1.11.2"
 val postgresJdbcVersion = "42.7.13"
 val openCsvVersion = "5.12.0"
 val podamVersion = "8.0.2.RELEASE"
+
+// CVE Security dependencies
+val tomcatEmbedCoreVersion = "11.0.25"
 
 dependencies {
   implementation("org.springframework.boot:spring-boot-starter-webmvc")
@@ -83,6 +86,10 @@ dependencies {
   implementation("com.google.code.gson:gson")
   implementation("org.springframework.boot:spring-boot-starter-jdbc")
   implementation("org.postgresql:postgresql:$postgresJdbcVersion")
+
+  // CVE Security dependencies
+  implementation("org.apache.tomcat.embed:tomcat-embed-core:$tomcatEmbedCoreVersion")
+
   compileOnly("org.projectlombok:lombok")
   annotationProcessor("org.projectlombok:lombok")
   testAnnotationProcessor("org.projectlombok:lombok")

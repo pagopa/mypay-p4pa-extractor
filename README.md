@@ -18,7 +18,7 @@ Supports **12 MigrationFileType**:
 | 4 | `DEBT_POSITIONS_TYPE_ORG` | MyPay4 + myDictionary | CSV (enriched) |
 | 5 | `DEBT_POSITIONS_TYPE_ORG_OPERATORS` | MyPay4 | CSV |
 | 6 | `DEBT_POSITIONS` | MyPay4 | CSV |
-| 7 | `DEBT_POSITIONS_PAID` | MyPay4 | XML (RT) |
+| 7 | `DEBT_POSITIONS_PAID` | MyPay4 | CSV |
 | 8 | `PAYMENT_NOTIFICATION` | myPivot4 | CSV |
 | 9 | `PAYMENTS_REPORTING` | FESP | XML (FdR) |
 | 10 | `TREASURY_CSV_COMPLETE` | myPivot4 *(optional)* | CSV (IUF only) |
@@ -209,7 +209,8 @@ The following global properties are exported for configuration in the migrated M
 | `EXPORT_PAGE_SIZE_DEBT_POSITIONS_TYPE_ORG`           | Maximum number of records to write to an exported file before creating a new one | `1000` |
 | `EXPORT_PAGE_SIZE_DEBT_POSITIONS_TYPE_ORG_OPERATORS` | Maximum number of records to write to an exported file before creating a new one | `1000` |
 | `EXPORT_PAGE_SIZE_DEBT_POSITIONS`                    | Maximum number of records to write to an exported file before creating a new one | `1000` |
-| `EXPORT_PAGE_SIZE_PAYMENT_NOTIFICATION`    | Maximum number of records to write to an exported file before creating a new one | `1000` |
+| `EXPORT_PAGE_SIZE_DEBT_POSITIONS_PAID`               | Maximum number of records to write to an exported file before creating a new one | `1000` |
+| `EXPORT_PAGE_SIZE_PAYMENT_NOTIFICATION`              | Maximum number of records to write to an exported file before creating a new one | `1000` |
 
 #### 🔑 Encryption keys
 
