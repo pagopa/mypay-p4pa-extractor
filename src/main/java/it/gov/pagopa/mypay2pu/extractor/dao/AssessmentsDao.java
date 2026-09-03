@@ -2,6 +2,7 @@ package it.gov.pagopa.mypay2pu.extractor.dao;
 
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.Assessments;
 import it.gov.pagopa.mypay2pu.extractor.utils.SqlLoader;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.DataClassRowMapper;
 import org.springframework.jdbc.core.RowMapper;
@@ -25,7 +26,7 @@ public class AssessmentsDao {
   private final String findByDateRangeSql;
 
   public AssessmentsDao(
-    @Qualifier("mpv4NamedParameterJdbcTemplate") NamedParameterJdbcTemplate mypivotJdbcTemplate,
+    @Autowired(required = false) @Qualifier("mpv4NamedParameterJdbcTemplate") NamedParameterJdbcTemplate mypivotJdbcTemplate,
     SqlLoader sqlLoader
   ) {
     this.mypivotJdbcTemplate = mypivotJdbcTemplate;
