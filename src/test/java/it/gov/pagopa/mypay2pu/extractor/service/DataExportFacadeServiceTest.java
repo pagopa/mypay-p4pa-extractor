@@ -5,6 +5,7 @@ import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.exception.ExportFileTypeNotSupportedException;
 import it.gov.pagopa.mypay2pu.extractor.service.export.debtposition.DebtPositionExportProcessingService;
+import it.gov.pagopa.mypay2pu.extractor.service.export.debtpositionpaid.DebtPositionPaidExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.debtpositionstypeorgoperators.DebtPositionsTypeOrgOperatorsExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.debtpositiontype.DebtPositionTypeExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.debtpositiontypeorg.DebtPositionTypeOrgExportProcessingService;
@@ -43,6 +44,8 @@ class DataExportFacadeServiceTest {
   @Mock
   private DebtPositionExportProcessingService debtPositionExportProcessingServiceMock;
   @Mock
+  private DebtPositionPaidExportProcessingService debtPositionPaidExportProcessingServiceMock;
+  @Mock
   private PaymentNotificationExportProcessingService paymentNotificationExportProcessingServiceMock;
 
   @InjectMocks
@@ -59,6 +62,7 @@ class DataExportFacadeServiceTest {
         debtPositionTypeOrgExportProcessingServiceMock,
         debtPositionsTypeOrgOperatorsExportProcessingServiceMock,
         debtPositionExportProcessingServiceMock,
+        debtPositionPaidExportProcessingServiceMock,
         paymentNotificationExportProcessingServiceMock
       )
     );
@@ -95,6 +99,10 @@ class DataExportFacadeServiceTest {
       case DEBT_POSITIONS -> {
         expected = new ExportFileResult(List.of("debtpositions_1_0.zip"), null);
         when(debtPositionExportProcessingServiceMock.executeExport(extractionId, request)).thenReturn(expected);
+      }
+      case DEBT_POSITIONS_PAID -> {
+        expected = new ExportFileResult(List.of("debtpositionspaid_1_0.zip"), null);
+        when(debtPositionPaidExportProcessingServiceMock.executeExport(extractionId, request)).thenReturn(expected);
       }
       case PAYMENT_NOTIFICATION -> {
         expected = new ExportFileResult(List.of("paymentnotification_1_0.zip"), null);
