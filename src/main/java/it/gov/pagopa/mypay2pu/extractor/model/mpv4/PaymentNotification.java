@@ -1,4 +1,4 @@
-package it.gov.pagopa.mypay2pu.extractor.model.mp4;
+package it.gov.pagopa.mypay2pu.extractor.model.mpv4;
 
 import it.gov.pagopa.mypay2pu.extractor.model.ExportModel;
 
