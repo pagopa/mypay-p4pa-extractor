@@ -15,26 +15,26 @@ import java.util.List;
 @Repository
 public class AssessmentsDao {
 
-  private static final String FIND_BY_LAST_MIGRATION_SQL_PATH = "mypay/assessments/assessments-export-by-last-migration.sql";
-  private static final String FIND_BY_DATE_RANGE_SQL_PATH = "mypay/assessments/assessments-export-by-date-range.sql";
+  private static final String FIND_BY_LAST_MIGRATION_SQL_PATH = "mypivot/assessments/assessments-export-by-last-migration.sql";
+  private static final String FIND_BY_DATE_RANGE_SQL_PATH = "mypivot/assessments/assessments-export-by-date-range.sql";
   protected static final RowMapper<Assessments> ASSESSMENTS_ROW_MAPPER =
     DataClassRowMapper.newInstance(Assessments.class);
 
-  private final NamedParameterJdbcTemplate mp4JdbcTemplate;
+  private final NamedParameterJdbcTemplate mypivotJdbcTemplate;
   private final String findByLastMigrationSql;
   private final String findByDateRangeSql;
 
   public AssessmentsDao(
-    @Qualifier("mp4NamedParameterJdbcTemplate") NamedParameterJdbcTemplate mp4JdbcTemplate,
+    @Qualifier("mpv4NamedParameterJdbcTemplate") NamedParameterJdbcTemplate mypivotJdbcTemplate,
     SqlLoader sqlLoader
   ) {
-    this.mp4JdbcTemplate = mp4JdbcTemplate;
+    this.mypivotJdbcTemplate = mypivotJdbcTemplate;
     this.findByLastMigrationSql = sqlLoader.load(FIND_BY_LAST_MIGRATION_SQL_PATH);
     this.findByDateRangeSql = sqlLoader.load(FIND_BY_DATE_RANGE_SQL_PATH);
   }
 
   public List<Assessments> findByFilters(String codIpaEnte, OffsetDateTime dateFrom, OffsetDateTime dateTo) {
-    return mp4JdbcTemplate.query(
+    return mypivotJdbcTemplate.query(
       dateFrom != null && dateTo != null ? findByDateRangeSql : findByLastMigrationSql,
       buildParams(codIpaEnte, dateFrom, dateTo),
       ASSESSMENTS_ROW_MAPPER

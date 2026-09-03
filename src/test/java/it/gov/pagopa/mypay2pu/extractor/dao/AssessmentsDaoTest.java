@@ -28,20 +28,21 @@ class AssessmentsDaoTest {
   private static final String FIND_BY_DATE_RANGE_SQL = "SELECT assessments by date range";
 
   @Mock
-  private NamedParameterJdbcTemplate mp4JdbcTemplateMock;
+  private NamedParameterJdbcTemplate mypivotJdbcTemplateMock;
+
   @Mock
   private SqlLoader sqlLoaderMock;
 
   @AfterEach
   void tearDown() {
-    verifyNoMoreInteractions(mp4JdbcTemplateMock, sqlLoaderMock);
+    verifyNoMoreInteractions(mypivotJdbcTemplateMock, sqlLoaderMock);
   }
 
   @Test
   void givenNoDateRangeWhenFindByFiltersThenUseLastMigrationSql() {
     AssessmentsDao dao = buildDao();
 
-    when(mp4JdbcTemplateMock.query(
+    when(mypivotJdbcTemplateMock.query(
       eq(FIND_BY_LAST_MIGRATION_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         "IPA1".equals(params.getValue("codIpaEnte"))
@@ -62,7 +63,7 @@ class AssessmentsDaoTest {
     OffsetDateTime from = OffsetDateTime.of(2026, 1, 10, 0, 0, 0, 0, ZoneOffset.UTC);
     OffsetDateTime to = OffsetDateTime.of(2026, 1, 12, 0, 0, 0, 0, ZoneOffset.UTC);
 
-    when(mp4JdbcTemplateMock.query(
+    when(mypivotJdbcTemplateMock.query(
       eq(FIND_BY_DATE_RANGE_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         "IPA1".equals(params.getValue("codIpaEnte"))
@@ -79,8 +80,8 @@ class AssessmentsDaoTest {
   }
 
   private AssessmentsDao buildDao() {
-    when(sqlLoaderMock.load("mypay/assessments/assessments-export-by-last-migration.sql")).thenReturn(FIND_BY_LAST_MIGRATION_SQL);
-    when(sqlLoaderMock.load("mypay/assessments/assessments-export-by-date-range.sql")).thenReturn(FIND_BY_DATE_RANGE_SQL);
-    return new AssessmentsDao(mp4JdbcTemplateMock, sqlLoaderMock);
+    when(sqlLoaderMock.load("mypivot/assessments/assessments-export-by-last-migration.sql")).thenReturn(FIND_BY_LAST_MIGRATION_SQL);
+    when(sqlLoaderMock.load("mypivot/assessments/assessments-export-by-date-range.sql")).thenReturn(FIND_BY_DATE_RANGE_SQL);
+    return new AssessmentsDao(mypivotJdbcTemplateMock, sqlLoaderMock);
   }
 }
