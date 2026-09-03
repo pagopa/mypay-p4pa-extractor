@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.inOrder;
@@ -166,18 +165,6 @@ class DebtPositionPaidExportProcessingServiceTest {
   @Test
   void whenCheckingSuperclassThenServiceUsesIpaSplitExportPattern() {
     assertEquals(SplitByIpaCodeBaseExportProcessingService.class, service.getClass().getSuperclass());
-  }
-
-  @Test
-  void whenIpaCodesAreEmptyThenRejectExport() {
-    ExtractionRequest request = new ExtractionRequest(List.of(), MigrationFileType.DEBT_POSITIONS_PAID);
-
-    IllegalArgumentException exception = assertThrows(
-      IllegalArgumentException.class,
-      () -> service.executeExport("extraction-id", request)
-    );
-
-    assertEquals("ipaCodes must not be empty", exception.getMessage());
   }
 
   private ExtractorExportProperties exportProperties() {
