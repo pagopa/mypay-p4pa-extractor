@@ -5,7 +5,10 @@ import it.gov.pagopa.mypay2pu.extractor.mapper.debtposition.DebtPositionPersonEn
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.DebtPositionPaid;
 import org.springframework.stereotype.Component;
 
-import java.nio.charset.StandardCharsets;
+import static it.gov.pagopa.mypay2pu.extractor.utils.DateTimeUtils.toLocalDate;
+import static it.gov.pagopa.mypay2pu.extractor.utils.StringUtils.characterToString;
+import static it.gov.pagopa.mypay2pu.extractor.utils.StringUtils.toUtf8String;
+
 @Component
 public class DebtPositionPaidMapper {
 
@@ -19,10 +22,10 @@ public class DebtPositionPaidMapper {
       .identificativoDominio(debtPositionPaid.getCodEDomIdDominio())
       .identificativoStazioneRichiedente(debtPositionPaid.getCodEDomIdStazioneRichiedente())
       .identificativoMessaggioRicevuta(debtPositionPaid.getCodEIdMessaggioRicevuta())
-      .dataOraMessaggioRicevuta(debtPositionPaid.getDtEDataOraMessaggioRicevuta())
+      .dataOraMessaggioRicevuta(debtPositionPaid.getCodEDataOraMessaggioRicevuta())
       .riferimentoMessaggioRichiesta(debtPositionPaid.getCodERiferimentoMessaggioRichiesta())
       .riferimentoDataRichiesta(toLocalDate(debtPositionPaid.getCodERiferimentoDataRichiesta()))
-      .tipoIdentificativoUnivocoAttestante(toString(debtPositionPaid.getCodEIstitAttIdUnivAttTipoIdUnivoco()))
+      .tipoIdentificativoUnivocoAttestante(characterToString(debtPositionPaid.getCodEIstitAttIdUnivAttTipoIdUnivoco()))
       .codiceIdentificativoUnivocoAttestante(debtPositionPaid.getCodEIstitAttIdUnivAttCodiceIdUnivoco())
       .denominazioneAttestante(debtPositionPaid.getDeEIstitAttDenominazioneAttestante())
       .codiceUnitOperAttestante(debtPositionPaid.getCodEIstitAttCodiceUnitOperAttestante())
@@ -35,7 +38,7 @@ public class DebtPositionPaidMapper {
       .nazioneAttestante(debtPositionPaid.getCodEIstitAttNazioneAttestante())
       .enteBenefTipoIdentificativoUnivoco(
         DebtPositionPaidBeneficiaryEntityIdTypeCsvConverter.INSTANCE.toCsvValue(
-          toString(debtPositionPaid.getCodEEnteBenefIdUnivBenefTipoIdUnivoco())
+          characterToString(debtPositionPaid.getCodEEnteBenefIdUnivBenefTipoIdUnivoco())
         )
       )
       .enteBenefCodiceIdentificativoUnivoco(debtPositionPaid.getCodEEnteBenefIdUnivBenefCodiceIdUnivoco())
@@ -49,7 +52,7 @@ public class DebtPositionPaidMapper {
       .provinciaBeneficiario(debtPositionPaid.getDeEEnteBenefProvinciaBeneficiario())
       .nazioneBeneficiario(debtPositionPaid.getCodEEnteBenefNazioneBeneficiario())
       .soggVersTipoIdentificativoUnivoco(
-        DebtPositionPersonEntityTypeCsvConverter.INSTANCE.toCsvValue(toString(debtPositionPaid.getCodESoggVersIdUnivVersTipoIdUnivoco()))
+        DebtPositionPersonEntityTypeCsvConverter.INSTANCE.toCsvValue(characterToString(debtPositionPaid.getCodESoggVersIdUnivVersTipoIdUnivoco()))
       )
       .soggVersCodiceIdentificativoUnivoco(debtPositionPaid.getCodESoggVersIdUnivVersCodiceIdUnivoco())
       .anagraficaVersante(debtPositionPaid.getDeESoggVersAnagraficaVersante())
@@ -61,7 +64,7 @@ public class DebtPositionPaidMapper {
       .nazioneVersante(debtPositionPaid.getDeESoggVersNazioneVersante())
       .emailVersante(debtPositionPaid.getDeESoggVersEmailVersante())
       .soggPagTipoIdentificativoUnivoco(
-        DebtPositionPersonEntityTypeCsvConverter.INSTANCE.toCsvValue(toString(debtPositionPaid.getCodESoggPagIdUnivPagTipoIdUnivoco()))
+        DebtPositionPersonEntityTypeCsvConverter.INSTANCE.toCsvValue(characterToString(debtPositionPaid.getCodESoggPagIdUnivPagTipoIdUnivoco()))
       )
       .soggPagCodiceIdentificativoUnivoco(debtPositionPaid.getCodESoggPagIdUnivPagCodiceIdUnivoco())
       .anagraficaPagatore(debtPositionPaid.getCodESoggPagAnagraficaPagatore())
@@ -72,7 +75,7 @@ public class DebtPositionPaidMapper {
       .provinciaPagatore(debtPositionPaid.getDeESoggPagProvinciaPagatore())
       .nazionePagatore(debtPositionPaid.getDeESoggPagNazionePagatore())
       .emailPagatore(debtPositionPaid.getDeESoggPagEmailPagatore())
-      .codiceEsitoPagamento(toString(debtPositionPaid.getCodEDatiPagCodiceEsitoPagamento()))
+      .codiceEsitoPagamento(characterToString(debtPositionPaid.getCodEDatiPagCodiceEsitoPagamento()))
       .importoTotalePagato(debtPositionPaid.getNumEDatiPagImportoTotalePagato())
       .identificativoUnivocoVersamento(debtPositionPaid.getCodEDatiPagIdUnivocoVersamento())
       .codiceContestoPagamento(debtPositionPaid.getCodEDatiPagCodiceContestoPagamento())
@@ -96,15 +99,4 @@ public class DebtPositionPaidMapper {
       .build();
   }
 
-  private String toString(Character value) {
-    return value == null ? null : value.toString();
-  }
-
-  private java.time.LocalDate toLocalDate(java.time.LocalDateTime value) {
-    return value == null ? null : value.toLocalDate();
-  }
-
-  private String toUtf8String(byte[] value) {
-    return value == null ? null : new String(value, StandardCharsets.UTF_8);
-  }
 }

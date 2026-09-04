@@ -1,5 +1,6 @@
 package it.gov.pagopa.mypay2pu.extractor.utils;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 
@@ -8,5 +9,9 @@ public class DateTimeUtils {
 
   public static LocalDateTime toLocalDateTime(OffsetDateTime date) {
     return date == null ? null : date.toLocalDateTime();
+  }
+
+  public static LocalDate toLocalDate(LocalDateTime date) {
+    return date == null ? null : date.toLocalDate();
   }
 }
