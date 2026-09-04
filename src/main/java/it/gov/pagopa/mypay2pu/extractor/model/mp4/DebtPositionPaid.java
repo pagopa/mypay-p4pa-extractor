@@ -22,7 +22,7 @@ public class DebtPositionPaid implements ExportModel {
   private String codEDomIdDominio;
   private String codEDomIdStazioneRichiedente;
   private String codEIdMessaggioRicevuta;
-  private LocalDateTime dtEDataOraMessaggioRicevuta;
+  private LocalDateTime codEDataOraMessaggioRicevuta;
   private String codERiferimentoMessaggioRichiesta;
   private LocalDateTime codERiferimentoDataRichiesta;
   private Character codEIstitAttIdUnivAttTipoIdUnivoco;

@@ -47,7 +47,7 @@ class DebtPositionPaidMapperTest {
     assertEquals("IUF-1", result.getIuf());
     assertEquals(debtPositionPaid.getCodRpSilinviarpIdUnivocoVersamento(), result.getCodIuv());
     assertEquals(debtPositionPaid.getNumEDatiPagImportoTotalePagato(), result.getImportoTotalePagato());
-    assertEquals(debtPositionPaid.getDtEDataOraMessaggioRicevuta(), result.getDataOraMessaggioRicevuta());
+    assertEquals(debtPositionPaid.getCodEDataOraMessaggioRicevuta(), result.getDataOraMessaggioRicevuta());
     assertEquals("CF-PA1", result.getCodFiscalePa1());
     assertEquals("PA One", result.getDeNomePa1());
     assertEquals("9/0101101IM/", result.getCodTassonomicoDovutoPa1());
@@ -57,7 +57,7 @@ class DebtPositionPaidMapperTest {
   @Test
   void mapShouldPreserveNullOptionalFields() {
     DebtPositionPaid debtPositionPaid = new DebtPositionPaid();
-    debtPositionPaid.setDtEDataOraMessaggioRicevuta(LocalDateTime.of(2026, Month.JANUARY, 15, 10, 30));
+    debtPositionPaid.setCodEDataOraMessaggioRicevuta(LocalDateTime.of(2026, Month.JANUARY, 15, 10, 30));
     debtPositionPaid.setNumEDatiPagImportoTotalePagato(BigDecimal.TEN);
 
     PuDebtPositionPaidDTO result = mapper.map(debtPositionPaid);

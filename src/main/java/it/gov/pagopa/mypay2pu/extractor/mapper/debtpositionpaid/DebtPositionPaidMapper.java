@@ -19,7 +19,7 @@ public class DebtPositionPaidMapper {
       .identificativoDominio(debtPositionPaid.getCodEDomIdDominio())
       .identificativoStazioneRichiedente(debtPositionPaid.getCodEDomIdStazioneRichiedente())
       .identificativoMessaggioRicevuta(debtPositionPaid.getCodEIdMessaggioRicevuta())
-      .dataOraMessaggioRicevuta(debtPositionPaid.getDtEDataOraMessaggioRicevuta())
+      .dataOraMessaggioRicevuta(debtPositionPaid.getCodEDataOraMessaggioRicevuta())
       .riferimentoMessaggioRichiesta(debtPositionPaid.getCodERiferimentoMessaggioRichiesta())
       .riferimentoDataRichiesta(toLocalDate(debtPositionPaid.getCodERiferimentoDataRichiesta()))
       .tipoIdentificativoUnivocoAttestante(toString(debtPositionPaid.getCodEIstitAttIdUnivAttTipoIdUnivoco()))
