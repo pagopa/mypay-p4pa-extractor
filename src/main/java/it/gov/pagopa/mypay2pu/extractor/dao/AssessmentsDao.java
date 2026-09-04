@@ -10,8 +10,10 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.CollectionUtils;
 
 import java.time.OffsetDateTime;
+import java.util.Collections;
 import java.util.List;
 
 @Repository
@@ -32,28 +34,33 @@ public class AssessmentsDao {
     this.findByFiltersSql = sqlLoader.load(FIND_BY_FILTERS_SQL_PATH);
   }
 
-  public List<Assessments> findByFilters(String codIpaEnte,
+  public List<Assessments> findByFilters(String ipaCode,
                                          OffsetDateTime lastExtractionDate,
+                                         List<String> assessmentCodes,
                                          OffsetDateTime dateFrom,
                                          OffsetDateTime dateTo,
                                          int limit,
                                          int offset) {
     return mypivotJdbcTemplate.query(
       findByFiltersSql,
-      buildParams(codIpaEnte, lastExtractionDate, dateFrom, dateTo, limit, offset),
+      buildParams(ipaCode, lastExtractionDate, assessmentCodes, dateFrom, dateTo, limit, offset),
       ASSESSMENTS_ROW_MAPPER
     );
   }
 
-  private MapSqlParameterSource buildParams(String codIpaEnte,
+  private MapSqlParameterSource buildParams(String ipaCode,
                                             OffsetDateTime lastExtractionDate,
+                                            List<String> assessmentCodes,
                                             OffsetDateTime dateFrom,
                                             OffsetDateTime dateTo,
                                             int limit,
                                             int offset) {
+    boolean emptyAssessmentsCodes = CollectionUtils.isEmpty(assessmentCodes);
     return QueryUtils.buildPaginatedFilterParams(limit, offset)
-      .addValue("codIpaEnte", codIpaEnte)
+      .addValue("ipaCode", ipaCode)
       .addValue("lastExtractionDate", lastExtractionDate)
+      .addValue("assessmentCodes", emptyAssessmentsCodes? Collections.singletonList(null) : assessmentCodes)
+      .addValue("skipAssessmentCodesFilter", emptyAssessmentsCodes)
       .addValue("dateFrom", dateFrom)
       .addValue("dateTo", dateTo);
   }
