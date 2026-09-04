@@ -4,8 +4,8 @@ import it.gov.pagopa.mypay2pu.extractor.dto.export.PuTreasuryCsvCompleteDTO;
 import it.gov.pagopa.mypay2pu.extractor.model.mpv4.TreasuryCsvComplete;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import static it.gov.pagopa.mypay2pu.extractor.utils.DateTimeUtils.toLocalDate;
+import static it.gov.pagopa.mypay2pu.extractor.utils.CurrencyUtils.toCents;
 
 @Component
 public class TreasuryCsvCompleteMapper {
@@ -56,11 +56,4 @@ public class TreasuryCsvCompleteMapper {
       .build();
   }
 
-  private Long toCents(BigDecimal value) {
-    return value == null ? null : value.movePointRight(2).longValueExact();
-  }
-
-  private java.time.LocalDate toLocalDate(LocalDateTime value) {
-    return value == null ? null : value.toLocalDate();
-  }
 }

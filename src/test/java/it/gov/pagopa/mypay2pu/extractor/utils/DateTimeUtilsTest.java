@@ -2,6 +2,7 @@ package it.gov.pagopa.mypay2pu.extractor.utils;
 
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.OffsetDateTime;
@@ -27,5 +28,18 @@ class DateTimeUtilsTest {
       LocalDateTime.of(2026, Month.JANUARY, 2, 11, 15),
       DateTimeUtils.toLocalDateTime(input)
     );
+  }
+
+  @Test
+  void givenDateWhenToLocalDateThenReturnLocalDate() {
+    assertEquals(
+      LocalDate.of(2026, Month.JANUARY, 2),
+      DateTimeUtils.toLocalDate(LocalDateTime.of(2026, Month.JANUARY, 2, 11, 15))
+    );
+  }
+
+  @Test
+  void givenNullDateWhenToLocalDateThenReturnNull() {
+    assertNull(DateTimeUtils.toLocalDate(null));
   }
 }

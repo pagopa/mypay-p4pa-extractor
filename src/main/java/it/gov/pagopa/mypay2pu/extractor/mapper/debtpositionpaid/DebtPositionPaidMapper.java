@@ -6,6 +6,8 @@ import it.gov.pagopa.mypay2pu.extractor.model.mp4.DebtPositionPaid;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
+
+import static it.gov.pagopa.mypay2pu.extractor.utils.DateTimeUtils.toLocalDate;
 @Component
 public class DebtPositionPaidMapper {
 
@@ -98,10 +100,6 @@ public class DebtPositionPaidMapper {
 
   private String toString(Character value) {
     return value == null ? null : value.toString();
-  }
-
-  private java.time.LocalDate toLocalDate(java.time.LocalDateTime value) {
-    return value == null ? null : value.toLocalDate();
   }
 
   private String toUtf8String(byte[] value) {
