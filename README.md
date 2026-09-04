@@ -212,6 +212,7 @@ The following global properties are exported for configuration in the migrated M
 | `EXPORT_PAGE_SIZE_DEBT_POSITIONS_PAID`               | Maximum number of records to write to an exported file before creating a new one | `1000` |
 | `EXPORT_PAGE_SIZE_PAYMENT_NOTIFICATION`              | Maximum number of records to write to an exported file before creating a new one | `1000` |
 | `EXPORT_PAGE_SIZE_TREASURY_CSV_COMPLETE`             | Maximum number of records to write to an exported file before creating a new one | `1000` |
+| `EXPORT_PAGE_SIZE_ASSESSMENTS`                       | Maximum number of records to write to an exported file before creating a new one | `1000` |
 
 #### 🔑 Encryption keys
 

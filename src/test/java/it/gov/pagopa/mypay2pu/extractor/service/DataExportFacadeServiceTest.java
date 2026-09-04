@@ -4,6 +4,7 @@ import it.gov.pagopa.mypay2pu.extractor.dto.ExportFileResult;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.exception.ExportFileTypeNotSupportedException;
+import it.gov.pagopa.mypay2pu.extractor.service.export.assessments.AssessmentsExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.debtposition.DebtPositionExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.debtpositionpaid.DebtPositionPaidExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.debtpositionstypeorgoperators.DebtPositionsTypeOrgOperatorsExportProcessingService;
@@ -49,11 +50,12 @@ class DataExportFacadeServiceTest {
   @Mock
   private PaymentNotificationExportProcessingService paymentNotificationExportProcessingServiceMock;
   @Mock
+  private AssessmentsExportProcessingService assessmentsExportProcessingServiceMock;
+  @Mock
   private TreasuryCsvCompleteExportProcessingService treasuryCsvCompleteExportProcessingServiceMock;
 
   @InjectMocks
   private DataExportFacadeService service;
-
 
   @AfterEach
   void tearDown() {
@@ -67,6 +69,7 @@ class DataExportFacadeServiceTest {
         debtPositionExportProcessingServiceMock,
         debtPositionPaidExportProcessingServiceMock,
         paymentNotificationExportProcessingServiceMock,
+        assessmentsExportProcessingServiceMock,
         treasuryCsvCompleteExportProcessingServiceMock
       )
     );
@@ -115,6 +118,10 @@ class DataExportFacadeServiceTest {
       case TREASURY_CSV_COMPLETE -> {
         expected = new ExportFileResult(List.of("treasury_1_0.zip"), null);
         when(treasuryCsvCompleteExportProcessingServiceMock.executeExport(extractionId, request)).thenReturn(expected);
+      }
+      case ASSESSMENTS -> {
+        expected = new ExportFileResult(List.of("assessments_1_0.zip"), null);
+        when(assessmentsExportProcessingServiceMock.executeExport(extractionId, request)).thenReturn(expected);
       }
       default -> {
         ExportFileTypeNotSupportedException exception = assertThrows(
