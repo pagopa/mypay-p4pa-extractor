@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -41,7 +42,7 @@ class AssessmentsDaoTest {
   }
 
   @Test
-  void givenNoDateRangeWhenFindByFiltersThenUseIncrementalFilterParams() {
+  void givenNoAssessmentCodesAndNoDateRangeWhenFindByFiltersThenUseIncrementalFilterParams() {
     AssessmentsDao dao = buildDao();
     OffsetDateTime lastExtractionDate = OffsetDateTime.of(
       LocalDateTime.of(2026, Month.JANUARY, 1, 0, 0),
@@ -53,23 +54,26 @@ class AssessmentsDaoTest {
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         "IPA1".equals(params.getValue("codIpaEnte"))
           && lastExtractionDate.equals(params.getValue("lastExtractionDate"))
+          && Boolean.TRUE.equals(params.getValue("skipAssessmentCodesFilter"))
+          && Collections.singletonList(null).equals(params.getValue("assessmentCodes"))
           && params.getValue("dateFrom") == null
           && params.getValue("dateTo") == null
           && Integer.valueOf(50).equals(params.getValue("limit"))
           && Integer.valueOf(0).equals(params.getValue("offset"))
-          && params.getValues().size() == 6
+          && params.getValues().size() == 8
       ),
       same(AssessmentsDao.ASSESSMENTS_ROW_MAPPER)
     )).thenReturn(List.of());
 
-    List<Assessments> result = dao.findByFilters("IPA1", lastExtractionDate, null, null, 50, 0);
+    List<Assessments> result = dao.findByFilters("IPA1", lastExtractionDate, null, null, null, 50, 0);
 
     assertEquals(List.of(), result);
   }
 
   @Test
-  void givenDateRangeWhenFindByFiltersThenUseDateRangeFilterParams() {
+  void givenAssessmentCodesAndDateRangeWhenFindByFiltersThenApplyBothFilters() {
     AssessmentsDao dao = buildDao();
+    List<String> assessmentCodes = List.of("ASSESSMENT-1", "ASSESSMENT-2");
     OffsetDateTime from = OffsetDateTime.of(
       LocalDateTime.of(2026, Month.JANUARY, 10, 0, 0),
       ZoneOffset.UTC
@@ -88,18 +92,46 @@ class AssessmentsDaoTest {
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         "IPA1".equals(params.getValue("codIpaEnte"))
           && lastExtractionDate.equals(params.getValue("lastExtractionDate"))
+          && Boolean.FALSE.equals(params.getValue("skipAssessmentCodesFilter"))
+          && assessmentCodes.equals(params.getValue("assessmentCodes"))
           && from.equals(params.getValue("dateFrom"))
           && to.equals(params.getValue("dateTo"))
           && Integer.valueOf(25).equals(params.getValue("limit"))
           && Integer.valueOf(10).equals(params.getValue("offset"))
-          && params.getValues().size() == 6
+          && params.getValues().size() == 8
       ),
       same(AssessmentsDao.ASSESSMENTS_ROW_MAPPER)
     )).thenReturn(List.of());
 
-    List<Assessments> result = dao.findByFilters("IPA1", lastExtractionDate, from, to, 25, 10);
+    List<Assessments> result = dao.findByFilters("IPA1", lastExtractionDate, assessmentCodes, from, to, 25, 10);
 
     assertEquals(List.of(), result);
+  }
+
+  @Test
+  void givenEmptyAssessmentCodesAndDateRangeWhenFindByFiltersThenSkipAssessmentCodesFilter() {
+    AssessmentsDao dao = buildDao();
+    OffsetDateTime from = OffsetDateTime.of(
+      LocalDateTime.of(2026, Month.JANUARY, 10, 0, 0),
+      ZoneOffset.UTC
+    );
+    OffsetDateTime to = OffsetDateTime.of(
+      LocalDateTime.of(2026, Month.JANUARY, 12, 0, 0),
+      ZoneOffset.UTC
+    );
+
+    when(mypivotJdbcTemplateMock.query(
+      eq(FIND_BY_FILTERS_SQL),
+      ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
+        Boolean.TRUE.equals(params.getValue("skipAssessmentCodesFilter"))
+          && Collections.singletonList(null).equals(params.getValue("assessmentCodes"))
+          && from.equals(params.getValue("dateFrom"))
+          && to.equals(params.getValue("dateTo"))
+      ),
+      same(AssessmentsDao.ASSESSMENTS_ROW_MAPPER)
+    )).thenReturn(List.of());
+
+    assertEquals(List.of(), dao.findByFilters("IPA1", null, List.of(), from, to, 10, 0));
   }
 
   @Test
@@ -108,7 +140,7 @@ class AssessmentsDaoTest {
 
     IllegalArgumentException exception = assertThrows(
       IllegalArgumentException.class,
-      () -> dao.findByFilters("IPA1", null, null, null, 0, 0)
+      () -> dao.findByFilters("IPA1", null, null, null, null, 0, 0)
     );
 
     assertEquals("limit must be greater than 0", exception.getMessage());
