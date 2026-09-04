@@ -4,6 +4,7 @@ import it.gov.pagopa.mypay2pu.extractor.dto.ExportFileResult;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.exception.ExportFileTypeNotSupportedException;
+import it.gov.pagopa.mypay2pu.extractor.service.export.assessments.AssessmentsExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.debtposition.DebtPositionExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.debtpositionpaid.DebtPositionPaidExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.debtpositionstypeorgoperators.DebtPositionsTypeOrgOperatorsExportProcessingService;
@@ -47,10 +48,11 @@ class DataExportFacadeServiceTest {
   private DebtPositionPaidExportProcessingService debtPositionPaidExportProcessingServiceMock;
   @Mock
   private PaymentNotificationExportProcessingService paymentNotificationExportProcessingServiceMock;
+  @Mock
+  private AssessmentsExportProcessingService assessmentsExportProcessingServiceMock;
 
   @InjectMocks
   private DataExportFacadeService service;
-
 
   @AfterEach
   void tearDown() {
@@ -63,7 +65,8 @@ class DataExportFacadeServiceTest {
         debtPositionsTypeOrgOperatorsExportProcessingServiceMock,
         debtPositionExportProcessingServiceMock,
         debtPositionPaidExportProcessingServiceMock,
-        paymentNotificationExportProcessingServiceMock
+        paymentNotificationExportProcessingServiceMock,
+        assessmentsExportProcessingServiceMock
       )
     );
   }
@@ -107,6 +110,10 @@ class DataExportFacadeServiceTest {
       case PAYMENT_NOTIFICATION -> {
         expected = new ExportFileResult(List.of("paymentnotification_1_0.zip"), null);
         when(paymentNotificationExportProcessingServiceMock.executeExport(extractionId, request)).thenReturn(expected);
+      }
+      case ASSESSMENTS -> {
+        expected = new ExportFileResult(List.of("assessments_1_0.zip"), null);
+        when(assessmentsExportProcessingServiceMock.executeExport(extractionId, request)).thenReturn(expected);
       }
       default -> {
         ExportFileTypeNotSupportedException exception = assertThrows(

@@ -58,7 +58,7 @@ class ExtractionValidationFacadeTest {
         validationFacade.validate(request);
         verify(extractionRequestValidatorMock).validate(request);
       }
-      case DEBT_POSITIONS_TYPE, DEBT_POSITIONS_TYPE_ORG, DEBT_POSITIONS -> {
+      case DEBT_POSITIONS_TYPE, DEBT_POSITIONS_TYPE_ORG, DEBT_POSITIONS, ASSESSMENTS -> {
         validationFacade.validate(request);
         verify(valueLogicalKeyValidatorMock).validate(request);
       }
