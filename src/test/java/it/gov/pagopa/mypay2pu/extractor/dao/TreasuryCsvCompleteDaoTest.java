@@ -15,6 +15,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.OffsetDateTime;
@@ -171,11 +172,11 @@ class TreasuryCsvCompleteDaoTest {
   void givenTreasuryProjectionWhenCreatedThenExposeAllMappedFieldsAndLogicalKey() {
     TreasuryCsvComplete treasury = new TreasuryCsvComplete(
       "2026", "BOLLETTA-1", null, null, "IPA1", "IUF", "IUV", "CONTO", "DOMINIO", "MOVIMENTO",
-      "CAUSALE", "Causale", "IP", LocalDateTime.of(2026, Month.JANUARY, 10, 10, 0),
+      "CAUSALE", "Causale", BigDecimal.TEN, LocalDateTime.of(2026, Month.JANUARY, 10, 10, 0),
       LocalDateTime.of(2026, Month.JANUARY, 10, 10, 1), "2026", "DOCUMENTO", "BOLLO", "Cognome",
       "Nome", "Via", "00100", "Roma", "CF", "PIVA", "ABI", "CAB", "IBAN", "CONTO-ANAGRAFICA",
       "Provvisorio", "COD-PROVVISORIO", "TIPO-CONTO", "PROCESSO", "PG-ESECUZIONE", "PG-TRASFERIMENTO",
-      "PG-PROCESSO", LocalDateTime.of(2026, Month.JANUARY, 10, 10, 2), true,
+      1L, LocalDateTime.of(2026, Month.JANUARY, 10, 10, 2), true,
       LocalDateTime.of(2026, Month.JANUARY, 10, 10, 3), "GESTIONALE", "END-TO-END"
     );
 

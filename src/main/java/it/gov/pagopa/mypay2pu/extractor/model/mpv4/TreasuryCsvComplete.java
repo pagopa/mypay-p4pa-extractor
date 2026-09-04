@@ -2,6 +2,7 @@ package it.gov.pagopa.mypay2pu.extractor.model.mpv4;
 
 import it.gov.pagopa.mypay2pu.extractor.model.ExportModel;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public record TreasuryCsvComplete(
@@ -17,7 +18,7 @@ public record TreasuryCsvComplete(
   String codTipoMovimento,
   String codCausale,
   String deCausale,
-  String numIpBolletta,
+  BigDecimal numIpBolletta,
   LocalDateTime dtBolletta,
   LocalDateTime dtRicezione,
   String deAnnoDocumento,
@@ -40,7 +41,7 @@ public record TreasuryCsvComplete(
   String codProcesso,
   String codPgEsecuzione,
   String codPgTrasferimento,
-  String numPgProcesso,
+  Long numPgProcesso,
   LocalDateTime dtDataValutaRegione,
   Boolean flgRegolarizzata,
   LocalDateTime dtEffettivaSospeso,
