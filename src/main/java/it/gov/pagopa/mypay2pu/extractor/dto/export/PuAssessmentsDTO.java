@@ -52,7 +52,7 @@ public class PuAssessmentsDTO implements CsvExportDto {
   private String assessmentDescription;
 
   @CsvBindByName(column = "importoCentesimi")
-  @NotBlank
+  @NotNull
   private Long amountCents;
 
   @CsvBindByName(column = "importoVersato")

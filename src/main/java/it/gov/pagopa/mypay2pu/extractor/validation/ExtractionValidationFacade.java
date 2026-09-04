@@ -30,7 +30,7 @@ public class ExtractionValidationFacade {
 
     switch (request.getFileTypes()) {
       case ORGANIZATIONS, ORG_SIL_SERVICES -> extractionRequestValidator.validate(request);
-      case DEBT_POSITIONS_TYPE, DEBT_POSITIONS_TYPE_ORG, DEBT_POSITIONS ->
+      case DEBT_POSITIONS_TYPE, DEBT_POSITIONS_TYPE_ORG, DEBT_POSITIONS, ASSESSMENTS ->
         valueLogicalKeyValidator.validate(request);
       case DEBT_POSITIONS_TYPE_ORG_OPERATORS, PAYMENT_NOTIFICATION, DEBT_POSITIONS_PAID -> pairedLogicalKeyValidator.validate(request);
       default -> throw new ExportFileTypeNotSupportedException(
