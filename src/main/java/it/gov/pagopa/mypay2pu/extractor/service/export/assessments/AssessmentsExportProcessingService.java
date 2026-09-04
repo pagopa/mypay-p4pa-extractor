@@ -51,11 +51,18 @@ public class AssessmentsExportProcessingService extends SplitByIpaCodeBaseExport
 
   @Override
   protected PuAssessmentsDTO toExportableEntity(Assessments model) {
-    return null;
+    return assessmentsMapper.map(model);
   }
 
   @Override
   protected List<Assessments> retrieveData(String ipaCode, ExtractionRequest request, int pageSize, int offset) {
-    return List.of();
+    return assessmentsDao.findByFilters(
+      ipaCode,
+      request.getLastExtractionDate(),
+      request.getFilters().getDateFrom(),
+      request.getFilters().getDateTo(),
+      pageSize,
+      offset
+    );
   }
 }
