@@ -14,7 +14,8 @@ SELECT
     ad.flg_importo_inserito AS amount_submitted
 FROM mygov_accertamento a
 JOIN mygov_accertamento_dettaglio ad ON ad.mygov_accertamento_id = a.mygov_accertamento_id
-WHERE ad.cod_ipa_ente = :codIpaEnte
+WHERE ad.cod_ipa_ente = :ipaCode
+AND (:skipAssessmentCodesFilter = TRUE OR a.de_nome_accertamento IN (:assessmentCodes))
   AND CASE
     WHEN :dateFrom IS NOT NULL AND :dateTo IS NOT NULL
       THEN a.dt_ultima_modifica BETWEEN :dateFrom AND :dateTo
