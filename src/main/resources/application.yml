@@ -123,6 +123,8 @@ extractor:
         export-page-size: "\${EXPORT_PAGE_SIZE_DEBT_POSITIONS_PAID:1000}"
       PAYMENT_NOTIFICATION:
         export-page-size: "\${EXPORT_PAGE_SIZE_PAYMENT_NOTIFICATION:1000}"
+      TREASURY_CSV_COMPLETE:
+        export-page-size: "\${EXPORT_PAGE_SIZE_TREASURY_CSV_COMPLETE:1000}"
   basic-auth:
     username: "\${CLIENT_ID:client}"
     password: "\${CLIENT_SECRET:secret}"
