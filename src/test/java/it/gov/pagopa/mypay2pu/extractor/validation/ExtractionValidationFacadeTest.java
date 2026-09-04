@@ -62,7 +62,7 @@ class ExtractionValidationFacadeTest {
         validationFacade.validate(request);
         verify(valueLogicalKeyValidatorMock).validate(request);
       }
-      case DEBT_POSITIONS_TYPE_ORG_OPERATORS, PAYMENT_NOTIFICATION, DEBT_POSITIONS_PAID -> {
+      case DEBT_POSITIONS_TYPE_ORG_OPERATORS, PAYMENT_NOTIFICATION, DEBT_POSITIONS_PAID, TREASURY_CSV_COMPLETE -> {
         validationFacade.validate(request);
         verify(pairedLogicalKeyValidatorMock).validate(request);
       }

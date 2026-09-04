@@ -11,7 +11,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
-import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -35,41 +35,39 @@ public class TreasuryCsvCompleteDao {
   }
 
   public List<TreasuryCsvComplete> findByFilters(
-    List<String> ipaCodes,
+    String ipaCode,
     TreasuryCsvCompleteFilters filters,
     int limit,
     int offset
   ) {
-    if (CollectionUtils.isEmpty(ipaCodes)) {
-      throw new IllegalArgumentException("ipaCodes must not be empty");
+    if (!StringUtils.hasText(ipaCode)) {
+      throw new IllegalArgumentException("ipaCode must not be blank");
     }
     if (mypivotJdbcTemplate == null) {
       throw new IllegalStateException("MyPivot datasource must be enabled for treasury extraction");
     }
     TreasuryCsvCompleteFilters effectiveFilters = filters != null
       ? filters
-      : new TreasuryCsvCompleteFilters(null, null, null, null, null);
+      : new TreasuryCsvCompleteFilters(null, null, null);
     TreasuryLogicalKey treasuryLogicalKey = parseLogicalKey(effectiveFilters.logicalKey());
     return mypivotJdbcTemplate.query(
       findByFiltersSql,
-      buildParams(ipaCodes, treasuryLogicalKey, effectiveFilters, limit, offset),
+      buildParams(ipaCode, treasuryLogicalKey, effectiveFilters, limit, offset),
       TREASURY_CSV_COMPLETE_ROW_MAPPER
     );
   }
 
   private MapSqlParameterSource buildParams(
-    List<String> ipaCodes,
+    String ipaCode,
     TreasuryLogicalKey logicalKey,
     TreasuryCsvCompleteFilters filters,
     int limit,
     int offset
   ) {
     return QueryUtils.buildPaginatedFilterParams(limit, offset)
-      .addValue("ipaCodes", ipaCodes)
+      .addValue("ipaCode", ipaCode)
       .addValue("annoBolletta", logicalKey.annoBolletta())
       .addValue("codBolletta", logicalKey.codBolletta())
-      .addValue("createdFrom", DateTimeUtils.toLocalDateTime(filters.createdFrom()))
-      .addValue("createdTo", DateTimeUtils.toLocalDateTime(filters.createdTo()))
       .addValue("updatedFrom", DateTimeUtils.toLocalDateTime(filters.updatedFrom()))
       .addValue("updatedTo", DateTimeUtils.toLocalDateTime(filters.updatedTo()));
   }
@@ -91,8 +89,6 @@ public class TreasuryCsvCompleteDao {
 
   public record TreasuryCsvCompleteFilters(
     String logicalKey,
-    OffsetDateTime createdFrom,
-    OffsetDateTime createdTo,
     OffsetDateTime updatedFrom,
     OffsetDateTime updatedTo
   ) {
