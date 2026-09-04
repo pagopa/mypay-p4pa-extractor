@@ -52,7 +52,7 @@ class AssessmentsDaoTest {
     when(mypivotJdbcTemplateMock.query(
       eq(FIND_BY_FILTERS_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
-        "IPA1".equals(params.getValue("codIpaEnte"))
+        "IPA1".equals(params.getValue("ipaCode"))
           && lastExtractionDate.equals(params.getValue("lastExtractionDate"))
           && Boolean.TRUE.equals(params.getValue("skipAssessmentCodesFilter"))
           && Collections.singletonList(null).equals(params.getValue("assessmentCodes"))
@@ -90,7 +90,7 @@ class AssessmentsDaoTest {
     when(mypivotJdbcTemplateMock.query(
       eq(FIND_BY_FILTERS_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
-        "IPA1".equals(params.getValue("codIpaEnte"))
+        "IPA1".equals(params.getValue("ipaCode"))
           && lastExtractionDate.equals(params.getValue("lastExtractionDate"))
           && Boolean.FALSE.equals(params.getValue("skipAssessmentCodesFilter"))
           && assessmentCodes.equals(params.getValue("assessmentCodes"))
