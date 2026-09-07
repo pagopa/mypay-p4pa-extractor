@@ -1,7 +1,7 @@
 package it.gov.pagopa.mypay2pu.extractor.mapper.assessments;
 
 import it.gov.pagopa.mypay2pu.extractor.dto.export.PuAssessmentsDTO;
-import it.gov.pagopa.mypay2pu.extractor.model.mp4.Assessments;
+import it.gov.pagopa.mypay2pu.extractor.model.mpv4.Assessments;
 import org.springframework.stereotype.Component;
 
 @Component
