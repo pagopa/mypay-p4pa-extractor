@@ -1,6 +1,6 @@
 package it.gov.pagopa.mypay2pu.extractor.dao;
 
-import it.gov.pagopa.mypay2pu.extractor.model.mpv4.Assessments;
+import it.gov.pagopa.mypay2pu.extractor.model.mpv4.AssessmentsRegistry;
 import it.gov.pagopa.mypay2pu.extractor.utils.SqlLoader;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -26,9 +26,9 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class AssessmentsDaoTest {
+class AssessmentsRegistryDaoTest {
 
-  private static final String FIND_BY_FILTERS_SQL = "SELECT assessments";
+  private static final String FIND_BY_FILTERS_SQL = "SELECT assessments registry";
 
   @Mock
   private NamedParameterJdbcTemplate mypivotJdbcTemplateMock;
@@ -42,8 +42,8 @@ class AssessmentsDaoTest {
   }
 
   @Test
-  void givenNoAssessmentCodesAndNoDateRangeWhenFindByFiltersThenUseIncrementalFilterParams() {
-    AssessmentsDao dao = buildDao();
+  void givenNoDebtPositionTypeOrgCodesAndNoDateRangeWhenFindByFiltersThenUseIncrementalFilterParams() {
+    AssessmentsRegistryDao dao = buildDao();
     OffsetDateTime lastExtractionDate = OffsetDateTime.of(
       LocalDateTime.of(2026, Month.JANUARY, 1, 0, 0),
       ZoneOffset.UTC
@@ -55,28 +55,30 @@ class AssessmentsDaoTest {
         "IPA1".equals(params.getValue("ipaCode"))
             && lastExtractionDate.equals(params.getValue("lastExtractionDate"))
             && Boolean.FALSE.equals(params.getValue("skipLastExtractionDateFilter"))
-            && Boolean.TRUE.equals(params.getValue("skipAssessmentCodesFilter"))
-            && Collections.singletonList(null).equals(params.getValue("assessmentCodes"))
-            && params.getValue("dateFrom") == null
             && Boolean.TRUE.equals(params.getValue("skipDateFromFilter"))
-            && params.getValue("dateTo") == null
             && Boolean.TRUE.equals(params.getValue("skipDateToFilter"))
+            && Boolean.TRUE.equals(params.getValue("skipDebtPositionTypeOrgCodesFilter"))
+            && Collections.singletonList(null).equals(params.getValue("debtPositionTypeOrgCodes"))
+            && params.getValue("dateFrom") == null
+            && params.getValue("dateTo") == null
             && Integer.valueOf(50).equals(params.getValue("limit"))
             && Integer.valueOf(0).equals(params.getValue("offset"))
             && params.getValues().size() == 11
       ),
-      same(AssessmentsDao.ASSESSMENTS_ROW_MAPPER)
+      same(AssessmentsRegistryDao.ASSESSMENTS_REGISTRY_ROW_MAPPER)
     )).thenReturn(List.of());
 
-    List<Assessments> result = dao.findByFilters("IPA1", lastExtractionDate, null, null, null, 50, 0);
+    List<AssessmentsRegistry> result = dao.findByFilters(
+      "IPA1", lastExtractionDate, null, null, null, 50, 0
+    );
 
     assertEquals(List.of(), result);
   }
 
   @Test
-  void givenAssessmentCodesAndDateRangeWhenFindByFiltersThenApplyBothFilters() {
-    AssessmentsDao dao = buildDao();
-    List<String> assessmentCodes = List.of("ASSESSMENT-1", "ASSESSMENT-2");
+  void givenDebtPositionTypeOrgCodesAndDateRangeWhenFindByFiltersThenApplyBothFilters() {
+    AssessmentsRegistryDao dao = buildDao();
+    List<String> debtPositionTypeOrgCodes = List.of("TYPE-1", "TYPE-2");
     OffsetDateTime from = OffsetDateTime.of(
       LocalDateTime.of(2026, Month.JANUARY, 10, 0, 0),
       ZoneOffset.UTC
@@ -96,27 +98,29 @@ class AssessmentsDaoTest {
         "IPA1".equals(params.getValue("ipaCode"))
             && lastExtractionDate.equals(params.getValue("lastExtractionDate"))
             && Boolean.FALSE.equals(params.getValue("skipLastExtractionDateFilter"))
-            && Boolean.FALSE.equals(params.getValue("skipAssessmentCodesFilter"))
-            && assessmentCodes.equals(params.getValue("assessmentCodes"))
-            && from.equals(params.getValue("dateFrom"))
             && Boolean.FALSE.equals(params.getValue("skipDateFromFilter"))
-            && to.equals(params.getValue("dateTo"))
             && Boolean.FALSE.equals(params.getValue("skipDateToFilter"))
-            && Integer.valueOf(25).equals(params.getValue("limit"))
-            && Integer.valueOf(10).equals(params.getValue("offset"))
-            && params.getValues().size() == 11
+            && Boolean.FALSE.equals(params.getValue("skipDebtPositionTypeOrgCodesFilter"))
+            && debtPositionTypeOrgCodes.equals(params.getValue("debtPositionTypeOrgCodes"))
+            && from.equals(params.getValue("dateFrom"))
+          && to.equals(params.getValue("dateTo"))
+          && Integer.valueOf(25).equals(params.getValue("limit"))
+          && Integer.valueOf(10).equals(params.getValue("offset"))
+          && params.getValues().size() == 11
       ),
-      same(AssessmentsDao.ASSESSMENTS_ROW_MAPPER)
+      same(AssessmentsRegistryDao.ASSESSMENTS_REGISTRY_ROW_MAPPER)
     )).thenReturn(List.of());
 
-    List<Assessments> result = dao.findByFilters("IPA1", lastExtractionDate, assessmentCodes, from, to, 25, 10);
+    List<AssessmentsRegistry> result = dao.findByFilters(
+      "IPA1", lastExtractionDate, debtPositionTypeOrgCodes, from, to, 25, 10
+    );
 
     assertEquals(List.of(), result);
   }
 
   @Test
-  void givenEmptyAssessmentCodesAndDateRangeWhenFindByFiltersThenSkipAssessmentCodesFilter() {
-    AssessmentsDao dao = buildDao();
+  void givenEmptyDebtPositionTypeOrgCodesAndDateRangeWhenFindByFiltersThenSkipCodesFilter() {
+    AssessmentsRegistryDao dao = buildDao();
     OffsetDateTime from = OffsetDateTime.of(
       LocalDateTime.of(2026, Month.JANUARY, 10, 0, 0),
       ZoneOffset.UTC
@@ -130,23 +134,26 @@ class AssessmentsDaoTest {
       eq(FIND_BY_FILTERS_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         Boolean.TRUE.equals(params.getValue("skipLastExtractionDateFilter"))
-          && Boolean.TRUE.equals(params.getValue("skipAssessmentCodesFilter"))
-          && Collections.singletonList(null).equals(params.getValue("assessmentCodes"))
-          && from.equals(params.getValue("dateFrom"))
           && Boolean.FALSE.equals(params.getValue("skipDateFromFilter"))
-          && to.equals(params.getValue("dateTo"))
           && Boolean.FALSE.equals(params.getValue("skipDateToFilter"))
-          && params.getValues().size() == 11
+          && Boolean.TRUE.equals(params.getValue("skipDebtPositionTypeOrgCodesFilter"))
+        && Collections.singletonList(null).equals(params.getValue("debtPositionTypeOrgCodes"))
+        && from.equals(params.getValue("dateFrom"))
+        && to.equals(params.getValue("dateTo"))
+        && params.getValues().size() == 11
       ),
-      same(AssessmentsDao.ASSESSMENTS_ROW_MAPPER)
+      same(AssessmentsRegistryDao.ASSESSMENTS_REGISTRY_ROW_MAPPER)
     )).thenReturn(List.of());
 
-    assertEquals(List.of(), dao.findByFilters("IPA1", null, List.of(), from, to, 10, 0));
+    assertEquals(
+      List.of(),
+      dao.findByFilters("IPA1", null, List.of(), from, to, 10, 0)
+    );
   }
 
   @Test
   void givenInvalidLimitWhenFindByFiltersThenThrowIllegalArgumentException() {
-    AssessmentsDao dao = buildDao();
+    AssessmentsRegistryDao dao = buildDao();
 
     IllegalArgumentException exception = assertThrows(
       IllegalArgumentException.class,
@@ -156,8 +163,9 @@ class AssessmentsDaoTest {
     assertEquals("limit must be greater than 0", exception.getMessage());
   }
 
-  private AssessmentsDao buildDao() {
-    when(sqlLoaderMock.load("mypivot/assessments/assessments-export.sql")).thenReturn(FIND_BY_FILTERS_SQL);
-    return new AssessmentsDao(mypivotJdbcTemplateMock, sqlLoaderMock);
+  private AssessmentsRegistryDao buildDao() {
+    when(sqlLoaderMock.load("mypivot/assessments-registry/assessments-registry-export.sql"))
+      .thenReturn(FIND_BY_FILTERS_SQL);
+    return new AssessmentsRegistryDao(mypivotJdbcTemplateMock, sqlLoaderMock);
   }
 }

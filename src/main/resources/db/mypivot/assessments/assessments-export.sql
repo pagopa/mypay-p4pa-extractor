@@ -13,14 +13,27 @@ SELECT
     CAST(ad.num_importo * 100 AS BIGINT) AS amount_cents,
     ad.flg_importo_inserito AS amount_submitted
 FROM mygov_accertamento a
-JOIN mygov_accertamento_dettaglio ad ON ad.mygov_accertamento_id = a.mygov_accertamento_id
+JOIN mygov_accertamento_dettaglio ad
+  ON ad.mygov_accertamento_id = a.mygov_accertamento_id
 WHERE ad.cod_ipa_ente = :ipaCode
-AND (:skipAssessmentCodesFilter = TRUE OR a.de_nome_accertamento IN (:assessmentCodes))
-  AND CASE
-    WHEN :dateFrom IS NOT NULL AND :dateTo IS NOT NULL
-      THEN a.dt_ultima_modifica BETWEEN :dateFrom AND :dateTo
-    ELSE a.dt_ultima_modifica > :lastExtractionDate
-  END
+  AND (:skipAssessmentCodesFilter = TRUE OR a.de_nome_accertamento IN (:assessmentCodes))
+  AND (
+    (
+      :skipDateFromFilter = FALSE
+      AND a.dt_ultima_modifica >= :dateFrom
+    )
+    OR (
+      :skipDateFromFilter = TRUE
+      AND (
+        :skipLastExtractionDateFilter = TRUE
+        OR a.dt_ultima_modifica > :lastExtractionDate
+      )
+    )
+  )
+  AND (
+    :skipDateToFilter = TRUE
+    OR a.dt_ultima_modifica <= :dateTo
+  )
 ORDER BY a.de_nome_accertamento, ad.cod_iuv
 LIMIT :limit
 OFFSET COALESCE(:offset, 0);
