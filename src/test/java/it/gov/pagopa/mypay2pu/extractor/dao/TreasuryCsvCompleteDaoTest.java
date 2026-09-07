@@ -51,9 +51,13 @@ class TreasuryCsvCompleteDaoTest {
     TreasuryCsvCompleteDao dao = buildDao();
     mockQuery(params ->
       "IPA1".equals(params.getValue("ipaCode"))
+        && Boolean.TRUE.equals(params.getValue("skipAnnoBollettaFilter"))
         && params.getValue("annoBolletta") == null
+        && Boolean.TRUE.equals(params.getValue("skipCodBollettaFilter"))
         && params.getValue("codBolletta") == null
+        && Boolean.TRUE.equals(params.getValue("skipUpdatedFromFilter"))
         && params.getValue("updatedFrom") == null
+        && Boolean.TRUE.equals(params.getValue("skipUpdatedToFilter"))
         && params.getValue("updatedTo") == null
         && Integer.valueOf(50).equals(params.getValue("limit"))
         && Integer.valueOf(0).equals(params.getValue("offset"))
@@ -75,7 +79,9 @@ class TreasuryCsvCompleteDaoTest {
     TreasuryCsvCompleteDao dao = buildDao();
     mockQuery(params ->
       "2026".equals(params.getValue("annoBolletta"))
+        && Boolean.FALSE.equals(params.getValue("skipAnnoBollettaFilter"))
         && "BOLLETTA-1".equals(params.getValue("codBolletta"))
+        && Boolean.FALSE.equals(params.getValue("skipCodBollettaFilter"))
     );
 
     assertEquals(List.of(), dao.findByFilters(
@@ -92,7 +98,9 @@ class TreasuryCsvCompleteDaoTest {
     OffsetDateTime updatedFrom = dateTime(10);
     mockQuery(params ->
       updatedFrom.toLocalDateTime().equals(params.getValue("updatedFrom"))
+        && Boolean.FALSE.equals(params.getValue("skipUpdatedFromFilter"))
         && params.getValue("updatedTo") == null
+        && Boolean.TRUE.equals(params.getValue("skipUpdatedToFilter"))
     );
 
     assertEquals(List.of(), dao.findByFilters("IPA1", filters(null, updatedFrom, null), 50, 0));
@@ -104,7 +112,9 @@ class TreasuryCsvCompleteDaoTest {
     OffsetDateTime updatedTo = dateTime(11);
     mockQuery(params ->
       params.getValue("updatedFrom") == null
+        && Boolean.TRUE.equals(params.getValue("skipUpdatedFromFilter"))
         && updatedTo.toLocalDateTime().equals(params.getValue("updatedTo"))
+        && Boolean.FALSE.equals(params.getValue("skipUpdatedToFilter"))
     );
 
     assertEquals(List.of(), dao.findByFilters("IPA1", filters(null, null, updatedTo), 50, 0));
@@ -133,10 +143,10 @@ class TreasuryCsvCompleteDaoTest {
     assertTrue(sql.contains("NULL AS cod_ente_bt"));
     assertTrue(sql.contains("NULL AS cod_istat_ente"));
     assertTrue(sql.contains("e.cod_ipa_ente = :ipaCode"));
-    assertTrue(sql.contains("ft.de_anno_bolletta = :annoBolletta"));
-    assertTrue(sql.contains("ft.cod_bolletta = :codBolletta"));
-    assertTrue(sql.contains("ft.dt_ultima_modifica >= :updatedFrom"));
-    assertTrue(sql.contains("ft.dt_ultima_modifica <= :updatedTo"));
+    assertTrue(sql.contains(":skipAnnoBollettaFilter = TRUE OR ft.de_anno_bolletta = :annoBolletta"));
+    assertTrue(sql.contains(":skipCodBollettaFilter = TRUE OR ft.cod_bolletta = :codBolletta"));
+    assertTrue(sql.contains(":skipUpdatedFromFilter = TRUE OR ft.dt_ultima_modifica >= :updatedFrom"));
+    assertTrue(sql.contains(":skipUpdatedToFilter = TRUE OR ft.dt_ultima_modifica <= :updatedTo"));
     assertTrue(sql.contains("ORDER BY ft.de_anno_bolletta, ft.cod_bolletta"));
   }
 

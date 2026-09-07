@@ -42,8 +42,8 @@ LEFT JOIN mygov_anagrafica_stato s
 LEFT JOIN organization_feature_flags
     ON organization_feature_flags.cod_ipa_ente = e.cod_ipa_ente
 WHERE e.cod_ipa_ente IN (:ipaCodes)
-  AND (:modifiedFrom IS NULL OR e.dt_ultima_modifica >= :modifiedFrom)
-  AND (:modifiedToExclusive IS NULL OR e.dt_ultima_modifica < :modifiedToExclusive)
+  AND (:skipModifiedFromFilter = TRUE OR e.dt_ultima_modifica >= :modifiedFrom)
+  AND (:skipModifiedToExclusiveFilter = TRUE OR e.dt_ultima_modifica < :modifiedToExclusive)
 ORDER BY e.dt_ultima_modifica, e.mygov_ente_id
 LIMIT :limit
 OFFSET COALESCE(:offset, 0);
