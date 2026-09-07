@@ -59,9 +59,12 @@ public class AssessmentsDao {
     return QueryUtils.buildPaginatedFilterParams(limit, offset)
       .addValue("ipaCode", ipaCode)
       .addValue("lastExtractionDate", lastExtractionDate)
+      .addValue("skipLastExtractionDateFilter", lastExtractionDate == null)
       .addValue("assessmentCodes", emptyAssessmentsCodes? Collections.singletonList(null) : assessmentCodes)
       .addValue("skipAssessmentCodesFilter", emptyAssessmentsCodes)
       .addValue("dateFrom", dateFrom)
-      .addValue("dateTo", dateTo);
+      .addValue("skipDateFromFilter", dateFrom == null)
+      .addValue("dateTo", dateTo)
+      .addValue("skipDateToFilter", dateTo == null);
   }
 }

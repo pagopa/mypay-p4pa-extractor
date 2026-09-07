@@ -59,8 +59,11 @@ public class AssessmentsRegistryDao {
     return QueryUtils.buildPaginatedFilterParams(limit, offset)
       .addValue("ipaCode", ipaCode)
       .addValue("lastExtractionDate", lastExtractionDate)
+      .addValue("skipLastExtractionDateFilter", lastExtractionDate == null)
       .addValue("dateFrom", dateFrom)
+      .addValue("skipDateFromFilter", dateFrom == null)
       .addValue("dateTo", dateTo)
+      .addValue("skipDateToFilter", dateTo == null)
       .addValue("skipDebtPositionTypeOrgCodesFilter", isEmptyCollection)
       .addValue("debtPositionTypeOrgCodes", isEmptyCollection ? Collections.singletonList(null) : debtPositionTypeOrgCodes);
   }

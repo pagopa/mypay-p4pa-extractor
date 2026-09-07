@@ -53,14 +53,17 @@ class AssessmentsRegistryDaoTest {
       eq(FIND_BY_FILTERS_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         "IPA1".equals(params.getValue("ipaCode"))
-          && lastExtractionDate.equals(params.getValue("lastExtractionDate"))
-          && Boolean.TRUE.equals(params.getValue("skipDebtPositionTypeOrgCodesFilter"))
-          && Collections.singletonList(null).equals(params.getValue("debtPositionTypeOrgCodes"))
-          && params.getValue("dateFrom") == null
-          && params.getValue("dateTo") == null
-          && Integer.valueOf(50).equals(params.getValue("limit"))
-          && Integer.valueOf(0).equals(params.getValue("offset"))
-          && params.getValues().size() == 8
+            && lastExtractionDate.equals(params.getValue("lastExtractionDate"))
+            && Boolean.FALSE.equals(params.getValue("skipLastExtractionDateFilter"))
+            && Boolean.TRUE.equals(params.getValue("skipDateFromFilter"))
+            && Boolean.TRUE.equals(params.getValue("skipDateToFilter"))
+            && Boolean.TRUE.equals(params.getValue("skipDebtPositionTypeOrgCodesFilter"))
+            && Collections.singletonList(null).equals(params.getValue("debtPositionTypeOrgCodes"))
+            && params.getValue("dateFrom") == null
+            && params.getValue("dateTo") == null
+            && Integer.valueOf(50).equals(params.getValue("limit"))
+            && Integer.valueOf(0).equals(params.getValue("offset"))
+            && params.getValues().size() == 11
       ),
       same(AssessmentsRegistryDao.ASSESSMENTS_REGISTRY_ROW_MAPPER)
     )).thenReturn(List.of());
@@ -93,14 +96,17 @@ class AssessmentsRegistryDaoTest {
       eq(FIND_BY_FILTERS_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         "IPA1".equals(params.getValue("ipaCode"))
-          && lastExtractionDate.equals(params.getValue("lastExtractionDate"))
-          && Boolean.FALSE.equals(params.getValue("skipDebtPositionTypeOrgCodesFilter"))
-          && debtPositionTypeOrgCodes.equals(params.getValue("debtPositionTypeOrgCodes"))
-          && from.equals(params.getValue("dateFrom"))
+            && lastExtractionDate.equals(params.getValue("lastExtractionDate"))
+            && Boolean.FALSE.equals(params.getValue("skipLastExtractionDateFilter"))
+            && Boolean.FALSE.equals(params.getValue("skipDateFromFilter"))
+            && Boolean.FALSE.equals(params.getValue("skipDateToFilter"))
+            && Boolean.FALSE.equals(params.getValue("skipDebtPositionTypeOrgCodesFilter"))
+            && debtPositionTypeOrgCodes.equals(params.getValue("debtPositionTypeOrgCodes"))
+            && from.equals(params.getValue("dateFrom"))
           && to.equals(params.getValue("dateTo"))
           && Integer.valueOf(25).equals(params.getValue("limit"))
           && Integer.valueOf(10).equals(params.getValue("offset"))
-          && params.getValues().size() == 8
+          && params.getValues().size() == 11
       ),
       same(AssessmentsRegistryDao.ASSESSMENTS_REGISTRY_ROW_MAPPER)
     )).thenReturn(List.of());
@@ -127,10 +133,14 @@ class AssessmentsRegistryDaoTest {
     when(mypivotJdbcTemplateMock.query(
       eq(FIND_BY_FILTERS_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
-        Boolean.TRUE.equals(params.getValue("skipDebtPositionTypeOrgCodesFilter"))
-          && Collections.singletonList(null).equals(params.getValue("debtPositionTypeOrgCodes"))
-          && from.equals(params.getValue("dateFrom"))
-          && to.equals(params.getValue("dateTo"))
+        Boolean.TRUE.equals(params.getValue("skipLastExtractionDateFilter"))
+          && Boolean.FALSE.equals(params.getValue("skipDateFromFilter"))
+          && Boolean.FALSE.equals(params.getValue("skipDateToFilter"))
+          && Boolean.TRUE.equals(params.getValue("skipDebtPositionTypeOrgCodesFilter"))
+        && Collections.singletonList(null).equals(params.getValue("debtPositionTypeOrgCodes"))
+        && from.equals(params.getValue("dateFrom"))
+        && to.equals(params.getValue("dateTo"))
+        && params.getValues().size() == 11
       ),
       same(AssessmentsRegistryDao.ASSESSMENTS_REGISTRY_ROW_MAPPER)
     )).thenReturn(List.of());

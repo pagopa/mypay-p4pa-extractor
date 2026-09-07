@@ -14,19 +14,19 @@ WHERE e.cod_ipa_ente = :ipaCode
   AND (:skipDebtPositionTypeOrgCodesFilter = TRUE OR uac.cod_tipo_dovuto IN (:debtPositionTypeOrgCodes))
   AND (
     (
-      :dateFrom IS NOT NULL
+      :skipDateFromFilter = FALSE
       AND uac.dt_ultima_modifica >= :dateFrom
     )
     OR (
-      :dateFrom IS NULL
+      :skipDateFromFilter = TRUE
       AND (
-        :lastExtractionDate IS NULL
+        :skipLastExtractionDateFilter = TRUE
         OR uac.dt_ultima_modifica > :lastExtractionDate
       )
     )
   )
   AND (
-    :dateTo IS NULL
+    :skipDateToFilter = TRUE
     OR uac.dt_ultima_modifica <= :dateTo
   )
 ORDER BY uac.cod_tipo_dovuto, uac.cod_capitolo, uac.cod_ufficio

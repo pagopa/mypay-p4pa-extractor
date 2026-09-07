@@ -53,14 +53,17 @@ class AssessmentsDaoTest {
       eq(FIND_BY_FILTERS_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         "IPA1".equals(params.getValue("ipaCode"))
-          && lastExtractionDate.equals(params.getValue("lastExtractionDate"))
-          && Boolean.TRUE.equals(params.getValue("skipAssessmentCodesFilter"))
-          && Collections.singletonList(null).equals(params.getValue("assessmentCodes"))
-          && params.getValue("dateFrom") == null
-          && params.getValue("dateTo") == null
-          && Integer.valueOf(50).equals(params.getValue("limit"))
-          && Integer.valueOf(0).equals(params.getValue("offset"))
-          && params.getValues().size() == 8
+            && lastExtractionDate.equals(params.getValue("lastExtractionDate"))
+            && Boolean.FALSE.equals(params.getValue("skipLastExtractionDateFilter"))
+            && Boolean.TRUE.equals(params.getValue("skipAssessmentCodesFilter"))
+            && Collections.singletonList(null).equals(params.getValue("assessmentCodes"))
+            && params.getValue("dateFrom") == null
+            && Boolean.TRUE.equals(params.getValue("skipDateFromFilter"))
+            && params.getValue("dateTo") == null
+            && Boolean.TRUE.equals(params.getValue("skipDateToFilter"))
+            && Integer.valueOf(50).equals(params.getValue("limit"))
+            && Integer.valueOf(0).equals(params.getValue("offset"))
+            && params.getValues().size() == 11
       ),
       same(AssessmentsDao.ASSESSMENTS_ROW_MAPPER)
     )).thenReturn(List.of());
@@ -91,14 +94,17 @@ class AssessmentsDaoTest {
       eq(FIND_BY_FILTERS_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         "IPA1".equals(params.getValue("ipaCode"))
-          && lastExtractionDate.equals(params.getValue("lastExtractionDate"))
-          && Boolean.FALSE.equals(params.getValue("skipAssessmentCodesFilter"))
-          && assessmentCodes.equals(params.getValue("assessmentCodes"))
-          && from.equals(params.getValue("dateFrom"))
-          && to.equals(params.getValue("dateTo"))
-          && Integer.valueOf(25).equals(params.getValue("limit"))
-          && Integer.valueOf(10).equals(params.getValue("offset"))
-          && params.getValues().size() == 8
+            && lastExtractionDate.equals(params.getValue("lastExtractionDate"))
+            && Boolean.FALSE.equals(params.getValue("skipLastExtractionDateFilter"))
+            && Boolean.FALSE.equals(params.getValue("skipAssessmentCodesFilter"))
+            && assessmentCodes.equals(params.getValue("assessmentCodes"))
+            && from.equals(params.getValue("dateFrom"))
+            && Boolean.FALSE.equals(params.getValue("skipDateFromFilter"))
+            && to.equals(params.getValue("dateTo"))
+            && Boolean.FALSE.equals(params.getValue("skipDateToFilter"))
+            && Integer.valueOf(25).equals(params.getValue("limit"))
+            && Integer.valueOf(10).equals(params.getValue("offset"))
+            && params.getValues().size() == 11
       ),
       same(AssessmentsDao.ASSESSMENTS_ROW_MAPPER)
     )).thenReturn(List.of());
@@ -123,10 +129,14 @@ class AssessmentsDaoTest {
     when(mypivotJdbcTemplateMock.query(
       eq(FIND_BY_FILTERS_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
-        Boolean.TRUE.equals(params.getValue("skipAssessmentCodesFilter"))
+        Boolean.TRUE.equals(params.getValue("skipLastExtractionDateFilter"))
+          && Boolean.TRUE.equals(params.getValue("skipAssessmentCodesFilter"))
           && Collections.singletonList(null).equals(params.getValue("assessmentCodes"))
           && from.equals(params.getValue("dateFrom"))
+          && Boolean.FALSE.equals(params.getValue("skipDateFromFilter"))
           && to.equals(params.getValue("dateTo"))
+          && Boolean.FALSE.equals(params.getValue("skipDateToFilter"))
+          && params.getValues().size() == 11
       ),
       same(AssessmentsDao.ASSESSMENTS_ROW_MAPPER)
     )).thenReturn(List.of());

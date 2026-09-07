@@ -19,19 +19,19 @@ WHERE ad.cod_ipa_ente = :ipaCode
   AND (:skipAssessmentCodesFilter = TRUE OR a.de_nome_accertamento IN (:assessmentCodes))
   AND (
     (
-      :dateFrom IS NOT NULL
+      :skipDateFromFilter = FALSE
       AND a.dt_ultima_modifica >= :dateFrom
     )
     OR (
-      :dateFrom IS NULL
+      :skipDateFromFilter = TRUE
       AND (
-        :lastExtractionDate IS NULL
+        :skipLastExtractionDateFilter = TRUE
         OR a.dt_ultima_modifica > :lastExtractionDate
       )
     )
   )
   AND (
-    :dateTo IS NULL
+    :skipDateToFilter = TRUE
     OR a.dt_ultima_modifica <= :dateTo
   )
 ORDER BY a.de_nome_accertamento, ad.cod_iuv
