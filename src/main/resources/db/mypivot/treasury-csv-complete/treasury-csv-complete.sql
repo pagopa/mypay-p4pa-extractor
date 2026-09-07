@@ -44,10 +44,10 @@ FROM mygov_flusso_tesoreria ft
 JOIN mygov_ente e
     ON ft.mygov_ente_id = e.mygov_ente_id
 WHERE e.cod_ipa_ente = :ipaCode
-  AND (:annoBolletta IS NULL OR ft.de_anno_bolletta = :annoBolletta)
-  AND (:codBolletta IS NULL OR ft.cod_bolletta = :codBolletta)
-  AND (:updatedFrom IS NULL OR ft.dt_ultima_modifica >= :updatedFrom)
-  AND (:updatedTo IS NULL OR ft.dt_ultima_modifica <= :updatedTo)
+  AND (:skipAnnoBollettaFilter = TRUE OR ft.de_anno_bolletta = :annoBolletta)
+  AND (:skipCodBollettaFilter = TRUE OR ft.cod_bolletta = :codBolletta)
+  AND (:skipUpdatedFromFilter = TRUE OR ft.dt_ultima_modifica >= :updatedFrom)
+  AND (:skipUpdatedToFilter = TRUE OR ft.dt_ultima_modifica <= :updatedTo)
 ORDER BY ft.de_anno_bolletta, ft.cod_bolletta
 LIMIT :limit
 OFFSET COALESCE(:offset, 0);

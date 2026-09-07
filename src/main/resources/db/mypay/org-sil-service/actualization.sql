@@ -18,7 +18,7 @@ JOIN mygov_ente e
 WHERE etd.url_notifica_pnd IS NOT NULL
   AND etd.user_pnd IS NOT NULL
   AND etd.psw_pnd IS NOT NULL
-  AND (:codIpaEnte IS NULL OR e.cod_ipa_ente = :codIpaEnte)
+  AND (:skipCodIpaEnteFilter = TRUE OR e.cod_ipa_ente = :codIpaEnte)
 ORDER BY e.cod_ipa_ente, application_name
 LIMIT :limit
 OFFSET COALESCE(:offset, 0)
