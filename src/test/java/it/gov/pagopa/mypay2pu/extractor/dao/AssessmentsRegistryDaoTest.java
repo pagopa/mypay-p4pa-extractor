@@ -164,7 +164,7 @@ class AssessmentsRegistryDaoTest {
   }
 
   private AssessmentsRegistryDao buildDao() {
-    when(sqlLoaderMock.load("mypivot/assessments/assessments-registry-export.sql"))
+    when(sqlLoaderMock.load("mypivot/assessments-registry/assessments-registry-export.sql"))
       .thenReturn(FIND_BY_FILTERS_SQL);
     return new AssessmentsRegistryDao(mypivotJdbcTemplateMock, sqlLoaderMock);
   }

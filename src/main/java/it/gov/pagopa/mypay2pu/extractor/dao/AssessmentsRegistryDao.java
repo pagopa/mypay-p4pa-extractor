@@ -19,7 +19,7 @@ import java.util.List;
 @Repository
 public class AssessmentsRegistryDao {
 
-  private static final String FIND_BY_FILTERS_SQL_PATH = "mypivot/assessments/assessments-registry-export.sql";
+  private static final String FIND_BY_FILTERS_SQL_PATH = "mypivot/assessments-registry/assessments-registry-export.sql";
   protected static final RowMapper<AssessmentsRegistry> ASSESSMENTS_REGISTRY_ROW_MAPPER =
     DataClassRowMapper.newInstance(AssessmentsRegistry.class);
 
