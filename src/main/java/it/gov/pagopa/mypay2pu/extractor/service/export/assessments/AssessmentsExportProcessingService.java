@@ -6,7 +6,7 @@ import it.gov.pagopa.mypay2pu.extractor.dto.export.PuAssessmentsDTO;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.mapper.assessments.AssessmentsMapper;
-import it.gov.pagopa.mypay2pu.extractor.model.mp4.Assessments;
+import it.gov.pagopa.mypay2pu.extractor.model.mpv4.Assessments;
 import it.gov.pagopa.mypay2pu.extractor.service.FileArchiverService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.CsvPartitionWriterService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.SplitByIpaCodeBaseExportProcessingService;

@@ -1,6 +1,6 @@
 package it.gov.pagopa.mypay2pu.extractor.dao;
 
-import it.gov.pagopa.mypay2pu.extractor.model.mp4.Assessments;
+import it.gov.pagopa.mypay2pu.extractor.model.mpv4.Assessments;
 import it.gov.pagopa.mypay2pu.extractor.utils.SqlLoader;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
