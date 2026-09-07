@@ -2,9 +2,9 @@ SELECT
     de.*,
     f.iuf,
     e.cod_ipa_ente,
-    r.fiscal_code AS cod_fiscale_pa1,
-    r.company_name AS de_nome_pa1,
-    r.transfer_category_1 AS cod_tassonomico_dovuto_pa1
+    COALESCE(NULLIF(TRIM(r.fiscal_code), ''), de.cod_e_ente_benef_id_univ_benef_codice_id_univoco) AS cod_fiscale_pa1,
+    COALESCE(NULLIF(TRIM(r.company_name), ''), de.de_e_ente_benef_denominazione_beneficiario) AS de_nome_pa1,
+    COALESCE(NULLIF(TRIM(r.transfer_category_1), ''), de.de_e_dati_pag_dati_sing_pag_dati_specifici_riscossione) AS cod_tassonomico_dovuto_pa1
 FROM mygov_dovuto_elaborato de
 INNER JOIN mygov_flusso f
     ON de.mygov_flusso_id = f.mygov_flusso_id

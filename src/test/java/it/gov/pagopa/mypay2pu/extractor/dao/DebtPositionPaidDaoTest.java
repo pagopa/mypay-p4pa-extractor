@@ -153,9 +153,15 @@ class DebtPositionPaidDaoTest {
     String sql = Files.readString(Path.of("src/main/resources/db/mypay/debt-positions-paid/debt-positions-paid.sql"));
 
     assertTrue(sql.contains("e.cod_ipa_ente = :codIpaEnte"));
-    assertTrue(sql.contains("r.fiscal_code AS cod_fiscale_pa1"));
-    assertTrue(sql.contains("r.company_name AS de_nome_pa1"));
-    assertTrue(sql.contains("r.transfer_category_1 AS cod_tassonomico_dovuto_pa1"));
+    assertTrue(sql.contains(
+      "COALESCE(NULLIF(TRIM(r.fiscal_code), ''), de.cod_e_ente_benef_id_univ_benef_codice_id_univoco) AS cod_fiscale_pa1"
+    ));
+    assertTrue(sql.contains(
+      "COALESCE(NULLIF(TRIM(r.company_name), ''), de.de_e_ente_benef_denominazione_beneficiario) AS de_nome_pa1"
+    ));
+    assertTrue(sql.contains(
+      "COALESCE(NULLIF(TRIM(r.transfer_category_1), ''), de.de_e_dati_pag_dati_sing_pag_dati_specifici_riscossione) AS cod_tassonomico_dovuto_pa1"
+    ));
     assertTrue(sql.contains("de_status.cod_stato = 'COMPLETATO'"));
     assertTrue(sql.contains("flow_status.cod_stato = 'CARICATO'"));
     assertTrue(sql.contains("de.cod_iud IN (:iuds)"));
