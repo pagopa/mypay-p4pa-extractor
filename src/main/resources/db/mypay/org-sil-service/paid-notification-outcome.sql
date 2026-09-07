@@ -16,7 +16,7 @@ FROM mygov_ente_sil es
 JOIN mygov_ente e
     ON e.mygov_ente_id = es.mygov_ente_id
 WHERE es.nome_applicativo IS NOT NULL
-  AND (:codIpaEnte IS NULL OR e.cod_ipa_ente = :codIpaEnte)
+  AND (:skipCodIpaEnteFilter = TRUE OR e.cod_ipa_ente = :codIpaEnte)
 ORDER BY e.cod_ipa_ente, application_name
 LIMIT :limit
 OFFSET COALESCE(:offset, 0)

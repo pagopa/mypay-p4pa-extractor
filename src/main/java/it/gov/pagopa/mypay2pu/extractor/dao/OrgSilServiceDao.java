@@ -59,6 +59,7 @@ public class OrgSilServiceDao {
 
   private MapSqlParameterSource buildParams(String codIpaEnte, int limit, int offset) {
     return QueryUtils.buildPaginatedFilterParams(limit, offset)
+      .addValue("skipCodIpaEnteFilter", codIpaEnte == null)
       .addValue("codIpaEnte", codIpaEnte);
   }
 }

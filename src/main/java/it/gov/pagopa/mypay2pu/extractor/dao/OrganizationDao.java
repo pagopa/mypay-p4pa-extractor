@@ -64,7 +64,9 @@ public class OrganizationDao {
   ) {
     return QueryUtils.buildPaginatedFilterParams(limit, offset)
       .addValue("ipaCodes", ipaCodes)
+      .addValue("skipModifiedFromFilter", filters == null || filters.getDateFrom() == null)
       .addValue("modifiedFrom", DateTimeUtils.toLocalDateTime(filters != null ? filters.getDateFrom() : null))
+      .addValue("skipModifiedToExclusiveFilter", filters == null || filters.getDateTo() == null)
       .addValue("modifiedToExclusive", DateTimeUtils.toLocalDateTime(filters != null ? filters.getDateTo() : null));
   }
 
