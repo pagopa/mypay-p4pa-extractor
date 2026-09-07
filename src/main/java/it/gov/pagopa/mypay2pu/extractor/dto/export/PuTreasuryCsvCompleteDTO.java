@@ -18,6 +18,8 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(callSuper = false)
 public class PuTreasuryCsvCompleteDTO implements CsvExportDto {
 
+  public static final String VERSION = "1_0";
+
   @CsvBindByName(column = "annoBolletta")
   private String billYear;
   @CsvBindByName(column = "codBolletta")

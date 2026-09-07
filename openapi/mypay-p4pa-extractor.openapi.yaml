@@ -128,6 +128,7 @@ components:
             - `DEBT_POSITIONS_TYPE_ORG_OPERATORS`: two comma-separated lists separated by `|` in the form `operatorFiscalCodes|debtPositionTypeOrgCodes`.
             - `DEBT_POSITIONS`: comma-separated list of `iuvs` values (example: `0101234567890001,0101234567890002`).
             - `PAYMENT_NOTIFICATION`: two comma-separated IUD and IUV lists separated by `|` in the form `iud1,iud2|iuv1,iuv2`.
+            - `TREASURY_CSV_COMPLETE`: two values, bill year and bill code, separated by `|` in the form `billYear|billCode`.
           examples:
             - value
             - value1,value2,value3

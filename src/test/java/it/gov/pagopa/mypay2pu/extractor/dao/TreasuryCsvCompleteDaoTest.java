@@ -50,26 +50,24 @@ class TreasuryCsvCompleteDaoTest {
   void givenNoOptionalFiltersWhenFindByFiltersThenQueryCompleteExport() {
     TreasuryCsvCompleteDao dao = buildDao();
     mockQuery(params ->
-      List.of("IPA1").equals(params.getValue("ipaCodes"))
+      "IPA1".equals(params.getValue("ipaCode"))
         && params.getValue("annoBolletta") == null
         && params.getValue("codBolletta") == null
-        && params.getValue("createdFrom") == null
-        && params.getValue("createdTo") == null
         && params.getValue("updatedFrom") == null
         && params.getValue("updatedTo") == null
         && Integer.valueOf(50).equals(params.getValue("limit"))
         && Integer.valueOf(0).equals(params.getValue("offset"))
     );
 
-    assertEquals(List.of(), dao.findByFilters(List.of("IPA1"), null, 50, 0));
+    assertEquals(List.of(), dao.findByFilters("IPA1", null, 50, 0));
   }
 
   @Test
-  void givenMultipleIpaCodesWhenFindByFiltersThenApplyMultiOrganizationFilter() {
+  void givenIpaCodeWhenFindByFiltersThenApplyOrganizationFilter() {
     TreasuryCsvCompleteDao dao = buildDao();
-    mockQuery(params -> List.of("IPA1", "IPA2").equals(params.getValue("ipaCodes")));
+    mockQuery(params -> "IPA1".equals(params.getValue("ipaCode")));
 
-    assertEquals(List.of(), dao.findByFilters(List.of("IPA1", "IPA2"), null, 50, 0));
+    assertEquals(List.of(), dao.findByFilters("IPA1", null, 50, 0));
   }
 
   @Test
@@ -81,69 +79,45 @@ class TreasuryCsvCompleteDaoTest {
     );
 
     assertEquals(List.of(), dao.findByFilters(
-      List.of("IPA1"),
-      filters("2026|BOLLETTA-1", null, null, null, null),
+      "IPA1",
+      filters("2026|BOLLETTA-1", null, null),
       50,
       0
     ));
   }
 
   @Test
-  void givenCreatedFromWhenFindByFiltersThenApplyCreationLowerBound() {
-    TreasuryCsvCompleteDao dao = buildDao();
-    OffsetDateTime createdFrom = dateTime(10);
-    mockQuery(params ->
-      createdFrom.toLocalDateTime().equals(params.getValue("createdFrom"))
-        && params.getValue("createdTo") == null
-    );
-
-    assertEquals(List.of(), dao.findByFilters(List.of("IPA1"), filters(null, createdFrom, null, null, null), 50, 0));
-  }
-
-  @Test
-  void givenCreatedToWhenFindByFiltersThenApplyCreationUpperBound() {
-    TreasuryCsvCompleteDao dao = buildDao();
-    OffsetDateTime createdTo = dateTime(11);
-    mockQuery(params ->
-      params.getValue("createdFrom") == null
-        && createdTo.toLocalDateTime().equals(params.getValue("createdTo"))
-    );
-
-    assertEquals(List.of(), dao.findByFilters(List.of("IPA1"), filters(null, null, createdTo, null, null), 50, 0));
-  }
-
-  @Test
   void givenUpdatedFromWhenFindByFiltersThenApplyModificationLowerBound() {
     TreasuryCsvCompleteDao dao = buildDao();
-    OffsetDateTime updatedFrom = dateTime(12);
+    OffsetDateTime updatedFrom = dateTime(10);
     mockQuery(params ->
       updatedFrom.toLocalDateTime().equals(params.getValue("updatedFrom"))
         && params.getValue("updatedTo") == null
     );
 
-    assertEquals(List.of(), dao.findByFilters(List.of("IPA1"), filters(null, null, null, updatedFrom, null), 50, 0));
+    assertEquals(List.of(), dao.findByFilters("IPA1", filters(null, updatedFrom, null), 50, 0));
   }
 
   @Test
   void givenUpdatedToWhenFindByFiltersThenApplyModificationUpperBound() {
     TreasuryCsvCompleteDao dao = buildDao();
-    OffsetDateTime updatedTo = dateTime(13);
+    OffsetDateTime updatedTo = dateTime(11);
     mockQuery(params ->
       params.getValue("updatedFrom") == null
         && updatedTo.toLocalDateTime().equals(params.getValue("updatedTo"))
     );
 
-    assertEquals(List.of(), dao.findByFilters(List.of("IPA1"), filters(null, null, null, null, updatedTo), 50, 0));
+    assertEquals(List.of(), dao.findByFilters("IPA1", filters(null, null, updatedTo), 50, 0));
   }
 
   @Test
   void givenDisabledMyPivotDatasourceWhenFindByFiltersThenThrowIllegalStateException() {
     TreasuryCsvCompleteDao dao = buildDao(null);
-    List<String> ipaCodes = List.of("IPA1");
+    String ipaCode = "IPA1";
 
     IllegalStateException exception = assertThrows(
       IllegalStateException.class,
-      () -> dao.findByFilters(ipaCodes, null, 50, 0)
+      () -> dao.findByFilters(ipaCode, null, 50, 0)
     );
 
     assertEquals("MyPivot datasource must be enabled for treasury extraction", exception.getMessage());
@@ -158,11 +132,9 @@ class TreasuryCsvCompleteDaoTest {
     assertTrue(sql.contains("ON ft.mygov_ente_id = e.mygov_ente_id"));
     assertTrue(sql.contains("NULL AS cod_ente_bt"));
     assertTrue(sql.contains("NULL AS cod_istat_ente"));
-    assertTrue(sql.contains("e.cod_ipa_ente IN (:ipaCodes)"));
+    assertTrue(sql.contains("e.cod_ipa_ente = :ipaCode"));
     assertTrue(sql.contains("ft.de_anno_bolletta = :annoBolletta"));
     assertTrue(sql.contains("ft.cod_bolletta = :codBolletta"));
-    assertTrue(sql.contains("ft.dt_creazione >= :createdFrom"));
-    assertTrue(sql.contains("ft.dt_creazione <= :createdTo"));
     assertTrue(sql.contains("ft.dt_ultima_modifica >= :updatedFrom"));
     assertTrue(sql.contains("ft.dt_ultima_modifica <= :updatedTo"));
     assertTrue(sql.contains("ORDER BY ft.de_anno_bolletta, ft.cod_bolletta"));
@@ -209,15 +181,11 @@ class TreasuryCsvCompleteDaoTest {
 
   private TreasuryCsvCompleteDao.TreasuryCsvCompleteFilters filters(
     String logicalKey,
-    OffsetDateTime createdFrom,
-    OffsetDateTime createdTo,
     OffsetDateTime updatedFrom,
     OffsetDateTime updatedTo
   ) {
     return new TreasuryCsvCompleteDao.TreasuryCsvCompleteFilters(
       logicalKey,
-      createdFrom,
-      createdTo,
       updatedFrom,
       updatedTo
     );
