@@ -59,6 +59,7 @@ class OrgSilServiceDaoTest {
       eq(FIND_PAID_NOTIFICATION_OUTCOME_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         "IPA1".equals(params.getValue("codIpaEnte"))
+          && Boolean.FALSE.equals(params.getValue("skipCodIpaEnteFilter"))
           && Integer.valueOf(Integer.MAX_VALUE).equals(params.getValue("limit"))
           && Integer.valueOf(0).equals(params.getValue("offset"))
       ),
@@ -78,6 +79,7 @@ class OrgSilServiceDaoTest {
       eq(FIND_PAID_NOTIFICATION_OUTCOME_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         "IPA1".equals(params.getValue("codIpaEnte"))
+          && Boolean.FALSE.equals(params.getValue("skipCodIpaEnteFilter"))
           && Integer.valueOf(50).equals(params.getValue("limit"))
           && Integer.valueOf(100).equals(params.getValue("offset"))
       ),
@@ -87,6 +89,22 @@ class OrgSilServiceDaoTest {
     List<OrgSilService> result = dao.findPaidNotificationOutcome("IPA1", 50, 100);
 
     assertEquals(List.of(), result);
+  }
+
+  @Test
+  void givenNullCodIpaEnteWhenFindPaidNotificationOutcomeThenSkipOrganizationFilter() {
+    OrgSilServiceDao dao = buildDao();
+
+    when(mp4JdbcTemplateMock.query(
+      eq(FIND_PAID_NOTIFICATION_OUTCOME_SQL),
+      ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
+        Boolean.TRUE.equals(params.getValue("skipCodIpaEnteFilter"))
+          && params.getValue("codIpaEnte") == null
+      ),
+      same(OrgSilServiceDao.ORG_SIL_SERVICE_ROW_MAPPER)
+    )).thenReturn(List.of());
+
+    assertEquals(List.of(), dao.findPaidNotificationOutcome(null, 50, 0));
   }
 
   @Test
@@ -112,6 +130,7 @@ class OrgSilServiceDaoTest {
       eq(FIND_ACTUALIZATION_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         "IPA2".equals(params.getValue("codIpaEnte"))
+          && Boolean.FALSE.equals(params.getValue("skipCodIpaEnteFilter"))
           && Integer.valueOf(Integer.MAX_VALUE).equals(params.getValue("limit"))
           && Integer.valueOf(0).equals(params.getValue("offset"))
       ),
@@ -131,6 +150,7 @@ class OrgSilServiceDaoTest {
       eq(FIND_ACTUALIZATION_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         "IPA2".equals(params.getValue("codIpaEnte"))
+          && Boolean.FALSE.equals(params.getValue("skipCodIpaEnteFilter"))
           && Integer.valueOf(25).equals(params.getValue("limit"))
           && Integer.valueOf(10).equals(params.getValue("offset"))
       ),

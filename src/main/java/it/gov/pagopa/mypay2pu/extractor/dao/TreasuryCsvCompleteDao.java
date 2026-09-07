@@ -66,9 +66,13 @@ public class TreasuryCsvCompleteDao {
   ) {
     return QueryUtils.buildPaginatedFilterParams(limit, offset)
       .addValue("ipaCode", ipaCode)
+      .addValue("skipAnnoBollettaFilter", logicalKey.annoBolletta() == null)
       .addValue("annoBolletta", logicalKey.annoBolletta())
+      .addValue("skipCodBollettaFilter", logicalKey.codBolletta() == null)
       .addValue("codBolletta", logicalKey.codBolletta())
+      .addValue("skipUpdatedFromFilter", filters.updatedFrom() == null)
       .addValue("updatedFrom", DateTimeUtils.toLocalDateTime(filters.updatedFrom()))
+      .addValue("skipUpdatedToFilter", filters.updatedTo() == null)
       .addValue("updatedTo", DateTimeUtils.toLocalDateTime(filters.updatedTo()));
   }
 

@@ -62,8 +62,10 @@ class OrganizationDaoTest {
         List.of("IPA1").equals(params.getValue("ipaCodes"))
           && !params.hasValue("limit")
           && !params.hasValue("offset")
+          && Boolean.TRUE.equals(params.getValue("skipModifiedFromFilter"))
           && params.hasValue("modifiedFrom")
           && params.getValue("modifiedFrom") == null
+          && Boolean.TRUE.equals(params.getValue("skipModifiedToExclusiveFilter"))
           && params.hasValue("modifiedToExclusive")
           && params.getValue("modifiedToExclusive") == null
       ),
@@ -84,7 +86,9 @@ class OrganizationDaoTest {
       eq(FIND_BY_FILTERS_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         List.of("IPA1", "IPA2").equals(params.getValue("ipaCodes"))
+          && Boolean.FALSE.equals(params.getValue("skipModifiedFromFilter"))
           && LocalDateTime.of(2026, Month.JANUARY, 10, 0, 0).equals(params.getValue("modifiedFrom"))
+          && Boolean.FALSE.equals(params.getValue("skipModifiedToExclusiveFilter"))
           && LocalDateTime.of(2026, Month.JANUARY, 12, 0, 0).equals(params.getValue("modifiedToExclusive"))
           && Integer.valueOf(50).equals(params.getValue("limit"))
           && Integer.valueOf(100).equals(params.getValue("offset"))
@@ -151,6 +155,8 @@ class OrganizationDaoTest {
     String sql = Files.readString(Path.of("src/main/resources/db/mypay/organization/organization.sql"));
     assertTrue(sql.contains("ef.cod_ipa_ente IN (:ipaCodes)"));
     assertTrue(sql.contains("e.cod_ipa_ente IN (:ipaCodes)"));
+    assertTrue(sql.contains(":skipModifiedFromFilter = TRUE OR e.dt_ultima_modifica >= :modifiedFrom"));
+    assertTrue(sql.contains(":skipModifiedToExclusiveFilter = TRUE OR e.dt_ultima_modifica < :modifiedToExclusive"));
   }
 
   private OrganizationDao buildDao(NamedParameterJdbcTemplate mpv4JdbcTemplate) {
