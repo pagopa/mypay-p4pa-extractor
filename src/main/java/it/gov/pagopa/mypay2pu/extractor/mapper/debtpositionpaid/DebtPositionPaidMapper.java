@@ -41,7 +41,7 @@ public class DebtPositionPaidMapper {
           characterToString(debtPositionPaid.getCodEEnteBenefIdUnivBenefTipoIdUnivoco())
         )
       )
-      .enteBenefCodiceIdentificativoUnivoco(debtPositionPaid.getCodEEnteBenefIdUnivBenefCodiceIdUnivoco())
+      .enteBenefCodiceIdentificativoUnivoco(trim(debtPositionPaid.getCodEEnteBenefIdUnivBenefCodiceIdUnivoco()))
       .denominazioneBeneficiario(debtPositionPaid.getDeEEnteBenefDenominazioneBeneficiario())
       .codiceUnitOperBeneficiario(debtPositionPaid.getCodEEnteBenefCodiceUnitOperBeneficiario())
       .denomUnitOperBeneficiario(debtPositionPaid.getDeEEnteBenefDenomUnitOperBeneficiario())
@@ -97,6 +97,10 @@ public class DebtPositionPaidMapper {
       .deNomePa1(debtPositionPaid.getDeNomePa1())
       .codTassonomicoDovutoPa1(debtPositionPaid.getCodTassonomicoDovutoPa1())
       .build();
+  }
+
+  private String trim(String value) {
+    return value == null ? null : value.trim();
   }
 
 }

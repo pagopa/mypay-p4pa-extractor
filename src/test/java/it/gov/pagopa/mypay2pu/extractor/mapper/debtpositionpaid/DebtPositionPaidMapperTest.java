@@ -38,6 +38,7 @@ class DebtPositionPaidMapperTest {
   void mapShouldPopulateCsvDtoIncludingIufAndReceiptFields() {
     DebtPositionPaid debtPositionPaid = completeDebtPositionPaid();
     debtPositionPaid.setIuf("IUF-1");
+    debtPositionPaid.setCodEEnteBenefIdUnivBenefCodiceIdUnivoco(" CF-123 ");
     debtPositionPaid.setCodFiscalePa1("CF-PA1");
     debtPositionPaid.setDeNomePa1("PA One");
     debtPositionPaid.setCodTassonomicoDovutoPa1("9/0101101IM/");
@@ -48,6 +49,7 @@ class DebtPositionPaidMapperTest {
     assertEquals(debtPositionPaid.getCodRpSilinviarpIdUnivocoVersamento(), result.getCodIuv());
     assertEquals(debtPositionPaid.getNumEDatiPagImportoTotalePagato(), result.getImportoTotalePagato());
     assertEquals(debtPositionPaid.getCodEDataOraMessaggioRicevuta(), result.getDataOraMessaggioRicevuta());
+    assertEquals("CF-123", result.getEnteBenefCodiceIdentificativoUnivoco());
     assertEquals("CF-PA1", result.getCodFiscalePa1());
     assertEquals("PA One", result.getDeNomePa1());
     assertEquals("9/0101101IM/", result.getCodTassonomicoDovutoPa1());

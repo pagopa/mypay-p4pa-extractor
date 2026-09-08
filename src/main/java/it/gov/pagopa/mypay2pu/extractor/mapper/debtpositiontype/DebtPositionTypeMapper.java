@@ -7,10 +7,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class DebtPositionTypeMapper {
 
+  private static final String DEFAULT_DEBT_POSITION_TYPE_CODE = "DEFAULT";
+  private static final String UNKNOWN_DEBT_POSITION_TYPE_CODE = "UNKNOWN";
+
   public PuDebtPositionTypeDTO map(DebtPositionType debtPositionType) {
     return PuDebtPositionTypeDTO.builder()
       .brokerCf(debtPositionType.brokerCf())
-      .debtPositionTypeCode(debtPositionType.debtPositionTypeCode())
+      .debtPositionTypeCode(mapDebtPositionTypeCode(debtPositionType.debtPositionTypeCode()))
       .description(debtPositionType.description())
       .orgType(debtPositionType.orgType())
       .macroArea(debtPositionType.macroArea())
@@ -23,5 +26,11 @@ public class DebtPositionTypeMapper {
       .ioTemplateMessage(null)
       .ioTemplateSubject(null)
       .build();
+  }
+
+  private String mapDebtPositionTypeCode(String debtPositionTypeCode) {
+    return DEFAULT_DEBT_POSITION_TYPE_CODE.equals(debtPositionTypeCode)
+      ? UNKNOWN_DEBT_POSITION_TYPE_CODE
+      : debtPositionTypeCode;
   }
 }
