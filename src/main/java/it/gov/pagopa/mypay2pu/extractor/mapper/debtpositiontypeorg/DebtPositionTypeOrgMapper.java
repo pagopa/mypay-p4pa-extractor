@@ -20,6 +20,9 @@ import static org.springframework.util.StringUtils.hasText;
 @Component
 public class DebtPositionTypeOrgMapper {
 
+  private static final String DEFAULT_DEBT_POSITION_TYPE_ORG_CODE = "DEFAULT";
+  private static final String UNKNOWN_DEBT_POSITION_TYPE_ORG_CODE = "UNKNOWN";
+
   private final DebtPositionTypeOrgDao debtPositionTypeOrgDao;
   private final MyPayProperties myPayProperties;
   private final MyDictionaryClient myDictionaryClient;
@@ -45,7 +48,7 @@ public class DebtPositionTypeOrgMapper {
     return PuDebtPositionTypeOrgDTO.builder()
       .ipaCode(debtPositionTypeOrg.ipaCode())
       .balance(debtPositionTypeOrg.balance())
-      .code(debtPositionTypeOrg.code())
+      .code(mapDebtPositionTypeOrgCode(debtPositionTypeOrg.code()))
       .description(debtPositionTypeOrg.description())
       .iban(debtPositionTypeOrg.iban())
       .postalIban(debtPositionTypeOrg.postalIban())
@@ -117,5 +120,11 @@ public class DebtPositionTypeOrgMapper {
       .replace("{anag_pagatore}", "%debitore_nomeCompleto%")
       .replace("{importo}", "%importoTotale%")
       .replace("{data_scadenza}", "%dataScadenza%");
+  }
+
+  private String mapDebtPositionTypeOrgCode(String debtPositionTypeOrgCode) {
+    return DEFAULT_DEBT_POSITION_TYPE_ORG_CODE.equals(debtPositionTypeOrgCode)
+      ? UNKNOWN_DEBT_POSITION_TYPE_ORG_CODE
+      : debtPositionTypeOrgCode;
   }
 }

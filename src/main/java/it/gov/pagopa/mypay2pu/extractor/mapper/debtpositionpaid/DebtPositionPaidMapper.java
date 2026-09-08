@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import static it.gov.pagopa.mypay2pu.extractor.utils.DateTimeUtils.toLocalDate;
 import static it.gov.pagopa.mypay2pu.extractor.utils.StringUtils.characterToString;
+import static it.gov.pagopa.mypay2pu.extractor.utils.StringUtils.trim;
 import static it.gov.pagopa.mypay2pu.extractor.utils.StringUtils.toUtf8String;
 
 @Component
@@ -41,7 +42,7 @@ public class DebtPositionPaidMapper {
           characterToString(debtPositionPaid.getCodEEnteBenefIdUnivBenefTipoIdUnivoco())
         )
       )
-      .enteBenefCodiceIdentificativoUnivoco(debtPositionPaid.getCodEEnteBenefIdUnivBenefCodiceIdUnivoco())
+      .enteBenefCodiceIdentificativoUnivoco(trim(debtPositionPaid.getCodEEnteBenefIdUnivBenefCodiceIdUnivoco()))
       .denominazioneBeneficiario(debtPositionPaid.getDeEEnteBenefDenominazioneBeneficiario())
       .codiceUnitOperBeneficiario(debtPositionPaid.getCodEEnteBenefCodiceUnitOperBeneficiario())
       .denomUnitOperBeneficiario(debtPositionPaid.getDeEEnteBenefDenomUnitOperBeneficiario())
@@ -98,5 +99,4 @@ public class DebtPositionPaidMapper {
       .codTassonomicoDovutoPa1(debtPositionPaid.getCodTassonomicoDovutoPa1())
       .build();
   }
-
 }
