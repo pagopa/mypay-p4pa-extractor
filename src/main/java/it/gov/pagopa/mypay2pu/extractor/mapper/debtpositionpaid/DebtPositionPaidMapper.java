@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import static it.gov.pagopa.mypay2pu.extractor.utils.DateTimeUtils.toLocalDate;
 import static it.gov.pagopa.mypay2pu.extractor.utils.StringUtils.characterToString;
+import static it.gov.pagopa.mypay2pu.extractor.utils.StringUtils.trim;
 import static it.gov.pagopa.mypay2pu.extractor.utils.StringUtils.toUtf8String;
 
 @Component
@@ -98,9 +99,4 @@ public class DebtPositionPaidMapper {
       .codTassonomicoDovutoPa1(debtPositionPaid.getCodTassonomicoDovutoPa1())
       .build();
   }
-
-  private String trim(String value) {
-    return value == null ? null : value.trim();
-  }
-
 }
