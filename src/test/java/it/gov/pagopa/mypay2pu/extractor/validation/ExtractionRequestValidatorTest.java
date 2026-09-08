@@ -13,6 +13,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -52,14 +54,21 @@ class ExtractionRequestValidatorTest {
       when(requestMock.getFilters()).thenReturn(filtersMock);
       when(filtersMock.getDateFrom()).thenReturn(dateFrom);
       when(filtersMock.getDateTo()).thenReturn(dateTo);
+      when(requestMock.getLastExtractionDate()).thenReturn(null);
     }
 
     assertDoesNotThrow(() -> validator.validate(requestMock));
   }
 
   private static Stream<Arguments> provideValidateShouldNotThrowCases() {
-    OffsetDateTime date1 = OffsetDateTime.of(2026, 1, 1, 0, 0, 0, 0, OffsetDateTime.now().getOffset());
-    OffsetDateTime date2 = OffsetDateTime.of(2026, 1, 2, 0, 0, 0, 0, OffsetDateTime.now().getOffset());
+    OffsetDateTime date1 = OffsetDateTime.of(
+      LocalDateTime.of(2026, Month.JANUARY, 1, 0, 0),
+      OffsetDateTime.now().getOffset()
+    );
+    OffsetDateTime date2 = OffsetDateTime.of(
+      LocalDateTime.of(2026, Month.JANUARY, 2, 0, 0),
+      OffsetDateTime.now().getOffset()
+    );
 
     return Stream.of(
       Arguments.of(null, null),
@@ -72,8 +81,14 @@ class ExtractionRequestValidatorTest {
 
   @Test
   void givenRequestWithDateFromAfterDateToWhenValidateThenThrowBadRequestException() {
-    OffsetDateTime dateFrom = OffsetDateTime.of(2026, 1, 2, 0, 0, 0, 0, OffsetDateTime.now().getOffset());
-    OffsetDateTime dateTo = OffsetDateTime.of(2026, 1, 1, 0, 0, 0, 0, OffsetDateTime.now().getOffset());
+    OffsetDateTime dateFrom = OffsetDateTime.of(
+      LocalDateTime.of(2026, Month.JANUARY, 2, 0, 0),
+      OffsetDateTime.now().getOffset()
+    );
+    OffsetDateTime dateTo = OffsetDateTime.of(
+      LocalDateTime.of(2026, Month.JANUARY, 1, 0, 0),
+      OffsetDateTime.now().getOffset()
+    );
     when(requestMock.getFilters()).thenReturn(filtersMock);
     when(filtersMock.getDateFrom()).thenReturn(dateFrom);
     when(filtersMock.getDateTo()).thenReturn(dateTo);
@@ -82,6 +97,24 @@ class ExtractionRequestValidatorTest {
 
     assertEquals("INVALID_EXTRACTION_FILTERS", exception.getCode());
     assertEquals("filters.dateFrom must be before or equal to filters.dateTo", exception.getMessage());
+  }
+
+  @Test
+  void givenDifferentLastExtractionDateAndDateFromWhenValidateThenThrowBadRequestException() {
+    OffsetDateTime lastExtractionDate = OffsetDateTime.parse("2026-01-01T00:00:00Z");
+    OffsetDateTime dateFrom = OffsetDateTime.parse("2026-01-02T00:00:00Z");
+    when(requestMock.getFilters()).thenReturn(filtersMock);
+    when(filtersMock.getDateFrom()).thenReturn(dateFrom);
+    when(filtersMock.getDateTo()).thenReturn(null);
+    when(requestMock.getLastExtractionDate()).thenReturn(lastExtractionDate);
+
+    BadRequestException exception = assertThrows(BadRequestException.class, () -> validator.validate(requestMock));
+
+    assertEquals("INVALID_EXTRACTION_FILTERS", exception.getCode());
+    assertEquals(
+      "lastExtractionDate and filters.dateFrom must have the same value when both are provided",
+      exception.getMessage()
+    );
   }
 
   @ParameterizedTest

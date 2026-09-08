@@ -2,19 +2,7 @@ SELECT rs.de_nome_file_scaricato
 FROM mygov_flusso_rend_spc rs
 WHERE rs.cod_ipa_ente = :ipaCode
   AND rs.cod_stato = 'OK'
-  AND (
-    (
-      :skipDateFromFilter = FALSE
-      AND rs.dt_ultima_modifica >= :dateFrom
-    )
-    OR (
-      :skipDateFromFilter = TRUE
-      AND (
-        :skipLastExtractionDateFilter = TRUE
-        OR rs.dt_ultima_modifica > :lastExtractionDate
-      )
-    )
-  )
+  AND (:skipDateFromFilter = TRUE OR rs.dt_ultima_modifica >= :dateFrom)
   AND (
     :skipDateToFilter = TRUE
     OR rs.dt_ultima_modifica <= :dateTo

@@ -53,8 +53,6 @@ class PaymentsReportingDaoTest {
       eq(FIND_BY_FILTERS_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         "IPA1".equals(params.getValue("ipaCode"))
-          && params.getValue("lastExtractionDate") == null
-          && Boolean.TRUE.equals(params.getValue("skipLastExtractionDateFilter"))
           && dateFrom.equals(params.getValue("dateFrom"))
           && Boolean.FALSE.equals(params.getValue("skipDateFromFilter"))
           && dateTo.equals(params.getValue("dateTo"))
@@ -63,7 +61,7 @@ class PaymentsReportingDaoTest {
           && params.getValue("logicalKey") == null
           && Integer.valueOf(50).equals(params.getValue("limit"))
           && Integer.valueOf(100).equals(params.getValue("offset"))
-          && params.getValues().size() == 11
+          && params.getValues().size() == 9
       ),
       same(PaymentsReportingDao.PAYMENTS_REPORTING_FILE_ROW_MAPPER)
     )).thenReturn(expected);
@@ -81,17 +79,15 @@ class PaymentsReportingDaoTest {
       eq(FIND_BY_FILTERS_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         "IPA1".equals(params.getValue("ipaCode"))
-          && lastExtractionDate.equals(params.getValue("lastExtractionDate"))
-          && Boolean.FALSE.equals(params.getValue("skipLastExtractionDateFilter"))
-          && params.getValue("dateFrom") == null
-          && Boolean.TRUE.equals(params.getValue("skipDateFromFilter"))
+          && lastExtractionDate.equals(params.getValue("dateFrom"))
+          && Boolean.FALSE.equals(params.getValue("skipDateFromFilter"))
           && params.getValue("dateTo") == null
           && Boolean.TRUE.equals(params.getValue("skipDateToFilter"))
           && Boolean.TRUE.equals(params.getValue("skipLogicalKeyFilter"))
           && params.getValue("logicalKey") == null
           && Integer.valueOf(Integer.MAX_VALUE).equals(params.getValue("limit"))
           && Integer.valueOf(0).equals(params.getValue("offset"))
-          && params.getValues().size() == 11
+          && params.getValues().size() == 9
       ),
       same(PaymentsReportingDao.PAYMENTS_REPORTING_FILE_ROW_MAPPER)
     )).thenReturn(expected);
@@ -108,8 +104,6 @@ class PaymentsReportingDaoTest {
       eq(FIND_BY_FILTERS_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         "IPA1".equals(params.getValue("ipaCode"))
-          && params.getValue("lastExtractionDate") == null
-          && Boolean.TRUE.equals(params.getValue("skipLastExtractionDateFilter"))
           && params.getValue("dateFrom") == null
           && Boolean.TRUE.equals(params.getValue("skipDateFromFilter"))
           && params.getValue("dateTo") == null
@@ -118,7 +112,7 @@ class PaymentsReportingDaoTest {
           && "FLOW-1".equals(params.getValue("logicalKey"))
           && Integer.valueOf(Integer.MAX_VALUE).equals(params.getValue("limit"))
           && Integer.valueOf(0).equals(params.getValue("offset"))
-          && params.getValues().size() == 11
+          && params.getValues().size() == 9
       ),
       same(PaymentsReportingDao.PAYMENTS_REPORTING_FILE_ROW_MAPPER)
     )).thenReturn(expected);
@@ -144,10 +138,8 @@ class PaymentsReportingDaoTest {
     assertTrue(sql.contains("rs.cod_ipa_ente = :ipaCode"));
     assertTrue(sql.contains("rs.cod_stato = 'OK'"));
     assertTrue(sql.contains("rs.dt_ultima_modifica >= :dateFrom"));
-    assertTrue(sql.contains("rs.dt_ultima_modifica > :lastExtractionDate"));
     assertTrue(sql.contains("rs.dt_ultima_modifica <= :dateTo"));
-    assertTrue(sql.contains(":skipDateFromFilter = FALSE"));
-    assertTrue(sql.contains(":skipLastExtractionDateFilter = TRUE"));
+    assertTrue(sql.contains(":skipDateFromFilter = TRUE"));
     assertTrue(sql.contains(":skipDateToFilter = TRUE"));
     assertTrue(sql.contains(":skipLogicalKeyFilter = TRUE"));
     assertTrue(sql.contains("rs.cod_identificativo_flusso = :logicalKey"));

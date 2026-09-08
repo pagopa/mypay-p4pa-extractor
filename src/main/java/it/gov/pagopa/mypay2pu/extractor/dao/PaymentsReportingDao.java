@@ -59,7 +59,7 @@ public class PaymentsReportingDao {
     validateIpaCode(ipaCode);
     return fespJdbcTemplate.query(
       findByFiltersSql,
-      buildParams(ipaCode, lastExtractionDate, dateFrom, dateTo, null, limit, offset),
+      buildParams(ipaCode, QueryUtils.resolveDateFrom(lastExtractionDate, dateFrom), dateTo, null, limit, offset),
       PAYMENTS_REPORTING_FILE_ROW_MAPPER
     );
   }
@@ -75,14 +75,13 @@ public class PaymentsReportingDao {
     }
     return fespJdbcTemplate.query(
       findByFiltersSql,
-      buildParams(ipaCode, null, null, null, logicalKey, limit, offset),
+      buildParams(ipaCode, null, null, logicalKey, limit, offset),
       PAYMENTS_REPORTING_FILE_ROW_MAPPER
     );
   }
 
   private MapSqlParameterSource buildParams(
     String ipaCode,
-    LocalDateTime lastExtractionDate,
     LocalDateTime dateFrom,
     LocalDateTime dateTo,
     String logicalKey,
@@ -91,8 +90,6 @@ public class PaymentsReportingDao {
   ) {
     return QueryUtils.buildPaginatedFilterParams(limit, offset)
       .addValue("ipaCode", ipaCode)
-      .addValue("lastExtractionDate", lastExtractionDate)
-      .addValue("skipLastExtractionDateFilter", lastExtractionDate == null)
       .addValue("dateFrom", dateFrom)
       .addValue("skipDateFromFilter", dateFrom == null)
       .addValue("dateTo", dateTo)

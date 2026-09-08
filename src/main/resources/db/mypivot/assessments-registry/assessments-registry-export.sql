@@ -12,19 +12,7 @@ FROM mygov_anagrafica_uff_cap_acc uac
 JOIN mygov_ente e ON uac.mygov_ente_id = e.mygov_ente_id
 WHERE e.cod_ipa_ente = :ipaCode
   AND (:skipDebtPositionTypeOrgCodesFilter = TRUE OR uac.cod_tipo_dovuto IN (:debtPositionTypeOrgCodes))
-  AND (
-    (
-      :skipDateFromFilter = FALSE
-      AND uac.dt_ultima_modifica >= :dateFrom
-    )
-    OR (
-      :skipDateFromFilter = TRUE
-      AND (
-        :skipLastExtractionDateFilter = TRUE
-        OR uac.dt_ultima_modifica > :lastExtractionDate
-      )
-    )
-  )
+  AND (:skipDateFromFilter = TRUE OR uac.dt_ultima_modifica >= :dateFrom)
   AND (
     :skipDateToFilter = TRUE
     OR uac.dt_ultima_modifica <= :dateTo

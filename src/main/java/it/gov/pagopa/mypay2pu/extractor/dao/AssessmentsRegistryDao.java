@@ -43,13 +43,19 @@ public class AssessmentsRegistryDao {
                                          int offset) {
     return mypivotJdbcTemplate.query(
       findByFiltersSql,
-      buildParams(ipaCode, lastExtractionDate, debtPositionTypeOrgCodes, dateFrom, dateTo, limit, offset),
+      buildParams(
+        ipaCode,
+        debtPositionTypeOrgCodes,
+        QueryUtils.resolveDateFrom(lastExtractionDate, dateFrom),
+        dateTo,
+        limit,
+        offset
+      ),
       ASSESSMENTS_REGISTRY_ROW_MAPPER
     );
   }
 
   private MapSqlParameterSource buildParams(String ipaCode,
-                                            OffsetDateTime lastExtractionDate,
                                             List<String> debtPositionTypeOrgCodes,
                                             OffsetDateTime dateFrom,
                                             OffsetDateTime dateTo,
@@ -58,8 +64,6 @@ public class AssessmentsRegistryDao {
     boolean isEmptyCollection = CollectionUtils.isEmpty(debtPositionTypeOrgCodes);
     return QueryUtils.buildPaginatedFilterParams(limit, offset)
       .addValue("ipaCode", ipaCode)
-      .addValue("lastExtractionDate", lastExtractionDate)
-      .addValue("skipLastExtractionDateFilter", lastExtractionDate == null)
       .addValue("dateFrom", dateFrom)
       .addValue("skipDateFromFilter", dateFrom == null)
       .addValue("dateTo", dateTo)
