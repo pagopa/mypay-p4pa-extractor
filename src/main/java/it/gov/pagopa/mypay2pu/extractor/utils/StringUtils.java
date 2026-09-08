@@ -14,4 +14,8 @@ public final class StringUtils {
   public static String toUtf8String(byte[] value) {
     return value == null ? null : new String(value, StandardCharsets.UTF_8);
   }
+
+  public static String trim(String value) {
+    return value == null ? null : value.trim();
+  }
 }
