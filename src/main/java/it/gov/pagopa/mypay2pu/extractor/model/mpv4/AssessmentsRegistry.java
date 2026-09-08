@@ -12,7 +12,7 @@ public record AssessmentsRegistry(
   String assessmentCode,
   String assessmentDescription,
   String operatingYear,
-  String status
+  String flagActive
 ) implements ExportModel {
 
   @Override
