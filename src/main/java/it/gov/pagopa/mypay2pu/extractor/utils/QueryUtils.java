@@ -31,7 +31,7 @@ public class QueryUtils {
    * @param lastExtractionDate incremental extraction timestamp
    * @param dateFrom explicit extraction start timestamp
    * @return the explicit start timestamp or the incremental extraction timestamp when the former is absent
-   * @throws IllegalArgumentException when both dates are present but identify different instants
+   * @throws IllegalArgumentException when both dates are present but have different values
    * @see #hasConflictingDates(OffsetDateTime, OffsetDateTime)
    */
   public static OffsetDateTime resolveDateFrom(OffsetDateTime lastExtractionDate, OffsetDateTime dateFrom) {
@@ -44,11 +44,11 @@ public class QueryUtils {
   }
 
   /**
-   * Checks whether two supplied dates identify different instants, irrespective of their offsets.
+   * Checks whether two supplied date-time values differ.
    *
    * @param lastExtractionDate incremental extraction timestamp
    * @param dateFrom explicit extraction start timestamp
-   * @return {@code true} when both dates are present and identify different instants
+   * @return {@code true} when both dates are present and have different values
    */
   public static boolean hasConflictingDates(OffsetDateTime lastExtractionDate, OffsetDateTime dateFrom) {
     return lastExtractionDate != null

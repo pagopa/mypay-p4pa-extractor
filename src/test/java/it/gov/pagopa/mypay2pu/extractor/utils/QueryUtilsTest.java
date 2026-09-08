@@ -83,7 +83,7 @@ class QueryUtilsTest {
   }
 
   @Test
-  void givenDatesWithDifferentOffsetsRepresentingSameInstantWhenResolveDateFromThenReturnDateFrom() {
+  void givenDatesWithDifferentOffsetsWhenResolveDateFromThenThrowIllegalArgumentException() {
     OffsetDateTime lastExtractionDate = OffsetDateTime.of(
       LocalDateTime.of(2026, Month.JANUARY, 1, 0, 0),
       ZoneOffset.UTC
@@ -93,6 +93,14 @@ class QueryUtilsTest {
       ZoneOffset.ofHours(1)
     );
 
-    assertEquals(dateFrom, QueryUtils.resolveDateFrom(lastExtractionDate, dateFrom));
+    IllegalArgumentException exception = assertThrows(
+      IllegalArgumentException.class,
+      () -> QueryUtils.resolveDateFrom(lastExtractionDate, dateFrom)
+    );
+
+    assertEquals(
+      "lastExtractionDate and filters.dateFrom must have the same value when both are provided",
+      exception.getMessage()
+    );
   }
 }
