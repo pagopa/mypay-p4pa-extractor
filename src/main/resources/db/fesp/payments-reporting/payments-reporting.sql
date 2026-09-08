@@ -4,19 +4,19 @@ WHERE rs.cod_ipa_ente = :organizationId
   AND rs.cod_stato = 'OK'
   AND (
     (
-      :dateFrom IS NOT NULL
+      :skipDateFromFilter = FALSE
       AND rs.dt_ultima_modifica >= :dateFrom
     )
     OR (
-      :dateFrom IS NULL
+      :skipDateFromFilter = TRUE
       AND (
-        :lastExtractionDate IS NULL
+        :skipLastExtractionDateFilter = TRUE
         OR rs.dt_ultima_modifica > :lastExtractionDate
       )
     )
   )
   AND (
-    :dateTo IS NULL
+    :skipDateToFilter = TRUE
     OR rs.dt_ultima_modifica <= :dateTo
   )
   AND (
@@ -24,3 +24,5 @@ WHERE rs.cod_ipa_ente = :organizationId
     OR rs.cod_identificativo_flusso = :logicalKey
   )
 ORDER BY rs.dt_creazione
+LIMIT :limit
+OFFSET COALESCE(:offset, 0)
