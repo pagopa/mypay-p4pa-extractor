@@ -42,7 +42,7 @@ public class PuAssessmentsRegistryDTO implements CsvExportDto {
   @NotBlank
   private String operatingYear;
 
-  @CsvBindByName(column = "flgAttivo")
+  @CsvBindByName(column = "statoAccertamento")
   @NotBlank
   private String status;
 }
