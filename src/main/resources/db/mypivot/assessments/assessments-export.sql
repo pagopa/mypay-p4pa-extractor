@@ -17,19 +17,7 @@ JOIN mygov_accertamento_dettaglio ad
   ON ad.mygov_accertamento_id = a.mygov_accertamento_id
 WHERE ad.cod_ipa_ente = :ipaCode
   AND (:skipAssessmentCodesFilter = TRUE OR a.de_nome_accertamento IN (:assessmentCodes))
-  AND (
-    (
-      :skipDateFromFilter = FALSE
-      AND a.dt_ultima_modifica >= :dateFrom
-    )
-    OR (
-      :skipDateFromFilter = TRUE
-      AND (
-        :skipLastExtractionDateFilter = TRUE
-        OR a.dt_ultima_modifica > :lastExtractionDate
-      )
-    )
-  )
+  AND (:skipDateFromFilter = TRUE OR a.dt_ultima_modifica >= :dateFrom)
   AND (
     :skipDateToFilter = TRUE
     OR a.dt_ultima_modifica <= :dateTo
