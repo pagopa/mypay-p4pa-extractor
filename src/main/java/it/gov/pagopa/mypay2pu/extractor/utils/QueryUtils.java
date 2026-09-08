@@ -25,6 +25,15 @@ public class QueryUtils {
       .addValue("offset", offset);
   }
 
+  /**
+   * Resolves the extraction start timestamp, preferring the explicit filter when provided.
+   *
+   * @param lastExtractionDate incremental extraction timestamp
+   * @param dateFrom explicit extraction start timestamp
+   * @return the explicit start timestamp or the incremental extraction timestamp when the former is absent
+   * @throws IllegalArgumentException when both dates are present but identify different instants
+   * @see #hasConflictingDates(OffsetDateTime, OffsetDateTime)
+   */
   public static OffsetDateTime resolveDateFrom(OffsetDateTime lastExtractionDate, OffsetDateTime dateFrom) {
     if (hasConflictingDates(lastExtractionDate, dateFrom)) {
       throw new IllegalArgumentException(
@@ -44,6 +53,6 @@ public class QueryUtils {
   public static boolean hasConflictingDates(OffsetDateTime lastExtractionDate, OffsetDateTime dateFrom) {
     return lastExtractionDate != null
       && dateFrom != null
-      && lastExtractionDate.toInstant().compareTo(dateFrom.toInstant()) != 0;
+      && lastExtractionDate.compareTo(dateFrom) != 0;
   }
 }
