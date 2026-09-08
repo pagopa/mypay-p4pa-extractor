@@ -176,6 +176,36 @@ class DebtPositionTypeOrgMapperTest {
     );
   }
 
+  @Test
+  void mapShouldMapDefaultDebtPositionTypeOrgCodeToUnknown() {
+    DebtPositionTypeOrg debtPositionTypeOrg = new DebtPositionTypeOrg(
+      "IPA1", "BILANCIO", "DEFAULT", "Default", "IT60X0542811101000000123456",
+      null, null, null, null, null, null, false, false, false, true, false,
+      null, false, null, null, null, false, false
+    );
+    when(debtPositionTypeOrgDaoMock.isExternal(debtPositionTypeOrg.ipaCode(), debtPositionTypeOrg.code()))
+      .thenReturn(false);
+
+    PuDebtPositionTypeOrgDTO result = debtPositionTypeOrgMapper.map(debtPositionTypeOrg);
+
+    assertEquals("UNKNOWN", result.getCode());
+    TestUtils.checkNotNullFields(
+      result,
+      "balance",
+      "postalIban",
+      "postalAccountCode",
+      "holderPostalCc",
+      "orgSector",
+      "spontaneousFormCode",
+      "spontaneousFormStructure",
+      "amountCents",
+      "externalPaymentUrl",
+      "notifyOutcomePushOrgSilServiceCode",
+      "amountActualizationOrgSilServiceCode",
+      "serviceCode"
+    );
+  }
+
   @ParameterizedTest
   @MethodSource("httpErrorStatuses")
   void mapShouldKeepRowWhenMyDictionaryReturnsHttpErrorAndFlagSpontaneousIsFalse(HttpStatusCodeException httpException) {

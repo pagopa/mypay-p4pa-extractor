@@ -20,4 +20,10 @@ class StringUtilsTest {
     assertEquals("Pàgopa", StringUtils.toUtf8String("Pàgopa".getBytes(StandardCharsets.UTF_8)));
     assertNull(StringUtils.toUtf8String(null));
   }
+
+  @Test
+  void trimShouldRemoveLeadingAndTrailingWhitespaceAndPreserveNull() {
+    assertEquals("value", StringUtils.trim(" value "));
+    assertNull(StringUtils.trim(null));
+  }
 }
