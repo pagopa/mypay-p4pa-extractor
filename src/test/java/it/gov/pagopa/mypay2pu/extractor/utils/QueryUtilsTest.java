@@ -5,6 +5,8 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 
 import java.time.LocalDateTime;
 import java.time.Month;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -60,8 +62,14 @@ class QueryUtilsTest {
 
   @Test
   void givenDifferentLastExtractionDateAndDateFromWhenResolveDateFromThenThrowIllegalArgumentException() {
-    LocalDateTime lastExtractionDate = LocalDateTime.of(2026, Month.JANUARY, 1, 0, 0);
-    LocalDateTime dateFrom = LocalDateTime.of(2026, Month.JANUARY, 2, 0, 0);
+    OffsetDateTime lastExtractionDate = OffsetDateTime.of(
+      LocalDateTime.of(2026, Month.JANUARY, 1, 0, 0),
+      ZoneOffset.UTC
+    );
+    OffsetDateTime dateFrom = OffsetDateTime.of(
+      LocalDateTime.of(2026, Month.JANUARY, 2, 0, 0),
+      ZoneOffset.UTC
+    );
 
     IllegalArgumentException exception = assertThrows(
       IllegalArgumentException.class,
@@ -72,5 +80,19 @@ class QueryUtilsTest {
       "lastExtractionDate and filters.dateFrom must have the same value when both are provided",
       exception.getMessage()
     );
+  }
+
+  @Test
+  void givenDatesWithDifferentOffsetsRepresentingSameInstantWhenResolveDateFromThenReturnDateFrom() {
+    OffsetDateTime lastExtractionDate = OffsetDateTime.of(
+      LocalDateTime.of(2026, Month.JANUARY, 1, 0, 0),
+      ZoneOffset.UTC
+    );
+    OffsetDateTime dateFrom = OffsetDateTime.of(
+      LocalDateTime.of(2026, Month.JANUARY, 1, 1, 0),
+      ZoneOffset.ofHours(1)
+    );
+
+    assertEquals(dateFrom, QueryUtils.resolveDateFrom(lastExtractionDate, dateFrom));
   }
 }

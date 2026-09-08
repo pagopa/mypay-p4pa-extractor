@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
 import java.nio.file.Path;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Repository
@@ -33,26 +33,26 @@ public class PaymentsReportingDao {
 
   public List<Path> findByDateRange(
     String ipaCode,
-    LocalDateTime dateFrom,
-    LocalDateTime dateTo
+    OffsetDateTime dateFrom,
+    OffsetDateTime dateTo
   ) {
     return findByDateRange(ipaCode, null, dateFrom, dateTo, Integer.MAX_VALUE, 0);
   }
 
   public List<Path> findByDateRange(
     String ipaCode,
-    LocalDateTime lastExtractionDate,
-    LocalDateTime dateFrom,
-    LocalDateTime dateTo
+    OffsetDateTime lastExtractionDate,
+    OffsetDateTime dateFrom,
+    OffsetDateTime dateTo
   ) {
     return findByDateRange(ipaCode, lastExtractionDate, dateFrom, dateTo, Integer.MAX_VALUE, 0);
   }
 
   public List<Path> findByDateRange(
     String ipaCode,
-    LocalDateTime lastExtractionDate,
-    LocalDateTime dateFrom,
-    LocalDateTime dateTo,
+    OffsetDateTime lastExtractionDate,
+    OffsetDateTime dateFrom,
+    OffsetDateTime dateTo,
     int limit,
     int offset
   ) {
@@ -82,8 +82,8 @@ public class PaymentsReportingDao {
 
   private MapSqlParameterSource buildParams(
     String ipaCode,
-    LocalDateTime dateFrom,
-    LocalDateTime dateTo,
+    OffsetDateTime dateFrom,
+    OffsetDateTime dateTo,
     String logicalKey,
     int limit,
     int offset

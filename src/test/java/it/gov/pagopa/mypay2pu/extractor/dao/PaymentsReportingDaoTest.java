@@ -15,6 +15,8 @@ import java.nio.file.Path;
 import java.sql.ResultSet;
 import java.time.LocalDateTime;
 import java.time.Month;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -45,8 +47,14 @@ class PaymentsReportingDaoTest {
   @Test
   void givenDateRangeWhenFindThenQueryMyPayDatabase() {
     PaymentsReportingDao dao = buildDao();
-    LocalDateTime dateFrom = LocalDateTime.of(2026, Month.JANUARY, 10, 10, 30);
-    LocalDateTime dateTo = LocalDateTime.of(2026, Month.JANUARY, 11, 10, 30);
+    OffsetDateTime dateFrom = OffsetDateTime.of(
+      LocalDateTime.of(2026, Month.JANUARY, 10, 10, 30),
+      ZoneOffset.UTC
+    );
+    OffsetDateTime dateTo = OffsetDateTime.of(
+      LocalDateTime.of(2026, Month.JANUARY, 11, 10, 30),
+      ZoneOffset.UTC
+    );
     List<Path> expected = List.of(Path.of("path.xml"));
 
     when(fespJdbcTemplateMock.query(
@@ -72,7 +80,10 @@ class PaymentsReportingDaoTest {
   @Test
   void givenLastExtractionDateWhenFindThenQueryMyPayDatabase() {
     PaymentsReportingDao dao = buildDao();
-    LocalDateTime lastExtractionDate = LocalDateTime.of(2026, Month.JANUARY, 10, 10, 30);
+    OffsetDateTime lastExtractionDate = OffsetDateTime.of(
+      LocalDateTime.of(2026, Month.JANUARY, 10, 10, 30),
+      ZoneOffset.UTC
+    );
     List<Path> expected = List.of(Path.of("path.xml"));
 
     when(fespJdbcTemplateMock.query(
