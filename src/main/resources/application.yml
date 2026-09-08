@@ -127,6 +127,8 @@ extractor:
         export-page-size: "\${EXPORT_PAGE_SIZE_TREASURY_CSV_COMPLETE:1000}"
       ASSESSMENTS:
         export-page-size: "\${EXPORT_PAGE_SIZE_ASSESSMENTS:1000}"
+      ASSESSMENTS_REGISTRY:
+        export-page-size: "\${EXPORT_PAGE_SIZE_ASSESSMENTS_REGISTRY:1000}"
   basic-auth:
     username: "\${CLIENT_ID:client}"
     password: "\${CLIENT_SECRET:secret}"
