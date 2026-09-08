@@ -3,16 +3,28 @@ package it.gov.pagopa.mypay2pu.extractor.mapper.assessmentsregistry;
 import it.gov.pagopa.mypay2pu.extractor.dto.export.PuAssessmentsRegistryDTO;
 import it.gov.pagopa.mypay2pu.extractor.model.mpv4.AssessmentsRegistry;
 import it.gov.pagopa.mypay2pu.extractor.utils.TestUtils;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class AssessmentsRegistryMapperTest {
   private final AssessmentsRegistryMapper mapper = new AssessmentsRegistryMapper();
 
-  @Test
-  void whenMapThenReturnAssessmentsRegistryDTO() {
-    AssessmentsRegistry model = TestUtils.getPodamFactory().manufacturePojo(AssessmentsRegistry.class);
+  @ParameterizedTest
+  @CsvSource({"false,INACTIVE", "true,ACTIVE"})
+  void whenMapThenReturnAssessmentsRegistryDTO(String modelStatus, String expectedStatus) {
+    AssessmentsRegistry model = new AssessmentsRegistry(
+        "organizationIpaCode",
+        "debtPositionTypeOrgCode",
+        "sectionCode",
+        "sectionDescription",
+        "officeCode",
+        "officeDescription",
+        "assessmentCode",
+        "assessmentDescription",
+        "2026",
+        modelStatus);
 
     PuAssessmentsRegistryDTO dto = mapper.map(model);
 
@@ -25,7 +37,7 @@ class AssessmentsRegistryMapperTest {
     assertEquals(model.assessmentCode(), dto.getAssessmentCode());
     assertEquals(model.assessmentDescription(), dto.getAssessmentDescription());
     assertEquals(model.operatingYear(), dto.getOperatingYear());
-    assertEquals(model.status(), dto.getStatus());
+    assertEquals(expectedStatus, dto.getStatus());
 
     TestUtils.reflectionEqualsByName(model, dto);
     TestUtils.checkNotNullFields(dto);
