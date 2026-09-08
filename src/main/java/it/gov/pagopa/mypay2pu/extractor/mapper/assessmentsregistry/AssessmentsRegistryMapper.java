@@ -18,7 +18,7 @@ public class AssessmentsRegistryMapper {
         .assessmentCode(model.assessmentCode())
         .assessmentDescription(model.assessmentDescription())
         .operatingYear(model.operatingYear())
-        .status(Boolean.valueOf(model.status())? "ACTIVE" : "INACTIVE")
+        .status(Boolean.parseBoolean(model.status())? "ACTIVE" : "INACTIVE")
         .build();
   }
 }
