@@ -52,7 +52,7 @@ class PaymentsReportingDaoTest {
     when(fespJdbcTemplateMock.query(
       eq(FIND_BY_FILTERS_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
-        "IPA1".equals(params.getValue("organizationId"))
+        "IPA1".equals(params.getValue("ipaCode"))
           && params.getValue("lastExtractionDate") == null
           && Boolean.TRUE.equals(params.getValue("skipLastExtractionDateFilter"))
           && dateFrom.equals(params.getValue("dateFrom"))
@@ -80,7 +80,7 @@ class PaymentsReportingDaoTest {
     when(fespJdbcTemplateMock.query(
       eq(FIND_BY_FILTERS_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
-        "IPA1".equals(params.getValue("organizationId"))
+        "IPA1".equals(params.getValue("ipaCode"))
           && lastExtractionDate.equals(params.getValue("lastExtractionDate"))
           && Boolean.FALSE.equals(params.getValue("skipLastExtractionDateFilter"))
           && params.getValue("dateFrom") == null
@@ -107,7 +107,7 @@ class PaymentsReportingDaoTest {
     when(fespJdbcTemplateMock.query(
       eq(FIND_BY_FILTERS_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
-        "IPA1".equals(params.getValue("organizationId"))
+        "IPA1".equals(params.getValue("ipaCode"))
           && params.getValue("lastExtractionDate") == null
           && Boolean.TRUE.equals(params.getValue("skipLastExtractionDateFilter"))
           && params.getValue("dateFrom") == null
@@ -141,7 +141,7 @@ class PaymentsReportingDaoTest {
     String sql = Files.readString(Path.of("src/main/resources/db/fesp/payments-reporting/payments-reporting.sql"));
 
     assertTrue(sql.contains("FROM mygov_flusso_rend_spc rs"));
-    assertTrue(sql.contains("rs.cod_ipa_ente = :organizationId"));
+    assertTrue(sql.contains("rs.cod_ipa_ente = :ipaCode"));
     assertTrue(sql.contains("rs.cod_stato = 'OK'"));
     assertTrue(sql.contains("rs.dt_ultima_modifica >= :dateFrom"));
     assertTrue(sql.contains("rs.dt_ultima_modifica > :lastExtractionDate"));

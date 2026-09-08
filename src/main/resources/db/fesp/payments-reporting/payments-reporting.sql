@@ -1,6 +1,6 @@
 SELECT rs.de_nome_file_scaricato
 FROM mygov_flusso_rend_spc rs
-WHERE rs.cod_ipa_ente = :organizationId
+WHERE rs.cod_ipa_ente = :ipaCode
   AND rs.cod_stato = 'OK'
   AND (
     (

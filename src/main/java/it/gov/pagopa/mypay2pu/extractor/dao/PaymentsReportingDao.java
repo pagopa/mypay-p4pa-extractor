@@ -32,56 +32,56 @@ public class PaymentsReportingDao {
   }
 
   public List<Path> findByDateRange(
-    String organizationId,
+    String ipaCode,
     LocalDateTime dateFrom,
     LocalDateTime dateTo
   ) {
-    return findByDateRange(organizationId, null, dateFrom, dateTo, Integer.MAX_VALUE, 0);
+    return findByDateRange(ipaCode, null, dateFrom, dateTo, Integer.MAX_VALUE, 0);
   }
 
   public List<Path> findByDateRange(
-    String organizationId,
+    String ipaCode,
     LocalDateTime lastExtractionDate,
     LocalDateTime dateFrom,
     LocalDateTime dateTo
   ) {
-    return findByDateRange(organizationId, lastExtractionDate, dateFrom, dateTo, Integer.MAX_VALUE, 0);
+    return findByDateRange(ipaCode, lastExtractionDate, dateFrom, dateTo, Integer.MAX_VALUE, 0);
   }
 
   public List<Path> findByDateRange(
-    String organizationId,
+    String ipaCode,
     LocalDateTime lastExtractionDate,
     LocalDateTime dateFrom,
     LocalDateTime dateTo,
     int limit,
     int offset
   ) {
-    validateOrganizationId(organizationId);
+    validateIpaCode(ipaCode);
     return fespJdbcTemplate.query(
       findByFiltersSql,
-      buildParams(organizationId, lastExtractionDate, dateFrom, dateTo, null, limit, offset),
+      buildParams(ipaCode, lastExtractionDate, dateFrom, dateTo, null, limit, offset),
       PAYMENTS_REPORTING_FILE_ROW_MAPPER
     );
   }
 
-  public List<Path> findByLogicalKey(String organizationId, String logicalKey) {
-    return findByLogicalKey(organizationId, logicalKey, Integer.MAX_VALUE, 0);
+  public List<Path> findByLogicalKey(String ipaCode, String logicalKey) {
+    return findByLogicalKey(ipaCode, logicalKey, Integer.MAX_VALUE, 0);
   }
 
-  public List<Path> findByLogicalKey(String organizationId, String logicalKey, int limit, int offset) {
-    validateOrganizationId(organizationId);
+  public List<Path> findByLogicalKey(String ipaCode, String logicalKey, int limit, int offset) {
+    validateIpaCode(ipaCode);
     if (!StringUtils.hasText(logicalKey)) {
       throw new IllegalArgumentException("logicalKey must not be blank");
     }
     return fespJdbcTemplate.query(
       findByFiltersSql,
-      buildParams(organizationId, null, null, null, logicalKey, limit, offset),
+      buildParams(ipaCode, null, null, null, logicalKey, limit, offset),
       PAYMENTS_REPORTING_FILE_ROW_MAPPER
     );
   }
 
   private MapSqlParameterSource buildParams(
-    String organizationId,
+    String ipaCode,
     LocalDateTime lastExtractionDate,
     LocalDateTime dateFrom,
     LocalDateTime dateTo,
@@ -90,7 +90,7 @@ public class PaymentsReportingDao {
     int offset
   ) {
     return QueryUtils.buildPaginatedFilterParams(limit, offset)
-      .addValue("organizationId", organizationId)
+      .addValue("ipaCode", ipaCode)
       .addValue("lastExtractionDate", lastExtractionDate)
       .addValue("skipLastExtractionDateFilter", lastExtractionDate == null)
       .addValue("dateFrom", dateFrom)
@@ -101,9 +101,9 @@ public class PaymentsReportingDao {
       .addValue("logicalKey", logicalKey);
   }
 
-  private void validateOrganizationId(String organizationId) {
-    if (!StringUtils.hasText(organizationId)) {
-      throw new IllegalArgumentException("organizationId must not be blank");
+  private void validateIpaCode(String ipaCode) {
+    if (!StringUtils.hasText(ipaCode)) {
+      throw new IllegalArgumentException("ipaCode must not be blank");
     }
   }
 }
