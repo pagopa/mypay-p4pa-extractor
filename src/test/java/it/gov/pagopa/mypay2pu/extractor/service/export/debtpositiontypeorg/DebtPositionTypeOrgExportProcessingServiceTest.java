@@ -174,7 +174,9 @@ class DebtPositionTypeOrgExportProcessingServiceTest {
       "FORM_" + suffix,
       "service_" + suffix,
       false,
-      false
+      false,
+      "taxonomy_" + suffix,
+      "orgType_" + suffix
     );
   }
 
@@ -204,6 +206,8 @@ class DebtPositionTypeOrgExportProcessingServiceTest {
       "",
       "",
       "",
+      null,
+      null,
       null,
       null,
       null,
