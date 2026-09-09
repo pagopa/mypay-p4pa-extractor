@@ -25,7 +25,9 @@ public record DebtPositionTypeOrg(
   String spontaneousFormCode,
   String serviceCode,
   Boolean flagNotifyIo,
-  Boolean flagNotifyIoBkp
+  Boolean flagNotifyIoBkp,
+  String taxonomyCode,
+  String orgType
 ) implements ExportModel {
 
   @Override
