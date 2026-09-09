@@ -73,6 +73,8 @@ public class DebtPositionTypeOrgMapper {
       .flagExternal(debtPositionTypeOrgDao.isExternal(debtPositionTypeOrg.ipaCode(), debtPositionTypeOrg.code()))
       .serviceCode(debtPositionTypeOrg.serviceCode())
       .ioTemplateSubject(transcodeTemplateTags(myPayProperties.ioTemplateSubject()))
+      .taxonomyCode(debtPositionTypeOrg.taxonomyCode())
+      .orgType(debtPositionTypeOrg.orgType())
       .build();
   }
 
