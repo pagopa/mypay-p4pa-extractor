@@ -46,11 +46,15 @@ class PaymentsReportingExportProcessingServiceTest {
     Path xmlFile = tempDir.resolve("xml").resolve("report.xml");
     Files.createDirectories(xmlFile.getParent());
     Files.writeString(xmlFile, "<report>content</report>");
+    Path secondXmlFile = tempDir.resolve("xml").resolve("second-report.xml");
+    Files.writeString(secondXmlFile, "<report>second-content</report>");
     OffsetDateTime createdFrom = OffsetDateTime.parse("2026-01-01T00:00:00Z");
     OffsetDateTime createdTo = OffsetDateTime.parse("2026-01-31T23:59:59Z");
     ExtractionRequest request = request(new ExtractionFilters().dateFrom(createdFrom).dateTo(createdTo));
-    when(paymentsReportingDaoMock.findByDateRange("IPA_CODE", createdFrom, createdTo))
-      .thenReturn(List.of(Path.of("xml", "report.xml"), Path.of("missing.xml")));
+    when(paymentsReportingDaoMock.findByDateRange("IPA_CODE", null, createdFrom, createdTo, 2, 0))
+      .thenReturn(List.of("xml/report.xml", "missing.xml"));
+    when(paymentsReportingDaoMock.findByDateRange("IPA_CODE", null, createdFrom, createdTo, 2, 2))
+      .thenReturn(List.of("xml/second-report.xml"));
 
     ExportFileResult result = service().executeExport("extraction-id", request);
 
@@ -59,20 +63,25 @@ class PaymentsReportingExportProcessingServiceTest {
     Path zipPath = tempDir.resolve("extraction-id").resolve(result.files().getFirst());
     assertTrue(Files.exists(zipPath));
     try (ZipFile zipFile = new ZipFile(zipPath.toFile())) {
-      assertEquals(1, zipFile.size());
+      assertEquals(2, zipFile.size());
       assertEquals(
         "<report>content</report>",
         new String(zipFile.getInputStream(zipFile.getEntry("report.xml")).readAllBytes(), StandardCharsets.UTF_8)
       );
+      assertEquals(
+        "<report>second-content</report>",
+        new String(zipFile.getInputStream(zipFile.getEntry("second-report.xml")).readAllBytes(), StandardCharsets.UTF_8)
+      );
     }
-    verify(paymentsReportingDaoMock).findByDateRange("IPA_CODE", createdFrom, createdTo);
+    verify(paymentsReportingDaoMock).findByDateRange("IPA_CODE", null, createdFrom, createdTo, 2, 0);
+    verify(paymentsReportingDaoMock).findByDateRange("IPA_CODE", null, createdFrom, createdTo, 2, 2);
   }
 
   @Test
   void givenLogicalKeyAndMissingXmlWhenExportThenSkipMissingFileAndCreateEmptyZip() throws Exception {
     ExtractionRequest request = request(new ExtractionFilters().logicalKey("FLOW-1"));
-    when(paymentsReportingDaoMock.findByLogicalKey("IPA_CODE", "FLOW-1"))
-      .thenReturn(List.of(Path.of("missing.xml")));
+    when(paymentsReportingDaoMock.findByLogicalKey("IPA_CODE", "FLOW-1", 2, 0))
+      .thenReturn(List.of("missing.xml"));
 
     ExportFileResult result = service().executeExport("extraction-id", request);
 
@@ -81,7 +90,7 @@ class PaymentsReportingExportProcessingServiceTest {
     try (ZipFile zipFile = new ZipFile(zipPath.toFile())) {
       assertEquals(0, zipFile.size());
     }
-    verify(paymentsReportingDaoMock).findByLogicalKey("IPA_CODE", "FLOW-1");
+    verify(paymentsReportingDaoMock).findByLogicalKey("IPA_CODE", "FLOW-1", 2, 0);
   }
 
   private PaymentsReportingExportProcessingService service() {
@@ -89,7 +98,7 @@ class PaymentsReportingExportProcessingServiceTest {
       paymentsReportingDaoMock,
       new ExtractorExportProperties(
         tempDir.toString(), tempDir.toString(), "BROKER_CF", "BROKER_IPA",
-        Map.of(MigrationFileType.PAYMENTS_REPORTING, new ExtractorExportProperties.FileTypeConfiguration(1)),
+        Map.of(MigrationFileType.PAYMENTS_REPORTING, new ExtractorExportProperties.FileTypeConfiguration(2)),
         new ExtractorExportProperties.PaymentsReportingConfiguration(tempDir.toString())
       ),
       new ZipFileService()

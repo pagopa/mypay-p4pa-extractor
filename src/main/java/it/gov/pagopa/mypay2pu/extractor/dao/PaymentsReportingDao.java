@@ -9,7 +9,6 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
-import java.nio.file.Path;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -17,8 +16,8 @@ import java.util.List;
 public class PaymentsReportingDao {
 
   private static final String FIND_BY_FILTERS_SQL_PATH = "fesp/payments-reporting/payments-reporting.sql";
-  protected static final RowMapper<Path> PAYMENTS_REPORTING_FILE_ROW_MAPPER = (resultSet, rowNum) ->
-    Path.of(resultSet.getString("de_nome_file_scaricato"));
+  protected static final RowMapper<String> PAYMENTS_REPORTING_FILE_ROW_MAPPER = (resultSet, rowNum) ->
+    resultSet.getString("de_nome_file_scaricato");
 
   private final NamedParameterJdbcTemplate fespJdbcTemplate;
   private final String findByFiltersSql;
@@ -31,24 +30,7 @@ public class PaymentsReportingDao {
     this.findByFiltersSql = sqlLoader.load(FIND_BY_FILTERS_SQL_PATH);
   }
 
-  public List<Path> findByDateRange(
-    String ipaCode,
-    OffsetDateTime dateFrom,
-    OffsetDateTime dateTo
-  ) {
-    return findByDateRange(ipaCode, null, dateFrom, dateTo, Integer.MAX_VALUE, 0);
-  }
-
-  public List<Path> findByDateRange(
-    String ipaCode,
-    OffsetDateTime lastExtractionDate,
-    OffsetDateTime dateFrom,
-    OffsetDateTime dateTo
-  ) {
-    return findByDateRange(ipaCode, lastExtractionDate, dateFrom, dateTo, Integer.MAX_VALUE, 0);
-  }
-
-  public List<Path> findByDateRange(
+  public List<String> findByDateRange(
     String ipaCode,
     OffsetDateTime lastExtractionDate,
     OffsetDateTime dateFrom,
@@ -64,11 +46,7 @@ public class PaymentsReportingDao {
     );
   }
 
-  public List<Path> findByLogicalKey(String ipaCode, String logicalKey) {
-    return findByLogicalKey(ipaCode, logicalKey, Integer.MAX_VALUE, 0);
-  }
-
-  public List<Path> findByLogicalKey(String ipaCode, String logicalKey, int limit, int offset) {
+  public List<String> findByLogicalKey(String ipaCode, String logicalKey, int limit, int offset) {
     validateIpaCode(ipaCode);
     if (!StringUtils.hasText(logicalKey)) {
       throw new IllegalArgumentException("logicalKey must not be blank");

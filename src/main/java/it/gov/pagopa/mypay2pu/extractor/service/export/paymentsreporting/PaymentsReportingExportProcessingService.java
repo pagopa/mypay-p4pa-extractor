@@ -5,6 +5,7 @@ import it.gov.pagopa.mypay2pu.extractor.dao.PaymentsReportingDao;
 import it.gov.pagopa.mypay2pu.extractor.dto.ExportFileResult;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionFilters;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
+import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.service.files.ZipFileService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -40,54 +41,73 @@ public class PaymentsReportingExportProcessingService {
   }
 
   public ExportFileResult executeExport(String extractionId, ExtractionRequest request) {
-    List<String> zipFileNames = new ArrayList<>();
-    for (String organizationId : request.getIpaCodes()) {
-      zipFileNames.add(createZip(extractionId, organizationId, request.getFilters()));
-    }
-    return new ExportFileResult(zipFileNames, null);
+    return new ExportFileResult(
+      request.getIpaCodes().stream()
+        .map(ipaCode -> createZip(extractionId, ipaCode, request.getFilters()))
+        .toList(),
+      null
+    );
   }
 
-  private String createZip(String extractionId, String organizationId, ExtractionFilters filters) {
+  private String createZip(String extractionId, String ipaCode, ExtractionFilters filters) {
     String logicalKey = filters != null ? filters.getLogicalKey() : null;
     OffsetDateTime createdFrom = filters != null ? filters.getDateFrom() : null;
     OffsetDateTime createdTo = filters != null ? filters.getDateTo() : null;
 
     log.info(
-      "Exporting payments reporting: organizationId={}, logicalKey={}, createdFrom={}, createdTo={}",
-      organizationId, logicalKey, createdFrom, createdTo
+      "Exporting payments reporting: ipaCode={}, logicalKey={}, createdFrom={}, createdTo={}",
+      ipaCode, logicalKey, createdFrom, createdTo
     );
 
-    List<Path> records = StringUtils.hasText(logicalKey)
-      ? paymentsReportingDao.findByLogicalKey(organizationId, logicalKey)
-      : paymentsReportingDao.findByDateRange(organizationId, createdFrom, createdTo);
-    log.info("Found {} payments reporting records for organizationId={}", records.size(), organizationId);
-
-    List<Path> xmlFiles = resolveExistingXmlFiles(records, organizationId);
-    Path zipPath = resolveZipPath(extractionId, organizationId);
+    Path zipPath = resolveZipPath(extractionId, ipaCode);
+    int pageSize = extractorExportProperties
+      .resolveFileTypeConfiguration(MigrationFileType.PAYMENTS_REPORTING)
+      .exportPageSize();
+    List<String> records = retrieveRecords(ipaCode, logicalKey, createdFrom, createdTo, pageSize);
+    List<Path> xmlFiles = resolveExistingXmlFiles(records, ipaCode);
     zipFileService.zipper(zipPath, xmlFiles);
 
     log.info(
-      "Generated payments reporting ZIP: organizationId={}, zip={}, processedXmls={}, skippedXmls={}",
-      organizationId, zipPath, xmlFiles.size(), records.size() - xmlFiles.size()
+      "Generated payments reporting ZIP: ipaCode={}, zip={}, processedXmls={}, skippedXmls={}",
+      ipaCode, zipPath, xmlFiles.size(), records.size() - xmlFiles.size()
     );
     return zipPath.getFileName().toString();
   }
 
-  private List<Path> resolveExistingXmlFiles(List<Path> records, String organizationId) {
+  private List<String> retrieveRecords(String ipaCode,
+                                       String logicalKey,
+                                       OffsetDateTime createdFrom,
+                                       OffsetDateTime createdTo,
+                                       int pageSize) {
+    List<String> records = new ArrayList<>();
+    int offset = 0;
+    List<String> page;
+    do {
+      page = StringUtils.hasText(logicalKey)
+        ? paymentsReportingDao.findByLogicalKey(ipaCode, logicalKey, pageSize, offset)
+        : paymentsReportingDao.findByDateRange(ipaCode, null, createdFrom, createdTo, pageSize, offset);
+      records.addAll(page);
+      offset += page.size();
+    } while (page.size() == pageSize);
+    return records;
+  }
+
+  private List<Path> resolveExistingXmlFiles(List<String> records, String ipaCode) {
     List<Path> xmlFiles = new ArrayList<>();
     Path baseDirectory = Path.of(extractorExportProperties.paymentsReporting().baseDirectory());
-    for (Path filePath : records) {
+    for (String fileName : records) {
+      Path filePath = Path.of(fileName);
       Path resolvedPath = filePath.isAbsolute() ? filePath : baseDirectory.resolve(filePath);
       if (Files.exists(resolvedPath)) {
         xmlFiles.add(resolvedPath);
       } else {
-        log.error("Payments reporting XML file not found: organizationId={}, path={}", organizationId, resolvedPath);
+        log.error("Payments reporting XML file not found: ipaCode={}, path={}", ipaCode, resolvedPath);
       }
     }
     return xmlFiles;
   }
 
-  private Path resolveZipPath(String extractionId, String organizationId) {
+  private Path resolveZipPath(String extractionId, String ipaCode) {
     Path outputDirectory = Path.of(extractorExportProperties.storagePath()).resolve(extractionId);
     try {
       Files.createDirectories(outputDirectory);
@@ -95,6 +115,6 @@ public class PaymentsReportingExportProcessingService {
       throw new IllegalStateException("Cannot create payments reporting output directory " + outputDirectory, e);
     }
     String timestamp = LocalDateTime.now(ZONEID).format(ZIP_TIMESTAMP_FORMATTER);
-    return outputDirectory.resolve("%s_%s_%s.zip".formatted(organizationId, ZIP_VERSION, timestamp));
+    return outputDirectory.resolve("%s_%s_%s.zip".formatted(ipaCode, ZIP_VERSION, timestamp));
   }
 }
