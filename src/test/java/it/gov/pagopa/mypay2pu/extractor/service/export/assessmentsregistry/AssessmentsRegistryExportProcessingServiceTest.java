@@ -99,8 +99,8 @@ class AssessmentsRegistryExportProcessingServiceTest {
       .filter(fileName -> fileName.contains(".errors."))
       .findFirst()
       .orElseThrow();
-    assertTrue(exportFileName.matches("IPA_CODE-ASSESSMENTS_REGISTRY-\\d{14}-1\\.0\\.zip"));
-    assertTrue(errorFileName.matches("IPA_CODE-ASSESSMENTS_REGISTRY-\\d{14}-1\\.0\\.errors\\.zip"));
+    assertTrue(exportFileName.matches("IPA_CODE-ASSESSMENTS_REGISTRY-\\d{14}-1_0\\.zip"));
+    assertTrue(errorFileName.matches("IPA_CODE-ASSESSMENTS_REGISTRY-\\d{14}-1_0\\.errors\\.zip"));
 
     Path exportArchivePath = tempDir.resolve("IPA_CODE").resolve(exportFileName);
     Path errorArchivePath = tempDir.resolve("IPA_CODE").resolve(errorFileName);
