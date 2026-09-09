@@ -3,6 +3,7 @@ package it.gov.pagopa.mypay2pu.extractor.validation;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionFilters;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.exception.BadRequestException;
+import it.gov.pagopa.mypay2pu.extractor.utils.QueryUtils;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
@@ -16,20 +17,32 @@ public class ExtractionRequestValidator {
 
   public void validate(ExtractionRequest request) {
     if (request != null) {
-      validateFilters(request.getFilters());
+      ExtractionFilters filters = request.getFilters();
+
+      if (filters != null) {
+        validateFilters(filters);
+        validateDateFrom(filters, request.getLastExtractionDate());
+      }
     }
   }
 
   protected void validateFilters(ExtractionFilters filters) {
-    if (filters != null) {
       validateInterval(filters.getDateFrom(), filters.getDateTo());
-    }
   }
 
   protected void validateInterval(OffsetDateTime from, OffsetDateTime to) {
     if (from != null && to != null && from.isAfter(to)) {
       throw new BadRequestException("INVALID_EXTRACTION_FILTERS",
         "filters.dateFrom must be before or equal to filters.dateTo");
+    }
+  }
+
+  private void validateDateFrom(ExtractionFilters filters, OffsetDateTime lastExtractionDate) {
+    if (filters != null && QueryUtils.hasConflictingDates(lastExtractionDate, filters.getDateFrom())) {
+      throw new BadRequestException(
+        "INVALID_EXTRACTION_FILTERS",
+        "lastExtractionDate and filters.dateFrom must have the same value when both are provided"
+      );
     }
   }
 

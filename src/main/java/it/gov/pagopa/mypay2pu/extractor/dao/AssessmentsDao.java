@@ -43,13 +43,19 @@ public class AssessmentsDao {
                                          int offset) {
     return mypivotJdbcTemplate.query(
       findByFiltersSql,
-      buildParams(ipaCode, lastExtractionDate, assessmentCodes, dateFrom, dateTo, limit, offset),
+      buildParams(
+        ipaCode,
+        assessmentCodes,
+        QueryUtils.resolveDateFrom(lastExtractionDate, dateFrom),
+        dateTo,
+        limit,
+        offset
+      ),
       ASSESSMENTS_ROW_MAPPER
     );
   }
 
   private MapSqlParameterSource buildParams(String ipaCode,
-                                            OffsetDateTime lastExtractionDate,
                                             List<String> assessmentCodes,
                                             OffsetDateTime dateFrom,
                                             OffsetDateTime dateTo,
@@ -58,8 +64,6 @@ public class AssessmentsDao {
     boolean emptyAssessmentsCodes = CollectionUtils.isEmpty(assessmentCodes);
     return QueryUtils.buildPaginatedFilterParams(limit, offset)
       .addValue("ipaCode", ipaCode)
-      .addValue("lastExtractionDate", lastExtractionDate)
-      .addValue("skipLastExtractionDateFilter", lastExtractionDate == null)
       .addValue("assessmentCodes", emptyAssessmentsCodes? Collections.singletonList(null) : assessmentCodes)
       .addValue("skipAssessmentCodesFilter", emptyAssessmentsCodes)
       .addValue("dateFrom", dateFrom)
