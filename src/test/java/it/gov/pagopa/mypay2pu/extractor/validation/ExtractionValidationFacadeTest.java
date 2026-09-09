@@ -54,7 +54,7 @@ class ExtractionValidationFacadeTest {
     ExtractionRequest request = request(fileType);
     // using verify to testing routing
     switch (fileType) {
-      case ORGANIZATIONS, ORG_SIL_SERVICES -> {
+      case ORGANIZATIONS, ORG_SIL_SERVICES, PAYMENTS_REPORTING -> {
         validationFacade.validate(request);
         verify(extractionRequestValidatorMock).validate(request);
       }
