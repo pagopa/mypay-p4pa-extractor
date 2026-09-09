@@ -20,7 +20,7 @@ public class DebtPositionPaidMapper {
       .codIud(debtPositionPaid.getCodIud())
       .codIuv(debtPositionPaid.getCodRpSilinviarpIdUnivocoVersamento())
       .versioneOggetto(debtPositionPaid.getDeEVersioneOggetto())
-      .identificativoDominio(debtPositionPaid.getCodEDomIdDominio())
+      .identificativoDominio(trim(debtPositionPaid.getCodEDomIdDominio()))
       .identificativoStazioneRichiedente(debtPositionPaid.getCodEDomIdStazioneRichiedente())
       .identificativoMessaggioRicevuta(debtPositionPaid.getCodEIdMessaggioRicevuta())
       .dataOraMessaggioRicevuta(debtPositionPaid.getCodEDataOraMessaggioRicevuta())
