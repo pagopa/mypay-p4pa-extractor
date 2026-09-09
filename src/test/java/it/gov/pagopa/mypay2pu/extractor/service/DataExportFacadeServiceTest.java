@@ -5,6 +5,7 @@ import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.exception.ExportFileTypeNotSupportedException;
 import it.gov.pagopa.mypay2pu.extractor.service.export.assessments.AssessmentsExportProcessingService;
+import it.gov.pagopa.mypay2pu.extractor.service.export.assessmentsregistry.AssessmentsRegistryExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.debtposition.DebtPositionExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.debtpositionpaid.DebtPositionPaidExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.debtpositionstypeorgoperators.DebtPositionsTypeOrgOperatorsExportProcessingService;
@@ -53,6 +54,8 @@ class DataExportFacadeServiceTest {
   private AssessmentsExportProcessingService assessmentsExportProcessingServiceMock;
   @Mock
   private TreasuryCsvCompleteExportProcessingService treasuryCsvCompleteExportProcessingServiceMock;
+  @Mock
+  private AssessmentsRegistryExportProcessingService assessmentsRegistryExportProcessingServiceMock;
 
   @InjectMocks
   private DataExportFacadeService service;
@@ -70,7 +73,8 @@ class DataExportFacadeServiceTest {
         debtPositionPaidExportProcessingServiceMock,
         paymentNotificationExportProcessingServiceMock,
         assessmentsExportProcessingServiceMock,
-        treasuryCsvCompleteExportProcessingServiceMock
+        treasuryCsvCompleteExportProcessingServiceMock,
+        assessmentsRegistryExportProcessingServiceMock
       )
     );
   }
@@ -122,6 +126,10 @@ class DataExportFacadeServiceTest {
       case ASSESSMENTS -> {
         expected = new ExportFileResult(List.of("assessments_1_0.zip"), null);
         when(assessmentsExportProcessingServiceMock.executeExport(extractionId, request)).thenReturn(expected);
+      }
+      case ASSESSMENTS_REGISTRY -> {
+        expected = new ExportFileResult(List.of("assessmentsregistry_1_0.zip"), null);
+        when(assessmentsRegistryExportProcessingServiceMock.executeExport(extractionId, request)).thenReturn(expected);
       }
       default -> {
         ExportFileTypeNotSupportedException exception = assertThrows(
