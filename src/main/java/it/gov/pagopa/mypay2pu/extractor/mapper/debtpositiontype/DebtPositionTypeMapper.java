@@ -11,16 +11,15 @@ public class DebtPositionTypeMapper {
   private static final String UNKNOWN_DEBT_POSITION_TYPE_CODE = "UNKNOWN";
 
   public PuDebtPositionTypeDTO map(DebtPositionType debtPositionType) {
-    String debtPositionTypeCode = debtPositionType.debtPositionTypeCode();
     return PuDebtPositionTypeDTO.builder()
       .brokerCf(debtPositionType.brokerCf())
-      .debtPositionTypeCode(mapDebtPositionTypeCode(debtPositionTypeCode))
+      .debtPositionTypeCode(mapDebtPositionTypeCode(debtPositionType.debtPositionTypeCode()))
       .description(debtPositionType.description())
-      .orgType(mapDefaultDebtPositionTypeProperty(debtPositionTypeCode, debtPositionType.orgType()))
-      .macroArea(mapDefaultDebtPositionTypeProperty(debtPositionTypeCode, debtPositionType.macroArea()))
-      .serviceType(mapDefaultDebtPositionTypeProperty(debtPositionTypeCode, debtPositionType.serviceType()))
-      .collectingReason(mapDefaultDebtPositionTypeProperty(debtPositionTypeCode, debtPositionType.collectingReason()))
-      .taxonomyCode(mapDefaultDebtPositionTypeProperty(debtPositionTypeCode, debtPositionType.taxonomyCode()))
+      .orgType(debtPositionType.orgType())
+      .macroArea(debtPositionType.macroArea())
+      .serviceType(debtPositionType.serviceType())
+      .collectingReason(debtPositionType.collectingReason())
+      .taxonomyCode(debtPositionType.taxonomyCode())
       .flagAnonymousFiscalCode(debtPositionType.flagAnonymousFiscalCode())
       .flagMandatoryDueDate(debtPositionType.flagMandatoryDueDate())
       .flagNotifyIo(debtPositionType.flagNotifyIo())
@@ -33,11 +32,5 @@ public class DebtPositionTypeMapper {
     return DEFAULT_DEBT_POSITION_TYPE_CODE.equals(debtPositionTypeCode)
       ? UNKNOWN_DEBT_POSITION_TYPE_CODE
       : debtPositionTypeCode;
-  }
-
-  private String mapDefaultDebtPositionTypeProperty(String debtPositionTypeCode, String property) {
-    return DEFAULT_DEBT_POSITION_TYPE_CODE.equals(debtPositionTypeCode) && property == null
-      ? ""
-      : property;
   }
 }

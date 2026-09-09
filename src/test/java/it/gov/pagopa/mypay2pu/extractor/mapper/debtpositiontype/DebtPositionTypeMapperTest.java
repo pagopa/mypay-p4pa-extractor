@@ -65,31 +65,4 @@ class DebtPositionTypeMapperTest {
     assertEquals("UNKNOWN", result.getDebtPositionTypeCode());
     TestUtils.checkNotNullFields(result, "ioTemplateSubject", "ioTemplateMessage");
   }
-
-  @Test
-  void mapShouldReplaceNullMandatoryPropertiesForDefaultDebtPositionType() {
-    DebtPositionType debtPositionType = new DebtPositionType(
-      "12345678901",
-      "DEFAULT",
-      "Tax",
-      null,
-      null,
-      null,
-      null,
-      null,
-      false,
-      false,
-      false
-    );
-
-    PuDebtPositionTypeDTO result = debtPositionTypeMapper.map(debtPositionType);
-
-    assertEquals("UNKNOWN", result.getDebtPositionTypeCode());
-    assertEquals("", result.getOrgType());
-    assertEquals("", result.getMacroArea());
-    assertEquals("", result.getServiceType());
-    assertEquals("", result.getCollectingReason());
-    assertEquals("", result.getTaxonomyCode());
-    TestUtils.checkNotNullFields(result, "ioTemplateSubject", "ioTemplateMessage");
-  }
 }
