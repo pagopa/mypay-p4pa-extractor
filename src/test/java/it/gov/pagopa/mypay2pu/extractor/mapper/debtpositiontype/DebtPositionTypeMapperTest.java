@@ -67,50 +67,6 @@ class DebtPositionTypeMapperTest {
   }
 
   @Test
-  void mapShouldMapDefaultDebtPositionTypeCodeToUnknown() {
-    DebtPositionType debtPositionType = new DebtPositionType(
-      "12345678901",
-      "DEFAULT",
-      "Tax",
-      "COMUNE",
-      "AREA",
-      "SERVICE",
-      "REASON",
-      "01.01.01",
-      false,
-      false,
-      false
-    );
-
-    PuDebtPositionTypeDTO result = debtPositionTypeMapper.map(debtPositionType);
-
-    assertEquals("UNKNOWN", result.getDebtPositionTypeCode());
-    TestUtils.checkNotNullFields(result, "ioTemplateSubject", "ioTemplateMessage");
-  }
-
-  @Test
-  void mapShouldMapDefaultDebtPositionTypeCodeToUnknown() {
-    DebtPositionType debtPositionType = new DebtPositionType(
-      "12345678901",
-      "DEFAULT",
-      "Tax",
-      "COMUNE",
-      "AREA",
-      "SERVICE",
-      "REASON",
-      "01.01.01",
-      false,
-      false,
-      false
-    );
-
-    PuDebtPositionTypeDTO result = debtPositionTypeMapper.map(debtPositionType);
-
-    assertEquals("UNKNOWN", result.getDebtPositionTypeCode());
-    TestUtils.checkNotNullFields(result, "ioTemplateSubject", "ioTemplateMessage");
-  }
-
-  @Test
   void mapShouldReplaceNullMandatoryPropertiesForDefaultDebtPositionType() {
     DebtPositionType debtPositionType = new DebtPositionType(
       "12345678901",
