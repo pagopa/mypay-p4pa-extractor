@@ -43,6 +43,7 @@ class ExtractorExportPropertiesTest {
         assertEquals(existingDirectories.tempBaseDir().toString(), properties.tempBaseDir());
         assertEquals("12345678901", properties.brokerCf());
         assertEquals("IPA_CODE", properties.brokerIpaCode());
+        assertEquals(existingDirectories.tempBaseDir().toString(), properties.paymentsReporting().baseDirectory());
         assertEquals(1000, properties.resolveFileTypeConfiguration(MigrationFileType.ORGANIZATIONS).exportPageSize());
       });
   }
@@ -92,7 +93,8 @@ class ExtractorExportPropertiesTest {
       existingDirectories.tempBaseDir().toString(),
       "12345678901",
       "IPA_CODE",
-      Map.of(MigrationFileType.ORG_SIL_SERVICES, new ExtractorExportProperties.FileTypeConfiguration(500))
+      Map.of(MigrationFileType.ORG_SIL_SERVICES, new ExtractorExportProperties.FileTypeConfiguration(500)),
+      new ExtractorExportProperties.PaymentsReportingConfiguration(existingDirectories.tempBaseDir().toString())
     );
 
     IllegalStateException exception = assertThrows(
@@ -117,6 +119,7 @@ class ExtractorExportPropertiesTest {
         "extractor.export.temp-base-dir=" + existingDirectories.tempBaseDir(),
         "extractor.export.broker-cf=12345678901",
         "extractor.export.broker-ipa-code=IPA_CODE",
+        "extractor.export.payments-reporting.base-directory=" + existingDirectories.tempBaseDir(),
         "extractor.export.file-type-configurations.ORGANIZATIONS.export-page-size=1000"
       )
       .run(context -> {
@@ -125,12 +128,30 @@ class ExtractorExportPropertiesTest {
       });
   }
 
+  @Test
+  void whenPaymentsReportingBaseDirectoryDoesNotExistThenValidationFails() {
+    ExistingDirectories existingDirectories = createExistingDirectories();
+    ExtractorExportProperties properties = new ExtractorExportProperties(
+      existingDirectories.storagePath().toString(),
+      existingDirectories.tempBaseDir().toString(),
+      "12345678901",
+      "IPA_CODE",
+      Map.of(MigrationFileType.ORGANIZATIONS, new ExtractorExportProperties.FileTypeConfiguration(1000)),
+      new ExtractorExportProperties.PaymentsReportingConfiguration(
+        existingDirectories.tempBaseDir().resolve("missing").toString()
+      )
+    );
+
+    assertThrows(IllegalStateException.class, properties::validateDirectoriesExist);
+  }
+
   private String[] validPropertyValues(ExistingDirectories existingDirectories) {
     return new String[]{
       "extractor.export.storage-path=" + existingDirectories.storagePath(),
       "extractor.export.temp-base-dir=" + existingDirectories.tempBaseDir(),
       "extractor.export.broker-cf=12345678901",
       "extractor.export.broker-ipa-code=IPA_CODE",
+      "extractor.export.payments-reporting.base-directory=" + existingDirectories.tempBaseDir(),
       "extractor.export.file-type-configurations.ORGANIZATIONS.export-page-size=1000"
     };
   }

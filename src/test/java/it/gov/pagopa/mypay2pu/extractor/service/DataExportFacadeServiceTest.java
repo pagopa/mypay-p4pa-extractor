@@ -13,6 +13,7 @@ import it.gov.pagopa.mypay2pu.extractor.service.export.debtpositiontypeorg.DebtP
 import it.gov.pagopa.mypay2pu.extractor.service.export.organization.OrganizationExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.orgsil.OrgSilServiceExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.paymentnotification.PaymentNotificationExportProcessingService;
+import it.gov.pagopa.mypay2pu.extractor.service.export.paymentsreporting.PaymentsReportingExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.treasurycsvcomplete.TreasuryCsvCompleteExportProcessingService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -53,6 +54,8 @@ class DataExportFacadeServiceTest {
   private AssessmentsExportProcessingService assessmentsExportProcessingServiceMock;
   @Mock
   private TreasuryCsvCompleteExportProcessingService treasuryCsvCompleteExportProcessingServiceMock;
+  @Mock
+  private PaymentsReportingExportProcessingService paymentsReportingExportProcessingServiceMock;
 
   @InjectMocks
   private DataExportFacadeService service;
@@ -70,7 +73,8 @@ class DataExportFacadeServiceTest {
         debtPositionPaidExportProcessingServiceMock,
         paymentNotificationExportProcessingServiceMock,
         assessmentsExportProcessingServiceMock,
-        treasuryCsvCompleteExportProcessingServiceMock
+        treasuryCsvCompleteExportProcessingServiceMock,
+        paymentsReportingExportProcessingServiceMock
       )
     );
   }
@@ -122,6 +126,10 @@ class DataExportFacadeServiceTest {
       case ASSESSMENTS -> {
         expected = new ExportFileResult(List.of("assessments_1_0.zip"), null);
         when(assessmentsExportProcessingServiceMock.executeExport(extractionId, request)).thenReturn(expected);
+      }
+      case PAYMENTS_REPORTING -> {
+        expected = new ExportFileResult(List.of("payments_reporting_1_0.zip"), null);
+        when(paymentsReportingExportProcessingServiceMock.executeExport(extractionId, request)).thenReturn(expected);
       }
       default -> {
         ExportFileTypeNotSupportedException exception = assertThrows(

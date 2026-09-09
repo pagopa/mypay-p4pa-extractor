@@ -129,6 +129,8 @@ extractor:
         export-page-size: "\${EXPORT_PAGE_SIZE_ASSESSMENTS:1000}"
       ASSESSMENTS_REGISTRY:
         export-page-size: "\${EXPORT_PAGE_SIZE_ASSESSMENTS_REGISTRY:1000}"
+    payments-reporting:
+      base-directory: "\${PAYMENTS_REPORTING_BASE_DIRECTORY:\${TMP_FOLDER:\${java.io.tmpdir}}}"
   basic-auth:
     username: "\${CLIENT_ID:client}"
     password: "\${CLIENT_SECRET:secret}"
