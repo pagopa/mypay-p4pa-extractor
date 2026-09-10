@@ -73,10 +73,14 @@ public abstract class BaseExportProcessingService<C> {
                                String extractionId, Path workingDirectory) throws IOException {
     List<String> names = new ArrayList<>(2);
     Path targetDirectory = Path.of(exportProperties.storagePath()).resolve(extractionId);
+    List<List<Path>> fileGroups = result.fileGroups();
+    List<String> archiveBaseNames = getArchiveBaseNames(nameBuilder, fileGroups.size());
+    for (int groupIndex = 0; groupIndex < fileGroups.size(); groupIndex++) {
+      Path zipPath = workingDirectory.resolve(archiveBaseNames.get(groupIndex) + ".zip");
+      fileArchiverService.compressAndArchive(fileGroups.get(groupIndex), zipPath, targetDirectory);
+      names.add(zipPath.getFileName().toString());
+    }
     String archiveBaseName = getArchiveBaseName(nameBuilder);
-    Path zipPath = workingDirectory.resolve(archiveBaseName + ".zip");
-    fileArchiverService.compressAndArchive(result.files(), zipPath, targetDirectory);
-    names.add(zipPath.getFileName().toString());
     if (!result.errorFiles().isEmpty()) {
       Path errorZipPath = workingDirectory.resolve(archiveBaseName + ".errors.zip");
       fileArchiverService.compressAndArchive(result.errorFiles(), errorZipPath, targetDirectory);
@@ -119,6 +123,14 @@ public abstract class BaseExportProcessingService<C> {
     return fileNameBuilder.buildZipBaseName();
   }
 
+  protected List<String> getArchiveBaseNames(ExportFileNameBuilder fileNameBuilder, int totalParts) {
+    List<String> archiveBaseNames = new ArrayList<>(totalParts);
+    for (int ignored = 0; ignored < totalParts; ignored++) {
+      archiveBaseNames.add(getArchiveBaseName(fileNameBuilder));
+    }
+    return archiveBaseNames;
+  }
+
   /** @return migration file type handled by the implementation */
   protected abstract MigrationFileType getMigrationFileType();
 
@@ -142,8 +154,8 @@ public abstract class BaseExportProcessingService<C> {
   /**
    * Artifacts produced by a format-specific export generation.
    *
-   * @param files normal export files
+   * @param fileGroups normal export file groups
    * @param errorFiles optional error-report files
    */
-  public record ExportGenerationResult(List<Path> files, List<Path> errorFiles) { }
+  public record ExportGenerationResult(List<List<Path>> fileGroups, List<Path> errorFiles) { }
 }

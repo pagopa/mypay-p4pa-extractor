@@ -18,7 +18,6 @@ import java.nio.file.Path;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.function.Supplier;
 
 @Service
 public class PaymentsReportingExportProcessingService
@@ -26,6 +25,7 @@ public class PaymentsReportingExportProcessingService
 
   private static final String ZIP_VERSION = "1.0";
   private final PaymentsReportingDao paymentsReportingDao;
+  private final PaymentsReportingPartitionWriterService paymentsReportingPartitionWriterService;
 
   public PaymentsReportingExportProcessingService(PaymentsReportingDao paymentsReportingDao,
                                                    PaymentsReportingPartitionWriterService partitionWriterService,
@@ -33,6 +33,7 @@ public class PaymentsReportingExportProcessingService
                                                    ExtractorExportProperties exportProperties) {
     super(partitionWriterService, fileArchiverService, exportProperties);
     this.paymentsReportingDao = paymentsReportingDao;
+                                                   this.paymentsReportingPartitionWriterService = partitionWriterService;
   }
 
   @Override
@@ -58,13 +59,19 @@ public class PaymentsReportingExportProcessingService
   }
 
   @Override
-  protected boolean useBrokerIpaAsPrefix() {
-    return false;
+  protected String getArchiveBaseName(ExportFileNameBuilder fileNameBuilder) {
+    return fileNameBuilder.buildBrokerOrganizationZipBaseName();
   }
 
   @Override
-  protected String getArchiveBaseName(ExportFileNameBuilder fileNameBuilder) {
-    return fileNameBuilder.buildOrganizationZipBaseName();
+  protected List<String> getArchiveBaseNames(ExportFileNameBuilder fileNameBuilder, int totalParts) {
+    List<String> archiveBaseNames = new ArrayList<>(totalParts);
+    for (int partNumber = 1; partNumber <= totalParts; partNumber++) {
+      archiveBaseNames.add(totalParts == 1
+        ? getArchiveBaseName(fileNameBuilder)
+        : fileNameBuilder.buildBrokerOrganizationZipPartBaseName(partNumber));
+    }
+    return archiveBaseNames;
   }
 
   @Override
@@ -75,13 +82,25 @@ public class PaymentsReportingExportProcessingService
     String logicalKey = filters != null ? filters.getLogicalKey() : null;
     OffsetDateTime dateFrom = filters != null ? filters.getDateFrom() : null;
     OffsetDateTime dateTo = filters != null ? filters.getDateTo() : null;
-    Supplier<List<String>> rows = new PaginatedExportRowsSupplier<>(
+    PaginatedExportRowsSupplier<String> rows = new PaginatedExportRowsSupplier<>(
       (limit, offset) -> retrieveFiles(request.getIpaCodes().getFirst(), request.getLastExtractionDate(),
         logicalKey, dateFrom, dateTo, limit, offset),
       pageSize
     );
+    List<List<Path>> fileGroups = new ArrayList<>();
+    List<String> files;
+    int partNumber = 1;
+    while (!(files = rows.get()).isEmpty()) {
+      fileGroups.add(paymentsReportingPartitionWriterService.copyFiles(
+        workingDirectory.resolve("part%03d".formatted(partNumber++)),
+        files
+      ));
+    }
+    if (fileGroups.isEmpty()) {
+      fileGroups.add(List.of());
+    }
     return new ExportGenerationResult(
-      partitionWriter().writePartitions(workingDirectory, fileNameBuilder, String.class, rows, ZIP_VERSION, pageSize),
+      fileGroups,
       List.of()
     );
   }

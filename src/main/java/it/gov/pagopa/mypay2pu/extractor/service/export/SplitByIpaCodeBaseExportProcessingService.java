@@ -51,10 +51,10 @@ public abstract class SplitByIpaCodeBaseExportProcessingService<E extends Export
       ExportGenerationResult result = super.generateExport(singleRequest, workingDirectory, pageSize,
         new ExportFileNameBuilder(fileNameBuilder.brokerIpaCode(), ipaCode, false,
           fileNameBuilder.migrationFileType(), fileNameBuilder.timestamp(), fileNameBuilder.version()));
-      files.addAll(result.files());
+      result.fileGroups().forEach(files::addAll);
       errorFiles.addAll(result.errorFiles());
     }
-    return new ExportGenerationResult(files, errorFiles);
+    return new ExportGenerationResult(List.of(files), errorFiles);
   }
 
   @Override

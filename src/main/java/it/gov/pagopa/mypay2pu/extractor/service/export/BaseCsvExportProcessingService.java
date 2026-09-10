@@ -56,7 +56,7 @@ public abstract class BaseCsvExportProcessingService<E extends ExportModel, C ex
         workingDirectory, fileNameBuilder, getDtoClass(), rowsSupplier, getZipVersion(), pageSize
       );
       Optional<Path> errorFile = errorCollector.writeToFile(baseCsvFilePath);
-      return new ExportGenerationResult(csvFiles, errorFile.map(List::of).orElseGet(List::of));
+      return new ExportGenerationResult(List.of(csvFiles), errorFile.map(List::of).orElseGet(List::of));
     }
   }
 

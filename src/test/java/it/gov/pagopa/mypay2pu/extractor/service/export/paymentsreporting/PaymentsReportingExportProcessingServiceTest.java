@@ -43,7 +43,7 @@ class PaymentsReportingExportProcessingServiceTest {
   }
 
   @Test
-  void givenDateRangeAndMissingXmlWhenExportThenSkipMissingFileAndCreateZipPreservingXmlName() throws Exception {
+  void givenMultiplePagesAndMissingXmlWhenExportThenCreateOneZipPerPagePreservingXmlNames() throws Exception {
     Path xmlFile = tempDir.resolve("xml").resolve("report.xml");
     Files.createDirectories(xmlFile.getParent());
     Files.writeString(xmlFile, "<report>content</report>");
@@ -59,16 +59,18 @@ class PaymentsReportingExportProcessingServiceTest {
 
     ExportFileResult result = service().executeExport("extraction-id", request);
 
-    assertEquals(1, result.files().size());
-    assertTrue(result.files().getFirst().matches("IPA_CODE-PAYMENTS_REPORTING-\\d{14}-1\\.0\\.zip"));
-    Path zipPath = tempDir.resolve("extraction-id").resolve(result.files().getFirst());
-    assertTrue(Files.exists(zipPath));
-    try (ZipFile zipFile = new ZipFile(zipPath.toFile())) {
-      assertEquals(2, zipFile.size());
+    assertEquals(2, result.files().size());
+    assertTrue(result.files().get(0).matches("BROKER_IPA-IPA_CODE-PAYMENTS_REPORTING-\\d{14}-part001-1\\.0\\.zip"));
+    assertTrue(result.files().get(1).matches("BROKER_IPA-IPA_CODE-PAYMENTS_REPORTING-\\d{14}-part002-1\\.0\\.zip"));
+    try (ZipFile zipFile = new ZipFile(tempDir.resolve("extraction-id").resolve(result.files().get(0)).toFile())) {
+      assertEquals(1, zipFile.size());
       assertEquals(
         "<report>content</report>",
         new String(zipFile.getInputStream(zipFile.getEntry("report.xml")).readAllBytes(), StandardCharsets.UTF_8)
       );
+    }
+    try (ZipFile zipFile = new ZipFile(tempDir.resolve("extraction-id").resolve(result.files().get(1)).toFile())) {
+      assertEquals(1, zipFile.size());
       assertEquals(
         "<report>second-content</report>",
         new String(zipFile.getInputStream(zipFile.getEntry("second-report.xml")).readAllBytes(), StandardCharsets.UTF_8)
@@ -111,8 +113,8 @@ class PaymentsReportingExportProcessingServiceTest {
     ExportFileResult result = service().executeExport("extraction-id", request);
 
     assertEquals(2, result.files().size());
-    assertTrue(result.files().stream().anyMatch(fileName -> fileName.startsWith("IPA_1-PAYMENTS_REPORTING-")));
-    assertTrue(result.files().stream().anyMatch(fileName -> fileName.startsWith("IPA_2-PAYMENTS_REPORTING-")));
+    assertTrue(result.files().stream().anyMatch(fileName -> fileName.startsWith("BROKER_IPA-IPA_1-PAYMENTS_REPORTING-")));
+    assertTrue(result.files().stream().anyMatch(fileName -> fileName.startsWith("BROKER_IPA-IPA_2-PAYMENTS_REPORTING-")));
     result.files().forEach(fileName -> assertTrue(Files.exists(tempDir.resolve("extraction-id").resolve(fileName))));
     verify(paymentsReportingDaoMock).findByDateRange("IPA_1", null, null, null, 2, 0);
     verify(paymentsReportingDaoMock).findByDateRange("IPA_2", null, null, null, 2, 0);
