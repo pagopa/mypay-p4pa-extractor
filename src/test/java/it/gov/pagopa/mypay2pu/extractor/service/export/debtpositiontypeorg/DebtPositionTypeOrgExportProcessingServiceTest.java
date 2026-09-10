@@ -129,7 +129,7 @@ class DebtPositionTypeOrgExportProcessingServiceTest {
     ExportFileResult result = service.executeExport("IPA_CODE", request);
 
     assertNull(result.error());
-    assertEquals(1, result.files().size());
+    assertEquals(2, result.files().size());
     Path archivePath = tempDir.resolve("IPA_CODE").resolve(result.files().get(0));
     List<String> archiveEntries = ZipUtils.readZipEntries(archivePath);
     assertEquals(1, archiveEntries.size());
@@ -175,7 +175,9 @@ class DebtPositionTypeOrgExportProcessingServiceTest {
       "FORM_" + suffix,
       "service_" + suffix,
       false,
-      false
+      false,
+      "taxonomy_" + suffix,
+      "orgType_" + suffix
     );
   }
 
@@ -205,6 +207,8 @@ class DebtPositionTypeOrgExportProcessingServiceTest {
       "",
       "",
       "",
+      null,
+      null,
       null,
       null,
       null,
