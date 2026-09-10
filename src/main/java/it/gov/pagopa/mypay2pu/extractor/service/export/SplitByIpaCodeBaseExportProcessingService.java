@@ -9,6 +9,7 @@ import it.gov.pagopa.mypay2pu.extractor.service.files.CsvService;
 import jakarta.validation.Validator;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -26,10 +27,10 @@ import java.util.List;
  * @param <C> CSV export DTO type
  */
 public abstract class SplitByIpaCodeBaseExportProcessingService<E extends ExportModel, C extends CsvExportDto>
-  extends BaseExportProcessingService<E, C> {
+  extends BaseCsvExportProcessingService<E, C> {
 
   protected SplitByIpaCodeBaseExportProcessingService(CsvService csvService,
-                                                       CsvPartitionWriterService csvPartitionWriterService,
+                                                       CsvPartitionWriterService<C> csvPartitionWriterService,
                                                        FileArchiverService fileArchiverService,
                                                        Validator validator,
                                                        ExtractorExportProperties exportProperties) {
@@ -37,24 +38,23 @@ public abstract class SplitByIpaCodeBaseExportProcessingService<E extends Export
   }
 
   @Override
-  protected void executeExport(ExtractionRequest request,
-                               Path workingDirectory,
-                               int pageSize,
-                               List<Path> csvFilePaths,
-                               List<Path> errorFilePaths) throws IOException {
+  protected ExportGenerationResult generateExport(ExtractionRequest request,
+                                                  Path workingDirectory,
+                                                  int pageSize,
+                                                  ExportFileNameBuilder fileNameBuilder) throws IOException {
+    List<Path> files = new ArrayList<>();
+    List<Path> errorFiles = new ArrayList<>();
     for (String ipaCode : request.getIpaCodes()) {
-      ExtractionRequest singleRequest = request.toBuilder()
-        .ipaCodes(List.of(ipaCode))
-        .build();
-
-      super.executeExport(
-        singleRequest,
-        workingDirectory,
-        pageSize,
-        csvFilePaths,
-        errorFilePaths
+      ExtractionRequest singleRequest = new ExtractionRequest(
+        List.of(ipaCode), request.getFileTypes(), request.getLastExtractionDate(), request.getFilters()
       );
+      ExportGenerationResult result = super.generateExport(singleRequest, workingDirectory, pageSize,
+        new ExportFileNameBuilder(fileNameBuilder.brokerIpaCode(), ipaCode, false,
+          fileNameBuilder.migrationFileType(), fileNameBuilder.timestamp(), fileNameBuilder.version()));
+      files.addAll(result.files());
+      errorFiles.addAll(result.errorFiles());
     }
+    return new ExportGenerationResult(files, errorFiles);
   }
 
   @Override

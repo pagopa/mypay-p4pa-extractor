@@ -10,7 +10,7 @@ import it.gov.pagopa.mypay2pu.extractor.exception.CsvRowMappingException;
 import it.gov.pagopa.mypay2pu.extractor.mapper.organization.OrganizationMapper;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.Organization;
 import it.gov.pagopa.mypay2pu.extractor.service.FileArchiverService;
-import it.gov.pagopa.mypay2pu.extractor.service.export.BaseExportProcessingService;
+import it.gov.pagopa.mypay2pu.extractor.service.export.BaseCsvExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.CsvPartitionWriterService;
 import it.gov.pagopa.mypay2pu.extractor.service.files.CsvService;
 import it.gov.pagopa.mypay2pu.extractor.service.files.ZipFileService;
@@ -57,7 +57,7 @@ class OrganizationExportProcessingServiceTest {
       organizationDaoMock,
       organizationMapperMock,
       csvService,
-      new CsvPartitionWriterService(csvService),
+      new CsvPartitionWriterService<>(csvService),
       new FileArchiverService(false, "test-password", new ZipFileService()),
       Validation.buildDefaultValidatorFactory().getValidator(),
       exportProperties()
@@ -217,7 +217,7 @@ class OrganizationExportProcessingServiceTest {
 
   @Test
   void whenCheckingSuperclassThenServiceIsAggregated() {
-    assertEquals(BaseExportProcessingService.class, service.getClass().getSuperclass());
+    assertEquals(BaseCsvExportProcessingService.class, service.getClass().getSuperclass());
   }
 
   private ExtractorExportProperties exportProperties() {

@@ -3,6 +3,7 @@ package it.gov.pagopa.mypay2pu.extractor.service.export.assessments;
 import it.gov.pagopa.mypay2pu.extractor.config.ExtractorExportProperties;
 import it.gov.pagopa.mypay2pu.extractor.dao.AssessmentsDao;
 import it.gov.pagopa.mypay2pu.extractor.dto.export.PuAssessmentsDTO;
+import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionFilters;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.mapper.assessments.AssessmentsMapper;
@@ -26,7 +27,7 @@ public class AssessmentsExportProcessingService extends SplitByIpaCodeBaseExport
   protected AssessmentsExportProcessingService(AssessmentsDao assessmentsDao,
                                                AssessmentsMapper assessmentsMapper,
                                                CsvService csvService,
-                                               CsvPartitionWriterService csvPartitionWriterService,
+                                               CsvPartitionWriterService<PuAssessmentsDTO> csvPartitionWriterService,
                                                FileArchiverService fileArchiverService,
                                                Validator validator,
                                                ExtractorExportProperties exportProperties) {
@@ -57,12 +58,13 @@ public class AssessmentsExportProcessingService extends SplitByIpaCodeBaseExport
 
   @Override
   protected List<Assessments> retrieveData(String ipaCode, ExtractionRequest request, int pageSize, int offset) {
+    ExtractionFilters filters = request.getFilters();
     return assessmentsDao.findByFilters(
       ipaCode,
       request.getLastExtractionDate(),
-      ValueLogicalKeyValidator.parseLogicalKey(request.getFilters().getLogicalKey()),
-      request.getFilters().getDateFrom(),
-      request.getFilters().getDateTo(),
+      ValueLogicalKeyValidator.parseLogicalKey(filters != null ? filters.getLogicalKey() : null),
+      filters != null ? filters.getDateFrom() : null,
+      filters != null ? filters.getDateTo() : null,
       pageSize,
       offset
     );

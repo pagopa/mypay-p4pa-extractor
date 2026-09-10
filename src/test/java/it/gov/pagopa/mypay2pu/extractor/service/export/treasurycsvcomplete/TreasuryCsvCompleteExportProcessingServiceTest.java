@@ -55,7 +55,7 @@ class TreasuryCsvCompleteExportProcessingServiceTest {
     CsvService csvService = new CsvService(';', '"');
     validatorFactory = Validation.buildDefaultValidatorFactory();
     service = new TreasuryCsvCompleteExportProcessingService(
-      treasuryDaoMock, treasuryMapperMock, csvService, new CsvPartitionWriterService(csvService),
+      treasuryDaoMock, treasuryMapperMock, csvService, new CsvPartitionWriterService<>(csvService),
       new FileArchiverService(false, "password", new ZipFileService()),
       validatorFactory.getValidator(), properties()
     );

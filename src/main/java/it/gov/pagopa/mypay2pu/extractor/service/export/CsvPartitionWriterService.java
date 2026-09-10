@@ -20,7 +20,7 @@ import java.util.function.Supplier;
  * partitioning when the configured row threshold is exceeded.</p>
  */
 @Service
-public class CsvPartitionWriterService {
+public class CsvPartitionWriterService<C extends CsvExportDto> implements PartitionWriterService<C> {
 
   private final CsvService csvService;
 
@@ -41,18 +41,19 @@ public class CsvPartitionWriterService {
    * @return generated CSV paths in deterministic order
    * @throws IOException if file creation or renaming fails
    */
-  public <T extends CsvExportDto> List<Path> writeCsv(Path workingDirectory,
-                                                      ExportFileNameBuilder fileNameBuilder,
-                                                      Class<T> typeClass,
-                                                      Supplier<List<T>> sourceSupplier,
-                                                      String csvProfile,
-                                                      int maxRowsPerPart) throws IOException {
+  @Override
+  public <T extends C> List<Path> writePartitions(Path workingDirectory,
+                                    ExportFileNameBuilder fileNameBuilder,
+                                    Class<T> typeClass,
+                                    Supplier<? extends List<? extends T>> sourceSupplier,
+                                    String csvProfile,
+                                    int maxRowsPerPart) throws IOException {
     if (maxRowsPerPart <= 0) {
       throw new IllegalArgumentException("Max rows per part must be positive");
     }
 
     Supplier<List<T>> partitionedRowsSupplier =
-      new BufferedPageSupplier<>(sourceSupplier, maxRowsPerPart);
+      new BufferedPageSupplier<>(() -> List.copyOf(sourceSupplier.get()), maxRowsPerPart);
 
     List<Path> partPaths = new ArrayList<>();
     int partNumber = 1;
@@ -103,9 +104,9 @@ public class CsvPartitionWriterService {
    * @param <C>        CSV export DTO type
    * @throws IOException if the CSV partition cannot be created or written
    */
-  private <C extends CsvExportDto> void writePart(Path partPath,
-                                                  Class<C> typeClass,
-                                                  List<C> rows,
+  private <T extends C> void writePart(Path partPath,
+                                                  Class<T> typeClass,
+                                                  List<T> rows,
                                                   String csvProfile) throws IOException {
     AtomicBoolean delivered = new AtomicBoolean();
 

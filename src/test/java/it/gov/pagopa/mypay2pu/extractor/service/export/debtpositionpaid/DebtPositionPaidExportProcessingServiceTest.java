@@ -64,7 +64,7 @@ class DebtPositionPaidExportProcessingServiceTest {
       debtPositionPaidDaoMock,
       debtPositionPaidMapperMock,
       csvService,
-      new CsvPartitionWriterService(csvService),
+      new CsvPartitionWriterService<>(csvService),
       new FileArchiverService(false, "test-password", new ZipFileService()),
       validatorFactory.getValidator(),
       exportProperties()

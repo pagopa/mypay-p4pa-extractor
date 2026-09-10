@@ -31,7 +31,7 @@ public class DebtPositionPaidExportProcessingService
     DebtPositionPaidDao debtPositionPaidDao,
     DebtPositionPaidMapper debtPositionPaidMapper,
     CsvService csvService,
-    CsvPartitionWriterService csvPartitionWriterService,
+    CsvPartitionWriterService<PuDebtPositionPaidDTO> csvPartitionWriterService,
     FileArchiverService fileArchiverService,
     Validator validator,
     ExtractorExportProperties exportProperties

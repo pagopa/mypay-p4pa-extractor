@@ -24,7 +24,7 @@ class CsvPartitionWriterServiceTest {
   @TempDir
   Path tempDir;
 
-  private final CsvPartitionWriterService service = new CsvPartitionWriterService(new CsvService(';', '"'));
+  private final CsvPartitionWriterService<TestCsv> service = new CsvPartitionWriterService<>(new CsvService(';', '"'));
 
   @Test
   void whenRowsExceedThresholdThenWriteMultiplePartsWithDeterministicNames() throws IOException {
@@ -34,7 +34,7 @@ class CsvPartitionWriterServiceTest {
       testCsv("A3", "B3")
     ));
 
-    List<Path> generatedPaths = service.writeCsv(tempDir, getFileNameBuilder(), TestCsv.class, supplier, "1_0", 2);
+    List<Path> generatedPaths = service.writePartitions(tempDir, getFileNameBuilder(), TestCsv.class, supplier, "1_0", 2);
 
     assertEquals(2, generatedPaths.size());
     assertEquals(getFileNameBuilder().buildCsvPartFileName(1), generatedPaths.get(0).getFileName().toString());
@@ -53,7 +53,7 @@ class CsvPartitionWriterServiceTest {
       testCsv("A2", "B2")
     ));
 
-    List<Path> generatedPaths = service.writeCsv(tempDir, getFileNameBuilder(), TestCsv.class, supplier, "1_0", 2);
+    List<Path> generatedPaths = service.writePartitions(tempDir, getFileNameBuilder(), TestCsv.class, supplier, "1_0", 2);
 
     assertEquals(1, generatedPaths.size());
     assertEquals(csvFilePath, generatedPaths.get(0));
@@ -64,7 +64,7 @@ class CsvPartitionWriterServiceTest {
   void whenNoRowsThenCreateSingleEmptyBaseFile() throws IOException {
     Path csvFilePath = tempDir.resolve(getFileNameBuilder().buildCsvFileName());
 
-    List<Path> generatedPaths = service.writeCsv(tempDir, getFileNameBuilder(), TestCsv.class, List::of, "1_0", 2);
+    List<Path> generatedPaths = service.writePartitions(tempDir, getFileNameBuilder(), TestCsv.class, List::of, "1_0", 2);
 
     assertEquals(1, generatedPaths.size());
     assertEquals(csvFilePath, generatedPaths.get(0));
@@ -77,7 +77,7 @@ class CsvPartitionWriterServiceTest {
     IllegalArgumentException exception = assertThrows(
       IllegalArgumentException.class,
       () -> {
-        service.writeCsv(tempDir, fileNameBuilder, TestCsv.class, List::of, "1_0", 0);
+        service.writePartitions(tempDir, fileNameBuilder, TestCsv.class, List::of, "1_0", 0);
       }
     );
     assertEquals("Max rows per part must be positive", exception.getMessage());

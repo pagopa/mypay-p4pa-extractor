@@ -22,6 +22,10 @@ public record ExportFileNameBuilder(
     return buildBaseName(brokerIpaCode, null);
   }
 
+  public String buildOrganizationZipBaseName() {
+    return buildBaseName(resolveCsvIpaCode(), null);
+  }
+
   public String buildCsvFileName() {
     return buildBaseName(resolveCsvIpaCode(), null) + ".csv";
   }

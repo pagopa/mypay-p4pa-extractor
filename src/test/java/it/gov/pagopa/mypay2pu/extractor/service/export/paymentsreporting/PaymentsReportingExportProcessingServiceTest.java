@@ -2,6 +2,7 @@ package it.gov.pagopa.mypay2pu.extractor.service.export.paymentsreporting;
 
 import it.gov.pagopa.mypay2pu.extractor.config.ExtractorExportProperties;
 import it.gov.pagopa.mypay2pu.extractor.dao.PaymentsReportingDao;
+import it.gov.pagopa.mypay2pu.extractor.service.FileArchiverService;
 import it.gov.pagopa.mypay2pu.extractor.dto.ExportFileResult;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionFilters;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
@@ -59,7 +60,7 @@ class PaymentsReportingExportProcessingServiceTest {
     ExportFileResult result = service().executeExport("extraction-id", request);
 
     assertEquals(1, result.files().size());
-    assertTrue(result.files().getFirst().matches("IPA_CODE_1\\.0_\\d{14}\\.zip"));
+    assertTrue(result.files().getFirst().matches("IPA_CODE-PAYMENTS_REPORTING-\\d{14}-1\\.0\\.zip"));
     Path zipPath = tempDir.resolve("extraction-id").resolve(result.files().getFirst());
     assertTrue(Files.exists(zipPath));
     try (ZipFile zipFile = new ZipFile(zipPath.toFile())) {
@@ -78,10 +79,10 @@ class PaymentsReportingExportProcessingServiceTest {
   }
 
   @Test
-  void givenLogicalKeyAndMissingXmlWhenExportThenSkipMissingFileAndCreateEmptyZip() throws Exception {
+  void givenLogicalKeyAndNoXmlWhenExportThenCreateEmptyZip() throws Exception {
     ExtractionRequest request = request(new ExtractionFilters().logicalKey("FLOW-1"));
     when(paymentsReportingDaoMock.findByLogicalKey("IPA_CODE", "FLOW-1", 2, 0))
-      .thenReturn(List.of("missing.xml"));
+      .thenReturn(List.of());
 
     ExportFileResult result = service().executeExport("extraction-id", request);
 
@@ -93,15 +94,41 @@ class PaymentsReportingExportProcessingServiceTest {
     verify(paymentsReportingDaoMock).findByLogicalKey("IPA_CODE", "FLOW-1", 2, 0);
   }
 
+  @Test
+  void givenMultipleIpaCodesWhenExportThenCreateOneZipForEachIpaCode() throws Exception {
+    Path firstXmlFile = tempDir.resolve("first.xml");
+    Path secondXmlFile = tempDir.resolve("second.xml");
+    Files.writeString(firstXmlFile, "<report>first</report>");
+    Files.writeString(secondXmlFile, "<report>second</report>");
+    ExtractionRequest request = new ExtractionRequest(
+      List.of("IPA_1", "IPA_2"), MigrationFileType.PAYMENTS_REPORTING, null, null
+    );
+    when(paymentsReportingDaoMock.findByDateRange("IPA_1", null, null, null, 2, 0))
+      .thenReturn(List.of("first.xml"));
+    when(paymentsReportingDaoMock.findByDateRange("IPA_2", null, null, null, 2, 0))
+      .thenReturn(List.of("second.xml"));
+
+    ExportFileResult result = service().executeExport("extraction-id", request);
+
+    assertEquals(2, result.files().size());
+    assertTrue(result.files().stream().anyMatch(fileName -> fileName.startsWith("IPA_1-PAYMENTS_REPORTING-")));
+    assertTrue(result.files().stream().anyMatch(fileName -> fileName.startsWith("IPA_2-PAYMENTS_REPORTING-")));
+    result.files().forEach(fileName -> assertTrue(Files.exists(tempDir.resolve("extraction-id").resolve(fileName))));
+    verify(paymentsReportingDaoMock).findByDateRange("IPA_1", null, null, null, 2, 0);
+    verify(paymentsReportingDaoMock).findByDateRange("IPA_2", null, null, null, 2, 0);
+  }
+
   private PaymentsReportingExportProcessingService service() {
-    return new PaymentsReportingExportProcessingService(
-      paymentsReportingDaoMock,
-      new ExtractorExportProperties(
+    ExtractorExportProperties properties = new ExtractorExportProperties(
         tempDir.toString(), tempDir.toString(), "BROKER_CF", "BROKER_IPA",
         Map.of(MigrationFileType.PAYMENTS_REPORTING, new ExtractorExportProperties.FileTypeConfiguration(2)),
         new ExtractorExportProperties.PaymentsReportingConfiguration(tempDir.toString())
-      ),
-      new ZipFileService()
+    );
+    return new PaymentsReportingExportProcessingService(
+      paymentsReportingDaoMock,
+      new PaymentsReportingPartitionWriterService(properties),
+      new FileArchiverService(false, "test-password", new ZipFileService()),
+      properties
     );
   }
 
