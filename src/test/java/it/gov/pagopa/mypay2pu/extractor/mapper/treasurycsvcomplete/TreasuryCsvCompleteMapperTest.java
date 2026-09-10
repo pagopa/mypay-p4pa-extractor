@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
+import java.time.ZoneOffset;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -37,7 +38,7 @@ class TreasuryCsvCompleteMapperTest {
     assertEquals("IPA1", result.getOrganizationIpaCode());
     assertEquals(150025L, result.getBillAmountCents());
     assertEquals(LocalDate.of(2026, Month.JANUARY, 10), result.getBillDate());
-    assertEquals(LocalDateTime.of(2026, Month.JANUARY, 10, 10, 1), result.getReceptionDate());
+    assertEquals(LocalDateTime.of(2026, Month.JANUARY, 10, 10, 1).atOffset(ZoneOffset.UTC), result.getReceptionDate());
     assertEquals(123L, result.getProcessPgNumber());
     assertEquals(LocalDate.of(2026, Month.JANUARY, 10), result.getRegionValueDate());
     assertEquals(true, result.getIsRegularized());
