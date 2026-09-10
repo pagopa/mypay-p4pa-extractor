@@ -8,7 +8,7 @@ WITH ranked AS (
         etd.cod_tassonomico,
         e.cod_tipo_ente,
         ROW_NUMBER() OVER (
-            PARTITION BY etd.cod_tipo
+            PARTITION BY etd.cod_tipo, etd.cod_tassonomico, e.cod_tipo_ente
             ORDER BY etd.mygov_ente_tipo_dovuto_id ASC
         ) AS rn
     FROM mygov_ente_tipo_dovuto etd
