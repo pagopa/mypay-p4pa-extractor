@@ -4,8 +4,7 @@ import it.gov.pagopa.mypay2pu.extractor.dto.export.PuTreasuryCsvCompleteDTO;
 import it.gov.pagopa.mypay2pu.extractor.model.mpv4.TreasuryCsvComplete;
 import org.springframework.stereotype.Component;
 
-import java.time.ZoneOffset;
-
+import static it.gov.pagopa.mypay2pu.extractor.utils.Constants.ZONEID;
 import static it.gov.pagopa.mypay2pu.extractor.utils.DateTimeUtils.toLocalDate;
 import static it.gov.pagopa.mypay2pu.extractor.utils.CurrencyUtils.toCents;
 
@@ -28,7 +27,7 @@ public class TreasuryCsvCompleteMapper {
       .remittanceDescription(treasury.deCausale())
       .billAmountCents(toCents(treasury.numIpBolletta()))
       .billDate(toLocalDate(treasury.dtBolletta()))
-      .receptionDate(treasury.dtRicezione() != null ? treasury.dtRicezione().atOffset(ZoneOffset.UTC) : null)
+      .receptionDate(treasury.dtRicezione() == null ? null : treasury.dtRicezione().atZone(ZONEID).toOffsetDateTime())
       .documentYear(treasury.deAnnoDocumento())
       .documentCode(treasury.codDocumento())
       .sealCode(treasury.codBollo())
