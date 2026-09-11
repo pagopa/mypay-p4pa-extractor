@@ -1,6 +1,7 @@
 package it.gov.pagopa.mypay2pu.extractor.service.files;
 
 import it.gov.pagopa.mypay2pu.extractor.exception.InvalidCsvRowException;
+import it.gov.pagopa.mypay2pu.extractor.dto.export.PuTreasuryCsvCompleteDTO;
 import org.junit.jupiter.api.Test;
 import uk.co.jemos.podam.api.PodamFactory;
 import uk.co.jemos.podam.api.PodamFactoryImpl;
@@ -11,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.Month;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -155,6 +157,28 @@ class CsvServiceTest {
         List<String> rows = Files.readAllLines(filePath);
 
         assertEquals("Data1;\"{\"\"fieldBeans\"\":[]}\";2026-01-01", rows.get(1));
+    }
+
+    @Test
+    void testCreateCsvFromBean_treasuryReceptionDateIncludesOffset() throws IOException {
+        Path filePath = Path.of("build", "tmp", "test", "TREASURY.csv");
+        PuTreasuryCsvCompleteDTO treasury = PuTreasuryCsvCompleteDTO.builder()
+          .receptionDate(OffsetDateTime.parse("2026-02-25T07:15:14Z"))
+          .build();
+        AtomicBoolean supplierCalled = new AtomicBoolean(false);
+
+        csvService.createCsv(filePath, PuTreasuryCsvCompleteDTO.class, () -> {
+            if (supplierCalled.get()) {
+                return Collections.emptyList();
+            }
+            supplierCalled.set(true);
+            return List.of(treasury);
+        }, PuTreasuryCsvCompleteDTO.VERSION);
+
+        List<String> rows = Files.readAllLines(filePath);
+        int receptionDateIndex = List.of(rows.getFirst().split(";")).indexOf("dataRicezione");
+
+        assertEquals("2026-02-25T07:15:14Z", rows.get(1).split(";", -1)[receptionDateIndex]);
     }
 
     @Test
