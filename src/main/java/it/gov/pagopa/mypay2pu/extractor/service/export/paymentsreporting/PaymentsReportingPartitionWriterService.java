@@ -39,17 +39,17 @@ public class PaymentsReportingPartitionWriterService implements PartitionWriterS
     List<Path> copiedFiles = new ArrayList<>();
     List<? extends T> files;
     while (!(files = sourceSupplier.get()).isEmpty()) {
-      copiedFiles.addAll(copyFiles(workingDirectory, List.copyOf(files)));
+      copiedFiles.addAll(copyFiles(workingDirectory, fileNameBuilder.organizationIpaCode(), List.copyOf(files)));
     }
     return List.copyOf(copiedFiles);
   }
 
-  public List<Path> copyFiles(Path workingDirectory, List<String> fileNames) throws IOException {
+  public List<Path> copyFiles(Path workingDirectory, String ipaCode, List<String> fileNames) throws IOException {
     Files.createDirectories(workingDirectory);
     List<Path> copiedFiles = new ArrayList<>();
     for (String fileName : fileNames) {
       Path source = Path.of(fileName);
-      source = source.isAbsolute() ? source : myPayDirectory.resolve(source);
+      source = source.isAbsolute() ? source : myPayDirectory.resolve(ipaCode).resolve(source);
       if (!Files.isRegularFile(source)) {
         log.error("Payments reporting XML file not found: {}", source);
         continue;

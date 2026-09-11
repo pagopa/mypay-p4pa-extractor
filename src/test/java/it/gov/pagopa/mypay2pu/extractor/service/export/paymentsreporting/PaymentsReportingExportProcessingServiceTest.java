@@ -44,10 +44,10 @@ class PaymentsReportingExportProcessingServiceTest {
 
   @Test
   void givenMultiplePagesAndMissingXmlWhenExportThenCreateOneZipPerPagePreservingXmlNames() throws Exception {
-    Path xmlFile = tempDir.resolve("xml").resolve("report.xml");
+    Path xmlFile = tempDir.resolve("IPA_CODE").resolve("xml").resolve("report.xml");
     Files.createDirectories(xmlFile.getParent());
     Files.writeString(xmlFile, "<report>content</report>");
-    Path secondXmlFile = tempDir.resolve("xml").resolve("second-report.xml");
+    Path secondXmlFile = tempDir.resolve("IPA_CODE").resolve("xml").resolve("second-report.xml");
     Files.writeString(secondXmlFile, "<report>second-content</report>");
     OffsetDateTime createdFrom = OffsetDateTime.parse("2026-01-01T00:00:00Z");
     OffsetDateTime createdTo = OffsetDateTime.parse("2026-01-31T23:59:59Z");
@@ -97,9 +97,30 @@ class PaymentsReportingExportProcessingServiceTest {
   }
 
   @Test
+  void givenAbsoluteXmlPathWhenExportThenCopyItWithoutAddingIpaCode() throws Exception {
+    Path xmlFile = tempDir.resolve("absolute-report.xml");
+    Files.writeString(xmlFile, "<report>absolute-content</report>");
+    ExtractionRequest request = request(null);
+    when(paymentsReportingDaoMock.findByDateRange("IPA_CODE", null, null, null, 2, 0))
+      .thenReturn(List.of(xmlFile.toString()));
+
+    ExportFileResult result = service().executeExport("extraction-id", request);
+
+    try (ZipFile zipFile = new ZipFile(tempDir.resolve("extraction-id").resolve(result.files().getFirst()).toFile())) {
+      assertEquals(
+        "<report>absolute-content</report>",
+        new String(zipFile.getInputStream(zipFile.getEntry("absolute-report.xml")).readAllBytes(), StandardCharsets.UTF_8)
+      );
+    }
+    verify(paymentsReportingDaoMock).findByDateRange("IPA_CODE", null, null, null, 2, 0);
+  }
+
+  @Test
   void givenMultipleIpaCodesWhenExportThenCreateOneZipForEachIpaCode() throws Exception {
-    Path firstXmlFile = tempDir.resolve("first.xml");
-    Path secondXmlFile = tempDir.resolve("second.xml");
+    Path firstXmlFile = tempDir.resolve("IPA_1").resolve("first.xml");
+    Path secondXmlFile = tempDir.resolve("IPA_2").resolve("second.xml");
+    Files.createDirectories(firstXmlFile.getParent());
+    Files.createDirectories(secondXmlFile.getParent());
     Files.writeString(firstXmlFile, "<report>first</report>");
     Files.writeString(secondXmlFile, "<report>second</report>");
     ExtractionRequest request = new ExtractionRequest(

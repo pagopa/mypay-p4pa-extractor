@@ -189,7 +189,7 @@ See [application.yml](src/main/resources/application.yml) for each configurable 
 | `CSV_SEPARATOR_CHAR` | Separator character used when generating CSV files | `;` |
 | `CSV_QUOTE_CHAR` | Quote character used when generating CSV files | `"` |
 | `FILE_ENCRYPT_ENABLED` | Enable the encryption of the extracted files. **Files are returned unencrypted via the `/extract/{id}/files` API regardless of this setting.** When encryption is enabled, it is the responsibility of the operator to ensure secure temporary storage and cleanup of extracted data. | `false` |
-| `PAYMENTS_REPORTING_BASE_DIRECTORY` | Existing MyPay directory used to resolve relative XML file names returned by the FESP payments-reporting query. Each XML is copied to the extractor temporary working directory before it is added to the export ZIP. Absolute paths are used unchanged. | `TMP_FOLDER` |
+| `PAYMENTS_REPORTING_BASE_DIRECTORY` | Existing MyPay directory used to resolve relative XML file names returned by the FESP payments-reporting query as `<base-directory>/<COD_PA_ENTE>/<file-name>`. Each XML is copied to the extractor temporary working directory before it is added to the export ZIP. Absolute paths are used unchanged. | `TMP_FOLDER` |
 
 ##### MyPay properties
 

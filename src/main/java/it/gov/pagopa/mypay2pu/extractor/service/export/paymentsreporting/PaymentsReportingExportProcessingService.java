@@ -93,6 +93,7 @@ public class PaymentsReportingExportProcessingService
     while (!(files = rows.get()).isEmpty()) {
       fileGroups.add(paymentsReportingPartitionWriterService.copyFiles(
         workingDirectory.resolve("part%03d".formatted(partNumber++)),
+        request.getIpaCodes().getFirst(),
         files
       ));
     }
