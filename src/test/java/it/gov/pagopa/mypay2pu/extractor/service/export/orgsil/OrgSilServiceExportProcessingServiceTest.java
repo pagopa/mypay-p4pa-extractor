@@ -53,7 +53,7 @@ class OrgSilServiceExportProcessingServiceTest {
       orgSilServiceDaoMock,
       orgSilServiceMapperMock,
       csvService,
-      new CsvPartitionWriterService(csvService),
+      new CsvPartitionWriterService<>(csvService),
       new FileArchiverService(false, "test-password", new ZipFileService()),
       Validation.buildDefaultValidatorFactory().getValidator(),
       exportProperties()
@@ -169,7 +169,8 @@ class OrgSilServiceExportProcessingServiceTest {
       tempDir.toString(),
       "12345678901",
       "BROKER_IPA",
-      Map.of(MigrationFileType.ORG_SIL_SERVICES, new ExtractorExportProperties.FileTypeConfiguration(2))
+      Map.of(MigrationFileType.ORG_SIL_SERVICES, new ExtractorExportProperties.FileTypeConfiguration(2)),
+      new ExtractorExportProperties.PaymentsReportingConfiguration(tempDir.toString())
     );
   }
 

@@ -37,7 +37,7 @@ public class DebtPositionExportProcessingService extends SplitByIpaCodeBaseExpor
   public DebtPositionExportProcessingService(DebtPositionDao debtPositionDao,
                                              DebtPositionMapper debtPositionMapper,
                                              CsvService csvService,
-                                             CsvPartitionWriterService csvPartitionWriterService,
+                                             CsvPartitionWriterService<PuDebtPositionDTO> csvPartitionWriterService,
                                              FileArchiverService fileArchiverService,
                                              Validator validator,
                                              ExtractorExportProperties exportProperties) {

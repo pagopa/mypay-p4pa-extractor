@@ -3,6 +3,7 @@ package it.gov.pagopa.mypay2pu.extractor.service.export.debtpositionstypeorgoper
 import it.gov.pagopa.mypay2pu.extractor.config.ExtractorExportProperties;
 import it.gov.pagopa.mypay2pu.extractor.dao.DebtPositionsTypeOrgOperatorsDao;
 import it.gov.pagopa.mypay2pu.extractor.dto.export.PuDebtPositionsTypeOrgOperatorsDTO;
+import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionFilters;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.mapper.debtpositionstypeorgoperators.DebtPositionsTypeOrgOperatorsMapper;
@@ -27,7 +28,7 @@ public class DebtPositionsTypeOrgOperatorsExportProcessingService extends SplitB
   public DebtPositionsTypeOrgOperatorsExportProcessingService(DebtPositionsTypeOrgOperatorsDao debtPositionsTypeOrgOperatorsDao,
                                                               DebtPositionsTypeOrgOperatorsMapper debtPositionsTypeOrgOperatorsMapper,
                                                               CsvService csvService,
-                                                              CsvPartitionWriterService csvPartitionWriterService,
+                                                              CsvPartitionWriterService<PuDebtPositionsTypeOrgOperatorsDTO> csvPartitionWriterService,
                                                               FileArchiverService fileArchiverService,
                                                               Validator validator,
                                                               ExtractorExportProperties exportProperties) {
@@ -58,7 +59,10 @@ public class DebtPositionsTypeOrgOperatorsExportProcessingService extends SplitB
 
   @Override
   protected List<DebtPositionsTypeOrgOperators> retrieveData(String ipaCode, ExtractionRequest request, int pageSize, int offset) {
-    LogicalKeyPair logicalKeyPair = PairedLogicalKeyValidator.parseLogicalKey(request.getFilters().getLogicalKey());
+    ExtractionFilters filters = request.getFilters();
+    LogicalKeyPair logicalKeyPair = PairedLogicalKeyValidator.parseLogicalKey(
+      filters != null ? filters.getLogicalKey() : null
+    );
     return debtPositionsTypeOrgOperatorsDao.findByFilters(
       ipaCode,
       logicalKeyPair.left(),
