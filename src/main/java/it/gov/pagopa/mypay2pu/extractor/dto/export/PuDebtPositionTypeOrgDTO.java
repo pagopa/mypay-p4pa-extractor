@@ -33,6 +33,14 @@ public class PuDebtPositionTypeOrgDTO implements CsvExportDto {
   @NotBlank
   private String description;
 
+  @CsvBindByName(column = "tipoEnte")
+  @NotBlank
+  private String orgType;
+
+  @CsvBindByName(column = "codiceTassonomico")
+  @NotBlank
+  private String taxonomyCode;
+
   @CsvBindByName(column = "codIban")
   private String iban;
 

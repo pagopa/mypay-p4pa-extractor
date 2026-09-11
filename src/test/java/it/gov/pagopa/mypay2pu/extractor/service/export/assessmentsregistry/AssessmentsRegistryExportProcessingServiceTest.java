@@ -99,8 +99,8 @@ class AssessmentsRegistryExportProcessingServiceTest {
       .filter(fileName -> fileName.contains(".errors."))
       .findFirst()
       .orElseThrow();
-    assertTrue(exportFileName.matches("IPA_CODE-ASSESSMENTS_REGISTRY-\\d{14}-1\\.0\\.zip"));
-    assertTrue(errorFileName.matches("IPA_CODE-ASSESSMENTS_REGISTRY-\\d{14}-1\\.0\\.errors\\.zip"));
+    assertTrue(exportFileName.matches("IPA_CODE-ASSESSMENTS_REGISTRY-\\d{14}-1_0\\.zip"));
+    assertTrue(errorFileName.matches("IPA_CODE-ASSESSMENTS_REGISTRY-\\d{14}-1_0\\.errors\\.zip"));
 
     Path exportArchivePath = tempDir.resolve("IPA_CODE").resolve(exportFileName);
     Path errorArchivePath = tempDir.resolve("IPA_CODE").resolve(errorFileName);
@@ -137,7 +137,7 @@ class AssessmentsRegistryExportProcessingServiceTest {
     Path archivePath = tempDir.resolve("IPA_CODE").resolve(result.files().get(0));
     List<String> archiveEntries = ZipUtils.readZipEntries(archivePath);
     assertEquals(1, archiveEntries.size());
-    assertTrue(archiveEntries.get(0).matches("IPA_CODE-ASSESSMENTS_REGISTRY-\\d{14}-1\\.0\\.csv"));
+    assertTrue(archiveEntries.get(0).matches("IPA_CODE-ASSESSMENTS_REGISTRY-\\d{14}-1_0\\.csv"));
 
     InOrder inOrder = inOrder(assessmentsRegistryDaoMock);
     inOrder.verify(assessmentsRegistryDaoMock).findByFilters(

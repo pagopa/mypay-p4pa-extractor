@@ -9,7 +9,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Data
 @NoArgsConstructor
@@ -50,8 +50,8 @@ public class PuTreasuryCsvCompleteDTO implements CsvExportDto {
   @CsvDate(value = "yyyy-MM-dd")
   private LocalDate billDate;
   @CsvBindByName(column = "dataRicezione")
-  @CsvDate(value = "yyyy-MM-dd'T'HH:mm:ss")
-  private LocalDateTime receptionDate;
+  @CsvDate(value = "yyyy-MM-dd'T'HH:mm:ssXXX")
+  private OffsetDateTime receptionDate;
   @CsvBindByName(column = "annoDocumento")
   private String documentYear;
   @CsvBindByName(column = "codDocumento")

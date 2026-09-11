@@ -4,6 +4,7 @@ import it.gov.pagopa.mypay2pu.extractor.dto.ExportFileResult;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.exception.ExportFileTypeNotSupportedException;
 import it.gov.pagopa.mypay2pu.extractor.service.export.assessments.AssessmentsExportProcessingService;
+import it.gov.pagopa.mypay2pu.extractor.service.export.assessmentsregistry.AssessmentsRegistryExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.debtpositionstypeorgoperators.DebtPositionsTypeOrgOperatorsExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.debtposition.DebtPositionExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.debtpositionpaid.DebtPositionPaidExportProcessingService;
@@ -30,6 +31,7 @@ public class DataExportFacadeService {
   private final AssessmentsExportProcessingService assessmentsExportProcessingService;
   private final TreasuryCsvCompleteExportProcessingService treasuryCsvCompleteExportProcessingService;
   private final PaymentsReportingExportProcessingService paymentsReportingExportProcessingService;
+  private final AssessmentsRegistryExportProcessingService assessmentsRegistryExportProcessingService;
 
   public DataExportFacadeService(OrganizationExportProcessingService organizationExportProcessingService,
                                  OrgSilServiceExportProcessingService orgSilServiceExportProcessingService,
@@ -41,6 +43,7 @@ public class DataExportFacadeService {
                                  PaymentNotificationExportProcessingService paymentNotificationExportProcessingService,
                                  AssessmentsExportProcessingService assessmentsExportProcessingService,
                                  TreasuryCsvCompleteExportProcessingService treasuryCsvCompleteExportProcessingService,
+                                 AssessmentsRegistryExportProcessingService assessmentsRegistryExportProcessingService,
                                  PaymentsReportingExportProcessingService paymentsReportingExportProcessingService) {
     this.organizationExportProcessingService = organizationExportProcessingService;
     this.orgSilServiceExportProcessingService = orgSilServiceExportProcessingService;
@@ -52,6 +55,7 @@ public class DataExportFacadeService {
     this.paymentNotificationExportProcessingService = paymentNotificationExportProcessingService;
     this.treasuryCsvCompleteExportProcessingService = treasuryCsvCompleteExportProcessingService;
     this.assessmentsExportProcessingService = assessmentsExportProcessingService;
+    this.assessmentsRegistryExportProcessingService = assessmentsRegistryExportProcessingService;
     this.paymentsReportingExportProcessingService = paymentsReportingExportProcessingService;
   }
 
@@ -67,6 +71,7 @@ public class DataExportFacadeService {
       case PAYMENT_NOTIFICATION -> paymentNotificationExportProcessingService.executeExport(extractionId, request);
       case TREASURY_CSV_COMPLETE -> treasuryCsvCompleteExportProcessingService.executeExport(extractionId, request);
       case ASSESSMENTS -> assessmentsExportProcessingService.executeExport(extractionId, request);
+      case ASSESSMENTS_REGISTRY -> assessmentsRegistryExportProcessingService.executeExport(extractionId, request);
       case PAYMENTS_REPORTING -> paymentsReportingExportProcessingService.executeExport(extractionId, request);
       default ->
         throw new ExportFileTypeNotSupportedException("Invalid export file type: " + request.getFileTypes());

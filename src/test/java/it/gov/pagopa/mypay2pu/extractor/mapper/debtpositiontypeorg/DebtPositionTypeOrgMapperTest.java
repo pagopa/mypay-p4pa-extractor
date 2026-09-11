@@ -69,7 +69,8 @@ class DebtPositionTypeOrgMapperTest {
       "IPA1", "BILANCIO", "TAX", "Tax", "IT60X0542811101000000123456",
       "IT60X0542811101000000123456", "123456", "Municipality", "Public administration", 1234L,
       "https://example.test/pay", false, true, true, true, true,
-      "PAYMENT_NOTIFICATION", true, "https://example.test/pnd", "SPONT_FORM", "SVC_CODE", false, true
+      "PAYMENT_NOTIFICATION", true, "https://example.test/pnd", "SPONT_FORM", "SVC_CODE", false, true,
+      "TAXONOMY_CODE", "ORG_TYPE"
     );
     String strutturaPagamentoSpontaneo = "[]";
 
@@ -84,6 +85,8 @@ class DebtPositionTypeOrgMapperTest {
     assertEquals(debtPositionTypeOrg.balance(), result.getBalance());
     assertEquals(debtPositionTypeOrg.code(), result.getCode());
     assertEquals(debtPositionTypeOrg.description(), result.getDescription());
+    assertEquals(debtPositionTypeOrg.taxonomyCode(), result.getTaxonomyCode());
+    assertEquals(debtPositionTypeOrg.orgType(), result.getOrgType());
     assertEquals(debtPositionTypeOrg.iban(), result.getIban());
     assertEquals(debtPositionTypeOrg.postalIban(), result.getPostalIban());
     assertEquals(debtPositionTypeOrg.postalAccountCode(), result.getPostalAccountCode());
@@ -118,7 +121,7 @@ class DebtPositionTypeOrgMapperTest {
     DebtPositionTypeOrg debtPositionTypeOrg = new DebtPositionTypeOrg(
       "IPA1", null, "FEE", "Fee", "IT60X0542811101000000123456",
       null, null, null, null, null, null, false, false, false, true, false,
-      null, false, null, null, null, false, false
+      null, false, null, null, null, false, false, "TAXONOMY_CODE", "ORG_TYPE"
     );
 
     when(debtPositionTypeOrgDaoMock.isExternal(debtPositionTypeOrg.ipaCode(), debtPositionTypeOrg.code()))
@@ -181,7 +184,7 @@ class DebtPositionTypeOrgMapperTest {
     DebtPositionTypeOrg debtPositionTypeOrg = new DebtPositionTypeOrg(
       "IPA1", "BILANCIO", "DEFAULT", "Default", "IT60X0542811101000000123456",
       null, null, null, null, null, null, false, false, false, true, false,
-      null, false, null, null, null, false, false
+      null, false, null, null, null, false, false, "TAXONOMY_CODE", "ORG_TYPE"
     );
     when(debtPositionTypeOrgDaoMock.isExternal(debtPositionTypeOrg.ipaCode(), debtPositionTypeOrg.code()))
       .thenReturn(false);
@@ -212,7 +215,7 @@ class DebtPositionTypeOrgMapperTest {
     DebtPositionTypeOrg debtPositionTypeOrg = new DebtPositionTypeOrg(
       "IPA1", "BILANCIO", "TAX", "Tax", "IT60X0542811101000000123456",
       null, null, null, null, null, null, false, true, false, true, false,
-      null, false, null, "SPONT_FORM", null, false, false
+      null, false, null, "SPONT_FORM", null, false, false, "TAXONOMY_CODE", "ORG_TYPE"
     );
     when(myDictionaryClientMock.getSpontaneousFormStructure("SPONT_FORM")).thenThrow(httpException);
     when(debtPositionTypeOrgDaoMock.isExternal(debtPositionTypeOrg.ipaCode(), debtPositionTypeOrg.code()))
@@ -230,7 +233,7 @@ class DebtPositionTypeOrgMapperTest {
     DebtPositionTypeOrg debtPositionTypeOrg = new DebtPositionTypeOrg(
       "IPA1", "BILANCIO", "TAX", "Tax", "IT60X0542811101000000123456",
       null, null, null, null, null, null, false, true, true, true, false,
-      null, false, null, "SPONT_FORM", null, false, false
+      null, false, null, "SPONT_FORM", null, false, false, "TAXONOMY_CODE", "ORG_TYPE"
     );
     when(myDictionaryClientMock.getSpontaneousFormStructure("SPONT_FORM")).thenThrow(httpException);
 
@@ -243,7 +246,7 @@ class DebtPositionTypeOrgMapperTest {
     DebtPositionTypeOrg debtPositionTypeOrg = new DebtPositionTypeOrg(
       "IPA1", "BILANCIO", "TAX", "Tax", "IT60X0542811101000000123456",
       null, null, null, null, null, null, false, true, true, true, false,
-      null, false, null, "SPONT_FORM", null, false, false
+      null, false, null, "SPONT_FORM", null, false, false, "TAXONOMY_CODE", "ORG_TYPE"
     );
     String responseBody = """
       [{
@@ -309,7 +312,7 @@ class DebtPositionTypeOrgMapperTest {
     DebtPositionTypeOrg debtPositionTypeOrg = new DebtPositionTypeOrg(
       "IPA1", "BILANCIO", "TAX", "Tax", "IT60X0542811101000000123456",
       null, null, null, null, null, null, false, true, false, true, false,
-      null, false, null, "SPONT_FORM", null, false, false
+      null, false, null, "SPONT_FORM", null, false, false, "TAXONOMY_CODE", "ORG_TYPE"
     );
     when(myDictionaryClientMock.getSpontaneousFormStructure("SPONT_FORM")).thenReturn(responseBody);
 
