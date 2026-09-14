@@ -73,7 +73,10 @@ class DebtPositionTypeDaoTest {
     when(sqlLoaderMock.load("mypay/debt-position-type/debt-position-type.sql")).thenReturn(FIND_ALL_SQL);
     return new DebtPositionTypeDao(
       mp4JdbcTemplateMock,
-      new ExtractorExportProperties("./build", "./build", "12345678901", "IPA_CODE", Map.of()),
+      new ExtractorExportProperties(
+        "./build", "./build", "12345678901", "IPA_CODE", Map.of(),
+        new ExtractorExportProperties.PaymentsReportingConfiguration("./build")
+      ),
       sqlLoaderMock
     );
   }

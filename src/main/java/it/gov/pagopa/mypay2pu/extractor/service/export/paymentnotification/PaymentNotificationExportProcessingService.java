@@ -31,7 +31,7 @@ public class PaymentNotificationExportProcessingService
     PaymentNotificationDao paymentNotificationDao,
     PaymentNotificationMapper paymentNotificationMapper,
     CsvService csvService,
-    CsvPartitionWriterService csvPartitionWriterService,
+    CsvPartitionWriterService<PuPaymentNotificationDTO> csvPartitionWriterService,
     FileArchiverService fileArchiverService,
     Validator validator,
     ExtractorExportProperties exportProperties

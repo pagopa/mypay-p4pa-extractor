@@ -10,7 +10,7 @@ import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.mapper.debtpositiontype.DebtPositionTypeMapper;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.DebtPositionType;
 import it.gov.pagopa.mypay2pu.extractor.service.FileArchiverService;
-import it.gov.pagopa.mypay2pu.extractor.service.export.BaseExportProcessingService;
+import it.gov.pagopa.mypay2pu.extractor.service.export.BaseCsvExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.CsvPartitionWriterService;
 import it.gov.pagopa.mypay2pu.extractor.service.files.CsvService;
 import it.gov.pagopa.mypay2pu.extractor.service.files.ZipFileService;
@@ -58,7 +58,7 @@ class DebtPositionTypeExportProcessingServiceTest {
       debtPositionTypeDaoMock,
       debtPositionTypeMapperMock,
       csvService,
-      new CsvPartitionWriterService(csvService),
+      new CsvPartitionWriterService<>(csvService),
       new FileArchiverService(false, "test-password", new ZipFileService()),
       Validation.buildDefaultValidatorFactory().getValidator(),
       exportProperties()
@@ -143,7 +143,7 @@ class DebtPositionTypeExportProcessingServiceTest {
 
   @Test
   void whenCheckingSuperclassThenServiceIsAggregated() {
-    assertEquals(BaseExportProcessingService.class, service.getClass().getSuperclass());
+    assertEquals(BaseCsvExportProcessingService.class, service.getClass().getSuperclass());
   }
 
   private ExtractorExportProperties exportProperties() {
@@ -152,7 +152,8 @@ class DebtPositionTypeExportProcessingServiceTest {
       tempDir.toString(),
       "12345678901",
       "BROKER_IPA",
-      Map.of(MigrationFileType.DEBT_POSITIONS_TYPE, new ExtractorExportProperties.FileTypeConfiguration(2))
+      Map.of(MigrationFileType.DEBT_POSITIONS_TYPE, new ExtractorExportProperties.FileTypeConfiguration(2)),
+      new ExtractorExportProperties.PaymentsReportingConfiguration(tempDir.toString())
     );
   }
 

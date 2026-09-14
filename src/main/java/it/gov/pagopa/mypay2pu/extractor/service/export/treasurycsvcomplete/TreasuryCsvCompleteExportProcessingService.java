@@ -28,7 +28,7 @@ public class TreasuryCsvCompleteExportProcessingService
     TreasuryCsvCompleteDao treasuryCsvCompleteDao,
     TreasuryCsvCompleteMapper treasuryCsvCompleteMapper,
     CsvService csvService,
-    CsvPartitionWriterService csvPartitionWriterService,
+    CsvPartitionWriterService<PuTreasuryCsvCompleteDTO> csvPartitionWriterService,
     FileArchiverService fileArchiverService,
     Validator validator,
     ExtractorExportProperties exportProperties

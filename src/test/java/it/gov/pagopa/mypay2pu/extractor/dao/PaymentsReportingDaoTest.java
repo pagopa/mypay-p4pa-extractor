@@ -55,7 +55,7 @@ class PaymentsReportingDaoTest {
       LocalDateTime.of(2026, Month.JANUARY, 11, 10, 30),
       ZoneOffset.UTC
     );
-    List<Path> expected = List.of(Path.of("path.xml"));
+    List<String> expected = List.of("path.xml");
 
     when(fespJdbcTemplateMock.query(
       eq(FIND_BY_FILTERS_SQL),
@@ -84,7 +84,7 @@ class PaymentsReportingDaoTest {
       LocalDateTime.of(2026, Month.JANUARY, 10, 10, 30),
       ZoneOffset.UTC
     );
-    List<Path> expected = List.of(Path.of("path.xml"));
+    List<String> expected = List.of("path.xml");
 
     when(fespJdbcTemplateMock.query(
       eq(FIND_BY_FILTERS_SQL),
@@ -96,20 +96,20 @@ class PaymentsReportingDaoTest {
           && Boolean.TRUE.equals(params.getValue("skipDateToFilter"))
           && Boolean.TRUE.equals(params.getValue("skipLogicalKeyFilter"))
           && params.getValue("logicalKey") == null
-          && Integer.valueOf(Integer.MAX_VALUE).equals(params.getValue("limit"))
+          && Integer.valueOf(50).equals(params.getValue("limit"))
           && Integer.valueOf(0).equals(params.getValue("offset"))
           && params.getValues().size() == 9
       ),
       same(PaymentsReportingDao.PAYMENTS_REPORTING_FILE_ROW_MAPPER)
     )).thenReturn(expected);
 
-    assertEquals(expected, dao.findByDateRange("IPA1", lastExtractionDate, null, null));
+    assertEquals(expected, dao.findByDateRange("IPA1", lastExtractionDate, null, null, 50, 0));
   }
 
   @Test
   void givenLogicalKeyWhenFindThenQueryMyPayDatabase() {
     PaymentsReportingDao dao = buildDao();
-    List<Path> expected = List.of(Path.of("path.xml"));
+    List<String> expected = List.of("path.xml");
 
     when(fespJdbcTemplateMock.query(
       eq(FIND_BY_FILTERS_SQL),
@@ -121,23 +121,23 @@ class PaymentsReportingDaoTest {
           && Boolean.TRUE.equals(params.getValue("skipDateToFilter"))
           && Boolean.FALSE.equals(params.getValue("skipLogicalKeyFilter"))
           && "FLOW-1".equals(params.getValue("logicalKey"))
-          && Integer.valueOf(Integer.MAX_VALUE).equals(params.getValue("limit"))
+          && Integer.valueOf(50).equals(params.getValue("limit"))
           && Integer.valueOf(0).equals(params.getValue("offset"))
           && params.getValues().size() == 9
       ),
       same(PaymentsReportingDao.PAYMENTS_REPORTING_FILE_ROW_MAPPER)
     )).thenReturn(expected);
 
-    assertEquals(expected, dao.findByLogicalKey("IPA1", "FLOW-1"));
+    assertEquals(expected, dao.findByLogicalKey("IPA1", "FLOW-1", 50, 0));
   }
 
   @Test
-  void givenDatabaseRowWhenMappedThenExposePaymentsReportingFilePath() throws Exception {
+  void givenDatabaseRowWhenMappedThenExposePaymentsReportingFileName() throws Exception {
     when(resultSetMock.getString("de_nome_file_scaricato")).thenReturn("/mypay/reporting/FLOW-1.xml");
 
-    Path result = PaymentsReportingDao.PAYMENTS_REPORTING_FILE_ROW_MAPPER.mapRow(resultSetMock, 0);
+    String result = PaymentsReportingDao.PAYMENTS_REPORTING_FILE_ROW_MAPPER.mapRow(resultSetMock, 0);
 
-    assertEquals(Path.of("/mypay/reporting/FLOW-1.xml"), result);
+    assertEquals("/mypay/reporting/FLOW-1.xml", result);
     verify(resultSetMock).getString("de_nome_file_scaricato");
   }
 
@@ -154,7 +154,7 @@ class PaymentsReportingDaoTest {
     assertTrue(sql.contains(":skipDateToFilter = TRUE"));
     assertTrue(sql.contains(":skipLogicalKeyFilter = TRUE"));
     assertTrue(sql.contains("rs.cod_identificativo_flusso = :logicalKey"));
-    assertTrue(sql.contains("ORDER BY rs.dt_creazione"));
+    assertTrue(sql.contains("ORDER BY rs.dt_creazione, rs.de_nome_file_scaricato"));
     assertTrue(sql.contains("LIMIT :limit"));
     assertTrue(sql.contains("OFFSET COALESCE(:offset, 0)"));
   }

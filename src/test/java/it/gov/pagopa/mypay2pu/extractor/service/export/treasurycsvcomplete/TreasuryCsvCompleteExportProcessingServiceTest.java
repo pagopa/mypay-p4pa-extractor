@@ -55,7 +55,7 @@ class TreasuryCsvCompleteExportProcessingServiceTest {
     CsvService csvService = new CsvService(';', '"');
     validatorFactory = Validation.buildDefaultValidatorFactory();
     service = new TreasuryCsvCompleteExportProcessingService(
-      treasuryDaoMock, treasuryMapperMock, csvService, new CsvPartitionWriterService(csvService),
+      treasuryDaoMock, treasuryMapperMock, csvService, new CsvPartitionWriterService<>(csvService),
       new FileArchiverService(false, "password", new ZipFileService()),
       validatorFactory.getValidator(), properties()
     );
@@ -136,7 +136,8 @@ class TreasuryCsvCompleteExportProcessingServiceTest {
 
   private ExtractorExportProperties properties() {
     return new ExtractorExportProperties(tempDir.toString(), tempDir.toString(), "12345678901", "BROKER_IPA",
-      Map.of(MigrationFileType.TREASURY_CSV_COMPLETE, new ExtractorExportProperties.FileTypeConfiguration(2)));
+      Map.of(MigrationFileType.TREASURY_CSV_COMPLETE, new ExtractorExportProperties.FileTypeConfiguration(2)),
+      new ExtractorExportProperties.PaymentsReportingConfiguration(tempDir.toString()));
   }
 
   private TreasuryCsvCompleteDao.TreasuryCsvCompleteFilters emptyFilters() {

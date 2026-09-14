@@ -5,6 +5,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
@@ -22,12 +23,18 @@ public record ExtractorExportProperties(
   @NotBlank String brokerCf,
   @NotBlank String brokerIpaCode,
   @NestedConfigurationProperty
-  @NotEmpty Map<MigrationFileType, @Valid FileTypeConfiguration> fileTypeConfigurations) {
+  @NotEmpty Map<MigrationFileType, @Valid FileTypeConfiguration> fileTypeConfigurations,
+  @NestedConfigurationProperty
+  @NotNull @Valid PaymentsReportingConfiguration paymentsReporting) {
 
   @PostConstruct
   public void validateDirectoriesExist() {
     validateExistingDirectory("extractor.export.storage-path", storagePath);
     validateExistingDirectory("extractor.export.temp-base-dir", tempBaseDir);
+    validateExistingDirectory(
+      "extractor.export.payments-reporting.base-directory",
+      paymentsReporting.baseDirectory()
+    );
   }
 
   public FileTypeConfiguration resolveFileTypeConfiguration(MigrationFileType migrationFileType) {
@@ -50,4 +57,6 @@ public record ExtractorExportProperties(
   }
 
   public record FileTypeConfiguration(@Positive int exportPageSize) { }
+
+  public record PaymentsReportingConfiguration(@NotBlank String baseDirectory) { }
 }

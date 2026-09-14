@@ -59,7 +59,7 @@ class AssessmentsRegistryExportProcessingServiceTest {
       assessmentsRegistryDaoMock,
       assessmentsRegistryMapperMock,
       csvService,
-      new CsvPartitionWriterService(csvService),
+      new CsvPartitionWriterService<>(csvService),
       new FileArchiverService(false, "test-password", new ZipFileService()),
       Validation.buildDefaultValidatorFactory().getValidator(),
       exportProperties()
@@ -201,7 +201,8 @@ class AssessmentsRegistryExportProcessingServiceTest {
       tempDir.toString(),
       "12345678901",
       "IPA_CODE",
-      Map.of(MigrationFileType.ASSESSMENTS_REGISTRY, new ExtractorExportProperties.FileTypeConfiguration(2))
+      Map.of(MigrationFileType.ASSESSMENTS_REGISTRY, new ExtractorExportProperties.FileTypeConfiguration(2)),
+      new ExtractorExportProperties.PaymentsReportingConfiguration(tempDir.toString())
     );
   }
 

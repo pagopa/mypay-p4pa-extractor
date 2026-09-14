@@ -64,7 +64,7 @@ class DebtPositionPaidExportProcessingServiceTest {
       debtPositionPaidDaoMock,
       debtPositionPaidMapperMock,
       csvService,
-      new CsvPartitionWriterService(csvService),
+      new CsvPartitionWriterService<>(csvService),
       new FileArchiverService(false, "test-password", new ZipFileService()),
       validatorFactory.getValidator(),
       exportProperties()
@@ -173,7 +173,8 @@ class DebtPositionPaidExportProcessingServiceTest {
       tempDir.toString(),
       "12345678901",
       "BROKER_IPA",
-      Map.of(MigrationFileType.DEBT_POSITIONS_PAID, new ExtractorExportProperties.FileTypeConfiguration(2))
+      Map.of(MigrationFileType.DEBT_POSITIONS_PAID, new ExtractorExportProperties.FileTypeConfiguration(2)),
+      new ExtractorExportProperties.PaymentsReportingConfiguration(tempDir.toString())
     );
   }
 

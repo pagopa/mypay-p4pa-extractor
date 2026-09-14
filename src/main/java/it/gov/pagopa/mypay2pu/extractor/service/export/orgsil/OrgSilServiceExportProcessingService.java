@@ -26,7 +26,7 @@ public class OrgSilServiceExportProcessingService extends SplitByIpaCodeBaseExpo
   public OrgSilServiceExportProcessingService(OrgSilServiceDao orgSilServiceDao,
                                               OrgSilServiceMapper orgSilServiceMapper,
                                               CsvService csvService,
-                                              CsvPartitionWriterService csvPartitionWriterService,
+                                              CsvPartitionWriterService<PuOrgSilServiceDTO> csvPartitionWriterService,
                                               FileArchiverService fileArchiverService,
                                               Validator validator,
                                               ExtractorExportProperties exportProperties) {

@@ -3,6 +3,7 @@ package it.gov.pagopa.mypay2pu.extractor.service.export.assessmentsregistry;
 import it.gov.pagopa.mypay2pu.extractor.config.ExtractorExportProperties;
 import it.gov.pagopa.mypay2pu.extractor.dao.AssessmentsRegistryDao;
 import it.gov.pagopa.mypay2pu.extractor.dto.export.PuAssessmentsRegistryDTO;
+import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionFilters;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.mapper.assessmentsregistry.AssessmentsRegistryMapper;
@@ -26,7 +27,7 @@ public class AssessmentsRegistryExportProcessingService extends SplitByIpaCodeBa
   protected AssessmentsRegistryExportProcessingService(AssessmentsRegistryDao assessmentsRegistryDao,
                                                        AssessmentsRegistryMapper assessmentsRegistryMapper,
                                                        CsvService csvService,
-                                                       CsvPartitionWriterService csvPartitionWriterService,
+                                                       CsvPartitionWriterService<PuAssessmentsRegistryDTO> csvPartitionWriterService,
                                                        FileArchiverService fileArchiverService,
                                                        Validator validator,
                                                        ExtractorExportProperties exportProperties) {
@@ -57,12 +58,13 @@ public class AssessmentsRegistryExportProcessingService extends SplitByIpaCodeBa
 
   @Override
   protected List<AssessmentsRegistry> retrieveData(String ipaCode, ExtractionRequest request, int pageSize, int offset) {
+    ExtractionFilters filters = request.getFilters();
     return assessmentsRegistryDao.findByFilters(
       ipaCode,
       request.getLastExtractionDate(),
-      ValueLogicalKeyValidator.parseLogicalKey(request.getFilters().getLogicalKey()),
-      request.getFilters().getDateFrom(),
-      request.getFilters().getDateTo(),
+      ValueLogicalKeyValidator.parseLogicalKey(filters != null ? filters.getLogicalKey() : null),
+      filters != null ? filters.getDateFrom() : null,
+      filters != null ? filters.getDateTo() : null,
       pageSize,
       offset
     );

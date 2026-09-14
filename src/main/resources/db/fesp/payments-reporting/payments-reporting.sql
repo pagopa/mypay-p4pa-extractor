@@ -11,6 +11,6 @@ WHERE rs.cod_ipa_ente = :ipaCode
     :skipLogicalKeyFilter = TRUE
     OR rs.cod_identificativo_flusso = :logicalKey
   )
-ORDER BY rs.dt_creazione
+ORDER BY rs.dt_creazione, rs.de_nome_file_scaricato
 LIMIT :limit
 OFFSET COALESCE(:offset, 0)
