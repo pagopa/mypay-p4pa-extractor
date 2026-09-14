@@ -48,6 +48,7 @@ JOIN mygov_ente e
 LEFT JOIN mygov_dovuto_multibeneficiario mb
     ON mb.mygov_dovuto_id = d.mygov_dovuto_id
 WHERE e.cod_ipa_ente = :codIpaEnte
+  AND (:skipGpdEnabledFilter = TRUE OR (gpd_iupd != NULL AND gpd_status = 'S'))
   AND (:skipCodIuvFilter = TRUE OR d.cod_iuv IN (:iuvs))
   AND (:skipDateFromFilter = TRUE OR d.dt_ultima_modifica >= :dateFrom)
   AND (:skipDateToExclusiveFilter = TRUE OR d.dt_ultima_modifica < :dateToExclusive)

@@ -106,6 +106,7 @@ extractor:
     temp-base-dir: "\${TMP_FOLDER:\${java.io.tmpdir}}"
     broker-cf: "\${BROKER_CF:\${PA_IDENTIFICATIVO_INTERMEDIARIO_PA:00123456789}}"
     broker-ipa-code: "\${BROKER_IPA_CODE:\${PA_COD_IPA_ENTE_PREDEFINITO:IPA_DEFAULT}}"
+    gpd-enabled: "\${GPD_ENABLED:${PA_GPD_ENABLED:false}}"
     file-type-configurations:
       ORGANIZATIONS:
         export-page-size: "\${EXPORT_PAGE_SIZE_ORGANIZATIONS:1000}"
