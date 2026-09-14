@@ -23,6 +23,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.same;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -36,9 +37,13 @@ class DebtPositionPaidDaoTest {
   private NamedParameterJdbcTemplate mp4JdbcTemplateMock;
   @Mock
   private SqlLoader sqlLoaderMock;
+  private boolean sqlLoaderUsed;
 
   @AfterEach
   void tearDown() {
+    if (sqlLoaderUsed) {
+      verify(sqlLoaderMock).load("mypay/debt-positions-paid/debt-positions-paid.sql");
+    }
     verifyNoMoreInteractions(mp4JdbcTemplateMock, sqlLoaderMock);
   }
 
@@ -58,9 +63,7 @@ class DebtPositionPaidDaoTest {
       eq(FIND_BY_FILTERS_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         "IPA1".equals(params.getValue("codIpaEnte"))
-          && Boolean.FALSE.equals(params.getValue("iudsEmpty"))
-          && List.of("IUD-1").equals(params.getValue("iuds"))
-          && Boolean.FALSE.equals(params.getValue("iuvsEmpty"))
+          && Boolean.FALSE.equals(params.getValue("skipIuvsFilter"))
           && List.of("IUV-1").equals(params.getValue("iuvs"))
           && Boolean.FALSE.equals(params.getValue("skipCreatedFromFilter"))
           && createdFrom.toLocalDateTime().equals(params.getValue("createdFrom"))
@@ -73,7 +76,7 @@ class DebtPositionPaidDaoTest {
     )).thenReturn(List.of());
 
     List<DebtPositionPaid> result = dao.findByFilters(
-      "IPA1", List.of("IUD-1"), List.of("IUV-1"), createdFrom, createdTo, 50, 100
+      "IPA1", List.of("IUV-1"), createdFrom, createdTo, 50, 100
     );
 
     assertEquals(List.of(), result);
@@ -98,7 +101,7 @@ class DebtPositionPaidDaoTest {
       same(DebtPositionPaidDao.DEBT_POSITION_PAID_ROW_MAPPER)
     )).thenReturn(List.of());
 
-    assertEquals(List.of(), dao.findByFilters("IPA1", List.of(), List.of(), createdFrom, null, 10, 0));
+    assertEquals(List.of(), dao.findByFilters("IPA1", List.of(), createdFrom, null, 10, 0));
   }
 
   @Test
@@ -120,7 +123,7 @@ class DebtPositionPaidDaoTest {
       same(DebtPositionPaidDao.DEBT_POSITION_PAID_ROW_MAPPER)
     )).thenReturn(List.of());
 
-    assertEquals(List.of(), dao.findByFilters("IPA1", List.of(), List.of(), null, createdTo, 10, 0));
+    assertEquals(List.of(), dao.findByFilters("IPA1", List.of(), null, createdTo, 10, 0));
   }
 
   @Test
@@ -131,9 +134,7 @@ class DebtPositionPaidDaoTest {
       eq(FIND_BY_FILTERS_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         "IPA1".equals(params.getValue("codIpaEnte"))
-          && Boolean.TRUE.equals(params.getValue("iudsEmpty"))
-          && Collections.singletonList(null).equals(params.getValue("iuds"))
-          && Boolean.TRUE.equals(params.getValue("iuvsEmpty"))
+          && Boolean.TRUE.equals(params.getValue("skipIuvsFilter"))
           && Collections.singletonList(null).equals(params.getValue("iuvs"))
           && Boolean.TRUE.equals(params.getValue("skipCreatedFromFilter"))
           && params.getValue("createdFrom") == null
@@ -145,7 +146,7 @@ class DebtPositionPaidDaoTest {
       same(DebtPositionPaidDao.DEBT_POSITION_PAID_ROW_MAPPER)
     )).thenReturn(List.of());
 
-    assertEquals(List.of(), dao.findByFilters("IPA1", List.of(), List.of(), null, null, 10, 0));
+    assertEquals(List.of(), dao.findByFilters("IPA1", List.of(), null, null, 10, 0));
   }
 
   @Test
@@ -164,13 +165,13 @@ class DebtPositionPaidDaoTest {
     ));
     assertTrue(sql.contains("de_status.cod_stato = 'COMPLETATO'"));
     assertTrue(sql.contains("flow_status.cod_stato = 'CARICATO'"));
-    assertTrue(sql.contains("de.cod_iud IN (:iuds)"));
-    assertTrue(sql.contains("de.cod_rp_silinviarp_id_univoco_versamento IN (:iuvs)"));
+    assertTrue(sql.contains(":skipIuvsFilter = TRUE OR de.cod_rp_silinviarp_id_univoco_versamento IN (:iuvs)"));
     assertTrue(sql.contains("de.dt_creazione >= :createdFrom"));
     assertTrue(sql.contains("de.dt_creazione <= :createdTo"));
   }
 
   private DebtPositionPaidDao buildDao() {
+    sqlLoaderUsed = true;
     when(sqlLoaderMock.load("mypay/debt-positions-paid/debt-positions-paid.sql")).thenReturn(FIND_BY_FILTERS_SQL);
     return new DebtPositionPaidDao(mp4JdbcTemplateMock, sqlLoaderMock);
   }

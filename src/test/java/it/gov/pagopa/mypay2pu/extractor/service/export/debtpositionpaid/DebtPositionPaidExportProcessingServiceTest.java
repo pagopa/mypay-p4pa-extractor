@@ -85,9 +85,9 @@ class DebtPositionPaidExportProcessingServiceTest {
     DebtPositionPaid first = debtPositionPaid("IUD-1", "IUV-1");
     DebtPositionPaid second = debtPositionPaid("IUD-2", "IUV-2");
 
-    when(debtPositionPaidDaoMock.findByFilters("IPA1", List.of(), List.of(), null, null, 2, 0))
+    when(debtPositionPaidDaoMock.findByFilters("IPA1", List.of(), null, null, 2, 0))
       .thenReturn(List.of(first));
-    when(debtPositionPaidDaoMock.findByFilters("IPA2", List.of(), List.of(), null, null, 2, 0))
+    when(debtPositionPaidDaoMock.findByFilters("IPA2", List.of(), null, null, 2, 0))
       .thenReturn(List.of(second));
     when(debtPositionPaidMapperMock.map(first)).thenReturn(validDto("IUD-1", "IUV-1"));
     when(debtPositionPaidMapperMock.map(second)).thenReturn(validDto("IUD-2", "IUV-2"));
@@ -115,23 +115,23 @@ class DebtPositionPaidExportProcessingServiceTest {
       new ExtractionFilters().dateFrom(createdFrom).dateTo(createdTo)
     );
 
-    when(debtPositionPaidDaoMock.findByFilters("IPA1", List.of(), List.of(), createdFrom, createdTo, 2, 0))
+    when(debtPositionPaidDaoMock.findByFilters("IPA1", List.of(), createdFrom, createdTo, 2, 0))
       .thenReturn(List.of());
 
     assertEquals(List.of(), service.retrieveData("IPA1", request, 2, 0));
   }
 
   @Test
-  void whenLogicalKeyExtractionThenParseIudAndIuvBeforeCallingDao() {
+  void whenLogicalKeyExtractionThenParseIuvValuesBeforeCallingDao() {
     ExtractionRequest request = new ExtractionRequest(
       List.of("IPA1"),
       MigrationFileType.DEBT_POSITIONS_PAID,
       null,
-      new ExtractionFilters().logicalKey("IUD-1,IUD-2|IUV-1,IUV-2")
+      new ExtractionFilters().logicalKey("IUV-1,IUV-2")
     );
 
     when(debtPositionPaidDaoMock.findByFilters(
-      "IPA1", List.of("IUD-1", "IUD-2"), List.of("IUV-1", "IUV-2"), null, null, 2, 0
+      "IPA1", List.of("IUV-1", "IUV-2"), null, null, 2, 0
     )).thenReturn(List.of());
 
     assertEquals(List.of(), service.retrieveData("IPA1", request, 2, 0));
@@ -143,9 +143,9 @@ class DebtPositionPaidExportProcessingServiceTest {
     DebtPositionPaid first = debtPositionPaid("IUD-1", "IUV-1");
     DebtPositionPaid second = debtPositionPaid("IUD-2", "IUV-2");
     DebtPositionPaid third = debtPositionPaid("IUD-3", "IUV-3");
-    when(debtPositionPaidDaoMock.findByFilters("IPA1", List.of(), List.of(), null, null, 2, 0))
+    when(debtPositionPaidDaoMock.findByFilters("IPA1", List.of(), null, null, 2, 0))
       .thenReturn(List.of(first, second));
-    when(debtPositionPaidDaoMock.findByFilters("IPA1", List.of(), List.of(), null, null, 2, 2))
+    when(debtPositionPaidDaoMock.findByFilters("IPA1", List.of(), null, null, 2, 2))
       .thenReturn(List.of(third));
     when(debtPositionPaidMapperMock.map(first)).thenReturn(validDto("IUD-1", "IUV-1"));
     when(debtPositionPaidMapperMock.map(second)).thenReturn(validDto("IUD-2", "IUV-2"));
@@ -158,8 +158,8 @@ class DebtPositionPaidExportProcessingServiceTest {
     assertTrue(entries.get(0).matches("IPA1-DEBT_POSITIONS_PAID-\\d{14}-part001-1_0\\.csv"));
     assertTrue(entries.get(1).matches("IPA1-DEBT_POSITIONS_PAID-\\d{14}-part002-1_0\\.csv"));
     InOrder inOrder = inOrder(debtPositionPaidDaoMock);
-    inOrder.verify(debtPositionPaidDaoMock).findByFilters("IPA1", List.of(), List.of(), null, null, 2, 0);
-    inOrder.verify(debtPositionPaidDaoMock).findByFilters("IPA1", List.of(), List.of(), null, null, 2, 2);
+    inOrder.verify(debtPositionPaidDaoMock).findByFilters("IPA1", List.of(), null, null, 2, 0);
+    inOrder.verify(debtPositionPaidDaoMock).findByFilters("IPA1", List.of(), null, null, 2, 2);
   }
 
   @Test
