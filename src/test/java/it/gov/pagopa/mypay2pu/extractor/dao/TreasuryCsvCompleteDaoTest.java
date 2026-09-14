@@ -143,6 +143,7 @@ class TreasuryCsvCompleteDaoTest {
     assertTrue(sql.contains("NULL AS cod_ente_bt"));
     assertTrue(sql.contains("NULL AS cod_istat_ente"));
     assertTrue(sql.contains("e.cod_ipa_ente = :ipaCode"));
+    assertTrue(sql.contains("ft.cod_id_univoco_flusso IS NOT NULL"));
     assertTrue(sql.contains(":skipAnnoBollettaFilter = TRUE OR ft.de_anno_bolletta = :annoBolletta"));
     assertTrue(sql.contains(":skipCodBollettaFilter = TRUE OR ft.cod_bolletta = :codBolletta"));
     assertTrue(sql.contains(":skipUpdatedFromFilter = TRUE OR ft.dt_ultima_modifica >= :updatedFrom"));
