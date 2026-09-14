@@ -25,8 +25,7 @@ WHERE e.cod_ipa_ente = :codIpaEnte
   AND de.flg_dovuto_attuale = TRUE
   AND de.num_e_dati_pag_dati_sing_pag_singolo_importo_pagato > 0
   AND de.cod_tipo_dovuto <> 'MARCA_BOLLO_DIGITALE'
-  AND (:iudsEmpty = TRUE OR de.cod_iud IN (:iuds))
-  AND (:iuvsEmpty = TRUE OR de.cod_rp_silinviarp_id_univoco_versamento IN (:iuvs))
+  AND (:skipIuvsFilter = TRUE OR de.cod_rp_silinviarp_id_univoco_versamento IN (:iuvs))
   AND (:skipCreatedFromFilter = TRUE OR de.dt_creazione >= :createdFrom)
   AND (:skipCreatedToFilter = TRUE OR de.dt_creazione <= :createdTo)
 ORDER BY de.dt_creazione, de.mygov_dovuto_elaborato_id

@@ -35,42 +35,33 @@ public class DebtPositionPaidDao {
     this.findByFiltersSql = sqlLoader.load(FIND_BY_FILTERS_SQL_PATH);
   }
 
-  public List<DebtPositionPaid> findByFilters(
-    String codIpaEnte,
-    List<String> iuds,
-    List<String> iuvs,
-    OffsetDateTime createdFrom,
-    OffsetDateTime createdTo,
-    int limit,
-    int offset
-  ) {
+  public List<DebtPositionPaid> findByFilters(String codIpaEnte,
+                                              List<String> iuvs,
+                                              OffsetDateTime createdFrom,
+                                              OffsetDateTime createdTo,
+                                              int limit,
+                                              int offset) {
     if (StringUtils.isEmpty(codIpaEnte)) {
       throw new IllegalArgumentException("codIpaEnte must not be blank");
     }
     return mp4JdbcTemplate.query(
       findByFiltersSql,
-      buildParams(codIpaEnte, iuds, iuvs, createdFrom, createdTo, limit, offset),
+      buildParams(codIpaEnte, iuvs, createdFrom, createdTo, limit, offset),
       DEBT_POSITION_PAID_ROW_MAPPER
     );
   }
 
-  private MapSqlParameterSource buildParams(
-    String codIpaEnte,
-    List<String> iuds,
-    List<String> iuvs,
-    OffsetDateTime createdFrom,
-    OffsetDateTime createdTo,
-    int limit,
-    int offset
-  ) {
-    boolean iudsEmpty = CollectionUtils.isEmpty(iuds);
-    boolean iuvsEmpty = CollectionUtils.isEmpty(iuvs);
+  private MapSqlParameterSource buildParams(String codIpaEnte,
+                                            List<String> iuvs,
+                                            OffsetDateTime createdFrom,
+                                            OffsetDateTime createdTo,
+                                            int limit,
+                                            int offset) {
+    boolean emptyIuvs = CollectionUtils.isEmpty(iuvs);
     return QueryUtils.buildPaginatedFilterParams(limit, offset)
       .addValue("codIpaEnte", codIpaEnte)
-      .addValue("iudsEmpty", iudsEmpty)
-      .addValue("iuds", iudsEmpty ? Collections.singletonList(null) : iuds)
-      .addValue("iuvsEmpty", iuvsEmpty)
-      .addValue("iuvs", iuvsEmpty ? Collections.singletonList(null) : iuvs)
+      .addValue("skipIuvsFilter", emptyIuvs)
+      .addValue("iuvs", emptyIuvs ? Collections.singletonList(null) : iuvs)
       .addValue("skipCreatedFromFilter", createdFrom == null)
       .addValue("createdFrom", DateTimeUtils.toLocalDateTime(createdFrom))
       .addValue("skipCreatedToFilter", createdTo == null)

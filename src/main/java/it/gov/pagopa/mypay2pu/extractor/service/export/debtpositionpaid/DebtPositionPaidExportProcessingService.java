@@ -12,8 +12,7 @@ import it.gov.pagopa.mypay2pu.extractor.service.FileArchiverService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.CsvPartitionWriterService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.SplitByIpaCodeBaseExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.files.CsvService;
-import it.gov.pagopa.mypay2pu.extractor.validation.LogicalKeyPair;
-import it.gov.pagopa.mypay2pu.extractor.validation.PairedLogicalKeyValidator;
+import it.gov.pagopa.mypay2pu.extractor.validation.ValueLogicalKeyValidator;
 import jakarta.validation.Validator;
 import org.springframework.stereotype.Service;
 
@@ -62,20 +61,22 @@ public class DebtPositionPaidExportProcessingService
   }
 
   @Override
-  protected List<DebtPositionPaid> retrieveData(String ipaCode, ExtractionRequest request, int pageSize, int offset) {
+  protected List<DebtPositionPaid> retrieveData(String ipaCode,
+                                                ExtractionRequest request,
+                                                int pageSize,
+                                                int offset) {
     ExtractionFilters filters = request.getFilters();
-    LogicalKeyPair logicalKeyPair = PairedLogicalKeyValidator.parseLogicalKey(
+    List<String> iuvs = ValueLogicalKeyValidator.parseLogicalKey(
       filters != null ? filters.getLogicalKey() : null
     );
-    OffsetDateTime createdFrom = filters != null ? filters.getDateFrom() : null;
-    OffsetDateTime createdTo = filters != null ? filters.getDateTo() : null;
+    OffsetDateTime dateFrom = filters != null ? filters.getDateFrom() : null;
+    OffsetDateTime dateTo = filters != null ? filters.getDateTo() : null;
 
     return debtPositionPaidDao.findByFilters(
       ipaCode,
-      logicalKeyPair.left(),
-      logicalKeyPair.right(),
-      createdFrom,
-      createdTo,
+      iuvs,
+      dateFrom,
+      dateTo,
       pageSize,
       offset
     );
