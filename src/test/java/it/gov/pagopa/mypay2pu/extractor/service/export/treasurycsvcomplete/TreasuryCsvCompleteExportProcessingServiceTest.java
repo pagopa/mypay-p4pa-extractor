@@ -137,7 +137,7 @@ class TreasuryCsvCompleteExportProcessingServiceTest {
   private ExtractorExportProperties properties() {
     return new ExtractorExportProperties(tempDir.toString(), tempDir.toString(), "12345678901", "BROKER_IPA",
       Map.of(MigrationFileType.TREASURY_CSV_COMPLETE, new ExtractorExportProperties.FileTypeConfiguration(2)),
-      new ExtractorExportProperties.PaymentsReportingConfiguration(tempDir.toString()));
+      ExtractorExportProperties.PaymentsReportingConfiguration.mypayShare());
   }
 
   private TreasuryCsvCompleteDao.TreasuryCsvCompleteFilters emptyFilters() {

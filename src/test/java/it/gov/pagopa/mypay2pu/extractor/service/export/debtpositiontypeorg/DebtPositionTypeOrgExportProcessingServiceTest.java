@@ -147,7 +147,7 @@ class DebtPositionTypeOrgExportProcessingServiceTest {
       "12345678901",
       "IPA_CODE",
       Map.of(MigrationFileType.DEBT_POSITIONS_TYPE_ORG, new ExtractorExportProperties.FileTypeConfiguration(2)),
-      new ExtractorExportProperties.PaymentsReportingConfiguration(tempDir.toString())
+      ExtractorExportProperties.PaymentsReportingConfiguration.mypayShare()
     );
   }
 

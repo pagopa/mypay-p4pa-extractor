@@ -38,14 +38,29 @@ class ZipFileServiceTest {
     assertEquals(2, entries.size());
     assertEquals("content-1", entries.get("file1.txt"));
     assertEquals("content-2", entries.get("file2.txt"));
+    assertTrue(Files.notExists(file1));
+    assertTrue(Files.notExists(file2));
+  }
+
+  @Test
+  void givenInputFilesAndDeletionDisabledWhenZipperThenPreserveSourceFiles() throws IOException {
+    Path file = tempDir.resolve("file.txt");
+    Files.writeString(file, "content");
+    Path zipPath = tempDir.resolve("output.zip");
+
+    zipFileService.zipper(zipPath, List.of(file), false);
+
+    assertTrue(Files.exists(zipPath));
+    assertTrue(Files.exists(file));
   }
 
   @Test
   void givenMissingSourceFileWhenZipperThenThrowIllegalStateException() {
     Path zipPath = tempDir.resolve("output.zip");
     Path missingFile = tempDir.resolve("missing.txt");
+    List<Path> inputFiles = List.of(missingFile);
 
-    assertThrows(IllegalStateException.class, () -> zipFileService.zipper(zipPath, List.of(missingFile)));
+    assertThrows(IllegalStateException.class, () -> zipFileService.zipper(zipPath, inputFiles));
   }
 
   private Map<String, String> unzipEntries(Path zipPath) throws IOException {

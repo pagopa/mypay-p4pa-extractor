@@ -153,7 +153,7 @@ class DebtPositionTypeExportProcessingServiceTest {
       "12345678901",
       "BROKER_IPA",
       Map.of(MigrationFileType.DEBT_POSITIONS_TYPE, new ExtractorExportProperties.FileTypeConfiguration(2)),
-      new ExtractorExportProperties.PaymentsReportingConfiguration(tempDir.toString())
+      ExtractorExportProperties.PaymentsReportingConfiguration.mypayShare()
     );
   }
 

@@ -123,6 +123,8 @@ extractor:
         export-page-size: "\${EXPORT_PAGE_SIZE_DEBT_POSITIONS_PAID:1000}"
       PAYMENT_NOTIFICATION:
         export-page-size: "\${EXPORT_PAGE_SIZE_PAYMENT_NOTIFICATION:1000}"
+      PAYMENTS_REPORTING:
+        export-page-size: "\${EXPORT_PAGE_SIZE_PAYMENTS_REPORTING:1000}"
       TREASURY_CSV_COMPLETE:
         export-page-size: "\${EXPORT_PAGE_SIZE_TREASURY_CSV_COMPLETE:1000}"
       ASSESSMENTS:
@@ -130,12 +132,14 @@ extractor:
       ASSESSMENTS_REGISTRY:
         export-page-size: "\${EXPORT_PAGE_SIZE_ASSESSMENTS_REGISTRY:1000}"
     payments-reporting:
-      base-directory: "\${PAYMENTS_REPORTING_BASE_DIRECTORY:\${TMP_FOLDER:\${java.io.tmpdir}}}"
+      source: "\${PAYMENTS_REPORTING_SOURCE:MYPAY_SHARE}"
   basic-auth:
     username: "\${CLIENT_ID:client}"
     password: "\${CLIENT_SECRET:secret}"
 
 mypay:
+  path:
+    directoryRootEnti: "\${MYPAY_PATH_DIRECTORY_ROOT_ENTI:\${TMP_FOLDER:\${java.io.tmpdir}}}"
   global-properties:
     notificaIo.markdown: "\${MYPAY_PROP_NOTIFICA_IO_MARKDOWN:}"
     notificaIo.subject: "\${MYPAY_PROP_NOTIFICA_IO_SUBJECT:}"

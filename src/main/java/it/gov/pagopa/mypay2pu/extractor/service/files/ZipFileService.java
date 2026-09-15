@@ -15,6 +15,10 @@ import java.util.zip.ZipOutputStream;
 public class ZipFileService {
 
   public File zipper(Path zipFilePath, List<Path> filesToZip) {
+    return zipper(zipFilePath, filesToZip, true);
+  }
+
+  public File zipper(Path zipFilePath, List<Path> filesToZip, boolean deleteSourceFiles) {
     try (ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zipFilePath.toFile()))) {
       for (Path file : filesToZip) {
         ZipEntry zipEntry = new ZipEntry(file.getFileName().toString());
@@ -22,9 +26,19 @@ public class ZipFileService {
         Files.copy(file, zos);
         zos.closeEntry();
       }
-      return zipFilePath.toFile();
     } catch (IOException e) {
       throw new IllegalStateException("Error while zipping: " + zipFilePath, e);
     }
+
+    if (deleteSourceFiles) {
+      try {
+        for (Path file : filesToZip) {
+          Files.delete(file);
+        }
+      } catch (IOException e) {
+        throw new IllegalStateException("Error while deleting ZIP source files: " + filesToZip, e);
+      }
+    }
+    return zipFilePath.toFile();
   }
 }

@@ -43,7 +43,7 @@ class ExtractorExportPropertiesTest {
         assertEquals(existingDirectories.tempBaseDir().toString(), properties.tempBaseDir());
         assertEquals("12345678901", properties.brokerCf());
         assertEquals("IPA_CODE", properties.brokerIpaCode());
-        assertEquals(existingDirectories.tempBaseDir().toString(), properties.paymentsReporting().baseDirectory());
+        assertEquals(PaymentsReportingSource.MYPAY_SHARE, properties.paymentsReporting().source());
         assertEquals(1000, properties.resolveFileTypeConfiguration(MigrationFileType.ORGANIZATIONS).exportPageSize());
       });
   }
@@ -94,7 +94,7 @@ class ExtractorExportPropertiesTest {
       "12345678901",
       "IPA_CODE",
       Map.of(MigrationFileType.ORG_SIL_SERVICES, new ExtractorExportProperties.FileTypeConfiguration(500)),
-      new ExtractorExportProperties.PaymentsReportingConfiguration(existingDirectories.tempBaseDir().toString())
+      ExtractorExportProperties.PaymentsReportingConfiguration.mypayShare()
     );
 
     IllegalStateException exception = assertThrows(
@@ -128,30 +128,13 @@ class ExtractorExportPropertiesTest {
       });
   }
 
-  @Test
-  void whenPaymentsReportingBaseDirectoryDoesNotExistThenValidationFails() {
-    ExistingDirectories existingDirectories = createExistingDirectories();
-    ExtractorExportProperties properties = new ExtractorExportProperties(
-      existingDirectories.storagePath().toString(),
-      existingDirectories.tempBaseDir().toString(),
-      "12345678901",
-      "IPA_CODE",
-      Map.of(MigrationFileType.ORGANIZATIONS, new ExtractorExportProperties.FileTypeConfiguration(1000)),
-      new ExtractorExportProperties.PaymentsReportingConfiguration(
-        existingDirectories.tempBaseDir().resolve("missing").toString()
-      )
-    );
-
-    assertThrows(IllegalStateException.class, properties::validateDirectoriesExist);
-  }
-
   private String[] validPropertyValues(ExistingDirectories existingDirectories) {
     return new String[]{
       "extractor.export.storage-path=" + existingDirectories.storagePath(),
       "extractor.export.temp-base-dir=" + existingDirectories.tempBaseDir(),
       "extractor.export.broker-cf=12345678901",
       "extractor.export.broker-ipa-code=IPA_CODE",
-      "extractor.export.payments-reporting.base-directory=" + existingDirectories.tempBaseDir(),
+      "extractor.export.payments-reporting.source=MYPAY_SHARE",
       "extractor.export.file-type-configurations.ORGANIZATIONS.export-page-size=1000"
     };
   }

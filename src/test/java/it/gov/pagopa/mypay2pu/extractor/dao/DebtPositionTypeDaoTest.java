@@ -75,7 +75,7 @@ class DebtPositionTypeDaoTest {
       mp4JdbcTemplateMock,
       new ExtractorExportProperties(
         "./build", "./build", "12345678901", "IPA_CODE", Map.of(),
-        new ExtractorExportProperties.PaymentsReportingConfiguration("./build")
+        ExtractorExportProperties.PaymentsReportingConfiguration.mypayShare()
       ),
       sqlLoaderMock
     );
