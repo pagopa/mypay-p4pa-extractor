@@ -197,7 +197,6 @@ class AssessmentsExportProcessingServiceTest {
       tempDir.toString(),
       "12345678901",
       "IPA_CODE",
-      Boolean.FALSE,
       Map.of(MigrationFileType.ASSESSMENTS, new ExtractorExportProperties.FileTypeConfiguration(2))
     );
   }

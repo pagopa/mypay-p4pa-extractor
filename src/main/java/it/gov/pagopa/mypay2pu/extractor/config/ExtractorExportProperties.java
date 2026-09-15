@@ -5,7 +5,6 @@ import jakarta.annotation.PostConstruct;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
@@ -22,7 +21,6 @@ public record ExtractorExportProperties(
   @NotBlank String tempBaseDir,
   @NotBlank String brokerCf,
   @NotBlank String brokerIpaCode,
-  @NotNull Boolean gpdEnabled,
   @NestedConfigurationProperty
   @NotEmpty Map<MigrationFileType, @Valid FileTypeConfiguration> fileTypeConfigurations) {
 

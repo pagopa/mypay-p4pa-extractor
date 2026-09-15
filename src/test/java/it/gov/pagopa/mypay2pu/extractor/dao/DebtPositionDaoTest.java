@@ -1,6 +1,5 @@
 package it.gov.pagopa.mypay2pu.extractor.dao;
 
-import it.gov.pagopa.mypay2pu.extractor.config.ExtractorExportProperties;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.DebtPosition;
 import it.gov.pagopa.mypay2pu.extractor.utils.SqlLoader;
 import org.junit.jupiter.api.AfterEach;
@@ -20,7 +19,6 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -63,7 +61,6 @@ class DebtPositionDaoTest {
           && LocalDateTime.of(2026, Month.JANUARY, 10, 8, 45).equals(params.getValue("dateFrom"))
           && Boolean.FALSE.equals(params.getValue("skipDateToExclusiveFilter"))
           && LocalDateTime.of(2026, Month.JANUARY, 12, 17, 30).equals(params.getValue("dateToExclusive"))
-          && Boolean.TRUE.equals(params.getValue("skipGpdEnabledFilter"))
           && Integer.valueOf(50).equals(params.getValue("limit"))
           && Integer.valueOf(100).equals(params.getValue("offset"))
       ),
@@ -100,7 +97,6 @@ class DebtPositionDaoTest {
           && Boolean.TRUE.equals(params.getValue("skipDateToExclusiveFilter"))
           && params.hasValue("dateToExclusive")
           && params.getValue("dateToExclusive") == null
-          && Boolean.TRUE.equals(params.getValue("skipGpdEnabledFilter"))
           && Integer.valueOf(Integer.MAX_VALUE).equals(params.getValue("limit"))
           && Integer.valueOf(0).equals(params.getValue("offset"))
       ),
@@ -127,7 +123,6 @@ class DebtPositionDaoTest {
           && params.getValue("dateFrom") == null
           && Boolean.TRUE.equals(params.getValue("skipDateToExclusiveFilter"))
           && params.getValue("dateToExclusive") == null
-          && Boolean.TRUE.equals(params.getValue("skipGpdEnabledFilter"))
           && Integer.valueOf(50).equals(params.getValue("limit"))
           && Integer.valueOf(0).equals(params.getValue("offset"))
       ),
@@ -169,8 +164,7 @@ class DebtPositionDaoTest {
   private DebtPositionDao buildDao() {
     when(sqlLoaderMock.load("mypay/debt-positions/debt-positions-open.sql")).thenReturn(FIND_DEBT_POSITIONS_SQL);
     when(sqlLoaderMock.load("mypay/debt-positions/debt-positions-cancelled.sql")).thenReturn(FIND_CANCELLED_DEBT_POSITIONS_SQL);
-    return new DebtPositionDao(mp4JdbcTemplateMock, sqlLoaderMock,
-      new ExtractorExportProperties("./build", "./build", "12345678901", "IPA_CODE", false, Map.of()));
+    return new DebtPositionDao(mp4JdbcTemplateMock, sqlLoaderMock);
   }
 
   private DebtPosition buildDebtPosition() {

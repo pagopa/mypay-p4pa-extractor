@@ -152,7 +152,6 @@ class DebtPositionsTypeOrgOperatorsExportProcessingServiceTest {
       tempDir.toString(),
       "12345678901",
       "BROKER_IPA",
-      Boolean.FALSE,
       Map.of(MigrationFileType.DEBT_POSITIONS_TYPE_ORG_OPERATORS, new ExtractorExportProperties.FileTypeConfiguration(2))
     );
   }

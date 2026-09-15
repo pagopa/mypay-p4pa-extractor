@@ -201,7 +201,6 @@ class AssessmentsRegistryExportProcessingServiceTest {
       tempDir.toString(),
       "12345678901",
       "IPA_CODE",
-      Boolean.FALSE,
       Map.of(MigrationFileType.ASSESSMENTS_REGISTRY, new ExtractorExportProperties.FileTypeConfiguration(2))
     );
   }

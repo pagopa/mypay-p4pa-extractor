@@ -1,6 +1,5 @@
 package it.gov.pagopa.mypay2pu.extractor.dao;
 
-import it.gov.pagopa.mypay2pu.extractor.config.ExtractorExportProperties;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.DebtPosition;
 import it.gov.pagopa.mypay2pu.extractor.utils.DateTimeUtils;
 import it.gov.pagopa.mypay2pu.extractor.utils.QueryUtils;
@@ -29,16 +28,14 @@ public class DebtPositionDao {
   private final NamedParameterJdbcTemplate mp4JdbcTemplate;
   private final String findDebtPositionsSql;
   private final String findCancelledDebtPositionsSql;
-  private final ExtractorExportProperties exportProperties;
 
   public DebtPositionDao(
     @Qualifier("mp4NamedParameterJdbcTemplate") NamedParameterJdbcTemplate mp4JdbcTemplate,
-    SqlLoader sqlLoader, ExtractorExportProperties exportProperties
+    SqlLoader sqlLoader
   ) {
     this.mp4JdbcTemplate = mp4JdbcTemplate;
     this.findDebtPositionsSql = sqlLoader.load(FIND_DEBT_POSITIONS_SQL_PATH);
     this.findCancelledDebtPositionsSql = sqlLoader.load(FIND_CANCELLED_DEBT_POSITIONS_SQL_PATH);
-    this.exportProperties = exportProperties;
   }
 
   public List<DebtPosition> findDebtPositions(String codIpaEnte,
@@ -47,7 +44,7 @@ public class DebtPositionDao {
                                               OffsetDateTime dateTo,
                                               int limit,
                                               int offset) {
-    return findByFilters(findDebtPositionsSql, codIpaEnte, iuvs, dateFrom, dateTo, !exportProperties.gpdEnabled(), limit, offset);
+    return findByFilters(findDebtPositionsSql, codIpaEnte, iuvs, dateFrom, dateTo, limit, offset);
   }
 
   public List<DebtPosition> findCancelledDebtPositions(String codIpaEnte,
@@ -56,7 +53,7 @@ public class DebtPositionDao {
                                                        OffsetDateTime dateTo,
                                                        int limit,
                                                        int offset) {
-    return findByFilters(findCancelledDebtPositionsSql, codIpaEnte, iuvs, dateFrom, dateTo, Boolean.TRUE, limit, offset);
+    return findByFilters(findCancelledDebtPositionsSql, codIpaEnte, iuvs, dateFrom, dateTo, limit, offset);
   }
 
   private List<DebtPosition> findByFilters(String sql,
@@ -64,7 +61,6 @@ public class DebtPositionDao {
                                            List<String> iuvs,
                                            OffsetDateTime dateFrom,
                                            OffsetDateTime dateTo,
-                                           Boolean skipGpdEnabledFilter,
                                            int limit,
                                            int offset) {
     if (StringUtils.isEmpty(codIpaEnte)) {
@@ -72,7 +68,7 @@ public class DebtPositionDao {
     }
     return mp4JdbcTemplate.query(
       sql,
-      buildParams(codIpaEnte, iuvs, dateFrom, dateTo, skipGpdEnabledFilter, limit, offset),
+      buildParams(codIpaEnte, iuvs, dateFrom, dateTo, limit, offset),
       DEBT_POSITION_ROW_MAPPER
     );
   }
@@ -81,7 +77,6 @@ public class DebtPositionDao {
                                             List<String> iuvs,
                                             OffsetDateTime dateFrom,
                                             OffsetDateTime dateTo,
-                                            Boolean skipGpdEnabledFilter,
                                             int limit,
                                             int offset) {
     boolean iuvsEmpty = CollectionUtils.isEmpty(iuvs);
@@ -93,7 +88,6 @@ public class DebtPositionDao {
       .addValue("skipDateFromFilter", dateFrom == null)
       .addValue("dateFrom", DateTimeUtils.toLocalDateTime(dateFrom))
       .addValue("skipDateToExclusiveFilter", dateTo == null)
-      .addValue("dateToExclusive", DateTimeUtils.toLocalDateTime(dateTo))
-      .addValue("skipGpdEnabledFilter", skipGpdEnabledFilter);
+      .addValue("dateToExclusive", DateTimeUtils.toLocalDateTime(dateTo));
   }
 }

@@ -43,7 +43,6 @@ class ExtractorExportPropertiesTest {
         assertEquals(existingDirectories.tempBaseDir().toString(), properties.tempBaseDir());
         assertEquals("12345678901", properties.brokerCf());
         assertEquals("IPA_CODE", properties.brokerIpaCode());
-        assertEquals(Boolean.TRUE, properties.gpdEnabled());
         assertEquals(1000, properties.resolveFileTypeConfiguration(MigrationFileType.ORGANIZATIONS).exportPageSize());
       });
   }
@@ -56,8 +55,7 @@ class ExtractorExportPropertiesTest {
         "extractor.export.storage-path=" + existingDirectories.storagePath(),
         "extractor.export.temp-base-dir=" + existingDirectories.tempBaseDir(),
         "extractor.export.broker-cf=12345678901",
-        "extractor.export.broker-ipa-code=IPA_CODE",
-        "extractor.export.gpd-enabled=true"
+        "extractor.export.broker-ipa-code=IPA_CODE"
       )
       .run(context -> {
         Throwable startupFailure = context.getStartupFailure();
@@ -76,7 +74,6 @@ class ExtractorExportPropertiesTest {
         "extractor.export.temp-base-dir=" + existingDirectories.tempBaseDir(),
         "extractor.export.broker-cf=12345678901",
         "extractor.export.broker-ipa-code=IPA_CODE",
-        "extractor.export.gpd-enabled=true",
         "extractor.export.file-type-configurations.ORGANIZATIONS.export-page-size=0"
       )
       .run(context -> {
@@ -95,7 +92,6 @@ class ExtractorExportPropertiesTest {
       existingDirectories.tempBaseDir().toString(),
       "12345678901",
       "IPA_CODE",
-      true,
       Map.of(MigrationFileType.ORG_SIL_SERVICES, new ExtractorExportProperties.FileTypeConfiguration(500))
     );
 
@@ -121,7 +117,6 @@ class ExtractorExportPropertiesTest {
         "extractor.export.temp-base-dir=" + existingDirectories.tempBaseDir(),
         "extractor.export.broker-cf=12345678901",
         "extractor.export.broker-ipa-code=IPA_CODE",
-        "extractor.export.gpd-enabled=true",
         "extractor.export.file-type-configurations.ORGANIZATIONS.export-page-size=1000"
       )
       .run(context -> {
@@ -136,7 +131,6 @@ class ExtractorExportPropertiesTest {
       "extractor.export.temp-base-dir=" + existingDirectories.tempBaseDir(),
       "extractor.export.broker-cf=12345678901",
       "extractor.export.broker-ipa-code=IPA_CODE",
-      "extractor.export.gpd-enabled=true",
       "extractor.export.file-type-configurations.ORGANIZATIONS.export-page-size=1000"
     };
   }
