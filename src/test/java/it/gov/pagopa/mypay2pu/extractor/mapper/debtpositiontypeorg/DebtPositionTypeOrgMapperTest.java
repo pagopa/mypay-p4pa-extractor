@@ -51,7 +51,10 @@ class DebtPositionTypeOrgMapperTest {
   void setUp() {
     debtPositionTypeOrgMapper = new DebtPositionTypeOrgMapper(
       debtPositionTypeOrgDaoMock,
-      new MyPayProperties(RAW_TEMPLATE_SUBJECT, RAW_TEMPLATE_MESSAGE),
+      new MyPayProperties(
+        new MyPayProperties.PathProperties("directory-root-enti"),
+        new MyPayProperties.GlobalProperties(RAW_TEMPLATE_SUBJECT, RAW_TEMPLATE_MESSAGE)
+      ),
       myDictionaryClientMock,
       new MyDictionaryToMyPayMapper(new Gson()),
       new JsonConfig().objectMapperJackson3()

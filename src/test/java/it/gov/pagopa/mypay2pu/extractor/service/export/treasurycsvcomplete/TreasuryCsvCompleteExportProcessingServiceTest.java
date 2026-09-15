@@ -140,7 +140,8 @@ class TreasuryCsvCompleteExportProcessingServiceTest {
       tempDir.toString(),
       "12345678901",
       "BROKER_IPA",
-      Map.of(MigrationFileType.TREASURY_CSV_COMPLETE, new ExtractorExportProperties.FileTypeConfiguration(2))
+      Map.of(MigrationFileType.TREASURY_CSV_COMPLETE, new ExtractorExportProperties.FileTypeConfiguration(2)),
+      ExtractorExportProperties.PaymentsReportingConfiguration.mypayShare()
     );
   }
 

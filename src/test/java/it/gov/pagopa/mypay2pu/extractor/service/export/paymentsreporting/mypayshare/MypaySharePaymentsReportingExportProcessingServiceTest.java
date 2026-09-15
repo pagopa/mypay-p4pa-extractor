@@ -1,7 +1,7 @@
 package it.gov.pagopa.mypay2pu.extractor.service.export.paymentsreporting.mypayshare;
 
 import it.gov.pagopa.mypay2pu.extractor.config.ExtractorExportProperties;
-import it.gov.pagopa.mypay2pu.extractor.config.MyPayPathProperties;
+import it.gov.pagopa.mypay2pu.extractor.config.MyPayProperties;
 import it.gov.pagopa.mypay2pu.extractor.dao.PaymentReportingMyPayShareDao;
 import it.gov.pagopa.mypay2pu.extractor.dto.ExportFileResult;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionFilters;
@@ -130,7 +130,10 @@ class MypaySharePaymentsReportingExportProcessingServiceTest {
         Map.of(MigrationFileType.PAYMENTS_REPORTING, new ExtractorExportProperties.FileTypeConfiguration(1)),
         ExtractorExportProperties.PaymentsReportingConfiguration.mypayShare()
       ),
-      new MyPayPathProperties(tempDir.toString()),
+      new MyPayProperties(
+        new MyPayProperties.PathProperties(tempDir.toString()),
+        new MyPayProperties.GlobalProperties(null, null)
+      ),
       new CsvService(';', '"'),
       new ZipFileService()
     );

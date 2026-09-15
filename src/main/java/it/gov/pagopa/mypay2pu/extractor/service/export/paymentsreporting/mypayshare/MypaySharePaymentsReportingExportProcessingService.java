@@ -1,7 +1,7 @@
 package it.gov.pagopa.mypay2pu.extractor.service.export.paymentsreporting.mypayshare;
 
 import it.gov.pagopa.mypay2pu.extractor.config.ExtractorExportProperties;
-import it.gov.pagopa.mypay2pu.extractor.config.MyPayPathProperties;
+import it.gov.pagopa.mypay2pu.extractor.config.MyPayProperties;
 import it.gov.pagopa.mypay2pu.extractor.dao.PaymentReportingMyPayShareDao;
 import it.gov.pagopa.mypay2pu.extractor.dto.ExportFileResult;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionFilters;
@@ -30,18 +30,18 @@ public class MypaySharePaymentsReportingExportProcessingService {
   private static final String MISSING_XML_DESCRIPTION = "XML file not found on the MyPay share";
   private final PaymentReportingMyPayShareDao paymentReportingMyPayShareDao;
   private final ExtractorExportProperties extractorExportProperties;
-  private final MyPayPathProperties myPayPathProperties;
+  private final MyPayProperties myPayProperties;
   private final CsvService csvService;
   private final ZipFileService zipFileService;
 
   public MypaySharePaymentsReportingExportProcessingService(PaymentReportingMyPayShareDao paymentReportingMyPayShareDao,
                                                             ExtractorExportProperties extractorExportProperties,
-                                                            MyPayPathProperties myPayPathProperties,
+                                                            MyPayProperties myPayProperties,
                                                             CsvService csvService,
                                                             ZipFileService zipFileService) {
     this.paymentReportingMyPayShareDao = paymentReportingMyPayShareDao;
     this.extractorExportProperties = extractorExportProperties;
-    this.myPayPathProperties = myPayPathProperties;
+    this.myPayProperties = myPayProperties;
     this.csvService = csvService;
     this.zipFileService = zipFileService;
   }
@@ -120,7 +120,7 @@ public class MypaySharePaymentsReportingExportProcessingService {
   private ResolvedFiles resolveExistingXmlFiles(List<Path> records, String ipaCode) {
     List<Path> xmlFiles = new ArrayList<>();
     List<Path> missingXmlFiles = new ArrayList<>();
-    Path baseDirectory = Path.of(myPayPathProperties.directoryRootEnti());
+    Path baseDirectory = Path.of(myPayProperties.path().directoryRootEnti());
     for (Path filePath : records) {
       Path resolvedPath = baseDirectory.resolve(ipaCode).resolve(filePath.getFileName());
       if (Files.exists(resolvedPath)) {
