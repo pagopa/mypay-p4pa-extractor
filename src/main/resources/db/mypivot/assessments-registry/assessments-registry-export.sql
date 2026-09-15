@@ -15,7 +15,7 @@ WHERE e.cod_ipa_ente = :ipaCode
   AND (:skipDateFromFilter = TRUE OR uac.dt_ultima_modifica >= :dateFrom)
   AND (
     :skipDateToFilter = TRUE
-    OR uac.dt_ultima_modifica <= :dateTo
+    OR uac.dt_ultima_modifica < :dateTo
   )
 ORDER BY uac.cod_tipo_dovuto, uac.cod_capitolo, uac.cod_ufficio
 LIMIT :limit

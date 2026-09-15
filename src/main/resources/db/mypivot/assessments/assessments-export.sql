@@ -20,7 +20,7 @@ WHERE ad.cod_ipa_ente = :ipaCode
   AND (:skipDateFromFilter = TRUE OR a.dt_ultima_modifica >= :dateFrom)
   AND (
     :skipDateToFilter = TRUE
-    OR a.dt_ultima_modifica <= :dateTo
+    OR a.dt_ultima_modifica < :dateTo
   )
 ORDER BY a.de_nome_accertamento, ad.cod_iuv
 LIMIT :limit
