@@ -24,7 +24,7 @@ SELECT
     de.cod_tipo_dovuto AS tipo_dovuto,
     de.de_rp_dati_vers_dati_sing_vers_causale_versamento AS causale_versamento,
     de.de_rp_dati_vers_dati_sing_vers_dati_specifici_riscossione AS dati_specifici_riscossione,
-    NULL AS flg_genera_iuv,
+    FALSE AS flg_genera_iuv,
     de.bilancio AS bilancio,
     FALSE AS draft,
     FALSE AS flag_multi_beneficiario,
