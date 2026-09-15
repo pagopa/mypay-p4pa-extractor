@@ -9,7 +9,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
-import org.springframework.boot.context.properties.bind.ConstructorBinding;
 import org.springframework.validation.annotation.Validated;
 
 import java.nio.file.Files;
@@ -56,11 +55,6 @@ public record ExtractorExportProperties(
   public record FileTypeConfiguration(@Positive int exportPageSize) { }
 
   public record PaymentsReportingConfiguration(@NotNull PaymentsReportingSource source) {
-
-    @ConstructorBinding
-    public PaymentsReportingConfiguration {
-      // Explicitly declared only to annotate the record constructor for configuration binding.
-    }
 
     public static PaymentsReportingConfiguration mypayShare() {
       return new PaymentsReportingConfiguration(PaymentsReportingSource.MYPAY_SHARE);

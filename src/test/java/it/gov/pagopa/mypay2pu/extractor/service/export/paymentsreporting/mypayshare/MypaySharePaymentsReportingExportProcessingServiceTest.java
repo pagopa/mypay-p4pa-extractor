@@ -2,7 +2,7 @@ package it.gov.pagopa.mypay2pu.extractor.service.export.paymentsreporting.mypays
 
 import it.gov.pagopa.mypay2pu.extractor.config.ExtractorExportProperties;
 import it.gov.pagopa.mypay2pu.extractor.config.MyPayPathProperties;
-import it.gov.pagopa.mypay2pu.extractor.dao.PaymentsReportingDao;
+import it.gov.pagopa.mypay2pu.extractor.dao.PaymentReportingMyPayShareDao;
 import it.gov.pagopa.mypay2pu.extractor.dto.ExportFileResult;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionFilters;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
@@ -36,11 +36,11 @@ class MypaySharePaymentsReportingExportProcessingServiceTest {
   @TempDir
   Path tempDir;
   @Mock
-  private PaymentsReportingDao paymentsReportingDaoMock;
+  private PaymentReportingMyPayShareDao paymentReportingMyPayShareDaoMock;
 
   @AfterEach
   void verifyMocks() {
-    verifyNoMoreInteractions(paymentsReportingDaoMock);
+    verifyNoMoreInteractions(paymentReportingMyPayShareDaoMock);
   }
 
   @Test
@@ -51,11 +51,11 @@ class MypaySharePaymentsReportingExportProcessingServiceTest {
     OffsetDateTime createdFrom = OffsetDateTime.parse("2026-01-01T00:00:00Z");
     OffsetDateTime createdTo = OffsetDateTime.parse("2026-01-31T23:59:59Z");
     ExtractionRequest request = request(new ExtractionFilters().dateFrom(createdFrom).dateTo(createdTo));
-    when(paymentsReportingDaoMock.findByFilters("IPA_CODE", null, createdFrom, createdTo, null, 1, 0))
+    when(paymentReportingMyPayShareDaoMock.findByFilters("IPA_CODE", null, createdFrom, createdTo, null, 1, 0))
       .thenReturn(List.of(Path.of("report.xml")));
-    when(paymentsReportingDaoMock.findByFilters("IPA_CODE", null, createdFrom, createdTo, null, 1, 1))
+    when(paymentReportingMyPayShareDaoMock.findByFilters("IPA_CODE", null, createdFrom, createdTo, null, 1, 1))
       .thenReturn(List.of(Path.of("missing.xml")));
-    when(paymentsReportingDaoMock.findByFilters("IPA_CODE", null, createdFrom, createdTo, null, 1, 2))
+    when(paymentReportingMyPayShareDaoMock.findByFilters("IPA_CODE", null, createdFrom, createdTo, null, 1, 2))
       .thenReturn(List.of());
 
     ExportFileResult result = service().executeExport("extraction-id", request);
@@ -82,17 +82,17 @@ class MypaySharePaymentsReportingExportProcessingServiceTest {
       ),
       Files.readAllLines(discardFilePath)
     );
-    verify(paymentsReportingDaoMock).findByFilters("IPA_CODE", null, createdFrom, createdTo, null, 1, 0);
-    verify(paymentsReportingDaoMock).findByFilters("IPA_CODE", null, createdFrom, createdTo, null, 1, 1);
-    verify(paymentsReportingDaoMock).findByFilters("IPA_CODE", null, createdFrom, createdTo, null, 1, 2);
+    verify(paymentReportingMyPayShareDaoMock).findByFilters("IPA_CODE", null, createdFrom, createdTo, null, 1, 0);
+    verify(paymentReportingMyPayShareDaoMock).findByFilters("IPA_CODE", null, createdFrom, createdTo, null, 1, 1);
+    verify(paymentReportingMyPayShareDaoMock).findByFilters("IPA_CODE", null, createdFrom, createdTo, null, 1, 2);
   }
 
   @Test
   void givenLogicalKeyAndMissingXmlWhenExportThenSkipMissingFileAndCreateEmptyZip() throws Exception {
     ExtractionRequest request = request(new ExtractionFilters().logicalKey("FLOW-1"));
-    when(paymentsReportingDaoMock.findByFilters("IPA_CODE", null, null, null, "FLOW-1", 1, 0))
+    when(paymentReportingMyPayShareDaoMock.findByFilters("IPA_CODE", null, null, null, "FLOW-1", 1, 0))
       .thenReturn(List.of(Path.of("missing.xml")));
-    when(paymentsReportingDaoMock.findByFilters("IPA_CODE", null, null, null, "FLOW-1", 1, 1))
+    when(paymentReportingMyPayShareDaoMock.findByFilters("IPA_CODE", null, null, null, "FLOW-1", 1, 1))
       .thenReturn(List.of());
 
     ExportFileResult result = service().executeExport("extraction-id", request);
@@ -102,8 +102,8 @@ class MypaySharePaymentsReportingExportProcessingServiceTest {
     try (ZipFile zipFile = new ZipFile(zipPath.toFile())) {
       assertEquals(0, zipFile.size());
     }
-    verify(paymentsReportingDaoMock).findByFilters("IPA_CODE", null, null, null, "FLOW-1", 1, 0);
-    verify(paymentsReportingDaoMock).findByFilters("IPA_CODE", null, null, null, "FLOW-1", 1, 1);
+    verify(paymentReportingMyPayShareDaoMock).findByFilters("IPA_CODE", null, null, null, "FLOW-1", 1, 0);
+    verify(paymentReportingMyPayShareDaoMock).findByFilters("IPA_CODE", null, null, null, "FLOW-1", 1, 1);
   }
 
   @Test
@@ -113,18 +113,18 @@ class MypaySharePaymentsReportingExportProcessingServiceTest {
     ExtractionRequest request = request(
       new ExtractionFilters().dateFrom(createdFrom).dateTo(createdTo).logicalKey("FLOW-1")
     );
-    when(paymentsReportingDaoMock.findByFilters("IPA_CODE", null, createdFrom, createdTo, "FLOW-1", 1, 0))
+    when(paymentReportingMyPayShareDaoMock.findByFilters("IPA_CODE", null, createdFrom, createdTo, "FLOW-1", 1, 0))
       .thenReturn(List.of());
 
     ExportFileResult result = service().executeExport("extraction-id", request);
 
     assertEquals(List.of(), result.files());
-    verify(paymentsReportingDaoMock).findByFilters("IPA_CODE", null, createdFrom, createdTo, "FLOW-1", 1, 0);
+    verify(paymentReportingMyPayShareDaoMock).findByFilters("IPA_CODE", null, createdFrom, createdTo, "FLOW-1", 1, 0);
   }
 
   private MypaySharePaymentsReportingExportProcessingService service() {
     return new MypaySharePaymentsReportingExportProcessingService(
-      paymentsReportingDaoMock,
+      paymentReportingMyPayShareDaoMock,
       new ExtractorExportProperties(
         tempDir.toString(), tempDir.toString(), "BROKER_CF", "BROKER_IPA",
         Map.of(MigrationFileType.PAYMENTS_REPORTING, new ExtractorExportProperties.FileTypeConfiguration(1)),

@@ -28,7 +28,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class PaymentsReportingDaoTest {
+class PaymentReportingMyPayShareDaoTest {
 
   private static final String FIND_BY_FILTERS_SQL = "SELECT payments reporting";
 
@@ -46,7 +46,7 @@ class PaymentsReportingDaoTest {
 
   @Test
   void givenDateRangeWhenFindThenQueryMyPayDatabase() {
-    PaymentsReportingDao dao = buildDao();
+    PaymentReportingMyPayShareDao dao = buildDao();
     OffsetDateTime dateFrom = OffsetDateTime.of(
       LocalDateTime.of(2026, Month.JANUARY, 10, 10, 30),
       ZoneOffset.UTC
@@ -71,7 +71,7 @@ class PaymentsReportingDaoTest {
           && Integer.valueOf(100).equals(params.getValue("offset"))
           && params.getValues().size() == 9
       ),
-      same(PaymentsReportingDao.PAYMENTS_REPORTING_FILE_ROW_MAPPER)
+      same(PaymentReportingMyPayShareDao.PAYMENTS_REPORTING_FILE_ROW_MAPPER)
     )).thenReturn(expected);
 
     assertEquals(expected, dao.findByDateRange("IPA1", null, dateFrom, dateTo, 50, 100));
@@ -79,7 +79,7 @@ class PaymentsReportingDaoTest {
 
   @Test
   void givenLastExtractionDateWhenFindThenQueryMyPayDatabase() {
-    PaymentsReportingDao dao = buildDao();
+    PaymentReportingMyPayShareDao dao = buildDao();
     OffsetDateTime lastExtractionDate = OffsetDateTime.of(
       LocalDateTime.of(2026, Month.JANUARY, 10, 10, 30),
       ZoneOffset.UTC
@@ -100,7 +100,7 @@ class PaymentsReportingDaoTest {
           && Integer.valueOf(0).equals(params.getValue("offset"))
           && params.getValues().size() == 9
       ),
-      same(PaymentsReportingDao.PAYMENTS_REPORTING_FILE_ROW_MAPPER)
+      same(PaymentReportingMyPayShareDao.PAYMENTS_REPORTING_FILE_ROW_MAPPER)
     )).thenReturn(expected);
 
     assertEquals(expected, dao.findByDateRange("IPA1", lastExtractionDate, null, null));
@@ -108,7 +108,7 @@ class PaymentsReportingDaoTest {
 
   @Test
   void givenLogicalKeyWhenFindThenQueryMyPayDatabase() {
-    PaymentsReportingDao dao = buildDao();
+    PaymentReportingMyPayShareDao dao = buildDao();
     List<Path> expected = List.of(Path.of("path.xml"));
 
     when(fespJdbcTemplateMock.query(
@@ -125,7 +125,7 @@ class PaymentsReportingDaoTest {
           && Integer.valueOf(0).equals(params.getValue("offset"))
           && params.getValues().size() == 9
       ),
-      same(PaymentsReportingDao.PAYMENTS_REPORTING_FILE_ROW_MAPPER)
+      same(PaymentReportingMyPayShareDao.PAYMENTS_REPORTING_FILE_ROW_MAPPER)
     )).thenReturn(expected);
 
     assertEquals(expected, dao.findByLogicalKey("IPA1", "FLOW-1"));
@@ -135,7 +135,7 @@ class PaymentsReportingDaoTest {
   void givenDatabaseRowWhenMappedThenExposePaymentsReportingFilePath() throws Exception {
     when(resultSetMock.getString("de_nome_file_scaricato")).thenReturn("/mypay/reporting/FLOW-1.xml");
 
-    Path result = PaymentsReportingDao.PAYMENTS_REPORTING_FILE_ROW_MAPPER.mapRow(resultSetMock, 0);
+    Path result = PaymentReportingMyPayShareDao.PAYMENTS_REPORTING_FILE_ROW_MAPPER.mapRow(resultSetMock, 0);
 
     assertEquals(Path.of("/mypay/reporting/FLOW-1.xml"), result);
     verify(resultSetMock).getString("de_nome_file_scaricato");
@@ -159,8 +159,8 @@ class PaymentsReportingDaoTest {
     assertTrue(sql.contains("OFFSET COALESCE(:offset, 0)"));
   }
 
-  private PaymentsReportingDao buildDao() {
+  private PaymentReportingMyPayShareDao buildDao() {
     when(sqlLoaderMock.load("fesp/payments-reporting/payments-reporting.sql")).thenReturn(FIND_BY_FILTERS_SQL);
-    return new PaymentsReportingDao(fespJdbcTemplateMock, sqlLoaderMock);
+    return new PaymentReportingMyPayShareDao(fespJdbcTemplateMock, sqlLoaderMock);
   }
 }

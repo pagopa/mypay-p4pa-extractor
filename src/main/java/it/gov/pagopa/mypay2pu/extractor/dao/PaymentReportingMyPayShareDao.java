@@ -14,7 +14,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 @Repository
-public class PaymentsReportingDao {
+public class PaymentReportingMyPayShareDao {
 
   private static final String FIND_BY_FILTERS_SQL_PATH = "fesp/payments-reporting/payments-reporting.sql";
   protected static final RowMapper<Path> PAYMENTS_REPORTING_FILE_ROW_MAPPER = (resultSet, rowNum) ->
@@ -23,7 +23,7 @@ public class PaymentsReportingDao {
   private final NamedParameterJdbcTemplate fespJdbcTemplate;
   private final String findByFiltersSql;
 
-  public PaymentsReportingDao(
+  public PaymentReportingMyPayShareDao(
     @Qualifier("fespNamedParameterJdbcTemplate") NamedParameterJdbcTemplate fespJdbcTemplate,
     SqlLoader sqlLoader
   ) {
