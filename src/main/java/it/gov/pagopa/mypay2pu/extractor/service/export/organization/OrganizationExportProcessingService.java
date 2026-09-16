@@ -56,6 +56,13 @@ public class OrganizationExportProcessingService extends BaseExportProcessingSer
 
   @Override
   protected List<Organization> retrieveData(ExtractionRequest request, int pageSize, int offset) {
-    return organizationDao.findByFilters(request.getIpaCodes(), request.getFilters(), pageSize, offset);
+    return organizationDao.findByFilters(
+      request.getIpaCodes(),
+      request.getLastExtractionDate(),
+      request.getFilters() != null ? request.getFilters().getDateFrom() : null,
+      request.getFilters() != null ? request.getFilters().getDateTo() : null,
+      pageSize,
+      offset
+    );
   }
 }

@@ -12,7 +12,6 @@ import it.gov.pagopa.mypay2pu.extractor.service.FileArchiverService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.CsvPartitionWriterService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.SplitByIpaCodeBaseExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.files.CsvService;
-import it.gov.pagopa.mypay2pu.extractor.utils.DateTimeUtils;
 import it.gov.pagopa.mypay2pu.extractor.validation.LogicalKeyPair;
 import it.gov.pagopa.mypay2pu.extractor.validation.PairedLogicalKeyValidator;
 import jakarta.validation.Validator;
@@ -67,12 +66,14 @@ public class PaymentNotificationExportProcessingService
     LogicalKeyPair logicalKeyPair = PairedLogicalKeyValidator.parseLogicalKey(
       filters != null ? filters.getLogicalKey() : null
     );
+
     return paymentNotificationDao.findByFilters(
       ipaCode,
+      request.getLastExtractionDate(),
       logicalKeyPair.left(),
       logicalKeyPair.right(),
-      DateTimeUtils.toLocalDateTime(filters != null ? filters.getDateFrom() : null),
-      DateTimeUtils.toLocalDateTime(filters != null ? filters.getDateTo() : null),
+      filters != null ? filters.getDateFrom() : null,
+      filters != null ? filters.getDateTo() : null,
       pageSize,
       offset
     );

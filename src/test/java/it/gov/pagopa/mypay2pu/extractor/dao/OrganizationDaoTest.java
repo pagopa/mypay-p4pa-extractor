@@ -1,9 +1,7 @@
 package it.gov.pagopa.mypay2pu.extractor.dao;
 
-import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionFilters;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.Organization;
 import it.gov.pagopa.mypay2pu.extractor.utils.SqlLoader;
-import it.gov.pagopa.mypay2pu.extractor.utils.TimeUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,11 +14,10 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.Month;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -60,20 +57,20 @@ class OrganizationDaoTest {
       eq(FIND_BY_FILTERS_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         List.of("IPA1").equals(params.getValue("ipaCodes"))
-          && !params.hasValue("limit")
-          && !params.hasValue("offset")
-          && Boolean.TRUE.equals(params.getValue("skipModifiedFromFilter"))
-          && params.hasValue("modifiedFrom")
-          && params.getValue("modifiedFrom") == null
-          && Boolean.TRUE.equals(params.getValue("skipModifiedToExclusiveFilter"))
-          && params.hasValue("modifiedToExclusive")
-          && params.getValue("modifiedToExclusive") == null
+          && Integer.valueOf(50).equals(params.getValue("limit"))
+          && Integer.valueOf(0).equals(params.getValue("offset"))
+          && Boolean.TRUE.equals(params.getValue("skipDateFromFilter"))
+          && params.hasValue("dateFrom")
+          && params.getValue("dateFrom") == null
+          && Boolean.TRUE.equals(params.getValue("skipDateToFilter"))
+          && params.hasValue("dateTo")
+          && params.getValue("dateTo") == null
       ),
       Mockito.same(OrganizationDao.ORGANIZATION_ROW_MAPPER)
     ))
       .thenReturn(expected);
 
-    List<Organization> result = dao.findByFilters(List.of("IPA1"), new ExtractionFilters(null, null, null));
+    List<Organization> result = dao.findByFilters(List.of("IPA1"), null, null, null, 50, 0);
 
     assertEquals(expected, result);
   }
@@ -86,10 +83,10 @@ class OrganizationDaoTest {
       eq(FIND_BY_FILTERS_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         List.of("IPA1", "IPA2").equals(params.getValue("ipaCodes"))
-          && Boolean.FALSE.equals(params.getValue("skipModifiedFromFilter"))
-          && LocalDateTime.of(2026, Month.JANUARY, 10, 0, 0).equals(params.getValue("modifiedFrom"))
-          && Boolean.FALSE.equals(params.getValue("skipModifiedToExclusiveFilter"))
-          && LocalDateTime.of(2026, Month.JANUARY, 12, 0, 0).equals(params.getValue("modifiedToExclusive"))
+          && Boolean.FALSE.equals(params.getValue("skipDateFromFilter"))
+          && OffsetDateTime.of(LocalDateTime.of(2026, Month.JANUARY, 10, 0, 0), ZoneOffset.UTC).equals(params.getValue("dateFrom"))
+          && Boolean.FALSE.equals(params.getValue("skipDateToFilter"))
+          && OffsetDateTime.of(LocalDateTime.of(2026, Month.JANUARY, 12, 0, 0), ZoneOffset.UTC).equals(params.getValue("dateTo"))
           && Integer.valueOf(50).equals(params.getValue("limit"))
           && Integer.valueOf(100).equals(params.getValue("offset"))
       ),
@@ -99,8 +96,9 @@ class OrganizationDaoTest {
 
     List<Organization> result = dao.findByFilters(
       List.of("IPA1", "IPA2"),
-      new ExtractionFilters(OffsetDateTime.of(LocalDate.of(2026, Month.JANUARY, 10), LocalTime.MIDNIGHT, TimeUtils.zoneOffsetAt(LocalDateTime.of(2026, Month.JANUARY, 10, 0, 0))),
-        OffsetDateTime.of(LocalDate.of(2026, Month.JANUARY, 12), LocalTime.MIDNIGHT, TimeUtils.zoneOffsetAt(LocalDateTime.of(2026, Month.JANUARY, 12, 0, 0))), null),
+      null,
+      OffsetDateTime.of(LocalDateTime.of(2026, Month.JANUARY, 10, 0, 0), ZoneOffset.UTC),
+      OffsetDateTime.of(LocalDateTime.of(2026, Month.JANUARY, 12, 0, 0), ZoneOffset.UTC),
       50,
       100
     );
@@ -109,13 +107,12 @@ class OrganizationDaoTest {
 
   @Test
   void givenInvalidLimitWhenFindByFiltersThenThrowIllegalArgumentException() {
-    ExtractionFilters filters = new ExtractionFilters(null, null, null);
     OrganizationDao dao = buildDao(mpv4JdbcTemplateMock);
     List<String> ipaCodes = List.of("IPA1");
 
     IllegalArgumentException exception = assertThrows(
       IllegalArgumentException.class,
-      () -> dao.findByFilters(ipaCodes, filters, 0, 0)
+      () -> dao.findByFilters(ipaCodes, null, null, null, 0, 0)
     );
     assertEquals("limit must be greater than 0", exception.getMessage());
   }
@@ -155,8 +152,8 @@ class OrganizationDaoTest {
     String sql = Files.readString(Path.of("src/main/resources/db/mypay/organization/organization.sql"));
     assertTrue(sql.contains("ef.cod_ipa_ente IN (:ipaCodes)"));
     assertTrue(sql.contains("e.cod_ipa_ente IN (:ipaCodes)"));
-    assertTrue(sql.contains(":skipModifiedFromFilter = TRUE OR e.dt_ultima_modifica >= :modifiedFrom"));
-    assertTrue(sql.contains(":skipModifiedToExclusiveFilter = TRUE OR e.dt_ultima_modifica < :modifiedToExclusive"));
+    assertTrue(sql.contains(":skipDateFromFilter = TRUE OR e.dt_ultima_modifica >= :dateFrom"));
+    assertTrue(sql.contains(":skipDateToFilter = TRUE OR e.dt_ultima_modifica < :dateTo"));
   }
 
   private OrganizationDao buildDao(NamedParameterJdbcTemplate mpv4JdbcTemplate) {

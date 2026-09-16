@@ -13,7 +13,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
 
@@ -37,10 +37,11 @@ public class PaymentNotificationDao {
 
   public List<PaymentNotification> findByFilters(
     String ipaCode,
+    OffsetDateTime lastExtractionDate,
     List<String> iuds,
     List<String> iuvs,
-    LocalDateTime createdFrom,
-    LocalDateTime createdTo,
+    OffsetDateTime dateFrom,
+    OffsetDateTime dateTo,
     int limit,
     int offset
   ) {
@@ -53,7 +54,14 @@ public class PaymentNotificationDao {
 
     return mypivotJdbcTemplate.query(
       findByFiltersSql,
-      buildParams(ipaCode, iuds, iuvs, createdFrom, createdTo, limit, offset),
+      buildParams(
+        ipaCode,
+        iuds,
+        iuvs,
+        QueryUtils.resolveDateFrom(lastExtractionDate, dateFrom),
+        dateTo,
+        limit,
+        offset),
       PAYMENT_NOTIFICATION_ROW_MAPPER
     );
   }
@@ -62,8 +70,8 @@ public class PaymentNotificationDao {
     String ipaCode,
     List<String> iuds,
     List<String> iuvs,
-    LocalDateTime createdFrom,
-    LocalDateTime createdTo,
+    OffsetDateTime dateFrom,
+    OffsetDateTime dateTo,
     int limit,
     int offset
   ) {
@@ -75,9 +83,9 @@ public class PaymentNotificationDao {
       .addValue("iuds", iudsEmpty ? Collections.singletonList(null) : iuds)
       .addValue("iuvsEmpty", iuvsEmpty)
       .addValue("iuvs", iuvsEmpty ? Collections.singletonList(null) : iuvs)
-      .addValue("skipCreatedFromFilter", createdFrom == null)
-      .addValue("createdFrom", createdFrom)
-      .addValue("skipCreatedToFilter", createdTo == null)
-      .addValue("createdTo", createdTo);
+      .addValue("skipDateFromFilter", dateFrom == null)
+      .addValue("dateFrom", dateFrom)
+      .addValue("skipDateToFilter", dateTo == null)
+      .addValue("dateTo", dateTo);
   }
 }

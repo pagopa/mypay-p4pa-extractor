@@ -133,9 +133,10 @@ class DebtPositionExportProcessingServiceTest {
     DebtPosition withoutChangeDates = debtPosition("IUPD-NO-CHANGE-DATES", "IUD-NO-CHANGE-DATES", null, null);
     DebtPosition cancelled = debtPosition("IUPD-CANCELLED", "IUD-CANCELLED");
 
-    when(debtPositionDaoMock.findDebtPositions("ORG_IPA", List.of("IUV-1"), null, null, 10, 0))
+    OffsetDateTime lastExtractionDate = request.getLastExtractionDate();
+    when(debtPositionDaoMock.findDebtPositions("ORG_IPA", List.of("IUV-1"), lastExtractionDate, null, 10, 0))
       .thenReturn(List.of(inserted, modified, unchanged, withoutLastModificationDate, withoutCreationDate, withoutChangeDates));
-    when(debtPositionDaoMock.findCancelledDebtPositions("ORG_IPA", List.of("IUV-1"), null, null, 10, 0))
+    when(debtPositionDaoMock.findCancelledDebtPositions("ORG_IPA", List.of("IUV-1"), lastExtractionDate, null, 10, 0))
       .thenReturn(List.of(cancelled));
 
     List<DebtPositionExportProcessingService.DebtPositionWithAction> result =

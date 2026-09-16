@@ -1,8 +1,6 @@
 package it.gov.pagopa.mypay2pu.extractor.dao;
 
-import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionFilters;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.Organization;
-import it.gov.pagopa.mypay2pu.extractor.utils.DateTimeUtils;
 import it.gov.pagopa.mypay2pu.extractor.utils.QueryUtils;
 import it.gov.pagopa.mypay2pu.extractor.utils.SqlLoader;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +11,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Repository
@@ -39,13 +38,22 @@ public class OrganizationDao {
     this.findTreasuryByIpaSql = sqlLoader.load(FIND_TREASURY_BY_IPA_SQL_PATH);
   }
 
-  public List<Organization> findByFilters(List<String> ipaCodes, ExtractionFilters filters) {
-    return mp4JdbcTemplate.query(findByFiltersSql, buildFiltersParams(ipaCodes, filters, null, null), ORGANIZATION_ROW_MAPPER);
-  }
-
-  public List<Organization> findByFilters(List<String> ipaCodes, ExtractionFilters filters, int limit, int offset) {
-    MapSqlParameterSource params = buildFiltersParams(ipaCodes, filters, limit, offset);
-    return mp4JdbcTemplate.query(findByFiltersSql, params, ORGANIZATION_ROW_MAPPER);
+  public List<Organization> findByFilters(List<String> ipaCodes,
+                                          OffsetDateTime lastExtractionDate,
+                                          OffsetDateTime dateFrom,
+                                          OffsetDateTime dateTo,
+                                          int limit,
+                                          int offset) {
+    return mp4JdbcTemplate.query(
+      findByFiltersSql,
+      buildFiltersParams(
+        ipaCodes,
+        QueryUtils.resolveDateFrom(lastExtractionDate, dateFrom),
+        dateTo,
+        limit,
+        offset
+      ),
+      ORGANIZATION_ROW_MAPPER);
   }
 
   public boolean isTreasuryEnabled(String ipaCode) {
@@ -58,16 +66,17 @@ public class OrganizationDao {
 
   private MapSqlParameterSource buildFiltersParams(
     List<String> ipaCodes,
-    ExtractionFilters filters,
+    OffsetDateTime dateFrom,
+    OffsetDateTime dateTo,
     Integer limit,
     Integer offset
   ) {
     return QueryUtils.buildPaginatedFilterParams(limit, offset)
       .addValue("ipaCodes", ipaCodes)
-      .addValue("skipModifiedFromFilter", filters == null || filters.getDateFrom() == null)
-      .addValue("modifiedFrom", DateTimeUtils.toLocalDateTime(filters != null ? filters.getDateFrom() : null))
-      .addValue("skipModifiedToExclusiveFilter", filters == null || filters.getDateTo() == null)
-      .addValue("modifiedToExclusive", DateTimeUtils.toLocalDateTime(filters != null ? filters.getDateTo() : null));
+      .addValue("skipDateFromFilter", dateFrom == null)
+      .addValue("dateFrom", dateFrom)
+      .addValue("skipDateToFilter", dateTo == null)
+      .addValue("dateTo", dateTo);
   }
 
   private MapSqlParameterSource buildTreasuryParams(String ipaCode) {

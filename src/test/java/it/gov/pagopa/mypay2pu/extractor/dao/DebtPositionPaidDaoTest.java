@@ -65,10 +65,10 @@ class DebtPositionPaidDaoTest {
         "IPA1".equals(params.getValue("codIpaEnte"))
           && Boolean.FALSE.equals(params.getValue("skipIuvsFilter"))
           && List.of("IUV-1").equals(params.getValue("iuvs"))
-          && Boolean.FALSE.equals(params.getValue("skipCreatedFromFilter"))
-          && createdFrom.toLocalDateTime().equals(params.getValue("createdFrom"))
-          && Boolean.FALSE.equals(params.getValue("skipCreatedToFilter"))
-          && createdTo.toLocalDateTime().equals(params.getValue("createdTo"))
+          && Boolean.FALSE.equals(params.getValue("skipDateFromFilter"))
+          && createdFrom.toLocalDateTime().equals(params.getValue("dateFrom"))
+          && Boolean.FALSE.equals(params.getValue("skipDateToFilter"))
+          && createdTo.toLocalDateTime().equals(params.getValue("dateTo"))
           && Integer.valueOf(50).equals(params.getValue("limit"))
           && Integer.valueOf(100).equals(params.getValue("offset"))
       ),
@@ -76,7 +76,7 @@ class DebtPositionPaidDaoTest {
     )).thenReturn(List.of());
 
     List<DebtPositionPaid> result = dao.findByFilters(
-      "IPA1", List.of("IUV-1"), createdFrom, createdTo, 50, 100
+      "IPA1", null, List.of("IUV-1"), createdFrom, createdTo, 50, 100
     );
 
     assertEquals(List.of(), result);
@@ -93,15 +93,15 @@ class DebtPositionPaidDaoTest {
     when(mp4JdbcTemplateMock.query(
       eq(FIND_BY_FILTERS_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
-        Boolean.FALSE.equals(params.getValue("skipCreatedFromFilter"))
-          && createdFrom.toLocalDateTime().equals(params.getValue("createdFrom"))
-          && Boolean.TRUE.equals(params.getValue("skipCreatedToFilter"))
-          && params.getValue("createdTo") == null
+        Boolean.FALSE.equals(params.getValue("skipDateFromFilter"))
+          && createdFrom.toLocalDateTime().equals(params.getValue("dateFrom"))
+          && Boolean.TRUE.equals(params.getValue("skipDateToFilter"))
+          && params.getValue("dateTo") == null
       ),
       same(DebtPositionPaidDao.DEBT_POSITION_PAID_ROW_MAPPER)
     )).thenReturn(List.of());
 
-    assertEquals(List.of(), dao.findByFilters("IPA1", List.of(), createdFrom, null, 10, 0));
+    assertEquals(List.of(), dao.findByFilters("IPA1", null, List.of(), createdFrom, null, 10, 0));
   }
 
   @Test
@@ -115,15 +115,15 @@ class DebtPositionPaidDaoTest {
     when(mp4JdbcTemplateMock.query(
       eq(FIND_BY_FILTERS_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
-        Boolean.TRUE.equals(params.getValue("skipCreatedFromFilter"))
-          && params.getValue("createdFrom") == null
-          && Boolean.FALSE.equals(params.getValue("skipCreatedToFilter"))
-          && createdTo.toLocalDateTime().equals(params.getValue("createdTo"))
+        Boolean.TRUE.equals(params.getValue("skipDateFromFilter"))
+          && params.getValue("dateFrom") == null
+          && Boolean.FALSE.equals(params.getValue("skipDateToFilter"))
+          && createdTo.toLocalDateTime().equals(params.getValue("dateTo"))
       ),
       same(DebtPositionPaidDao.DEBT_POSITION_PAID_ROW_MAPPER)
     )).thenReturn(List.of());
 
-    assertEquals(List.of(), dao.findByFilters("IPA1", List.of(), null, createdTo, 10, 0));
+    assertEquals(List.of(), dao.findByFilters("IPA1", null, List.of(), null, createdTo, 10, 0));
   }
 
   @Test
@@ -136,17 +136,17 @@ class DebtPositionPaidDaoTest {
         "IPA1".equals(params.getValue("codIpaEnte"))
           && Boolean.TRUE.equals(params.getValue("skipIuvsFilter"))
           && Collections.singletonList(null).equals(params.getValue("iuvs"))
-          && Boolean.TRUE.equals(params.getValue("skipCreatedFromFilter"))
-          && params.getValue("createdFrom") == null
-          && Boolean.TRUE.equals(params.getValue("skipCreatedToFilter"))
-          && params.getValue("createdTo") == null
+          && Boolean.TRUE.equals(params.getValue("skipDateFromFilter"))
+          && params.getValue("dateFrom") == null
+          && Boolean.TRUE.equals(params.getValue("skipDateToFilter"))
+          && params.getValue("dateTo") == null
           && Integer.valueOf(10).equals(params.getValue("limit"))
           && Integer.valueOf(0).equals(params.getValue("offset"))
       ),
       same(DebtPositionPaidDao.DEBT_POSITION_PAID_ROW_MAPPER)
     )).thenReturn(List.of());
 
-    assertEquals(List.of(), dao.findByFilters("IPA1", List.of(), null, null, 10, 0));
+    assertEquals(List.of(), dao.findByFilters("IPA1", null, List.of(), null, null, 10, 0));
   }
 
   @Test
@@ -166,8 +166,8 @@ class DebtPositionPaidDaoTest {
     assertTrue(sql.contains("de_status.cod_stato = 'COMPLETATO'"));
     assertTrue(sql.contains("flow_status.cod_stato = 'CARICATO'"));
     assertTrue(sql.contains(":skipIuvsFilter = TRUE OR de.cod_rp_silinviarp_id_univoco_versamento IN (:iuvs)"));
-    assertTrue(sql.contains("de.dt_creazione >= :createdFrom"));
-    assertTrue(sql.contains("de.dt_creazione < :createdTo"));
+    assertTrue(sql.contains("de.dt_creazione >= :dateFrom"));
+    assertTrue(sql.contains("de.dt_creazione < :dateTo"));
   }
 
   private DebtPositionPaidDao buildDao() {

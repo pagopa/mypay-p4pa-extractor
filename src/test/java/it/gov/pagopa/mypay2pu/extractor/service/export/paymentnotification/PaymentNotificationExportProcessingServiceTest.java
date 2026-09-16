@@ -71,10 +71,11 @@ class PaymentNotificationExportProcessingServiceTest {
     List<PaymentNotification> expected = List.of();
     when(paymentNotificationDaoMock.findByFilters(
       ipaCode,
+      null,
       List.of("IUD-1", "IUD-2"),
       List.of("IUV-1", "IUV-2"),
-      dateFrom.toLocalDateTime(),
-      dateTo.toLocalDateTime(),
+      dateFrom,
+      dateTo,
       50,
       100
     ))
@@ -85,10 +86,11 @@ class PaymentNotificationExportProcessingServiceTest {
     assertEquals(expected, result);
     verify(paymentNotificationDaoMock).findByFilters(
       ipaCode,
+      null,
       List.of("IUD-1", "IUD-2"),
       List.of("IUV-1", "IUV-2"),
-      dateFrom.toLocalDateTime(),
-      dateTo.toLocalDateTime(),
+      dateFrom,
+      dateTo,
       50,
       100
     );
@@ -108,7 +110,7 @@ class PaymentNotificationExportProcessingServiceTest {
     PaymentNotificationExportProcessingService service = service();
     String ipaCode = "IPA1";
     List<PaymentNotification> expected = List.of();
-    when(paymentNotificationDaoMock.findByFilters(ipaCode, List.of(), List.of(), null, null, 50, 100))
+    when(paymentNotificationDaoMock.findByFilters(ipaCode, null, List.of(), List.of(), null, null, 50, 100))
       .thenReturn(expected);
 
     List<PaymentNotification> result = service.retrieveData(
@@ -119,7 +121,7 @@ class PaymentNotificationExportProcessingServiceTest {
     );
 
     assertEquals(expected, result);
-    verify(paymentNotificationDaoMock).findByFilters(ipaCode, List.of(), List.of(), null, null, 50, 100);
+    verify(paymentNotificationDaoMock).findByFilters(ipaCode, null, List.of(), List.of(), null, null, 50, 100);
   }
 
   private PaymentNotificationExportProcessingService service() {

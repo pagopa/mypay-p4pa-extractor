@@ -17,6 +17,8 @@ import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
 
@@ -49,8 +51,8 @@ class PaymentNotificationDaoTest {
     String ipaCode = "IPA1";
     List<String> iuds = List.of("IUD-1", "IUD-2");
     List<String> iuvs = List.of("IUV-1", "IUV-2");
-    LocalDateTime createdFrom = LocalDateTime.of(2026, Month.JANUARY, 10, 10, 30);
-    LocalDateTime createdTo = LocalDateTime.of(2026, Month.JANUARY, 11, 10, 30);
+    OffsetDateTime createdFrom = OffsetDateTime.of(LocalDateTime.of(2026, Month.JANUARY, 10, 10, 30), ZoneOffset.UTC);
+    OffsetDateTime createdTo = OffsetDateTime.of(LocalDateTime.of(2026, Month.JANUARY, 11, 10, 30), ZoneOffset.UTC);
     List<PaymentNotification> expected = List.of(buildPaymentNotification());
 
     when(mypivotJdbcTemplateMock.query(
@@ -61,10 +63,10 @@ class PaymentNotificationDaoTest {
           && iuds.equals(params.getValue("iuds"))
           && Boolean.FALSE.equals(params.getValue("iuvsEmpty"))
           && iuvs.equals(params.getValue("iuvs"))
-          && Boolean.FALSE.equals(params.getValue("skipCreatedFromFilter"))
-          && createdFrom.equals(params.getValue("createdFrom"))
-          && Boolean.FALSE.equals(params.getValue("skipCreatedToFilter"))
-          && createdTo.equals(params.getValue("createdTo"))
+          && Boolean.FALSE.equals(params.getValue("skipDateFromFilter"))
+          && createdFrom.equals(params.getValue("dateFrom"))
+          && Boolean.FALSE.equals(params.getValue("skipDateToFilter"))
+          && createdTo.equals(params.getValue("dateTo"))
           && Integer.valueOf(50).equals(params.getValue("limit"))
           && Integer.valueOf(100).equals(params.getValue("offset"))
           && params.getValues().size() == 11
@@ -73,7 +75,7 @@ class PaymentNotificationDaoTest {
     )).thenReturn(expected);
 
     List<PaymentNotification> result = dao.findByFilters(
-      ipaCode, iuds, iuvs, createdFrom, createdTo, 50, 100
+      ipaCode, null, iuds, iuvs, createdFrom, createdTo, 50, 100
     );
 
     assertEquals(expected, result);
@@ -91,12 +93,12 @@ class PaymentNotificationDaoTest {
           && Collections.singletonList(null).equals(params.getValue("iuds"))
           && Boolean.TRUE.equals(params.getValue("iuvsEmpty"))
           && Collections.singletonList(null).equals(params.getValue("iuvs"))
-          && Boolean.TRUE.equals(params.getValue("skipCreatedFromFilter"))
-          && params.hasValue("createdFrom")
-          && params.getValue("createdFrom") == null
-          && Boolean.TRUE.equals(params.getValue("skipCreatedToFilter"))
-          && params.hasValue("createdTo")
-          && params.getValue("createdTo") == null
+          && Boolean.TRUE.equals(params.getValue("skipDateFromFilter"))
+          && params.hasValue("dateFrom")
+          && params.getValue("dateFrom") == null
+          && Boolean.TRUE.equals(params.getValue("skipDateToFilter"))
+          && params.hasValue("dateTo")
+          && params.getValue("dateTo") == null
           && Integer.valueOf(10).equals(params.getValue("limit"))
           && Integer.valueOf(0).equals(params.getValue("offset"))
           && params.getValues().size() == 11
@@ -105,7 +107,7 @@ class PaymentNotificationDaoTest {
     )).thenReturn(List.of());
 
     List<PaymentNotification> result = dao.findByFilters(
-      "IPA1", List.of(), List.of(), null, null, 10, 0
+      "IPA1", null, List.of(), List.of(), null, null, 10, 0
     );
 
     assertEquals(List.of(), result);
@@ -117,7 +119,7 @@ class PaymentNotificationDaoTest {
 
     IllegalArgumentException exception = assertThrows(
       IllegalArgumentException.class,
-      () -> dao.findByFilters("IPA1", List.of(), List.of(), null, null, 0, 0)
+      () -> dao.findByFilters("IPA1", null, List.of(), List.of(), null, null, 0, 0)
     );
 
     assertEquals("limit must be greater than 0", exception.getMessage());
@@ -129,7 +131,7 @@ class PaymentNotificationDaoTest {
 
     IllegalArgumentException exception = assertThrows(
       IllegalArgumentException.class,
-      () -> dao.findByFilters(" ", List.of(), List.of(), null, null, 10, 0)
+      () -> dao.findByFilters(" ", null, List.of(), List.of(), null, null, 10, 0)
     );
 
     assertEquals("ipaCode must not be blank", exception.getMessage());
@@ -141,7 +143,7 @@ class PaymentNotificationDaoTest {
 
     IllegalStateException exception = assertThrows(
       IllegalStateException.class,
-      () -> dao.findByFilters("IPA1", List.of(), List.of(), null, null, 10, 0)
+      () -> dao.findByFilters("IPA1", null, List.of(), List.of(), null, null, 10, 0)
     );
 
     assertEquals("MyPivot datasource must be enabled for payment notification extraction", exception.getMessage());

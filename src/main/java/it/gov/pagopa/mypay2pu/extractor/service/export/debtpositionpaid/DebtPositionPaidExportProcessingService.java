@@ -16,7 +16,6 @@ import it.gov.pagopa.mypay2pu.extractor.validation.ValueLogicalKeyValidator;
 import jakarta.validation.Validator;
 import org.springframework.stereotype.Service;
 
-import java.time.OffsetDateTime;
 import java.util.List;
 
 @Service
@@ -69,14 +68,13 @@ public class DebtPositionPaidExportProcessingService
     List<String> iuvs = ValueLogicalKeyValidator.parseLogicalKey(
       filters != null ? filters.getLogicalKey() : null
     );
-    OffsetDateTime dateFrom = filters != null ? filters.getDateFrom() : null;
-    OffsetDateTime dateTo = filters != null ? filters.getDateTo() : null;
 
     return debtPositionPaidDao.findByFilters(
       ipaCode,
+      request.getLastExtractionDate(),
       iuvs,
-      dateFrom,
-      dateTo,
+      filters != null ? filters.getDateFrom() : null,
+      filters != null ? filters.getDateTo() : null,
       pageSize,
       offset
     );

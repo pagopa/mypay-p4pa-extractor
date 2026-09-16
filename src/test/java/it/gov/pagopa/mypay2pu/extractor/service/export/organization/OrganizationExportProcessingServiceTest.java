@@ -76,8 +76,8 @@ class OrganizationExportProcessingServiceTest {
     Organization second = invalidOrganization();
     PuOrganizationDTO firstDto = dto("first");
     PuOrganizationDTO secondDto = invalidDto();
-    when(organizationDaoMock.findByFilters(List.of("ORG_IPA", "ORG_IPA_2"), null, 2, 0)).thenReturn(List.of(first, second));
-    when(organizationDaoMock.findByFilters(List.of("ORG_IPA", "ORG_IPA_2"), null, 2, 2)).thenReturn(List.of());
+    when(organizationDaoMock.findByFilters(List.of("ORG_IPA", "ORG_IPA_2"), null, null, null, 2, 0)).thenReturn(List.of(first, second));
+    when(organizationDaoMock.findByFilters(List.of("ORG_IPA", "ORG_IPA_2"), null, null, null, 2, 2)).thenReturn(List.of());
     when(organizationMapperMock.map(first)).thenReturn(firstDto);
     when(organizationMapperMock.map(second)).thenReturn(secondDto);
 
@@ -109,8 +109,8 @@ class OrganizationExportProcessingServiceTest {
     assertEquals(1, errorArchiveEntries.size());
     assertTrue(errorArchiveEntries.get(0).matches("BROKER_IPA-ORGANIZATIONS-\\d{14}-1_0\\.errors\\.csv"));
     InOrder inOrder = inOrder(organizationDaoMock);
-    inOrder.verify(organizationDaoMock).findByFilters(List.of("ORG_IPA", "ORG_IPA_2"), null, 2, 0);
-    inOrder.verify(organizationDaoMock).findByFilters(List.of("ORG_IPA", "ORG_IPA_2"), null, 2, 2);
+    inOrder.verify(organizationDaoMock).findByFilters(List.of("ORG_IPA", "ORG_IPA_2"), null, null, null, 2, 0);
+    inOrder.verify(organizationDaoMock).findByFilters(List.of("ORG_IPA", "ORG_IPA_2"), null, null, null, 2, 2);
   }
 
   @Test
@@ -118,8 +118,8 @@ class OrganizationExportProcessingServiceTest {
     ExtractionRequest request = new ExtractionRequest(List.of("ORG_IPA"), MigrationFileType.ORGANIZATIONS);
     Organization first = organization("first");
     Organization second = organization("second");
-    when(organizationDaoMock.findByFilters(List.of("ORG_IPA"), null, 2, 0)).thenReturn(List.of(first, second));
-    when(organizationDaoMock.findByFilters(List.of("ORG_IPA"), null, 2, 2)).thenReturn(List.of());
+    when(organizationDaoMock.findByFilters(List.of("ORG_IPA"), null, null, null, 2, 0)).thenReturn(List.of(first, second));
+    when(organizationDaoMock.findByFilters(List.of("ORG_IPA"), null, null, null, 2, 2)).thenReturn(List.of());
     when(organizationMapperMock.map(first)).thenReturn(dto("first"));
     when(organizationMapperMock.map(second)).thenReturn(dto("second"));
 
@@ -132,8 +132,8 @@ class OrganizationExportProcessingServiceTest {
     assertTrue(archiveEntries.get(0).matches("BROKER_IPA-ORGANIZATIONS-\\d{14}-1_0\\.csv"));
 
     InOrder inOrder = inOrder(organizationDaoMock);
-    inOrder.verify(organizationDaoMock).findByFilters(List.of("ORG_IPA"), null, 2, 0);
-    inOrder.verify(organizationDaoMock).findByFilters(List.of("ORG_IPA"), null, 2, 2);
+    inOrder.verify(organizationDaoMock).findByFilters(List.of("ORG_IPA"), null, null, null, 2, 0);
+    inOrder.verify(organizationDaoMock).findByFilters(List.of("ORG_IPA"), null, null, null, 2, 2);
   }
 
   @Test
@@ -143,8 +143,8 @@ class OrganizationExportProcessingServiceTest {
     Organization second = organization("second");
     Organization third = organization("third");
 
-    when(organizationDaoMock.findByFilters(List.of("ORG_IPA"), null, 2, 0)).thenReturn(List.of(first, second));
-    when(organizationDaoMock.findByFilters(List.of("ORG_IPA"), null, 2, 2)).thenReturn(List.of(third));
+    when(organizationDaoMock.findByFilters(List.of("ORG_IPA"), null, null, null, 2, 0)).thenReturn(List.of(first, second));
+    when(organizationDaoMock.findByFilters(List.of("ORG_IPA"), null, null, null, 2, 2)).thenReturn(List.of(third));
     when(organizationMapperMock.map(first)).thenReturn(dto("first"));
     when(organizationMapperMock.map(second)).thenReturn(dto("second"));
     when(organizationMapperMock.map(third)).thenReturn(dto("third"));
@@ -165,8 +165,8 @@ class OrganizationExportProcessingServiceTest {
     assertTrue(exportArchiveEntries.get(1).matches("BROKER_IPA-ORGANIZATIONS-\\d{14}-part002-1_0\\.csv"));
 
     InOrder inOrder = inOrder(organizationDaoMock);
-    inOrder.verify(organizationDaoMock).findByFilters(List.of("ORG_IPA"), null, 2, 0);
-    inOrder.verify(organizationDaoMock).findByFilters(List.of("ORG_IPA"), null, 2, 2);
+    inOrder.verify(organizationDaoMock).findByFilters(List.of("ORG_IPA"), null, null, null, 2, 0);
+    inOrder.verify(organizationDaoMock).findByFilters(List.of("ORG_IPA"), null, null, null, 2, 2);
   }
 
   @Test
@@ -175,8 +175,8 @@ class OrganizationExportProcessingServiceTest {
     Organization first = organization("first");
     Organization second = organization("second");
 
-    when(organizationDaoMock.findByFilters(List.of("ORG_IPA"), null, 2, 0)).thenReturn(List.of(first, second));
-    when(organizationDaoMock.findByFilters(List.of("ORG_IPA"), null, 2, 2)).thenReturn(List.of());
+    when(organizationDaoMock.findByFilters(List.of("ORG_IPA"), null, null, null, 2, 0)).thenReturn(List.of(first, second));
+    when(organizationDaoMock.findByFilters(List.of("ORG_IPA"), null, null, null, 2, 2)).thenReturn(List.of());
     when(organizationMapperMock.map(first)).thenThrow(
       new CsvRowMappingException("EnumMapping", "status", "UNKNOWN", "Unrecognized value 'UNKNOWN'", null));
     when(organizationMapperMock.map(second)).thenReturn(dto("second"));
@@ -205,7 +205,7 @@ class OrganizationExportProcessingServiceTest {
     ExtractionRequest request = new ExtractionRequest(List.of("ORG_IPA"), MigrationFileType.ORGANIZATIONS);
     Organization first = organization("first");
 
-    when(organizationDaoMock.findByFilters(List.of("ORG_IPA"), null, 2, 0)).thenReturn(List.of(first));
+    when(organizationDaoMock.findByFilters(List.of("ORG_IPA"), null, null, null, 2, 0)).thenReturn(List.of(first));
     when(organizationMapperMock.map(first)).thenThrow(new RuntimeException("mapping failure"));
 
     ExportFileResult result = service.executeExport("BROKER_IPA", request);

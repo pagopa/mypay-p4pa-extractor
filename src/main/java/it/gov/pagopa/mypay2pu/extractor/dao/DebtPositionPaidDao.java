@@ -36,9 +36,10 @@ public class DebtPositionPaidDao {
   }
 
   public List<DebtPositionPaid> findByFilters(String codIpaEnte,
+                                              OffsetDateTime lastExtractionDate,
                                               List<String> iuvs,
-                                              OffsetDateTime createdFrom,
-                                              OffsetDateTime createdTo,
+                                              OffsetDateTime dateFrom,
+                                              OffsetDateTime dateTo,
                                               int limit,
                                               int offset) {
     if (StringUtils.isEmpty(codIpaEnte)) {
@@ -46,15 +47,21 @@ public class DebtPositionPaidDao {
     }
     return mp4JdbcTemplate.query(
       findByFiltersSql,
-      buildParams(codIpaEnte, iuvs, createdFrom, createdTo, limit, offset),
+      buildParams(
+        codIpaEnte,
+        iuvs,
+        QueryUtils.resolveDateFrom(lastExtractionDate, dateFrom),
+        dateTo,
+        limit,
+        offset),
       DEBT_POSITION_PAID_ROW_MAPPER
     );
   }
 
   private MapSqlParameterSource buildParams(String codIpaEnte,
                                             List<String> iuvs,
-                                            OffsetDateTime createdFrom,
-                                            OffsetDateTime createdTo,
+                                            OffsetDateTime dateFrom,
+                                            OffsetDateTime dateTo,
                                             int limit,
                                             int offset) {
     boolean emptyIuvs = CollectionUtils.isEmpty(iuvs);
@@ -62,9 +69,9 @@ public class DebtPositionPaidDao {
       .addValue("codIpaEnte", codIpaEnte)
       .addValue("skipIuvsFilter", emptyIuvs)
       .addValue("iuvs", emptyIuvs ? Collections.singletonList(null) : iuvs)
-      .addValue("skipCreatedFromFilter", createdFrom == null)
-      .addValue("createdFrom", DateTimeUtils.toLocalDateTime(createdFrom))
-      .addValue("skipCreatedToFilter", createdTo == null)
-      .addValue("createdTo", DateTimeUtils.toLocalDateTime(createdTo));
+      .addValue("skipDateFromFilter", dateFrom == null)
+      .addValue("dateFrom", DateTimeUtils.toLocalDateTime(dateFrom))
+      .addValue("skipDateToFilter", dateTo == null)
+      .addValue("dateTo", DateTimeUtils.toLocalDateTime(dateTo));
   }
 }

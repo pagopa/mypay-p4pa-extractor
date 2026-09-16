@@ -28,8 +28,8 @@ JOIN mygov_ente e
 WHERE e.cod_ipa_ente = :ipaCode
   AND (:iudsEmpty = TRUE OR fi.cod_iud IN (:iuds))
   AND (:iuvsEmpty = TRUE OR fi.cod_rp_silinviarp_id_univoco_versamento IN (:iuvs))
-  AND (:skipCreatedFromFilter = TRUE OR fi.dt_creazione >= :createdFrom)
-  AND (:skipCreatedToFilter = TRUE OR fi.dt_creazione < :createdTo)
+  AND (:skipDateFromFilter = TRUE OR fi.dt_creazione >= :dateFrom)
+  AND (:skipDateToFilter = TRUE OR fi.dt_creazione < :dateTo)
 ORDER BY fi.dt_creazione
 LIMIT :limit
 OFFSET COALESCE(:offset, 0);
