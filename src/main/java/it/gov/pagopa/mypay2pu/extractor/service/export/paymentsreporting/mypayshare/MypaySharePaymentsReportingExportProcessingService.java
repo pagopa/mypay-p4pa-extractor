@@ -48,6 +48,15 @@ public class MypaySharePaymentsReportingExportProcessingService {
     this.zipFileService = zipFileService;
   }
 
+  private void validateMyPaySharedFolder() {
+    if (extractorExportProperties.paymentsReporting().source().equals(PaymentsReportingSource.MYPAY_SHARE)
+      && !Files.isDirectory(myPaySharedFolderPath)) {
+      throw new IllegalStateException(
+        "Property mypay.path.directory-root-enti must point to an existing directory: " + myPaySharedFolderPath
+      );
+    }
+  }
+
   public ExportFileResult executeExport(String extractionId, ExtractionRequest request) {
     List<String> zipFileNames = new ArrayList<>();
     for (String organizationId : request.getIpaCodes()) {
@@ -130,15 +139,6 @@ public class MypaySharePaymentsReportingExportProcessingService {
       }
     }
     return new ResolvedFiles(xmlFiles, missingXmlFiles);
-  }
-
-  private void validateMyPaySharedFolder() {
-    if (extractorExportProperties.paymentsReporting().source() == PaymentsReportingSource.MYPAY_SHARE
-      && !Files.isDirectory(myPaySharedFolderPath)) {
-      throw new IllegalStateException(
-        "Property mypay.path.directory-root-enti must point to an existing directory: " + myPaySharedFolderPath
-      );
-    }
   }
 
   private void writeMissingFilesCsv(String extractionId,
