@@ -2,6 +2,7 @@ package it.gov.pagopa.mypay2pu.extractor.service.export.paymentsreporting.mypays
 
 import it.gov.pagopa.mypay2pu.extractor.config.ExtractorExportProperties;
 import it.gov.pagopa.mypay2pu.extractor.config.MyPayProperties;
+import it.gov.pagopa.mypay2pu.extractor.config.PaymentsReportingSource;
 import it.gov.pagopa.mypay2pu.extractor.dao.PaymentReportingMyPayShareDao;
 import it.gov.pagopa.mypay2pu.extractor.dto.ExportFileResult;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionFilters;
@@ -42,6 +43,7 @@ public class MypaySharePaymentsReportingExportProcessingService {
     this.paymentReportingMyPayShareDao = paymentReportingMyPayShareDao;
     this.extractorExportProperties = extractorExportProperties;
     this.myPaySharedFolderPath = Path.of(myPayProperties.path().directoryRootEnti());
+    validateMyPaySharedFolder();
     this.csvService = csvService;
     this.zipFileService = zipFileService;
   }
@@ -128,6 +130,15 @@ public class MypaySharePaymentsReportingExportProcessingService {
       }
     }
     return new ResolvedFiles(xmlFiles, missingXmlFiles);
+  }
+
+  private void validateMyPaySharedFolder() {
+    if (extractorExportProperties.paymentsReporting().source() == PaymentsReportingSource.MYPAY_SHARE
+      && !Files.isDirectory(myPaySharedFolderPath)) {
+      throw new IllegalStateException(
+        "Property mypay.path.directory-root-enti must point to an existing directory: " + myPaySharedFolderPath
+      );
+    }
   }
 
   private void writeMissingFilesCsv(String extractionId,

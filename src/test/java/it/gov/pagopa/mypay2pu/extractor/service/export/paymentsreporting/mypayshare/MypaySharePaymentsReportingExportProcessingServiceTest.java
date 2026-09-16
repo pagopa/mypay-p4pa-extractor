@@ -2,6 +2,7 @@ package it.gov.pagopa.mypay2pu.extractor.service.export.paymentsreporting.mypays
 
 import it.gov.pagopa.mypay2pu.extractor.config.ExtractorExportProperties;
 import it.gov.pagopa.mypay2pu.extractor.config.MyPayProperties;
+import it.gov.pagopa.mypay2pu.extractor.config.PaymentsReportingSource;
 import it.gov.pagopa.mypay2pu.extractor.dao.PaymentReportingMyPayShareDao;
 import it.gov.pagopa.mypay2pu.extractor.dto.ExportFileResult;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionFilters;
@@ -25,6 +26,8 @@ import java.util.Map;
 import java.util.zip.ZipFile;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -122,16 +125,43 @@ class MypaySharePaymentsReportingExportProcessingServiceTest {
     verify(paymentReportingMyPayShareDaoMock).findByFilters("IPA_CODE", null, createdFrom, createdTo, "FLOW-1", 1, 0);
   }
 
+  @Test
+  void givenMypayShareSourceAndMissingSharedFolderWhenServiceCreatedThenThrowException() {
+    Path missingDirectory = tempDir.resolve("missing");
+
+    IllegalStateException exception = assertThrows(
+      IllegalStateException.class,
+      () -> service(missingDirectory, PaymentsReportingSource.MYPAY_SHARE)
+    );
+
+    assertEquals(
+      "Property mypay.path.directory-root-enti must point to an existing directory: " + missingDirectory,
+      exception.getMessage()
+    );
+  }
+
+  @Test
+  void givenMypivotSourceAndMissingSharedFolderWhenServiceCreatedThenDoNotThrowException() {
+    assertDoesNotThrow(() -> service(tempDir.resolve("missing"), PaymentsReportingSource.MYPIVOT));
+  }
+
   private MypaySharePaymentsReportingExportProcessingService service() {
+    return service(tempDir, PaymentsReportingSource.MYPAY_SHARE);
+  }
+
+  private MypaySharePaymentsReportingExportProcessingService service(
+    Path myPaySharedFolderPath,
+    PaymentsReportingSource paymentsReportingSource
+  ) {
     return new MypaySharePaymentsReportingExportProcessingService(
       paymentReportingMyPayShareDaoMock,
       new ExtractorExportProperties(
         tempDir.toString(), tempDir.toString(), "BROKER_CF", "BROKER_IPA",
         Map.of(MigrationFileType.PAYMENTS_REPORTING, new ExtractorExportProperties.FileTypeConfiguration(1)),
-        new ExtractorExportProperties.PaymentsReportingConfiguration(it.gov.pagopa.mypay2pu.extractor.config.PaymentsReportingSource.MYPAY_SHARE)
+        new ExtractorExportProperties.PaymentsReportingConfiguration(paymentsReportingSource)
       ),
       new MyPayProperties(
-        new MyPayProperties.PathProperties(tempDir.toString()),
+        new MyPayProperties.PathProperties(myPaySharedFolderPath.toString()),
         new MyPayProperties.GlobalProperties(null, null)
       ),
       new CsvService(';', '"'),
