@@ -55,9 +55,5 @@ public record ExtractorExportProperties(
   public record FileTypeConfiguration(@Positive int exportPageSize) { }
 
   public record PaymentsReportingConfiguration(@NotNull PaymentsReportingSource source) {
-
-    public static PaymentsReportingConfiguration mypayShare() {
-      return new PaymentsReportingConfiguration(PaymentsReportingSource.MYPAY_SHARE);
-    }
   }
 }

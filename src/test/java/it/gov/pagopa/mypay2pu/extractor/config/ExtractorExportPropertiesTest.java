@@ -94,7 +94,7 @@ class ExtractorExportPropertiesTest {
       "12345678901",
       "IPA_CODE",
       Map.of(MigrationFileType.ORG_SIL_SERVICES, new ExtractorExportProperties.FileTypeConfiguration(500)),
-      ExtractorExportProperties.PaymentsReportingConfiguration.mypayShare()
+      new ExtractorExportProperties.PaymentsReportingConfiguration(PaymentsReportingSource.MYPAY_SHARE)
     );
 
     IllegalStateException exception = assertThrows(

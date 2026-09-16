@@ -128,7 +128,7 @@ class MypaySharePaymentsReportingExportProcessingServiceTest {
       new ExtractorExportProperties(
         tempDir.toString(), tempDir.toString(), "BROKER_CF", "BROKER_IPA",
         Map.of(MigrationFileType.PAYMENTS_REPORTING, new ExtractorExportProperties.FileTypeConfiguration(1)),
-        ExtractorExportProperties.PaymentsReportingConfiguration.mypayShare()
+        new ExtractorExportProperties.PaymentsReportingConfiguration(it.gov.pagopa.mypay2pu.extractor.config.PaymentsReportingSource.MYPAY_SHARE)
       ),
       new MyPayProperties(
         new MyPayProperties.PathProperties(tempDir.toString()),

@@ -30,7 +30,7 @@ public class MypaySharePaymentsReportingExportProcessingService {
   private static final String MISSING_XML_DESCRIPTION = "XML file not found on the MyPay share";
   private final PaymentReportingMyPayShareDao paymentReportingMyPayShareDao;
   private final ExtractorExportProperties extractorExportProperties;
-  private final MyPayProperties myPayProperties;
+  private final Path myPaySharedFolderPath;
   private final CsvService csvService;
   private final ZipFileService zipFileService;
 
@@ -41,7 +41,7 @@ public class MypaySharePaymentsReportingExportProcessingService {
                                                             ZipFileService zipFileService) {
     this.paymentReportingMyPayShareDao = paymentReportingMyPayShareDao;
     this.extractorExportProperties = extractorExportProperties;
-    this.myPayProperties = myPayProperties;
+    this.myPaySharedFolderPath = Path.of(myPayProperties.path().directoryRootEnti());
     this.csvService = csvService;
     this.zipFileService = zipFileService;
   }
@@ -78,8 +78,9 @@ public class MypaySharePaymentsReportingExportProcessingService {
     int offset = 0;
     int partNumber = 1;
     List<String> zipFileNames = new ArrayList<>();
-    while (true) {
-      List<Path> records = paymentReportingMyPayShareDao.findByFilters(
+    List<Path> records;
+    do {
+      records = paymentReportingMyPayShareDao.findByFilters(
         ipaCode,
         request.getLastExtractionDate(),
         createdFrom,
@@ -110,19 +111,15 @@ public class MypaySharePaymentsReportingExportProcessingService {
 
       offset += records.size();
       partNumber++;
-      if (records.size() < pageSize) {
-        break;
-      }
-    }
+    } while(records.size() >= pageSize);
     return zipFileNames;
   }
 
   private ResolvedFiles resolveExistingXmlFiles(List<Path> records, String ipaCode) {
     List<Path> xmlFiles = new ArrayList<>();
     List<Path> missingXmlFiles = new ArrayList<>();
-    Path baseDirectory = Path.of(myPayProperties.path().directoryRootEnti());
     for (Path filePath : records) {
-      Path resolvedPath = baseDirectory.resolve(ipaCode).resolve(filePath.getFileName());
+      Path resolvedPath = myPaySharedFolderPath.resolve(ipaCode).resolve(filePath.getFileName());
       if (Files.exists(resolvedPath)) {
         xmlFiles.add(resolvedPath);
       } else {
