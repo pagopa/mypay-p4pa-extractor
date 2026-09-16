@@ -43,6 +43,7 @@ class ExtractorExportPropertiesTest {
         assertEquals(existingDirectories.tempBaseDir().toString(), properties.tempBaseDir());
         assertEquals("12345678901", properties.brokerCf());
         assertEquals("IPA_CODE", properties.brokerIpaCode());
+        assertEquals(PaymentsReportingSource.MYPAY_SHARE, properties.paymentsReporting().source());
         assertEquals(1000, properties.resolveFileTypeConfiguration(MigrationFileType.ORGANIZATIONS).exportPageSize());
       });
   }
@@ -92,7 +93,8 @@ class ExtractorExportPropertiesTest {
       existingDirectories.tempBaseDir().toString(),
       "12345678901",
       "IPA_CODE",
-      Map.of(MigrationFileType.ORG_SIL_SERVICES, new ExtractorExportProperties.FileTypeConfiguration(500))
+      Map.of(MigrationFileType.ORG_SIL_SERVICES, new ExtractorExportProperties.FileTypeConfiguration(500)),
+      new ExtractorExportProperties.PaymentsReportingConfiguration(PaymentsReportingSource.MYPAY_SHARE)
     );
 
     IllegalStateException exception = assertThrows(
@@ -117,6 +119,7 @@ class ExtractorExportPropertiesTest {
         "extractor.export.temp-base-dir=" + existingDirectories.tempBaseDir(),
         "extractor.export.broker-cf=12345678901",
         "extractor.export.broker-ipa-code=IPA_CODE",
+        "extractor.export.payments-reporting.base-directory=" + existingDirectories.tempBaseDir(),
         "extractor.export.file-type-configurations.ORGANIZATIONS.export-page-size=1000"
       )
       .run(context -> {
@@ -131,6 +134,7 @@ class ExtractorExportPropertiesTest {
       "extractor.export.temp-base-dir=" + existingDirectories.tempBaseDir(),
       "extractor.export.broker-cf=12345678901",
       "extractor.export.broker-ipa-code=IPA_CODE",
+      "extractor.export.payments-reporting.source=MYPAY_SHARE",
       "extractor.export.file-type-configurations.ORGANIZATIONS.export-page-size=1000"
     };
   }

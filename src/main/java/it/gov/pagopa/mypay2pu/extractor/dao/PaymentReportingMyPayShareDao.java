@@ -14,7 +14,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 @Repository
-public class PaymentsReportingDao {
+public class PaymentReportingMyPayShareDao {
 
   private static final String FIND_BY_FILTERS_SQL_PATH = "fesp/payments-reporting/payments-reporting.sql";
   protected static final RowMapper<Path> PAYMENTS_REPORTING_FILE_ROW_MAPPER = (resultSet, rowNum) ->
@@ -23,7 +23,7 @@ public class PaymentsReportingDao {
   private final NamedParameterJdbcTemplate fespJdbcTemplate;
   private final String findByFiltersSql;
 
-  public PaymentsReportingDao(
+  public PaymentReportingMyPayShareDao(
     @Qualifier("fespNamedParameterJdbcTemplate") NamedParameterJdbcTemplate fespJdbcTemplate,
     SqlLoader sqlLoader
   ) {
@@ -57,11 +57,7 @@ public class PaymentsReportingDao {
     int offset
   ) {
     validateIpaCode(ipaCode);
-    return fespJdbcTemplate.query(
-      findByFiltersSql,
-      buildParams(ipaCode, QueryUtils.resolveDateFrom(lastExtractionDate, dateFrom), dateTo, null, limit, offset),
-      PAYMENTS_REPORTING_FILE_ROW_MAPPER
-    );
+    return findByFilters(ipaCode, lastExtractionDate, dateFrom, dateTo, null, limit, offset);
   }
 
   public List<Path> findByLogicalKey(String ipaCode, String logicalKey) {
@@ -69,13 +65,20 @@ public class PaymentsReportingDao {
   }
 
   public List<Path> findByLogicalKey(String ipaCode, String logicalKey, int limit, int offset) {
+    return findByFilters(ipaCode, null, null, null, logicalKey, limit, offset);
+  }
+
+  public List<Path> findByFilters(String ipaCode,
+                                  OffsetDateTime lastExtractionDate,
+                                  OffsetDateTime dateFrom,
+                                  OffsetDateTime dateTo,
+                                  String logicalKey,
+                                  int limit,
+                                  int offset) {
     validateIpaCode(ipaCode);
-    if (!StringUtils.hasText(logicalKey)) {
-      throw new IllegalArgumentException("logicalKey must not be blank");
-    }
     return fespJdbcTemplate.query(
       findByFiltersSql,
-      buildParams(ipaCode, null, null, logicalKey, limit, offset),
+      buildParams(ipaCode, QueryUtils.resolveDateFrom(lastExtractionDate, dateFrom), dateTo, logicalKey, limit, offset),
       PAYMENTS_REPORTING_FILE_ROW_MAPPER
     );
   }

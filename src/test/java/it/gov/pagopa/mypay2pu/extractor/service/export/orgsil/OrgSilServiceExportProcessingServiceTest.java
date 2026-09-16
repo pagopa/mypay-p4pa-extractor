@@ -169,7 +169,8 @@ class OrgSilServiceExportProcessingServiceTest {
       tempDir.toString(),
       "12345678901",
       "BROKER_IPA",
-      Map.of(MigrationFileType.ORG_SIL_SERVICES, new ExtractorExportProperties.FileTypeConfiguration(2))
+      Map.of(MigrationFileType.ORG_SIL_SERVICES, new ExtractorExportProperties.FileTypeConfiguration(2)),
+      new ExtractorExportProperties.PaymentsReportingConfiguration(it.gov.pagopa.mypay2pu.extractor.config.PaymentsReportingSource.MYPAY_SHARE)
     );
   }
 

@@ -189,6 +189,8 @@ See [application.yml](src/main/resources/application.yml) for each configurable 
 | `CSV_SEPARATOR_CHAR` | Separator character used when generating CSV files | `;` |
 | `CSV_QUOTE_CHAR` | Quote character used when generating CSV files | `"` |
 | `FILE_ENCRYPT_ENABLED` | Enable the encryption of the extracted files. **Files are returned unencrypted via the `/extract/{id}/files` API regardless of this setting.** When encryption is enabled, it is the responsibility of the operator to ensure secure temporary storage and cleanup of extracted data. | `false` |
+| `MYPAY_PATH_DIRECTORY_ROOT_ENTI` | Value of `mypay.path.directoryRootEnti`: existing MyPay-share directory containing Payments Reporting XML files at `<directoryRootEnti>/<codice-IPA>/<de_nome_file_scaricato>`. | `TMP_FOLDER` |
+| `PAYMENTS_REPORTING_SOURCE` | Source used to retrieve Payments Reporting files: `MYPAY_SHARE` or `MYPIVOT`. Only `MYPAY_SHARE` is currently implemented. | `MYPAY_SHARE` |
 
 ##### MyPay properties
 
@@ -211,7 +213,8 @@ The following global properties are exported for configuration in the migrated M
 | `EXPORT_PAGE_SIZE_DEBT_POSITIONS`                    | Maximum number of records to write to an exported file before creating a new one | `1000` |
 | `EXPORT_PAGE_SIZE_DEBT_POSITIONS_PAID`               | Maximum number of records to write to an exported file before creating a new one | `1000` |
 | `EXPORT_PAGE_SIZE_PAYMENT_NOTIFICATION`              | Maximum number of records to write to an exported file before creating a new one | `1000` |
-| `EXPORT_PAGE_SIZE_TREASURY_CSV_COMPLETE`             | Maximum number of records to write to an exported file before creating a new one | `1000` |
+| `EXPORT_PAGE_SIZE_PAYMENTS_REPORTING`                | Maximum number of FESP payments-reporting file paths read in each database page | `1000` |
+| `EXPORT_PAGE_SIZE_TREASURY_CSV_COMPLETE`            | Maximum number of records to write to an exported file before creating a new one | `1000` |
 | `EXPORT_PAGE_SIZE_ASSESSMENTS`                       | Maximum number of records to write to an exported file before creating a new one | `1000` |
 | `EXPORT_PAGE_SIZE_ASSESSMENTS_REGISTRY`             | Maximum number of records to write to an exported file before creating a new one | `1000` |
 
@@ -243,7 +246,7 @@ To customize them, add to the classpath a resource with the same path as the que
 
 | PU Entity | Resource | Parameters | Description |
 |---|---|---|---|
-| payments_reporting | `/db/fesp/payments-reporting/payments-reporting.sql` | <li>ipaCode: organization IPA code (required)<br><li>dateFrom: inclusive modification timestamp lower bound (nullable)<br><li>skipDateFromFilter: `true` to skip the `dateFrom` filter<br><li>dateTo: inclusive modification timestamp upper bound (nullable)<br><li>skipDateToFilter: `true` to skip the `dateTo` filter<br><li>skipLogicalKeyFilter: `true` to skip the flow identifier filter<br><li>logicalKey: flow identifier (required for logical-key lookup)<br><li>limit: page size (> 0)<br><li>offset: page start (>= 0, nullable) | Retrieves XML reporting files with status `OK` from FESP `mygov_flusso_rend_spc`. When no `dateFrom` is supplied, the DAO uses `lastExtractionDate` as its lower bound; if both are supplied, they must match. The result paths are packaged in a ZIP without CSV generation or data transformation and are paginated with `LIMIT/OFFSET`. |
+| payments_reporting | `/db/fesp/payments-reporting/payments-reporting.sql` | <li>ipaCode: organization IPA code (required)<br><li>dateFrom: inclusive modification timestamp lower bound (nullable)<br><li>skipDateFromFilter: `true` to skip the `dateFrom` filter<br><li>dateTo: inclusive modification timestamp upper bound (nullable)<br><li>skipDateToFilter: `true` to skip the `dateTo` filter<br><li>skipLogicalKeyFilter: `true` to skip the flow identifier filter<br><li>logicalKey: flow identifier (nullable, and combinable with date filters)<br><li>limit: page size (> 0)<br><li>offset: page start (>= 0, nullable) | Retrieves XML reporting files with status `OK` from FESP `mygov_flusso_rend_spc`. When no `dateFrom` is supplied, the DAO uses `lastExtractionDate` as its lower bound; if both are supplied, they must match. Each query page is packaged in a distinct ZIP without data transformation. Missing XMLs are listed in an adjacent `.errors.csv` discard file with `fileName` and `description` columns. |
 
 
 ### MyPivot

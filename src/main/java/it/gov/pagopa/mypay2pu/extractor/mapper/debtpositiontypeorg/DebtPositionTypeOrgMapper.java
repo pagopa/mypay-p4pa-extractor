@@ -64,7 +64,7 @@ public class DebtPositionTypeOrgMapper {
       .flagSpontaneous(debtPositionTypeOrg.flagSpontaneous())
       .flagNotifyIo(debtPositionTypeOrg.flagNotifyIo())
       .flagNotifyIoBkp(debtPositionTypeOrg.flagNotifyIoBkp())
-      .ioTemplateMessage(transcodeTemplateTags(myPayProperties.ioTemplateMessage()))
+      .ioTemplateMessage(transcodeTemplateTags(myPayProperties.globalProperties().ioTemplateMessage()))
       .flagActive(debtPositionTypeOrg.flagActive())
       .flagNotifyOutcomePush(debtPositionTypeOrg.flagNotifyOutcomePush())
       .notifyOutcomePushOrgSilServiceCode(debtPositionTypeOrg.notifyOutcomePushOrgSilServiceCode())
@@ -72,7 +72,7 @@ public class DebtPositionTypeOrgMapper {
       .amountActualizationOrgSilServiceCode(debtPositionTypeOrg.amountActualizationOrgSilServiceCode())
       .flagExternal(debtPositionTypeOrgDao.isExternal(debtPositionTypeOrg.ipaCode(), debtPositionTypeOrg.code()))
       .serviceCode(debtPositionTypeOrg.serviceCode())
-      .ioTemplateSubject(transcodeTemplateTags(myPayProperties.ioTemplateSubject()))
+      .ioTemplateSubject(transcodeTemplateTags(myPayProperties.globalProperties().ioTemplateSubject()))
       .taxonomyCode(debtPositionTypeOrg.taxonomyCode())
       .orgType(debtPositionTypeOrg.orgType())
       .build();

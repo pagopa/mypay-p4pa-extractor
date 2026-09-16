@@ -104,7 +104,8 @@ class OrganizationMapperTest {
       "./build/tmp",
       brokerCf,
       brokerIpaCode,
-      Map.of(MigrationFileType.ORGANIZATIONS, new ExtractorExportProperties.FileTypeConfiguration(500))
+      Map.of(MigrationFileType.ORGANIZATIONS, new ExtractorExportProperties.FileTypeConfiguration(500)),
+      new ExtractorExportProperties.PaymentsReportingConfiguration(it.gov.pagopa.mypay2pu.extractor.config.PaymentsReportingSource.MYPAY_SHARE)
     );
   }
 }
