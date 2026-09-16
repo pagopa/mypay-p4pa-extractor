@@ -147,7 +147,7 @@ class TreasuryCsvCompleteDaoTest {
     assertTrue(sql.contains(":skipAnnoBollettaFilter = TRUE OR ft.de_anno_bolletta = :annoBolletta"));
     assertTrue(sql.contains(":skipCodBollettaFilter = TRUE OR ft.cod_bolletta = :codBolletta"));
     assertTrue(sql.contains(":skipUpdatedFromFilter = TRUE OR ft.dt_ultima_modifica >= :updatedFrom"));
-    assertTrue(sql.contains(":skipUpdatedToFilter = TRUE OR ft.dt_ultima_modifica <= :updatedTo"));
+    assertTrue(sql.contains(":skipUpdatedToFilter = TRUE OR ft.dt_ultima_modifica < :updatedTo"));
     assertTrue(sql.contains("ORDER BY ft.de_anno_bolletta, ft.cod_bolletta"));
   }
 

@@ -27,7 +27,7 @@ WHERE e.cod_ipa_ente = :codIpaEnte
   AND de.cod_tipo_dovuto <> 'MARCA_BOLLO_DIGITALE'
   AND (:skipIuvsFilter = TRUE OR de.cod_rp_silinviarp_id_univoco_versamento IN (:iuvs))
   AND (:skipCreatedFromFilter = TRUE OR de.dt_creazione >= :createdFrom)
-  AND (:skipCreatedToFilter = TRUE OR de.dt_creazione <= :createdTo)
+  AND (:skipCreatedToFilter = TRUE OR de.dt_creazione < :createdTo)
 ORDER BY de.dt_creazione, de.mygov_dovuto_elaborato_id
 LIMIT :limit
 OFFSET COALESCE(:offset, 0)

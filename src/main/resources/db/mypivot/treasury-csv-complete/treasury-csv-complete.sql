@@ -48,7 +48,7 @@ WHERE e.cod_ipa_ente = :ipaCode
   AND (:skipAnnoBollettaFilter = TRUE OR ft.de_anno_bolletta = :annoBolletta)
   AND (:skipCodBollettaFilter = TRUE OR ft.cod_bolletta = :codBolletta)
   AND (:skipUpdatedFromFilter = TRUE OR ft.dt_ultima_modifica >= :updatedFrom)
-  AND (:skipUpdatedToFilter = TRUE OR ft.dt_ultima_modifica <= :updatedTo)
+  AND (:skipUpdatedToFilter = TRUE OR ft.dt_ultima_modifica < :updatedTo)
 ORDER BY ft.de_anno_bolletta, ft.cod_bolletta
 LIMIT :limit
 OFFSET COALESCE(:offset, 0);

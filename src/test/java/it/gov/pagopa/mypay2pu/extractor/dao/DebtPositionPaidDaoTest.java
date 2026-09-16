@@ -167,7 +167,7 @@ class DebtPositionPaidDaoTest {
     assertTrue(sql.contains("flow_status.cod_stato = 'CARICATO'"));
     assertTrue(sql.contains(":skipIuvsFilter = TRUE OR de.cod_rp_silinviarp_id_univoco_versamento IN (:iuvs)"));
     assertTrue(sql.contains("de.dt_creazione >= :createdFrom"));
-    assertTrue(sql.contains("de.dt_creazione <= :createdTo"));
+    assertTrue(sql.contains("de.dt_creazione < :createdTo"));
   }
 
   private DebtPositionPaidDao buildDao() {
