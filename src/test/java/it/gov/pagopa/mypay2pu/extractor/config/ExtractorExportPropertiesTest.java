@@ -43,6 +43,7 @@ class ExtractorExportPropertiesTest {
         assertEquals(existingDirectories.tempBaseDir().toString(), properties.tempBaseDir());
         assertEquals("12345678901", properties.brokerCf());
         assertEquals("IPA_CODE", properties.brokerIpaCode());
+        assertEquals(false, properties.gpdEnabled());
         assertEquals(PaymentsReportingSource.MYPAY_SHARE, properties.paymentsReporting().source());
         assertEquals(1000, properties.resolveFileTypeConfiguration(MigrationFileType.ORGANIZATIONS).exportPageSize());
       });
@@ -75,6 +76,7 @@ class ExtractorExportPropertiesTest {
         "extractor.export.temp-base-dir=" + existingDirectories.tempBaseDir(),
         "extractor.export.broker-cf=12345678901",
         "extractor.export.broker-ipa-code=IPA_CODE",
+        "extractor.export.gpd-enabled=false",
         "extractor.export.file-type-configurations.ORGANIZATIONS.export-page-size=0"
       )
       .run(context -> {
@@ -119,6 +121,7 @@ class ExtractorExportPropertiesTest {
         "extractor.export.temp-base-dir=" + existingDirectories.tempBaseDir(),
         "extractor.export.broker-cf=12345678901",
         "extractor.export.broker-ipa-code=IPA_CODE",
+        "extractor.export.gpd-enabled=false",
         "extractor.export.payments-reporting.base-directory=" + existingDirectories.tempBaseDir(),
         "extractor.export.file-type-configurations.ORGANIZATIONS.export-page-size=1000"
       )

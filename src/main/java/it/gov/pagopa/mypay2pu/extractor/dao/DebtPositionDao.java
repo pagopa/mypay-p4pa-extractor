@@ -1,5 +1,6 @@
 package it.gov.pagopa.mypay2pu.extractor.dao;
 
+import it.gov.pagopa.mypay2pu.extractor.config.ExtractorExportProperties;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.DebtPosition;
 import it.gov.pagopa.mypay2pu.extractor.utils.DateTimeUtils;
 import it.gov.pagopa.mypay2pu.extractor.utils.QueryUtils;
@@ -26,14 +27,17 @@ public class DebtPositionDao {
     DataClassRowMapper.newInstance(DebtPosition.class);
 
   private final NamedParameterJdbcTemplate mp4JdbcTemplate;
+  private final ExtractorExportProperties exportProperties;
   private final String findDebtPositionsSql;
   private final String findCancelledDebtPositionsSql;
 
   public DebtPositionDao(
     @Qualifier("mp4NamedParameterJdbcTemplate") NamedParameterJdbcTemplate mp4JdbcTemplate,
+    ExtractorExportProperties exportProperties,
     SqlLoader sqlLoader
   ) {
     this.mp4JdbcTemplate = mp4JdbcTemplate;
+    this.exportProperties = exportProperties;
     this.findDebtPositionsSql = sqlLoader.load(FIND_DEBT_POSITIONS_SQL_PATH);
     this.findCancelledDebtPositionsSql = sqlLoader.load(FIND_CANCELLED_DEBT_POSITIONS_SQL_PATH);
   }
@@ -44,7 +48,9 @@ public class DebtPositionDao {
                                               OffsetDateTime dateTo,
                                               int limit,
                                               int offset) {
-    return findByFilters(findDebtPositionsSql, codIpaEnte, iuvs, dateFrom, dateTo, limit, offset);
+    return findByFilters(
+      findDebtPositionsSql, codIpaEnte, iuvs, dateFrom, dateTo, limit, offset, !exportProperties.gpdEnabled()
+    );
   }
 
   public List<DebtPosition> findCancelledDebtPositions(String codIpaEnte,
@@ -53,7 +59,9 @@ public class DebtPositionDao {
                                                        OffsetDateTime dateTo,
                                                        int limit,
                                                        int offset) {
-    return findByFilters(findCancelledDebtPositionsSql, codIpaEnte, iuvs, dateFrom, dateTo, limit, offset);
+    return findByFilters(
+      findCancelledDebtPositionsSql, codIpaEnte, iuvs, dateFrom, dateTo, limit, offset, true
+    );
   }
 
   private List<DebtPosition> findByFilters(String sql,
@@ -62,13 +70,14 @@ public class DebtPositionDao {
                                            OffsetDateTime dateFrom,
                                            OffsetDateTime dateTo,
                                            int limit,
-                                           int offset) {
+                                           int offset,
+                                           boolean skipGpdEnabledFilter) {
     if (StringUtils.isEmpty(codIpaEnte)) {
       throw new IllegalArgumentException("codIpaEnte must not be blank");
     }
     return mp4JdbcTemplate.query(
       sql,
-      buildParams(codIpaEnte, iuvs, dateFrom, dateTo, limit, offset),
+      buildParams(codIpaEnte, iuvs, dateFrom, dateTo, limit, offset, skipGpdEnabledFilter),
       DEBT_POSITION_ROW_MAPPER
     );
   }
@@ -78,7 +87,8 @@ public class DebtPositionDao {
                                             OffsetDateTime dateFrom,
                                             OffsetDateTime dateTo,
                                             int limit,
-                                            int offset) {
+                                            int offset,
+                                            boolean skipGpdEnabledFilter) {
     boolean iuvsEmpty = CollectionUtils.isEmpty(iuvs);
 
     return QueryUtils.buildPaginatedFilterParams(limit, offset)
@@ -88,6 +98,7 @@ public class DebtPositionDao {
       .addValue("skipDateFromFilter", dateFrom == null)
       .addValue("dateFrom", DateTimeUtils.toLocalDateTime(dateFrom))
       .addValue("skipDateToExclusiveFilter", dateTo == null)
-      .addValue("dateToExclusive", DateTimeUtils.toLocalDateTime(dateTo));
+      .addValue("dateToExclusive", DateTimeUtils.toLocalDateTime(dateTo))
+      .addValue("skipGpdEnabledFilter", skipGpdEnabledFilter);
   }
 }

@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.bind.ConstructorBinding;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.validation.annotation.Validated;
 
@@ -22,10 +23,41 @@ public record ExtractorExportProperties(
   @NotBlank String tempBaseDir,
   @NotBlank String brokerCf,
   @NotBlank String brokerIpaCode,
+  boolean gpdEnabled,
   @NestedConfigurationProperty
   @NotEmpty Map<MigrationFileType, @Valid FileTypeConfiguration> fileTypeConfigurations,
   @NestedConfigurationProperty
   @NotNull @Valid PaymentsReportingConfiguration paymentsReporting) {
+
+  @ConstructorBinding
+  public ExtractorExportProperties(
+    String storagePath,
+    String tempBaseDir,
+    String brokerCf,
+    String brokerIpaCode,
+    boolean gpdEnabled,
+    Map<MigrationFileType, @Valid FileTypeConfiguration> fileTypeConfigurations,
+    PaymentsReportingConfiguration paymentsReporting
+  ) {
+    this.storagePath = storagePath;
+    this.tempBaseDir = tempBaseDir;
+    this.brokerCf = brokerCf;
+    this.brokerIpaCode = brokerIpaCode;
+    this.gpdEnabled = gpdEnabled;
+    this.fileTypeConfigurations = fileTypeConfigurations;
+    this.paymentsReporting = paymentsReporting;
+  }
+
+  public ExtractorExportProperties(
+    String storagePath,
+    String tempBaseDir,
+    String brokerCf,
+    String brokerIpaCode,
+    Map<MigrationFileType, @Valid FileTypeConfiguration> fileTypeConfigurations,
+    PaymentsReportingConfiguration paymentsReporting
+  ) {
+    this(storagePath, tempBaseDir, brokerCf, brokerIpaCode, false, fileTypeConfigurations, paymentsReporting);
+  }
 
   @PostConstruct
   public void validateDirectoriesExist() {

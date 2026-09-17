@@ -1,5 +1,6 @@
 package it.gov.pagopa.mypay2pu.extractor.dao;
 
+import it.gov.pagopa.mypay2pu.extractor.config.ExtractorExportProperties;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.DebtPosition;
 import it.gov.pagopa.mypay2pu.extractor.utils.SqlLoader;
 import org.junit.jupiter.api.AfterEach;
@@ -45,7 +46,7 @@ class DebtPositionDaoTest {
 
   @Test
   void givenOpenFiltersWhenFindDebtPositionsThenQueryMp4Database() {
-    DebtPositionDao dao = buildDao();
+    DebtPositionDao dao = buildDao(false);
     List<DebtPosition> expected = List.of(buildDebtPosition());
     List<String> iuvs = List.of("IUV-1");
     OffsetDateTime dateFrom = OffsetDateTime.of(LocalDateTime.of(2026, Month.JANUARY, 10, 8, 45), ZoneOffset.ofHours(1));
@@ -61,6 +62,7 @@ class DebtPositionDaoTest {
           && LocalDateTime.of(2026, Month.JANUARY, 10, 8, 45).equals(params.getValue("dateFrom"))
           && Boolean.FALSE.equals(params.getValue("skipDateToExclusiveFilter"))
           && LocalDateTime.of(2026, Month.JANUARY, 12, 17, 30).equals(params.getValue("dateToExclusive"))
+          && Boolean.TRUE.equals(params.getValue("skipGpdEnabledFilter"))
           && Integer.valueOf(50).equals(params.getValue("limit"))
           && Integer.valueOf(100).equals(params.getValue("offset"))
       ),
@@ -80,8 +82,24 @@ class DebtPositionDaoTest {
   }
 
   @Test
+  void givenGpdEnabledWhenFindDebtPositionsThenApplyGpdFilter() {
+    DebtPositionDao dao = buildDao(true);
+    List<DebtPosition> expected = List.of(buildDebtPosition());
+
+    when(mp4JdbcTemplateMock.query(
+      eq(FIND_DEBT_POSITIONS_SQL),
+      ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
+        Boolean.FALSE.equals(params.getValue("skipGpdEnabledFilter"))
+      ),
+      same(DebtPositionDao.DEBT_POSITION_ROW_MAPPER)
+    )).thenReturn(expected);
+
+    assertEquals(expected, dao.findDebtPositions("IPA1", List.of(), null, null, 50, 0));
+  }
+
+  @Test
   void givenNullOptionalFiltersWhenFindCancelledDebtPositionsThenQueryMp4Database() {
-    DebtPositionDao dao = buildDao();
+    DebtPositionDao dao = buildDao(false);
     List<DebtPosition> expected = List.of(buildDebtPosition());
     List<String> iuvs = List.of("IUV-2");
 
@@ -97,6 +115,7 @@ class DebtPositionDaoTest {
           && Boolean.TRUE.equals(params.getValue("skipDateToExclusiveFilter"))
           && params.hasValue("dateToExclusive")
           && params.getValue("dateToExclusive") == null
+          && Boolean.TRUE.equals(params.getValue("skipGpdEnabledFilter"))
           && Integer.valueOf(Integer.MAX_VALUE).equals(params.getValue("limit"))
           && Integer.valueOf(0).equals(params.getValue("offset"))
       ),
@@ -110,7 +129,7 @@ class DebtPositionDaoTest {
 
   @Test
   void givenEmptyIuvsWhenFindDebtPositionsThenQueryMp4DatabaseWithoutIuvFilter() {
-    DebtPositionDao dao = buildDao();
+    DebtPositionDao dao = buildDao(false);
     List<DebtPosition> expected = List.of(buildDebtPosition());
 
     when(mp4JdbcTemplateMock.query(
@@ -123,6 +142,7 @@ class DebtPositionDaoTest {
           && params.getValue("dateFrom") == null
           && Boolean.TRUE.equals(params.getValue("skipDateToExclusiveFilter"))
           && params.getValue("dateToExclusive") == null
+          && Boolean.TRUE.equals(params.getValue("skipGpdEnabledFilter"))
           && Integer.valueOf(50).equals(params.getValue("limit"))
           && Integer.valueOf(0).equals(params.getValue("offset"))
       ),
@@ -136,7 +156,7 @@ class DebtPositionDaoTest {
 
   @Test
   void givenInvalidLimitWhenFindDebtPositionsThenThrowIllegalArgumentException() {
-    DebtPositionDao dao = buildDao();
+    DebtPositionDao dao = buildDao(false);
     List<String> iuvs = List.of("IUV-1");
 
     assertThrows(
@@ -151,7 +171,7 @@ class DebtPositionDaoTest {
 
   @Test
   void givenEmptyCodIpaEnteWhenFindCancelledDebtPositionsThenThrowIllegalArgumentException() {
-    DebtPositionDao dao = buildDao();
+    DebtPositionDao dao = buildDao(false);
 
     IllegalArgumentException exception = assertThrows(
       IllegalArgumentException.class,
@@ -161,10 +181,19 @@ class DebtPositionDaoTest {
     assertEquals("codIpaEnte must not be blank", exception.getMessage());
   }
 
-  private DebtPositionDao buildDao() {
+  private DebtPositionDao buildDao(boolean gpdEnabled) {
     when(sqlLoaderMock.load("mypay/debt-positions/debt-positions-open.sql")).thenReturn(FIND_DEBT_POSITIONS_SQL);
     when(sqlLoaderMock.load("mypay/debt-positions/debt-positions-cancelled.sql")).thenReturn(FIND_CANCELLED_DEBT_POSITIONS_SQL);
-    return new DebtPositionDao(mp4JdbcTemplateMock, sqlLoaderMock);
+    return new DebtPositionDao(
+      mp4JdbcTemplateMock,
+      new ExtractorExportProperties(
+        "./build", "./build", "12345678901", "IPA_CODE", gpdEnabled, Collections.emptyMap(),
+        new ExtractorExportProperties.PaymentsReportingConfiguration(
+          it.gov.pagopa.mypay2pu.extractor.config.PaymentsReportingSource.MYPAY_SHARE
+        )
+      ),
+      sqlLoaderMock
+    );
   }
 
   private DebtPosition buildDebtPosition() {
