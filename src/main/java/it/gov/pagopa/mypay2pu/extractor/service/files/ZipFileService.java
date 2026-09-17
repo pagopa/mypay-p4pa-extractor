@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.function.Function;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -19,9 +20,16 @@ public class ZipFileService {
   }
 
   public File zipper(Path zipFilePath, List<Path> filesToZip, boolean deleteSourceFiles) {
+    return zipper(zipFilePath, filesToZip, deleteSourceFiles, file -> file.getFileName().toString());
+  }
+
+  public File zipper(Path zipFilePath,
+                     List<Path> filesToZip,
+                     boolean deleteSourceFiles,
+                     Function<Path, String> entryNameResolver) {
     try (ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zipFilePath.toFile()))) {
       for (Path file : filesToZip) {
-        ZipEntry zipEntry = new ZipEntry(file.getFileName().toString());
+        ZipEntry zipEntry = new ZipEntry(entryNameResolver.apply(file));
         zos.putNextEntry(zipEntry);
         Files.copy(file, zos);
         zos.closeEntry();

@@ -106,7 +106,12 @@ public class MypaySharePaymentsReportingExportProcessingService {
 
       ResolvedFiles resolvedFiles = resolveExistingXmlFiles(records, ipaCode);
       Path zipPath = resolveZipPath(extractionId, fileNameBuilder.buildZipPartBaseName(partNumber));
-      zipFileService.zipper(zipPath, resolvedFiles.existingXmlFiles(), false);
+      zipFileService.zipper(
+        zipPath,
+        resolvedFiles.existingXmlFiles(),
+        false,
+        file -> "%s-%s".formatted(ipaCode, file.getFileName())
+      );
       zipFileNames.add(zipPath.getFileName().toString());
       writeMissingFilesCsv(
         extractionId,
