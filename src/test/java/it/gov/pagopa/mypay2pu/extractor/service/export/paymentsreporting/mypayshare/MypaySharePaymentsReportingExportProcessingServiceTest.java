@@ -110,6 +110,52 @@ class MypaySharePaymentsReportingExportProcessingServiceTest {
   }
 
   @Test
+  void givenUnixStyleNestedFilePathWhenExportThenAddXmlFromNestedDirectoryToZip() throws Exception {
+    Path xmlFile = tempDir.resolve("IPA_CODE").resolve("mypay").resolve("reporting").resolve("report.xml");
+    Files.createDirectories(xmlFile.getParent());
+    Files.writeString(xmlFile, "<report>content</report>");
+    when(paymentReportingMyPayShareDaoMock.findByFilters("IPA_CODE", null, null, null, null, 1, 0))
+      .thenReturn(List.of(Path.of("/mypay/reporting/report.xml")));
+    when(paymentReportingMyPayShareDaoMock.findByFilters("IPA_CODE", null, null, null, null, 1, 1))
+      .thenReturn(List.of());
+
+    ExportFileResult result = service().executeExport("extraction-id", request(null));
+
+    Path zipPath = tempDir.resolve("extraction-id").resolve(result.files().getFirst());
+    try (ZipFile zipFile = new ZipFile(zipPath.toFile())) {
+      assertEquals(
+        "<report>content</report>",
+        new String(zipFile.getInputStream(zipFile.getEntry("report.xml")).readAllBytes(), StandardCharsets.UTF_8)
+      );
+    }
+    verify(paymentReportingMyPayShareDaoMock).findByFilters("IPA_CODE", null, null, null, null, 1, 0);
+    verify(paymentReportingMyPayShareDaoMock).findByFilters("IPA_CODE", null, null, null, null, 1, 1);
+  }
+
+  @Test
+  void givenWindowsStyleNestedFilePathWhenExportThenAddXmlFromNestedDirectoryToZip() throws Exception {
+    Path xmlFile = tempDir.resolve("IPA_CODE").resolve("mypay").resolve("reporting").resolve("report.xml");
+    Files.createDirectories(xmlFile.getParent());
+    Files.writeString(xmlFile, "<report>content</report>");
+    when(paymentReportingMyPayShareDaoMock.findByFilters("IPA_CODE", null, null, null, null, 1, 0))
+      .thenReturn(List.of(Path.of("mypay\\reporting\\report.xml")));
+    when(paymentReportingMyPayShareDaoMock.findByFilters("IPA_CODE", null, null, null, null, 1, 1))
+      .thenReturn(List.of());
+
+    ExportFileResult result = service().executeExport("extraction-id", request(null));
+
+    Path zipPath = tempDir.resolve("extraction-id").resolve(result.files().getFirst());
+    try (ZipFile zipFile = new ZipFile(zipPath.toFile())) {
+      assertEquals(
+        "<report>content</report>",
+        new String(zipFile.getInputStream(zipFile.getEntry("report.xml")).readAllBytes(), StandardCharsets.UTF_8)
+      );
+    }
+    verify(paymentReportingMyPayShareDaoMock).findByFilters("IPA_CODE", null, null, null, null, 1, 0);
+    verify(paymentReportingMyPayShareDaoMock).findByFilters("IPA_CODE", null, null, null, null, 1, 1);
+  }
+
+  @Test
   void givenDateRangeAndLogicalKeyWhenExportThenApplyBothFilters() {
     OffsetDateTime createdFrom = OffsetDateTime.parse("2026-01-01T00:00:00Z");
     OffsetDateTime createdTo = OffsetDateTime.parse("2026-01-31T23:59:59Z");
