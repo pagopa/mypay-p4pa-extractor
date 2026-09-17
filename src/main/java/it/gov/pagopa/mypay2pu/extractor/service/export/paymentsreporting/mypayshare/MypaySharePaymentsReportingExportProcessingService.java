@@ -106,7 +106,12 @@ public class MypaySharePaymentsReportingExportProcessingService {
 
       ResolvedFiles resolvedFiles = resolveExistingXmlFiles(records, ipaCode);
       Path zipPath = resolveZipPath(extractionId, fileNameBuilder.buildZipPartBaseName(partNumber));
-      zipFileService.zipper(zipPath, resolvedFiles.existingXmlFiles(), false);
+      zipFileService.zipper(
+        zipPath,
+        resolvedFiles.existingXmlFiles(),
+        false,
+        file -> "%s-%s".formatted(ipaCode, file.getFileName())
+      );
       zipFileNames.add(zipPath.getFileName().toString());
       writeMissingFilesCsv(
         extractionId,
@@ -130,7 +135,7 @@ public class MypaySharePaymentsReportingExportProcessingService {
     List<Path> xmlFiles = new ArrayList<>();
     List<Path> missingXmlFiles = new ArrayList<>();
     for (Path filePath : records) {
-      Path resolvedPath = myPaySharedFolderPath.resolve(ipaCode).resolve(filePath.getFileName());
+      Path resolvedPath = resolveSharedXmlPath(ipaCode, filePath);
       if (Files.exists(resolvedPath)) {
         xmlFiles.add(resolvedPath);
       } else {
@@ -139,6 +144,18 @@ public class MypaySharePaymentsReportingExportProcessingService {
       }
     }
     return new ResolvedFiles(xmlFiles, missingXmlFiles);
+  }
+
+  private Path resolveSharedXmlPath(String ipaCode, Path filePath) {
+    String relativeFilePath = filePath.toString()
+      .replace('\\', '/')
+      .replaceFirst("^/+", "");
+    Path organizationDirectory = myPaySharedFolderPath.resolve(ipaCode).normalize();
+    Path resolvedPath = organizationDirectory.resolve(relativeFilePath).normalize();
+    if (!resolvedPath.startsWith(organizationDirectory)) {
+      throw new IllegalArgumentException("Invalid payments reporting file path: " + filePath);
+    }
+    return resolvedPath;
   }
 
   private void writeMissingFilesCsv(String extractionId,
