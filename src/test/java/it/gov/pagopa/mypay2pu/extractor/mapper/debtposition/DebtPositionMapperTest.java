@@ -95,12 +95,12 @@ class DebtPositionMapperTest {
     assertEquals(debtPosition.flagMultiBeneficiario(), result.getFlagMultiBeneficiary());
     assertEquals(1, result.getNumberBeneficiary());
     assertNotNull(result.getTransfer1());
-    assertEquals(List.of("CFENTE"), List.copyOf(result.getTransfer1().get("codiceFiscaleEnte_1")));
-    assertEquals(List.of("Ente"), List.copyOf(result.getTransfer1().get("denominazioneEnte_1")));
-    assertEquals(List.of("IT60X0542811101000000123456"), List.copyOf(result.getTransfer1().get("ibanAccreditoEnte_1")));
-    assertEquals(List.of("causale"), List.copyOf(result.getTransfer1().get("causaleVersamentoEnte_1")));
-    assertEquals(List.of("1"), List.copyOf(result.getTransfer1().get("importoVersamentoEnte_1")));
-    assertEquals(List.of("9/0101101IM/"), List.copyOf(result.getTransfer1().get("codiceTassonomiaEnte_1")));
+    assertEquals(List.of("CFENTE"), List.copyOf(result.getTransfer1().get("codiceFiscaleEnte1")));
+    assertEquals(List.of("Ente"), List.copyOf(result.getTransfer1().get("denominazioneEnte1")));
+    assertEquals(List.of("IT60X0542811101000000123456"), List.copyOf(result.getTransfer1().get("ibanAccreditoEnte1")));
+    assertEquals(List.of("causale"), List.copyOf(result.getTransfer1().get("causaleVersamentoEnte1")));
+    assertEquals(List.of("1"), List.copyOf(result.getTransfer1().get("importoVersamentoEnte1")));
+    assertEquals(List.of("9/0101101IM/"), List.copyOf(result.getTransfer1().get("codiceTassonomiaEnte1")));
     assertEquals(Action.M, result.getAction());
     assertEquals(debtPosition.draft(), result.getDraft());
     TestUtils.checkNotNullFields(result, "transfer1", "transfer2", "transfer3", "transfer4", "transfer5", "executionConfig");
@@ -237,7 +237,7 @@ class DebtPositionMapperTest {
     PuDebtPositionDTO result = debtPositionMapper.map(debtPosition, Action.M);
 
     assertNotNull(result.getTransfer1());
-    assertEquals(List.of("10"), List.copyOf(result.getTransfer1().get("importoVersamentoEnte_1")));
+    assertEquals(List.of("10"), List.copyOf(result.getTransfer1().get("importoVersamentoEnte1")));
     assertEquals(1, result.getTransfer1().size());
   }
 }

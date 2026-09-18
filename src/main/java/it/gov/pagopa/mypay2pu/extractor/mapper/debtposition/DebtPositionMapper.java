@@ -51,14 +51,14 @@ public class DebtPositionMapper {
 
   private MultiValuedMap<String, String> buildTransfer1(DebtPosition debtPosition) {
     MultiValuedMap<String, String> transfer1 = new ArrayListValuedHashMap<>();
-    addIfHasText(transfer1, "codiceFiscaleEnte_1", debtPosition.codiceFiscaleEnte1());
-    addIfHasText(transfer1, "denominazioneEnte_1", debtPosition.denominazioneEnte1());
-    addIfHasText(transfer1, "ibanAccreditoEnte_1", debtPosition.ibanAccreditoEnte1());
-    addIfHasText(transfer1, "causaleVersamentoEnte_1", debtPosition.causaleVersamentoEnte1());
-    addIfHasText(transfer1, "codiceTassonomiaEnte_1", debtPosition.codiceTassonomiaEnte1());
+    addIfHasText(transfer1, "codiceFiscaleEnte1", debtPosition.codiceFiscaleEnte1());
+    addIfHasText(transfer1, "denominazioneEnte1", debtPosition.denominazioneEnte1());
+    addIfHasText(transfer1, "ibanAccreditoEnte1", debtPosition.ibanAccreditoEnte1());
+    addIfHasText(transfer1, "causaleVersamentoEnte1", debtPosition.causaleVersamentoEnte1());
+    addIfHasText(transfer1, "codiceTassonomiaEnte1", debtPosition.codiceTassonomiaEnte1());
 
     if (debtPosition.importoVersamentoEnte1() != null) {
-      transfer1.put("importoVersamentoEnte_1", debtPosition.importoVersamentoEnte1().toPlainString());
+      transfer1.put("importoVersamentoEnte1", debtPosition.importoVersamentoEnte1().toPlainString());
     }
     return transfer1.isEmpty() ? null : transfer1;
   }
