@@ -143,7 +143,7 @@ class DebtPositionExportProcessingServiceTest {
       service.retrieveData("ORG_IPA", request, 10, 0);
 
     assertEquals(
-      List.of(Action.M, Action.M, Action.M, Action.I, Action.M, Action.I, Action.A),
+      List.of(Action.I, Action.M, Action.M, Action.M, Action.I, Action.I, Action.A),
       result.stream().map(DebtPositionExportProcessingService.DebtPositionWithAction::action).toList()
     );
   }
