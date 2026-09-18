@@ -13,6 +13,7 @@ import it.gov.pagopa.mypay2pu.extractor.service.FileArchiverService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.CsvPartitionWriterService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.SplitByIpaCodeBaseExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.files.CsvService;
+import it.gov.pagopa.mypay2pu.extractor.utils.QueryUtils;
 import it.gov.pagopa.mypay2pu.extractor.validation.ValueLogicalKeyValidator;
 import it.gov.pagopa.pu.debtposition.dto.generated.Action;
 import jakarta.validation.Validator;
@@ -70,7 +71,10 @@ public class DebtPositionExportProcessingService extends SplitByIpaCodeBaseExpor
   protected List<DebtPositionWithAction> retrieveData(String ipaCode, ExtractionRequest request, int pageSize, int offset) {
     ExtractionFilters filters = request.getFilters();
     List<String> iuvs = ValueLogicalKeyValidator.parseLogicalKey(filters != null ? filters.getLogicalKey() : null);
-    OffsetDateTime dateFrom = filters != null ? filters.getDateFrom() : null;
+    OffsetDateTime dateFrom = QueryUtils.resolveDateFrom(
+      request.getLastExtractionDate(),
+      filters != null ? filters.getDateFrom() : null
+    );
     OffsetDateTime dateTo = filters != null ? filters.getDateTo() : null;
     List<DebtPosition> debtPositions = debtPositionDao.findDebtPositions(
       ipaCode,
