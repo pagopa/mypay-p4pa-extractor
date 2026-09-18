@@ -28,12 +28,12 @@ SELECT
     de.bilancio AS bilancio,
     FALSE AS draft,
     FALSE AS flag_multi_beneficiario,
-    NULL AS codice_fiscale_ente_1,
-    NULL AS denominazione_ente_1,
-    NULL AS iban_accredito_ente_1,
-    NULL AS causale_versamento_ente_1,
-    NULL AS importo_versamento_ente_1,
-    NULL AS codice_tassonomia_ente_1,
+    NULL AS codice_fiscale_ente1,
+    NULL AS denominazione_ente1,
+    NULL AS iban_accredito_ente1,
+    NULL AS causale_versamento_ente1,
+    NULL AS importo_versamento_ente1,
+    NULL AS codice_tassonomia_ente1,
     de.dt_creazione AS dt_creazione,
     NULL AS dt_ultima_modifica
 FROM mygov_dovuto_elaborato de
