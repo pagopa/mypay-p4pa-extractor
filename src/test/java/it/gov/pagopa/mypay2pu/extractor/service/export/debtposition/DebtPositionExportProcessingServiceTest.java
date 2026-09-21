@@ -132,17 +132,18 @@ class DebtPositionExportProcessingServiceTest {
     DebtPosition withoutCreationDate = debtPosition("IUPD-NO-CREATION-DATE", "IUD-NO-CREATION-DATE", null, LocalDate.of(2026, Month.JANUARY, 16).atStartOfDay());
     DebtPosition withoutChangeDates = debtPosition("IUPD-NO-CHANGE-DATES", "IUD-NO-CHANGE-DATES", null, null);
     DebtPosition cancelled = debtPosition("IUPD-CANCELLED", "IUD-CANCELLED");
+    OffsetDateTime lastExtractionDate = OffsetDateTime.parse("2026-01-15T10:00:00Z");
 
-    when(debtPositionDaoMock.findDebtPositions("ORG_IPA", List.of("IUV-1"), null, null, 10, 0))
+    when(debtPositionDaoMock.findDebtPositions("ORG_IPA", List.of("IUV-1"), lastExtractionDate, null, 10, 0))
       .thenReturn(List.of(inserted, modified, unchanged, withoutLastModificationDate, withoutCreationDate, withoutChangeDates));
-    when(debtPositionDaoMock.findCancelledDebtPositions("ORG_IPA", List.of("IUV-1"), null, null, 10, 0))
+    when(debtPositionDaoMock.findCancelledDebtPositions("ORG_IPA", List.of("IUV-1"), lastExtractionDate, null, 10, 0))
       .thenReturn(List.of(cancelled));
 
     List<DebtPositionExportProcessingService.DebtPositionWithAction> result =
       service.retrieveData("ORG_IPA", request, 10, 0);
 
     assertEquals(
-      List.of(Action.M, Action.M, Action.M, Action.I, Action.M, Action.I, Action.A),
+      List.of(Action.I, Action.M, Action.M, Action.M, Action.I, Action.I, Action.A),
       result.stream().map(DebtPositionExportProcessingService.DebtPositionWithAction::action).toList()
     );
   }
