@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -66,7 +67,7 @@ class PaymentReportingMyPayShareDaoTest {
           && dateTo.equals(params.getValue("dateTo"))
           && Boolean.FALSE.equals(params.getValue("skipDateToFilter"))
           && Boolean.TRUE.equals(params.getValue("skipLogicalKeyFilter"))
-          && params.getValue("logicalKey") == null
+          && Collections.singletonList(null).equals(params.getValue("logicalKeys"))
           && Integer.valueOf(50).equals(params.getValue("limit"))
           && Integer.valueOf(100).equals(params.getValue("offset"))
           && params.getValues().size() == 9
@@ -95,7 +96,7 @@ class PaymentReportingMyPayShareDaoTest {
           && params.getValue("dateTo") == null
           && Boolean.TRUE.equals(params.getValue("skipDateToFilter"))
           && Boolean.TRUE.equals(params.getValue("skipLogicalKeyFilter"))
-          && params.getValue("logicalKey") == null
+          && Collections.singletonList(null).equals(params.getValue("logicalKeys"))
           && Integer.valueOf(Integer.MAX_VALUE).equals(params.getValue("limit"))
           && Integer.valueOf(0).equals(params.getValue("offset"))
           && params.getValues().size() == 9
@@ -120,7 +121,7 @@ class PaymentReportingMyPayShareDaoTest {
           && params.getValue("dateTo") == null
           && Boolean.TRUE.equals(params.getValue("skipDateToFilter"))
           && Boolean.FALSE.equals(params.getValue("skipLogicalKeyFilter"))
-          && "FLOW-1".equals(params.getValue("logicalKey"))
+          && List.of("FLOW-1", "FLOW-2").equals(params.getValue("logicalKeys"))
           && Integer.valueOf(Integer.MAX_VALUE).equals(params.getValue("limit"))
           && Integer.valueOf(0).equals(params.getValue("offset"))
           && params.getValues().size() == 9
@@ -128,7 +129,7 @@ class PaymentReportingMyPayShareDaoTest {
       same(PaymentReportingMyPayShareDao.PAYMENTS_REPORTING_FILE_ROW_MAPPER)
     )).thenReturn(expected);
 
-    assertEquals(expected, dao.findByLogicalKey("IPA1", "FLOW-1"));
+    assertEquals(expected, dao.findByLogicalKey("IPA1", List.of("FLOW-1", "FLOW-2")));
   }
 
   @Test
@@ -153,7 +154,7 @@ class PaymentReportingMyPayShareDaoTest {
     assertTrue(sql.contains(":skipDateFromFilter = TRUE"));
     assertTrue(sql.contains(":skipDateToFilter = TRUE"));
     assertTrue(sql.contains(":skipLogicalKeyFilter = TRUE"));
-    assertTrue(sql.contains("rs.cod_identificativo_flusso = :logicalKey"));
+    assertTrue(sql.contains("rs.cod_identificativo_flusso IN (:logicalKeys)"));
     assertTrue(sql.contains("ORDER BY rs.dt_creazione"));
     assertTrue(sql.contains("LIMIT :limit"));
     assertTrue(sql.contains("OFFSET COALESCE(:offset, 0)"));

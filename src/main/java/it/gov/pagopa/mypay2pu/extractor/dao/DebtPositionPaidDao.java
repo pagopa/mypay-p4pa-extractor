@@ -36,11 +36,11 @@ public class DebtPositionPaidDao {
   }
 
   public List<DebtPositionPaid> findByFilters(String codIpaEnte,
-                                              List<String> iuvs,
-                                              OffsetDateTime createdFrom,
-                                              OffsetDateTime createdTo,
-                                              int limit,
-                                              int offset) {
+                                               List<String> iuvs,
+                                               OffsetDateTime createdFrom,
+                                               OffsetDateTime createdTo,
+                                               int limit,
+                                               int offset) {
     if (StringUtils.isEmpty(codIpaEnte)) {
       throw new IllegalArgumentException("codIpaEnte must not be blank");
     }

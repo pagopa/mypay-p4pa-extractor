@@ -3,6 +3,8 @@ package it.gov.pagopa.mypay2pu.extractor.utils;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 
 import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.stream.IntStream;
 
 public class QueryUtils {
   private QueryUtils() {}
@@ -54,5 +56,14 @@ public class QueryUtils {
     return lastExtractionDate != null
       && dateFrom != null
       && lastExtractionDate.compareTo(dateFrom) != 0;
+  }
+
+  public static List<Object[]> pairValues(List<String> firstValues, List<String> secondValues) {
+    if (firstValues.size() != secondValues.size()) {
+      throw new IllegalArgumentException("logical key component lists must have the same size");
+    }
+    return IntStream.range(0, firstValues.size())
+      .mapToObj(index -> new Object[]{firstValues.get(index), secondValues.get(index)})
+      .toList();
   }
 }

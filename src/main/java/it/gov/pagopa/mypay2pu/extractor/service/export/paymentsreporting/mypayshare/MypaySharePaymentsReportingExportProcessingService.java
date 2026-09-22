@@ -11,6 +11,7 @@ import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.service.export.ExportFileNameBuilder;
 import it.gov.pagopa.mypay2pu.extractor.service.files.CsvService;
 import it.gov.pagopa.mypay2pu.extractor.service.files.ZipFileService;
+import it.gov.pagopa.mypay2pu.extractor.validation.ValueLogicalKeyValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -67,7 +68,9 @@ public class MypaySharePaymentsReportingExportProcessingService {
 
   private List<String> createZips(String extractionId, String ipaCode, ExtractionRequest request) {
     ExtractionFilters filters = request.getFilters();
-    String logicalKey = filters != null ? filters.getLogicalKey() : null;
+    List<String> logicalKeys = ValueLogicalKeyValidator.parseLogicalKey(
+      filters != null ? filters.getLogicalKey() : null
+    );
     OffsetDateTime createdFrom = filters != null ? filters.getDateFrom() : null;
     OffsetDateTime createdTo = filters != null ? filters.getDateTo() : null;
     int pageSize = extractorExportProperties.resolveFileTypeConfiguration(MigrationFileType.PAYMENTS_REPORTING)
@@ -83,7 +86,7 @@ public class MypaySharePaymentsReportingExportProcessingService {
 
     log.info(
       "Exporting payments reporting: ipaCode={}, logicalKey={}, createdFrom={}, createdTo={}",
-      ipaCode, logicalKey, createdFrom, createdTo
+      ipaCode, logicalKeys, createdFrom, createdTo
     );
 
     int offset = 0;
@@ -96,7 +99,7 @@ public class MypaySharePaymentsReportingExportProcessingService {
         request.getLastExtractionDate(),
         createdFrom,
         createdTo,
-        logicalKey,
+        logicalKeys,
         pageSize,
         offset
       );

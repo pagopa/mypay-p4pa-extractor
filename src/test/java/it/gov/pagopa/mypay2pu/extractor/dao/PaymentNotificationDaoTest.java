@@ -17,7 +17,7 @@ import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -57,17 +57,15 @@ class PaymentNotificationDaoTest {
       eq(FIND_BY_FILTERS_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         ipaCode.equals(params.getValue("ipaCode"))
-          && Boolean.FALSE.equals(params.getValue("iudsEmpty"))
-          && iuds.equals(params.getValue("iuds"))
-          && Boolean.FALSE.equals(params.getValue("iuvsEmpty"))
-          && iuvs.equals(params.getValue("iuvs"))
+          && Boolean.FALSE.equals(params.getValue("skipLogicalKeyFilter"))
+          && hasPairs(params, "logicalKeys", new Object[]{"IUD-1", "IUV-1"}, new Object[]{"IUD-2", "IUV-2"})
           && Boolean.FALSE.equals(params.getValue("skipCreatedFromFilter"))
           && createdFrom.equals(params.getValue("createdFrom"))
           && Boolean.FALSE.equals(params.getValue("skipCreatedToFilter"))
           && createdTo.equals(params.getValue("createdTo"))
           && Integer.valueOf(50).equals(params.getValue("limit"))
           && Integer.valueOf(100).equals(params.getValue("offset"))
-          && params.getValues().size() == 11
+          && params.getValues().size() == 9
       ),
       same(PaymentNotificationDao.PAYMENT_NOTIFICATION_ROW_MAPPER)
     )).thenReturn(expected);
@@ -87,10 +85,8 @@ class PaymentNotificationDaoTest {
       eq(FIND_BY_FILTERS_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         "IPA1".equals(params.getValue("ipaCode"))
-          && Boolean.TRUE.equals(params.getValue("iudsEmpty"))
-          && Collections.singletonList(null).equals(params.getValue("iuds"))
-          && Boolean.TRUE.equals(params.getValue("iuvsEmpty"))
-          && Collections.singletonList(null).equals(params.getValue("iuvs"))
+          && Boolean.TRUE.equals(params.getValue("skipLogicalKeyFilter"))
+          && hasPairs(params, "logicalKeys", new Object[]{null, null})
           && Boolean.TRUE.equals(params.getValue("skipCreatedFromFilter"))
           && params.hasValue("createdFrom")
           && params.getValue("createdFrom") == null
@@ -99,7 +95,7 @@ class PaymentNotificationDaoTest {
           && params.getValue("createdTo") == null
           && Integer.valueOf(10).equals(params.getValue("limit"))
           && Integer.valueOf(0).equals(params.getValue("offset"))
-          && params.getValues().size() == 11
+          && params.getValues().size() == 9
       ),
       same(PaymentNotificationDao.PAYMENT_NOTIFICATION_ROW_MAPPER)
     )).thenReturn(List.of());
@@ -152,8 +148,8 @@ class PaymentNotificationDaoTest {
     String sql = Files.readString(Path.of("src/main/resources/db/mypivot/payment-notification/payment-notification.sql"));
 
     assertTrue(sql.contains("e.cod_ipa_ente = :ipaCode"));
-    assertTrue(sql.contains(":iudsEmpty = TRUE OR fi.cod_iud IN (:iuds)"));
-    assertTrue(sql.contains(":iuvsEmpty = TRUE OR fi.cod_rp_silinviarp_id_univoco_versamento IN (:iuvs)"));
+    assertTrue(sql.contains(":skipLogicalKeyFilter = TRUE"));
+    assertTrue(sql.contains("(fi.cod_iud, fi.cod_rp_silinviarp_id_univoco_versamento) IN (:logicalKeys)"));
     assertTrue(sql.contains("ORDER BY fi.dt_creazione"));
   }
 
@@ -193,5 +189,13 @@ class PaymentNotificationDaoTest {
       LocalDateTime.of(2026, Month.JANUARY, 10, 10, 30),
       LocalDateTime.of(2026, Month.JANUARY, 10, 10, 30)
     );
+  }
+
+  private boolean hasPairs(MapSqlParameterSource params, String parameterName, Object[]... expectedPairs) {
+    Object value = params.getValue(parameterName);
+    return value instanceof List<?> pairs
+      && pairs.size() == expectedPairs.length
+      && java.util.stream.IntStream.range(0, expectedPairs.length)
+        .allMatch(index -> pairs.get(index) instanceof Object[] pair && Arrays.equals(expectedPairs[index], pair));
   }
 }

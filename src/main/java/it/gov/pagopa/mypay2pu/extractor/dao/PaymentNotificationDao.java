@@ -67,14 +67,13 @@ public class PaymentNotificationDao {
     int limit,
     int offset
   ) {
-    boolean iudsEmpty = CollectionUtils.isEmpty(iuds);
-    boolean iuvsEmpty = CollectionUtils.isEmpty(iuvs);
+    boolean skipLogicalKeyFilter = CollectionUtils.isEmpty(iuds) || CollectionUtils.isEmpty(iuvs);
     return QueryUtils.buildPaginatedFilterParams(limit, offset)
       .addValue("ipaCode", ipaCode)
-      .addValue("iudsEmpty", iudsEmpty)
-      .addValue("iuds", iudsEmpty ? Collections.singletonList(null) : iuds)
-      .addValue("iuvsEmpty", iuvsEmpty)
-      .addValue("iuvs", iuvsEmpty ? Collections.singletonList(null) : iuvs)
+      .addValue("skipLogicalKeyFilter", skipLogicalKeyFilter)
+      .addValue("logicalKeys", skipLogicalKeyFilter
+        ? Collections.singletonList(new Object[]{null, null})
+        : QueryUtils.pairValues(iuds, iuvs))
       .addValue("skipCreatedFromFilter", createdFrom == null)
       .addValue("createdFrom", createdFrom)
       .addValue("skipCreatedToFilter", createdTo == null)

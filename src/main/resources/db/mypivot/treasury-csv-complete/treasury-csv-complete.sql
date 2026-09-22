@@ -45,8 +45,8 @@ JOIN mygov_ente e
     ON ft.mygov_ente_id = e.mygov_ente_id
 WHERE e.cod_ipa_ente = :ipaCode
   AND ft.cod_id_univoco_flusso IS NOT NULL
-  AND (:skipAnnoBollettaFilter = TRUE OR ft.de_anno_bolletta = :annoBolletta)
-  AND (:skipCodBollettaFilter = TRUE OR ft.cod_bolletta = :codBolletta)
+  AND (:skipBollettaLogicalKeyFilter = TRUE
+    OR (ft.de_anno_bolletta, ft.cod_bolletta) IN (:bollettaLogicalKeys))
   AND (:skipUpdatedFromFilter = TRUE OR ft.dt_ultima_modifica >= :updatedFrom)
   AND (:skipUpdatedToFilter = TRUE OR ft.dt_ultima_modifica < :updatedTo)
 ORDER BY ft.de_anno_bolletta, ft.cod_bolletta

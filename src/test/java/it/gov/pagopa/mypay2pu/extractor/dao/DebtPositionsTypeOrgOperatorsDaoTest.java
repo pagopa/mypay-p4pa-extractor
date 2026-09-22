@@ -11,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -45,10 +46,10 @@ class DebtPositionsTypeOrgOperatorsDaoTest {
       eq(FIND_BY_FILTERS_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         "IPA_CODE".equals(params.getValue("ipaCode"))
-          && Boolean.FALSE.equals(params.getValue("operatorFiscalCodesEmpty"))
-          && List.of("OPERATOR_CF").equals(params.getValue("operatorFiscalCodes"))
-          && Boolean.FALSE.equals(params.getValue("debtPositionTypeOrgCodesEmpty"))
-          && List.of("TYPE_ORG_CODE").equals(params.getValue("debtPositionTypeOrgCodes"))
+          && Boolean.FALSE.equals(params.getValue("skipLogicalKeyFilter"))
+          && hasPairs(params, "logicalKeys",
+            new Object[]{"TYPE_ORG_CODE_1", "OPERATOR_CF_1"},
+            new Object[]{"TYPE_ORG_CODE_2", "OPERATOR_CF_2"})
           && Integer.valueOf(50).equals(params.getValue("limit"))
           && Integer.valueOf(100).equals(params.getValue("offset"))
       ),
@@ -57,8 +58,8 @@ class DebtPositionsTypeOrgOperatorsDaoTest {
 
     List<DebtPositionsTypeOrgOperators> result = dao.findByFilters(
       "IPA_CODE",
-      List.of("OPERATOR_CF"),
-      List.of("TYPE_ORG_CODE"),
+      List.of("OPERATOR_CF_1", "OPERATOR_CF_2"),
+      List.of("TYPE_ORG_CODE_1", "TYPE_ORG_CODE_2"),
       50,
       100
     );
@@ -86,5 +87,13 @@ class DebtPositionsTypeOrgOperatorsDaoTest {
     when(sqlLoaderMock.load("mypay/debt-positions-type-org-operators/debt-positions-type-org-operators.sql"))
       .thenReturn(FIND_BY_FILTERS_SQL);
     return new DebtPositionsTypeOrgOperatorsDao(mp4JdbcTemplateMock, sqlLoaderMock);
+  }
+
+  private boolean hasPairs(MapSqlParameterSource params, String parameterName, Object[]... expectedPairs) {
+    Object value = params.getValue(parameterName);
+    return value instanceof List<?> pairs
+      && pairs.size() == expectedPairs.length
+      && java.util.stream.IntStream.range(0, expectedPairs.length)
+        .allMatch(index -> pairs.get(index) instanceof Object[] pair && Arrays.equals(expectedPairs[index], pair));
   }
 }

@@ -9,7 +9,7 @@ WHERE rs.cod_ipa_ente = :ipaCode
   )
   AND (
     :skipLogicalKeyFilter = TRUE
-    OR rs.cod_identificativo_flusso = :logicalKey
+    OR rs.cod_identificativo_flusso IN (:logicalKeys)
   )
 ORDER BY rs.dt_creazione
 LIMIT :limit
