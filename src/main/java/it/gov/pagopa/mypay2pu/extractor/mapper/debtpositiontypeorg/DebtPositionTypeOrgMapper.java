@@ -61,7 +61,7 @@ public class DebtPositionTypeOrgMapper {
       .externalPaymentUrl(debtPositionTypeOrg.externalPaymentUrl())
       .flagAnonymousFiscalCode(debtPositionTypeOrg.flagAnonymousFiscalCode())
       .flagMandatoryDueDate(debtPositionTypeOrg.flagMandatoryDueDate())
-      .flagSpontaneous(debtPositionTypeOrg.flagSpontaneous())
+      .flagSpontaneous(hasText(debtPositionTypeOrg.externalPaymentUrl()) ? Boolean.FALSE : debtPositionTypeOrg.flagSpontaneous())
       .flagNotifyIo(debtPositionTypeOrg.flagNotifyIo())
       .flagNotifyIoBkp(debtPositionTypeOrg.flagNotifyIoBkp())
       .ioTemplateMessage(transcodeTemplateTags(myPayProperties.globalProperties().ioTemplateMessage()))
@@ -80,7 +80,7 @@ public class DebtPositionTypeOrgMapper {
 
   private String resolveSpontaneousFormStructure(DebtPositionTypeOrg debtPositionTypeOrg) {
     String spontaneousFormCode = debtPositionTypeOrg.spontaneousFormCode();
-    if (!hasText(spontaneousFormCode)) {
+    if (!hasText(spontaneousFormCode) || hasText(debtPositionTypeOrg.externalPaymentUrl())) {
       return null;
     }
     try {

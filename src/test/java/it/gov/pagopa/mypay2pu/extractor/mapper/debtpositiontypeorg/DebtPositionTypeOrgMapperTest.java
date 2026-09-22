@@ -67,7 +67,7 @@ class DebtPositionTypeOrgMapperTest {
   }
 
   @Test
-  void mapShouldPopulateExportDtoWithEnrichmentInputs() {
+  void mapShouldNotResolveSpontaneousFormStructureWhenExternalPaymentUrlIsConfigured() {
     DebtPositionTypeOrg debtPositionTypeOrg = new DebtPositionTypeOrg(
       "IPA1", "BILANCIO", "TAX", "Tax", "IT60X0542811101000000123456",
       "IT60X0542811101000000123456", "123456", "Municipality", "Public administration", 1234L,
@@ -75,10 +75,6 @@ class DebtPositionTypeOrgMapperTest {
       "PAYMENT_NOTIFICATION", true, "https://example.test/pnd", "SPONT_FORM", "SVC_CODE", false, true,
       "TAXONOMY_CODE", "ORG_TYPE"
     );
-    String strutturaPagamentoSpontaneo = "[]";
-
-    when(myDictionaryClientMock.getSpontaneousFormStructure(debtPositionTypeOrg.spontaneousFormCode()))
-      .thenReturn(strutturaPagamentoSpontaneo);
     when(debtPositionTypeOrgDaoMock.isExternal(debtPositionTypeOrg.ipaCode(), debtPositionTypeOrg.code()))
       .thenReturn(true);
 
@@ -95,12 +91,12 @@ class DebtPositionTypeOrgMapperTest {
     assertEquals(debtPositionTypeOrg.postalAccountCode(), result.getPostalAccountCode());
     assertEquals(debtPositionTypeOrg.holderPostalCc(), result.getHolderPostalCc());
     assertEquals(debtPositionTypeOrg.orgSector(), result.getOrgSector());
-    assertEquals("{\"fieldBeans\":[]}", result.getSpontaneousFormStructure());
+    assertNull(result.getSpontaneousFormStructure());
     assertEquals(debtPositionTypeOrg.amountCents(), result.getAmountCents());
     assertEquals(debtPositionTypeOrg.externalPaymentUrl(), result.getExternalPaymentUrl());
     assertEquals(debtPositionTypeOrg.flagAnonymousFiscalCode(), result.getFlagAnonymousFiscalCode());
     assertEquals(debtPositionTypeOrg.flagMandatoryDueDate(), result.getFlagMandatoryDueDate());
-    assertEquals(debtPositionTypeOrg.flagSpontaneous(), result.getFlagSpontaneous());
+    assertEquals(false, result.getFlagSpontaneous());
     assertEquals(false, result.getFlagNotifyIo());
     assertEquals(true, result.getFlagNotifyIoBkp());
     assertEquals(
@@ -116,7 +112,10 @@ class DebtPositionTypeOrgMapperTest {
     assertEquals("SVC_CODE", result.getServiceCode());
     assertEquals("Oggetto %posizioneDebitoria_descrizione%", result.getIoTemplateSubject());
 
-    TestUtils.checkNotNullFields(result);
+    TestUtils.checkNotNullFields(result, "spontaneousFormStructure");
+
+    verify(myDictionaryClientMock, never())
+      .getSpontaneousFormStructure(debtPositionTypeOrg.spontaneousFormCode());
   }
 
   @Test

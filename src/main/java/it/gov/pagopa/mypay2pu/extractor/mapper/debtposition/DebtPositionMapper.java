@@ -44,7 +44,7 @@ public class DebtPositionMapper {
       .flagPuPagoPaPayment(Boolean.FALSE)
       .balance(debtPosition.bilancio())
       .flagMultiBeneficiary(debtPosition.flagMultiBeneficiario())
-      .numberBeneficiary(1)
+      .numberBeneficiary(debtPosition.flagMultiBeneficiario() != null && debtPosition.flagMultiBeneficiario() ? 2 : 1)
       .transfer1(buildTransfer1(debtPosition))
       .action(action)
       .draft(debtPosition.draft())
