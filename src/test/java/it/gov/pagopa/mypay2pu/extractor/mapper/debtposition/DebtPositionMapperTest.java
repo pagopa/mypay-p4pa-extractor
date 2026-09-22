@@ -64,7 +64,9 @@ class DebtPositionMapperTest {
 
     PuDebtPositionDTO result = debtPositionMapper.map(debtPosition, Action.M);
 
-    assertEquals(debtPosition.iupd(), result.getIupdOrg());
+    assertEquals(debtPosition.iud(), result.getIupdIUD());
+    assertEquals(debtPosition.iud(), result.getIupdOrg());
+    assertEquals(debtPosition.iupd(), result.getIupdPagoPa());
     assertEquals(debtPosition.descrizionePosizioneDebitoria(), result.getDescription());
     assertEquals(debtPosition.dataValidita(), result.getValidityDate());
     assertEquals(debtPosition.coobbligato(), result.getMultiDebtor());
@@ -90,7 +92,7 @@ class DebtPositionMapperTest {
     assertEquals(debtPosition.causaleVersamento(), result.getRemittanceInformation());
     assertEquals(debtPosition.datiSpecificiRiscossione(), result.getLegacyPaymentMetadata());
     assertEquals(debtPosition.flgGeneraIuv(), result.getGenerateNotice());
-    assertEquals(Boolean.TRUE, result.getFlagPuPagoPaPayment());
+    assertEquals(Boolean.FALSE, result.getFlagPuPagoPaPayment());
     assertEquals(debtPosition.bilancio(), result.getBalance());
     assertEquals(debtPosition.flagMultiBeneficiario(), result.getFlagMultiBeneficiary());
     assertEquals(1, result.getNumberBeneficiary());
@@ -107,7 +109,7 @@ class DebtPositionMapperTest {
   }
 
   @Test
-  void mapShouldPreserveNullOptionalFieldsAndZeroBeneficiaries() {
+  void mapShouldPreserveNullOptionalFieldsAndSetOneBeneficiaryForMultiBeneficiaryDebtPosition() {
     DebtPosition debtPosition = new DebtPosition(
       "IUPD-2",
       "description",
@@ -151,7 +153,7 @@ class DebtPositionMapperTest {
     PuDebtPositionDTO result = debtPositionMapper.map(debtPosition, Action.I);
 
     assertEquals(PersonEntityType.G, result.getEntityType());
-    assertEquals(0, result.getNumberBeneficiary());
+    assertEquals(1, result.getNumberBeneficiary());
     assertEquals(Action.I, result.getAction());
     assertNull(result.getNotificationDate());
     assertNull(result.getPaymentOptionDescription());

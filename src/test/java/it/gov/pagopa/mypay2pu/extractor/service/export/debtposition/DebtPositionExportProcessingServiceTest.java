@@ -161,7 +161,7 @@ class DebtPositionExportProcessingServiceTest {
 
   private PuDebtPositionDTO validDto(String iud) {
     return PuDebtPositionDTO.builder()
-      .iupdOrg("IUPD_" + iud)
+      .iupdIUD("IUPD_" + iud)
       .paymentOptionIndex(1)
       .paymentOptionType("SINGLE_INSTALLMENT")
       .iud(iud)

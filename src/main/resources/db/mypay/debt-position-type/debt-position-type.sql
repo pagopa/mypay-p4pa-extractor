@@ -14,7 +14,8 @@ WITH ranked AS (
     FROM mygov_ente_tipo_dovuto etd
     JOIN mygov_ente e
         ON e.mygov_ente_id = etd.mygov_ente_id
-    WHERE (:skipDebtPositionTypeOrgCodesFilter = TRUE OR etd.cod_tipo IN (:debtPositionTypeOrgCodes))
+    WHERE etd.cod_tipo <> 'DEFAULT'
+      AND (:skipDebtPositionTypeOrgCodesFilter = TRUE OR etd.cod_tipo IN (:debtPositionTypeOrgCodes))
 )
 SELECT
     :brokerCf AS broker_cf,

@@ -13,7 +13,9 @@ public class DebtPositionMapper {
 
   public PuDebtPositionDTO map(DebtPosition debtPosition, Action action) {
     return PuDebtPositionDTO.builder()
-      .iupdOrg(debtPosition.iupd())
+      .iupdIUD(debtPosition.iud())
+      .iupdOrg(debtPosition.iud())
+      .iupdPagoPa(debtPosition.iupd())
       .description(debtPosition.descrizionePosizioneDebitoria())
       .validityDate(debtPosition.dataValidita())
       .multiDebtor(debtPosition.coobbligato())
@@ -39,10 +41,10 @@ public class DebtPositionMapper {
       .remittanceInformation(debtPosition.causaleVersamento())
       .legacyPaymentMetadata(debtPosition.datiSpecificiRiscossione())
       .generateNotice(Boolean.TRUE.equals(debtPosition.flgGeneraIuv()))
-      .flagPuPagoPaPayment(Boolean.TRUE)
+      .flagPuPagoPaPayment(Boolean.FALSE)
       .balance(debtPosition.bilancio())
       .flagMultiBeneficiary(debtPosition.flagMultiBeneficiario())
-      .numberBeneficiary(Boolean.TRUE.equals(debtPosition.flagMultiBeneficiario()) ? 1 : 0)
+      .numberBeneficiary(1)
       .transfer1(buildTransfer1(debtPosition))
       .action(action)
       .draft(debtPosition.draft())
