@@ -1,7 +1,10 @@
 package it.gov.pagopa.mypay2pu.extractor.service.files;
 
 import it.gov.pagopa.mypay2pu.extractor.exception.InvalidCsvRowException;
+import it.gov.pagopa.mypay2pu.extractor.dto.export.PuDebtPositionDTO;
 import it.gov.pagopa.mypay2pu.extractor.dto.export.PuTreasuryCsvCompleteDTO;
+import org.apache.commons.collections4.MultiValuedMap;
+import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import org.junit.jupiter.api.Test;
 import uk.co.jemos.podam.api.PodamFactory;
 import uk.co.jemos.podam.api.PodamFactoryImpl;
@@ -179,6 +182,38 @@ class CsvServiceTest {
         int receptionDateIndex = List.of(rows.getFirst().split(";")).indexOf("dataRicezione");
 
         assertEquals("2026-02-25T07:15:14Z", rows.get(1).split(";", -1)[receptionDateIndex]);
+    }
+
+    @Test
+    void testCreateCsvFromBean_debtPositionIncludesTransfer1Columns() throws IOException {
+        Path filePath = Path.of("build", "tmp", "test", "DEBT_POSITION.csv");
+        MultiValuedMap<String, String> transfer1 = new ArrayListValuedHashMap<>();
+        transfer1.put("codiceFiscaleEnte_1", "CFENTE");
+        transfer1.put("denominazioneEnte_1", "Ente");
+
+        PuDebtPositionDTO debtPosition = PuDebtPositionDTO.builder()
+          .transfer1(transfer1)
+          .build();
+        AtomicBoolean supplierCalled = new AtomicBoolean(false);
+
+        csvService.createCsv(filePath, PuDebtPositionDTO.class, () -> {
+            if (supplierCalled.get()) {
+                return Collections.emptyList();
+            }
+            supplierCalled.set(true);
+            return List.of(debtPosition);
+        }, PuDebtPositionDTO.VERSION);
+
+        List<String> rows = Files.readAllLines(filePath);
+        List<String> headers = List.of(rows.getFirst().split(";"));
+        String[] values = rows.get(1).split(";", -1);
+        int fiscalCodeIndex = headers.indexOf("codiceFiscaleEnte_1");
+        int denominationIndex = headers.indexOf("denominazioneEnte_1");
+
+        assertTrue(fiscalCodeIndex >= 0);
+        assertTrue(denominationIndex >= 0);
+        assertEquals("CFENTE", values[fiscalCodeIndex]);
+        assertEquals("Ente", values[denominationIndex]);
     }
 
     @Test
