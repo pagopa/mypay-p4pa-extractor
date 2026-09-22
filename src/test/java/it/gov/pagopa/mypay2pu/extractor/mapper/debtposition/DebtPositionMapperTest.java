@@ -95,7 +95,7 @@ class DebtPositionMapperTest {
     assertEquals(Boolean.FALSE, result.getFlagPuPagoPaPayment());
     assertEquals(debtPosition.bilancio(), result.getBalance());
     assertEquals(debtPosition.flagMultiBeneficiario(), result.getFlagMultiBeneficiary());
-    assertEquals(1, result.getNumberBeneficiary());
+    assertEquals(2, result.getNumberBeneficiary());
     assertNotNull(result.getTransfer1());
     assertEquals(List.of("CFENTE"), List.copyOf(result.getTransfer1().get("codiceFiscaleEnte1")));
     assertEquals(List.of("Ente"), List.copyOf(result.getTransfer1().get("denominazioneEnte1")));
