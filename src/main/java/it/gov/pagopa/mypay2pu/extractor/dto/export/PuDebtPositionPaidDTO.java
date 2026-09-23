@@ -20,7 +20,7 @@ import java.time.LocalDate;
 @Builder
 public class PuDebtPositionPaidDTO implements CsvExportDto {
 
-  public static final String VERSION = "1_0";
+  public static final String VERSION = "1_3";
 
   @CsvBindByName(column = "iuf")
   private String iuf;

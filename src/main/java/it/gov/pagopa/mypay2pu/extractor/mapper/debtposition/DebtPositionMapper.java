@@ -46,6 +46,7 @@ public class DebtPositionMapper {
       .flagMultiBeneficiary(debtPosition.flagMultiBeneficiario())
       .numberBeneficiary(debtPosition.flagMultiBeneficiario() != null && debtPosition.flagMultiBeneficiario() ? 2 : 1)
       .transfer1(buildTransfer1(debtPosition))
+      .transfer2(buildTransfer2(debtPosition))
       .action(action)
       .draft(debtPosition.draft())
       .build();
@@ -56,13 +57,27 @@ public class DebtPositionMapper {
     addIfHasText(transfer1, "codiceFiscaleEnte_1", debtPosition.codiceFiscaleEnte1());
     addIfHasText(transfer1, "denominazioneEnte_1", debtPosition.denominazioneEnte1());
     addIfHasText(transfer1, "ibanAccreditoEnte_1", debtPosition.ibanAccreditoEnte1());
-    addIfHasText(transfer1, "causaleVersamentoEnte_1", debtPosition.causaleVersamentoEnte1());
-    addIfHasText(transfer1, "codiceTassonomiaEnte_1", debtPosition.codiceTassonomiaEnte1());
+    addIfHasText(transfer1, "causaleVersamentoEnte_1", debtPosition.causaleVersamento());
+    addIfHasText(transfer1, "codiceTassonomiaEnte_1", debtPosition.datiSpecificiRiscossione());
 
-    if (debtPosition.importoVersamentoEnte1() != null) {
-      transfer1.put("importoVersamentoEnte_1", debtPosition.importoVersamentoEnte1().toPlainString());
+    if (debtPosition.importoDovuto() != null) {
+      transfer1.put("importoVersamentoEnte_1", debtPosition.importoDovuto().toPlainString());
     }
     return transfer1.isEmpty() ? null : transfer1;
+  }
+
+  private MultiValuedMap<String, String> buildTransfer2(DebtPosition debtPosition) {
+    MultiValuedMap<String, String> transfer2 = new ArrayListValuedHashMap<>();
+    addIfHasText(transfer2, "codiceFiscaleEnte_2", debtPosition.codiceFiscaleEnte2());
+    addIfHasText(transfer2, "denominazioneEnte_2", debtPosition.denominazioneEnte2());
+    addIfHasText(transfer2, "ibanAccreditoEnte_2", debtPosition.ibanAccreditoEnte2());
+    addIfHasText(transfer2, "causaleVersamentoEnte_2", debtPosition.causaleVersamentoEnte2());
+    addIfHasText(transfer2, "codiceTassonomiaEnte_2", debtPosition.codiceTassonomiaEnte2());
+
+    if (debtPosition.importoVersamentoEnte2() != null) {
+      transfer2.put("importoVersamentoEnte_2", debtPosition.importoVersamentoEnte2().toPlainString());
+    }
+    return transfer2.isEmpty() ? null : transfer2;
   }
 
   private void addIfHasText(MultiValuedMap<String, String> map, String key, String value) {

@@ -27,13 +27,19 @@ SELECT
     FALSE AS flg_genera_iuv,
     de.bilancio AS bilancio,
     FALSE AS draft,
+    e.codice_fiscale_ente AS codice_fiscale_ente1,
+    e.de_nome_ente AS denominazione_ente1,
+    COALESCE(
+        etd.iban_accredito_psp,
+        e.cod_rp_dati_vers_dati_sing_vers_iban_accredito
+    ) AS iban_accredito_ente1,
     FALSE AS flag_multi_beneficiario,
-    NULL AS codice_fiscale_ente1,
-    NULL AS denominazione_ente1,
-    NULL AS iban_accredito_ente1,
-    NULL AS causale_versamento_ente1,
-    NULL AS importo_versamento_ente1,
-    NULL AS codice_tassonomia_ente1,
+    NULL AS codice_fiscale_ente2,
+    NULL AS denominazione_ente2,
+    NULL AS iban_accredito_ente2,
+    NULL AS causale_versamento_ente2,
+    NULL AS importo_versamento_ente2,
+    NULL AS codice_tassonomia_ente2,
     de.dt_creazione AS dt_creazione,
     NULL AS dt_ultima_modifica
 FROM mygov_dovuto_elaborato de
@@ -41,6 +47,9 @@ JOIN mygov_flusso f
     ON de.mygov_flusso_id = f.mygov_flusso_id
 JOIN mygov_ente e
     ON f.mygov_ente_id = e.mygov_ente_id
+LEFT JOIN mygov_ente_tipo_dovuto etd
+    ON etd.mygov_ente_id = e.mygov_ente_id
+   AND etd.cod_tipo = de.cod_tipo_dovuto
 JOIN mygov_anagrafica_stato s
     ON s.mygov_anagrafica_stato_id = de.mygov_anagrafica_stato_id
 WHERE e.cod_ipa_ente = :codIpaEnte
