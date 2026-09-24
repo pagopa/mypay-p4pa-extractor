@@ -114,7 +114,7 @@ class OrderedHeaderColumnNameMappingStrategyTest {
     }
 
     @Test
-    void testGenerateHeaderNoCsvBindByNameFields() throws Exception {
+    void testGenerateHeaderNoCsvBindByNameFieldsUsesOpenCsvGeneratedHeader() throws Exception {
         class EmptyDto {
             private String noAnnotation;
         }
@@ -124,6 +124,6 @@ class OrderedHeaderColumnNameMappingStrategyTest {
 
         String[] headers = strategy.generateHeader(new EmptyDto());
         assertNotNull(headers);
-        assertEquals(0, headers.length);
+        assertEquals(List.of("NOANNOTATION"), List.of(headers));
     }
 }
