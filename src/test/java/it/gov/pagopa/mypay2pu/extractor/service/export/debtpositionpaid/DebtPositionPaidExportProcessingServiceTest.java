@@ -97,11 +97,11 @@ class DebtPositionPaidExportProcessingServiceTest {
     assertNull(result.error());
     assertEquals(1, result.files().size());
     String zipFileName = result.files().getFirst();
-    assertTrue(zipFileName.matches("BROKER_IPA-DEBT_POSITIONS_PAID-\\d{14}-1_0\\.zip"));
+    assertTrue(zipFileName.matches("BROKER_IPA-DEBT_POSITIONS_PAID-\\d{14}-1_3\\.zip"));
     List<String> entries = ZipUtils.readZipEntries(tempDir.resolve("extraction-id").resolve(zipFileName));
     assertEquals(2, entries.size());
-    assertTrue(entries.get(0).matches("IPA1-DEBT_POSITIONS_PAID-\\d{14}-1_0\\.csv"));
-    assertTrue(entries.get(1).matches("IPA2-DEBT_POSITIONS_PAID-\\d{14}-1_0\\.csv"));
+    assertTrue(entries.get(0).matches("IPA1-DEBT_POSITIONS_PAID-\\d{14}-1_3\\.csv"));
+    assertTrue(entries.get(1).matches("IPA2-DEBT_POSITIONS_PAID-\\d{14}-1_3\\.csv"));
   }
 
   @Test
@@ -155,8 +155,8 @@ class DebtPositionPaidExportProcessingServiceTest {
 
     List<String> entries = ZipUtils.readZipEntries(tempDir.resolve("extraction-id").resolve(result.files().getFirst()));
     assertEquals(2, entries.size());
-    assertTrue(entries.get(0).matches("IPA1-DEBT_POSITIONS_PAID-\\d{14}-part001-1_0\\.csv"));
-    assertTrue(entries.get(1).matches("IPA1-DEBT_POSITIONS_PAID-\\d{14}-part002-1_0\\.csv"));
+    assertTrue(entries.get(0).matches("IPA1-DEBT_POSITIONS_PAID-\\d{14}-part001-1_3\\.csv"));
+    assertTrue(entries.get(1).matches("IPA1-DEBT_POSITIONS_PAID-\\d{14}-part002-1_3\\.csv"));
     InOrder inOrder = inOrder(debtPositionPaidDaoMock);
     inOrder.verify(debtPositionPaidDaoMock).findByFilters("IPA1", List.of(), null, null, 2, 0);
     inOrder.verify(debtPositionPaidDaoMock).findByFilters("IPA1", List.of(), null, null, 2, 2);
