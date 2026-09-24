@@ -127,8 +127,8 @@ components:
             - `DEBT_POSITIONS_TYPE`, `DEBT_POSITIONS_TYPE_ORG`: comma-separated list of `debtPositionTypeOrgCode` values (example: `TARI,TASI`).
             - `DEBT_POSITIONS_TYPE_ORG_OPERATORS`: two comma-separated lists separated by `|` in the form `operatorFiscalCodes|debtPositionTypeOrgCodes`.
             - `DEBT_POSITIONS`: comma-separated list of `iuvs` values (example: `0101234567890001,0101234567890002`).
-            - `PAYMENT_NOTIFICATION`: two comma-separated IUD and IUV lists separated by `|` in the form `iud1,iud2|iuv1,iuv2`.
-            - `TREASURY_CSV_COMPLETE`: two values, bill year and bill code, separated by `|` in the form `billYear|billCode`.
+            - `PAYMENT_NOTIFICATION`: comma-separated `iud` values (example: `IUD-1,IUD-2`).
+            - `TREASURY_CSV_COMPLETE`: two comma-separated lists separated by `|`, in the form `billYears|billCodes` (example: `2024,2025|BOL001,BOL002`); values at the same position form a bill pair.
           examples:
             - value
             - value1,value2,value3
