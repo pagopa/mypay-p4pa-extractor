@@ -96,7 +96,7 @@ class DebtPositionTypeOrgMapperTest {
     assertEquals(debtPositionTypeOrg.externalPaymentUrl(), result.getExternalPaymentUrl());
     assertEquals(debtPositionTypeOrg.flagAnonymousFiscalCode(), result.getFlagAnonymousFiscalCode());
     assertEquals(debtPositionTypeOrg.flagMandatoryDueDate(), result.getFlagMandatoryDueDate());
-    assertEquals(false, result.getFlagSpontaneous());
+    assertEquals(true, result.getFlagSpontaneous());
     assertEquals(false, result.getFlagNotifyIo());
     assertEquals(true, result.getFlagNotifyIoBkp());
     assertEquals(

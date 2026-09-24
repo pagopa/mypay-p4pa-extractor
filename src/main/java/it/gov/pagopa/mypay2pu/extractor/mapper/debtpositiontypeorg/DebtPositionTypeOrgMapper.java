@@ -61,7 +61,7 @@ public class DebtPositionTypeOrgMapper {
       .externalPaymentUrl(debtPositionTypeOrg.externalPaymentUrl())
       .flagAnonymousFiscalCode(debtPositionTypeOrg.flagAnonymousFiscalCode())
       .flagMandatoryDueDate(debtPositionTypeOrg.flagMandatoryDueDate())
-      .flagSpontaneous(hasText(debtPositionTypeOrg.externalPaymentUrl()) ? Boolean.FALSE : debtPositionTypeOrg.flagSpontaneous())
+      .flagSpontaneous(debtPositionTypeOrg.flagSpontaneous())
       .flagNotifyIo(debtPositionTypeOrg.flagNotifyIo())
       .flagNotifyIoBkp(debtPositionTypeOrg.flagNotifyIoBkp())
       .ioTemplateMessage(transcodeTemplateTags(myPayProperties.globalProperties().ioTemplateMessage()))
