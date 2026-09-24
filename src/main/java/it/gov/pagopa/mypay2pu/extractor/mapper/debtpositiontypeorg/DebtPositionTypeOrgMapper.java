@@ -80,7 +80,15 @@ public class DebtPositionTypeOrgMapper {
 
   private String resolveSpontaneousFormStructure(DebtPositionTypeOrg debtPositionTypeOrg) {
     String spontaneousFormCode = debtPositionTypeOrg.spontaneousFormCode();
-    if (!hasText(spontaneousFormCode) || hasText(debtPositionTypeOrg.externalPaymentUrl())) {
+    if (!hasText(spontaneousFormCode)) {
+      return null;
+    }
+    if (hasText(debtPositionTypeOrg.externalPaymentUrl())) {
+      log.info(
+        "There is a spontaneousFormCode but we are ignoring it because of externalPaymentUrl for debt position type organization with ipaCode {} and code {}",
+        debtPositionTypeOrg.ipaCode(),
+        debtPositionTypeOrg.code()
+      );
       return null;
     }
     try {
