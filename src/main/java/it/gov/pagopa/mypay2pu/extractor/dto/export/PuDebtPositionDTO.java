@@ -27,7 +27,13 @@ public class PuDebtPositionDTO implements CsvExportDto {
   public static final String VERSION = "2_0";
 
   @CsvBindByName(column = "IUPD")
+  private String iupdIUD;
+
+  @CsvBindByName(column = "iupd_org")
   private String iupdOrg;
+
+  @CsvBindByName(column = "iupd_pagopa")
+  private String iupdPagoPa;
 
   @CsvBindByName(column = "descrizionePosizioneDebitoria")
   private String description;

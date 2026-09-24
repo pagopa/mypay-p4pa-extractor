@@ -83,6 +83,14 @@ public class DebtPositionTypeOrgMapper {
     if (!hasText(spontaneousFormCode)) {
       return null;
     }
+    if (hasText(debtPositionTypeOrg.externalPaymentUrl())) {
+      log.info(
+        "There is a spontaneousFormCode but we are ignoring it because of externalPaymentUrl for debt position type organization with ipaCode {} and code {}",
+        debtPositionTypeOrg.ipaCode(),
+        debtPositionTypeOrg.code()
+      );
+      return null;
+    }
     try {
       String responseBody = myDictionaryClient.getSpontaneousFormStructure(spontaneousFormCode);
       return spontaneousFormStructureObjectMapper.writeValueAsString(myDictionaryToMyPayMapper.map(responseBody));

@@ -6,6 +6,7 @@ import com.opencsv.bean.HeaderColumnNameMappingStrategy;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -26,7 +27,7 @@ public class OrderedHeaderColumnNameMappingStrategy<T> extends HeaderColumnNameM
             return super.generateHeader(null);
         }
 
-        super.generateHeader(bean);
+        String[] generatedHeaders = super.generateHeader(bean);
 
         List<Field> declaredFields = Arrays.asList(bean.getClass().getDeclaredFields());
 
@@ -39,7 +40,10 @@ public class OrderedHeaderColumnNameMappingStrategy<T> extends HeaderColumnNameM
                             ? ann.column()
                             : field.getName();
                 })
-                .toList();
+                .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+        orderedHeaders.addAll(Arrays.stream(generatedHeaders)
+                .filter(header -> orderedHeaders.stream().noneMatch(orderedHeader -> orderedHeader.equalsIgnoreCase(header)))
+                .toList());
 
         setColumnOrderOnWrite(Comparator.comparingInt(header -> {
             int idx = orderedHeaders.indexOf(header);

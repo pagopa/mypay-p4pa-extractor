@@ -27,17 +27,23 @@ SELECT
     d.flg_genera_iuv AS flg_genera_iuv,
     d.bilancio AS bilancio,
     FALSE AS draft,
+    e.codice_fiscale_ente AS codice_fiscale_ente1,
+    e.de_nome_ente AS denominazione_ente1,
+    COALESCE(
+        etd.iban_accredito_psp,
+        e.cod_rp_dati_vers_dati_sing_vers_iban_accredito
+    ) AS iban_accredito_ente1,
     EXISTS (
         SELECT 1
         FROM mygov_dovuto_multibeneficiario mbx
         WHERE mbx.mygov_dovuto_id = d.mygov_dovuto_id
     ) AS flag_multi_beneficiario,
-    mb.codice_fiscale_ente AS codice_fiscale_ente1,
-    mb.de_rp_ente_benef_denominazione_beneficiario AS denominazione_ente1,
-    mb.cod_rp_dati_vers_dati_sing_vers_iban_accredito AS iban_accredito_ente1,
-    mb.de_rp_dati_vers_dati_sing_vers_causale_versamento AS causale_versamento_ente1,
-    mb.num_rp_dati_vers_dati_sing_vers_importo_singolo_versamento AS importo_versamento_ente1,
-    mb.de_rp_dati_vers_dati_sing_vers_dati_specifici_riscossione AS codice_tassonomia_ente1,
+    mb.codice_fiscale_ente AS codice_fiscale_ente2,
+    mb.de_rp_ente_benef_denominazione_beneficiario AS denominazione_ente2,
+    mb.cod_rp_dati_vers_dati_sing_vers_iban_accredito AS iban_accredito_ente2,
+    mb.de_rp_dati_vers_dati_sing_vers_causale_versamento AS causale_versamento_ente2,
+    mb.num_rp_dati_vers_dati_sing_vers_importo_singolo_versamento AS importo_versamento_ente2,
+    mb.de_rp_dati_vers_dati_sing_vers_dati_specifici_riscossione AS codice_tassonomia_ente2,
     d.dt_creazione AS dt_creazione,
     d.dt_ultima_modifica AS dt_ultima_modifica
 FROM mygov_dovuto d
@@ -45,6 +51,9 @@ JOIN mygov_flusso f
     ON d.mygov_flusso_id = f.mygov_flusso_id
 JOIN mygov_ente e
     ON f.mygov_ente_id = e.mygov_ente_id
+LEFT JOIN mygov_ente_tipo_dovuto etd
+    ON etd.mygov_ente_id = e.mygov_ente_id
+   AND etd.cod_tipo = d.cod_tipo_dovuto
 LEFT JOIN mygov_dovuto_multibeneficiario mb
     ON mb.mygov_dovuto_id = d.mygov_dovuto_id
 WHERE e.cod_ipa_ente = :codIpaEnte

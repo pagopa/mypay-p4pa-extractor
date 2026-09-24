@@ -51,6 +51,9 @@ class DebtPositionMapperTest {
       true,
       "balance",
       false,
+      "CFMAIN",
+      "Main Entity",
+      "IT60X0542811101000000123456",
       true,
       "CFENTE",
       "Ente",
@@ -64,7 +67,9 @@ class DebtPositionMapperTest {
 
     PuDebtPositionDTO result = debtPositionMapper.map(debtPosition, Action.M);
 
-    assertEquals(debtPosition.iupd(), result.getIupdOrg());
+    assertEquals(debtPosition.iud(), result.getIupdIUD());
+    assertEquals(debtPosition.iud(), result.getIupdOrg());
+    assertEquals(debtPosition.iupd(), result.getIupdPagoPa());
     assertEquals(debtPosition.descrizionePosizioneDebitoria(), result.getDescription());
     assertEquals(debtPosition.dataValidita(), result.getValidityDate());
     assertEquals(debtPosition.coobbligato(), result.getMultiDebtor());
@@ -90,24 +95,30 @@ class DebtPositionMapperTest {
     assertEquals(debtPosition.causaleVersamento(), result.getRemittanceInformation());
     assertEquals(debtPosition.datiSpecificiRiscossione(), result.getLegacyPaymentMetadata());
     assertEquals(debtPosition.flgGeneraIuv(), result.getGenerateNotice());
-    assertEquals(Boolean.TRUE, result.getFlagPuPagoPaPayment());
+    assertEquals(Boolean.FALSE, result.getFlagPuPagoPaPayment());
     assertEquals(debtPosition.bilancio(), result.getBalance());
     assertEquals(debtPosition.flagMultiBeneficiario(), result.getFlagMultiBeneficiary());
-    assertEquals(1, result.getNumberBeneficiary());
+    assertEquals(2, result.getNumberBeneficiary());
     assertNotNull(result.getTransfer1());
-    assertEquals(List.of("CFENTE"), List.copyOf(result.getTransfer1().get("codiceFiscaleEnte1")));
-    assertEquals(List.of("Ente"), List.copyOf(result.getTransfer1().get("denominazioneEnte1")));
-    assertEquals(List.of("IT60X0542811101000000123456"), List.copyOf(result.getTransfer1().get("ibanAccreditoEnte1")));
-    assertEquals(List.of("causale"), List.copyOf(result.getTransfer1().get("causaleVersamentoEnte1")));
-    assertEquals(List.of("1"), List.copyOf(result.getTransfer1().get("importoVersamentoEnte1")));
-    assertEquals(List.of("9/0101101IM/"), List.copyOf(result.getTransfer1().get("codiceTassonomiaEnte1")));
+    assertEquals(List.of("CFMAIN"), List.copyOf(result.getTransfer1().get("codiceFiscaleEnte_1")));
+    assertEquals(List.of("IT60X0542811101000000123456"), List.copyOf(result.getTransfer1().get("ibanAccreditoEnte_1")));
+    assertEquals(List.of("remittance"), List.copyOf(result.getTransfer1().get("causaleVersamentoEnte_1")));
+    assertEquals(List.of("10"), List.copyOf(result.getTransfer1().get("importoVersamentoEnte_1")));
+    assertEquals(List.of("metadata"), List.copyOf(result.getTransfer1().get("codiceTassonomiaEnte_1")));
+    assertNotNull(result.getTransfer2());
+    assertEquals(List.of("CFENTE"), List.copyOf(result.getTransfer2().get("codiceFiscaleEnte_2")));
+    assertEquals(List.of("Ente"), List.copyOf(result.getTransfer2().get("denominazioneEnte_2")));
+    assertEquals(List.of("IT60X0542811101000000123456"), List.copyOf(result.getTransfer2().get("ibanAccreditoEnte_2")));
+    assertEquals(List.of("causale"), List.copyOf(result.getTransfer2().get("causaleVersamentoEnte_2")));
+    assertEquals(List.of("1"), List.copyOf(result.getTransfer2().get("importoVersamentoEnte_2")));
+    assertEquals(List.of("9/0101101IM/"), List.copyOf(result.getTransfer2().get("codiceTassonomiaEnte_2")));
     assertEquals(Action.M, result.getAction());
     assertEquals(debtPosition.draft(), result.getDraft());
-    TestUtils.checkNotNullFields(result, "transfer1", "transfer2", "transfer3", "transfer4", "transfer5", "executionConfig");
+    TestUtils.checkNotNullFields(result, "transfer3", "transfer4", "transfer5", "executionConfig");
   }
 
   @Test
-  void mapShouldPreserveNullOptionalFieldsAndZeroBeneficiaries() {
+  void mapShouldPreserveNullOptionalFieldsAndSetOneBeneficiaryForMultiBeneficiaryDebtPosition() {
     DebtPosition debtPosition = new DebtPosition(
       "IUPD-2",
       "description",
@@ -137,6 +148,9 @@ class DebtPositionMapperTest {
       false,
       null,
       true,
+      null,
+      null,
+      null,
       false,
       null,
       null,
@@ -151,7 +165,7 @@ class DebtPositionMapperTest {
     PuDebtPositionDTO result = debtPositionMapper.map(debtPosition, Action.I);
 
     assertEquals(PersonEntityType.G, result.getEntityType());
-    assertEquals(0, result.getNumberBeneficiary());
+    assertEquals(1, result.getNumberBeneficiary());
     assertEquals(Action.I, result.getAction());
     assertNull(result.getNotificationDate());
     assertNull(result.getPaymentOptionDescription());
@@ -166,7 +180,8 @@ class DebtPositionMapperTest {
     assertNull(result.getDueDate());
     assertNull(result.getLegacyPaymentMetadata());
     assertNull(result.getBalance());
-    assertNull(result.getTransfer1());
+    assertNotNull(result.getTransfer1());
+    assertNull(result.getTransfer2());
     assertEquals(Boolean.FALSE, result.getGenerateNotice());
     TestUtils.checkNotNullFields(
       result,
@@ -183,7 +198,6 @@ class DebtPositionMapperTest {
       "dueDate",
       "legacyPaymentMetadata",
       "balance",
-      "transfer1",
       "transfer2",
       "transfer3",
       "transfer4",
@@ -223,6 +237,9 @@ class DebtPositionMapperTest {
       true,
       null,
       false,
+      null,
+      null,
+      null,
       true,
       "   ",
       "",
@@ -237,7 +254,10 @@ class DebtPositionMapperTest {
     PuDebtPositionDTO result = debtPositionMapper.map(debtPosition, Action.M);
 
     assertNotNull(result.getTransfer1());
-    assertEquals(List.of("10"), List.copyOf(result.getTransfer1().get("importoVersamentoEnte1")));
-    assertEquals(1, result.getTransfer1().size());
+    assertEquals(List.of("1"), List.copyOf(result.getTransfer1().get("importoVersamentoEnte_1")));
+    assertEquals(2, result.getTransfer1().size());
+    assertNotNull(result.getTransfer2());
+    assertEquals(List.of("10"), List.copyOf(result.getTransfer2().get("importoVersamentoEnte_2")));
+    assertEquals(1, result.getTransfer2().size());
   }
 }
