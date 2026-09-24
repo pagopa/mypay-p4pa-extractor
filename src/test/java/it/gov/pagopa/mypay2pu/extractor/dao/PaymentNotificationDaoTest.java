@@ -17,7 +17,7 @@ import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -48,7 +48,6 @@ class PaymentNotificationDaoTest {
     PaymentNotificationDao dao = buildDao();
     String ipaCode = "IPA1";
     List<String> iuds = List.of("IUD-1", "IUD-2");
-    List<String> iuvs = List.of("IUV-1", "IUV-2");
     LocalDateTime createdFrom = LocalDateTime.of(2026, Month.JANUARY, 10, 10, 30);
     LocalDateTime createdTo = LocalDateTime.of(2026, Month.JANUARY, 11, 10, 30);
     List<PaymentNotification> expected = List.of(buildPaymentNotification());
@@ -57,8 +56,8 @@ class PaymentNotificationDaoTest {
       eq(FIND_BY_FILTERS_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         ipaCode.equals(params.getValue("ipaCode"))
-          && Boolean.FALSE.equals(params.getValue("skipLogicalKeyFilter"))
-          && hasPairs(params, "logicalKeys", new Object[]{"IUD-1", "IUV-1"}, new Object[]{"IUD-2", "IUV-2"})
+          && Boolean.FALSE.equals(params.getValue("skipIudFilter"))
+          && iuds.equals(params.getValue("iuds"))
           && Boolean.FALSE.equals(params.getValue("skipCreatedFromFilter"))
           && createdFrom.equals(params.getValue("createdFrom"))
           && Boolean.FALSE.equals(params.getValue("skipCreatedToFilter"))
@@ -71,7 +70,7 @@ class PaymentNotificationDaoTest {
     )).thenReturn(expected);
 
     List<PaymentNotification> result = dao.findByFilters(
-      ipaCode, iuds, iuvs, createdFrom, createdTo, 50, 100
+      ipaCode, iuds, createdFrom, createdTo, 50, 100
     );
 
     assertEquals(expected, result);
@@ -85,8 +84,8 @@ class PaymentNotificationDaoTest {
       eq(FIND_BY_FILTERS_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         "IPA1".equals(params.getValue("ipaCode"))
-          && Boolean.TRUE.equals(params.getValue("skipLogicalKeyFilter"))
-          && hasPairs(params, "logicalKeys", new Object[]{null, null})
+          && Boolean.TRUE.equals(params.getValue("skipIudFilter"))
+          && Collections.singletonList(null).equals(params.getValue("iuds"))
           && Boolean.TRUE.equals(params.getValue("skipCreatedFromFilter"))
           && params.hasValue("createdFrom")
           && params.getValue("createdFrom") == null
@@ -101,7 +100,7 @@ class PaymentNotificationDaoTest {
     )).thenReturn(List.of());
 
     List<PaymentNotification> result = dao.findByFilters(
-      "IPA1", List.of(), List.of(), null, null, 10, 0
+      "IPA1", List.of(), null, null, 10, 0
     );
 
     assertEquals(List.of(), result);
@@ -113,7 +112,7 @@ class PaymentNotificationDaoTest {
 
     IllegalArgumentException exception = assertThrows(
       IllegalArgumentException.class,
-      () -> dao.findByFilters("IPA1", List.of(), List.of(), null, null, 0, 0)
+      () -> dao.findByFilters("IPA1", List.of(), null, null, 0, 0)
     );
 
     assertEquals("limit must be greater than 0", exception.getMessage());
@@ -125,7 +124,7 @@ class PaymentNotificationDaoTest {
 
     IllegalArgumentException exception = assertThrows(
       IllegalArgumentException.class,
-      () -> dao.findByFilters(" ", List.of(), List.of(), null, null, 10, 0)
+      () -> dao.findByFilters(" ", List.of(), null, null, 10, 0)
     );
 
     assertEquals("ipaCode must not be blank", exception.getMessage());
@@ -137,7 +136,7 @@ class PaymentNotificationDaoTest {
 
     IllegalStateException exception = assertThrows(
       IllegalStateException.class,
-      () -> dao.findByFilters("IPA1", List.of(), List.of(), null, null, 10, 0)
+      () -> dao.findByFilters("IPA1", List.of(), null, null, 10, 0)
     );
 
     assertEquals("MyPivot datasource must be enabled for payment notification extraction", exception.getMessage());
@@ -148,8 +147,8 @@ class PaymentNotificationDaoTest {
     String sql = Files.readString(Path.of("src/main/resources/db/mypivot/payment-notification/payment-notification.sql"));
 
     assertTrue(sql.contains("e.cod_ipa_ente = :ipaCode"));
-    assertTrue(sql.contains(":skipLogicalKeyFilter = TRUE"));
-    assertTrue(sql.contains("(fi.cod_iud, fi.cod_rp_silinviarp_id_univoco_versamento) IN (:logicalKeys)"));
+    assertTrue(sql.contains(":skipIudFilter = TRUE"));
+    assertTrue(sql.contains("fi.cod_iud IN (:iuds)"));
     assertTrue(sql.contains("ORDER BY fi.dt_creazione"));
   }
 
@@ -189,13 +188,5 @@ class PaymentNotificationDaoTest {
       LocalDateTime.of(2026, Month.JANUARY, 10, 10, 30),
       LocalDateTime.of(2026, Month.JANUARY, 10, 10, 30)
     );
-  }
-
-  private boolean hasPairs(MapSqlParameterSource params, String parameterName, Object[]... expectedPairs) {
-    Object value = params.getValue(parameterName);
-    return value instanceof List<?> pairs
-      && pairs.size() == expectedPairs.length
-      && java.util.stream.IntStream.range(0, expectedPairs.length)
-        .allMatch(index -> pairs.get(index) instanceof Object[] pair && Arrays.equals(expectedPairs[index], pair));
   }
 }
