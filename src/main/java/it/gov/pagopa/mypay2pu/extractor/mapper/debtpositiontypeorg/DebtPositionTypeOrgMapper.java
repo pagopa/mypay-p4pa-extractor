@@ -55,7 +55,7 @@ public class DebtPositionTypeOrgMapper {
       .postalAccountCode(debtPositionTypeOrg.postalAccountCode())
       .holderPostalCc(debtPositionTypeOrg.holderPostalCc())
       .orgSector(debtPositionTypeOrg.orgSector())
-      .spontaneousFormCode(debtPositionTypeOrg.spontaneousFormCode())
+      .spontaneousFormCode(hasText(debtPositionTypeOrg.externalPaymentUrl()) ? null : debtPositionTypeOrg.spontaneousFormCode())
       .spontaneousFormStructure(strutturaPagamentoSpontaneo)
       .amountCents(debtPositionTypeOrg.amountCents())
       .externalPaymentUrl(debtPositionTypeOrg.externalPaymentUrl())

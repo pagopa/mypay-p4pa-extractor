@@ -91,6 +91,7 @@ class DebtPositionTypeOrgMapperTest {
     assertEquals(debtPositionTypeOrg.postalAccountCode(), result.getPostalAccountCode());
     assertEquals(debtPositionTypeOrg.holderPostalCc(), result.getHolderPostalCc());
     assertEquals(debtPositionTypeOrg.orgSector(), result.getOrgSector());
+    assertNull(result.getSpontaneousFormCode());
     assertNull(result.getSpontaneousFormStructure());
     assertEquals(debtPositionTypeOrg.amountCents(), result.getAmountCents());
     assertEquals(debtPositionTypeOrg.externalPaymentUrl(), result.getExternalPaymentUrl());
@@ -112,7 +113,7 @@ class DebtPositionTypeOrgMapperTest {
     assertEquals("SVC_CODE", result.getServiceCode());
     assertEquals("Oggetto %posizioneDebitoria_descrizione%", result.getIoTemplateSubject());
 
-    TestUtils.checkNotNullFields(result, "spontaneousFormStructure");
+    TestUtils.checkNotNullFields(result, "spontaneousFormCode", "spontaneousFormStructure");
 
     verify(myDictionaryClientMock, never())
       .getSpontaneousFormStructure(debtPositionTypeOrg.spontaneousFormCode());
