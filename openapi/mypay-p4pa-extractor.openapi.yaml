@@ -123,6 +123,7 @@ components:
           description: |-
             Optional filter whose format depends on `fileTypes`.
 
+            - `ORGANIZATIONS`: not used.
             - `ORG_SIL_SERVICES`: not used.
             - `DEBT_POSITIONS_TYPE`: comma-separated `debtPositionTypeCode` values (example: `TARI,TASI`).
             - `DEBT_POSITIONS_TYPE_ORG`: comma-separated `debtPositionTypeOrgCode` values (example: `TARI,TASI`).

@@ -8,8 +8,8 @@ WHERE rs.cod_ipa_ente = :ipaCode
     OR rs.dt_ultima_modifica <= :dateTo
   )
   AND (
-    :skipLogicalKeyFilter = TRUE
-    OR rs.cod_identificativo_flusso IN (:logicalKeys)
+    :skipFlowIdentifiersFilter = TRUE
+    OR rs.cod_identificativo_flusso IN (:flowIdentifiers)
   )
 ORDER BY rs.dt_creazione
 LIMIT :limit

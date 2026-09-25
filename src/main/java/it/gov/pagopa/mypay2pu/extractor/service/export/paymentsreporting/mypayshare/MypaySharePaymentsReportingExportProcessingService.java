@@ -68,7 +68,7 @@ public class MypaySharePaymentsReportingExportProcessingService {
 
   private List<String> createZips(String extractionId, String ipaCode, ExtractionRequest request) {
     ExtractionFilters filters = request.getFilters();
-    List<String> logicalKeys = ValueLogicalKeyValidator.parseLogicalKey(
+    List<String> flowIdentifiers = ValueLogicalKeyValidator.parseLogicalKey(
       filters != null ? filters.getLogicalKey() : null
     );
     OffsetDateTime createdFrom = filters != null ? filters.getDateFrom() : null;
@@ -85,8 +85,8 @@ public class MypaySharePaymentsReportingExportProcessingService {
     );
 
     log.info(
-      "Exporting payments reporting: ipaCode={}, logicalKey={}, createdFrom={}, createdTo={}",
-      ipaCode, logicalKeys, createdFrom, createdTo
+      "Exporting payments reporting: ipaCode={}, flowIdentifiers={}, createdFrom={}, createdTo={}",
+      ipaCode, flowIdentifiers, createdFrom, createdTo
     );
 
     int offset = 0;
@@ -99,7 +99,7 @@ public class MypaySharePaymentsReportingExportProcessingService {
         request.getLastExtractionDate(),
         createdFrom,
         createdTo,
-        logicalKeys,
+        flowIdentifiers,
         pageSize,
         offset
       );

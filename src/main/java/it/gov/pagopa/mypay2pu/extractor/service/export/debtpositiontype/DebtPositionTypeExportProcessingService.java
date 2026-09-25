@@ -59,9 +59,9 @@ public class DebtPositionTypeExportProcessingService extends BaseExportProcessin
   @Override
   protected List<DebtPositionType> retrieveData(ExtractionRequest request, int pageSize, int offset) {
     ExtractionFilters filters = request.getFilters();
-    String logicalKey = filters == null ? null : filters.getLogicalKey();
+    String debtPositionTypeCodesFilter = filters == null ? null : filters.getLogicalKey();
     return debtPositionTypeDao.findByFilters(
-      ValueLogicalKeyValidator.parseLogicalKey(logicalKey),
+      ValueLogicalKeyValidator.parseLogicalKey(debtPositionTypeCodesFilter),
       pageSize,
       offset
     );

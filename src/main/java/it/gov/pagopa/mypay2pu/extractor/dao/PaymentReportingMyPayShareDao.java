@@ -61,25 +61,25 @@ public class PaymentReportingMyPayShareDao {
     return findByFilters(ipaCode, lastExtractionDate, dateFrom, dateTo, null, limit, offset);
   }
 
-  public List<Path> findByLogicalKey(String ipaCode, List<String> logicalKeys) {
-    return findByLogicalKey(ipaCode, logicalKeys, Integer.MAX_VALUE, 0);
+  public List<Path> findByFlowIdentifiers(String ipaCode, List<String> flowIdentifiers) {
+    return findByFlowIdentifiers(ipaCode, flowIdentifiers, Integer.MAX_VALUE, 0);
   }
 
-  public List<Path> findByLogicalKey(String ipaCode, List<String> logicalKeys, int limit, int offset) {
-    return findByFilters(ipaCode, null, null, null, logicalKeys, limit, offset);
+  public List<Path> findByFlowIdentifiers(String ipaCode, List<String> flowIdentifiers, int limit, int offset) {
+    return findByFilters(ipaCode, null, null, null, flowIdentifiers, limit, offset);
   }
 
   public List<Path> findByFilters(String ipaCode,
                                   OffsetDateTime lastExtractionDate,
                                   OffsetDateTime dateFrom,
                                   OffsetDateTime dateTo,
-                                  List<String> logicalKeys,
+                                  List<String> flowIdentifiers,
                                   int limit,
                                   int offset) {
     validateIpaCode(ipaCode);
     return fespJdbcTemplate.query(
       findByFiltersSql,
-      buildParams(ipaCode, QueryUtils.resolveDateFrom(lastExtractionDate, dateFrom), dateTo, logicalKeys, limit, offset),
+      buildParams(ipaCode, QueryUtils.resolveDateFrom(lastExtractionDate, dateFrom), dateTo, flowIdentifiers, limit, offset),
       PAYMENTS_REPORTING_FILE_ROW_MAPPER
     );
   }
@@ -88,7 +88,7 @@ public class PaymentReportingMyPayShareDao {
     String ipaCode,
     OffsetDateTime dateFrom,
     OffsetDateTime dateTo,
-    List<String> logicalKeys,
+    List<String> flowIdentifiers,
     int limit,
     int offset
   ) {
@@ -98,10 +98,10 @@ public class PaymentReportingMyPayShareDao {
       .addValue("skipDateFromFilter", dateFrom == null)
       .addValue("dateTo", dateTo)
       .addValue("skipDateToFilter", dateTo == null)
-      .addValue("skipLogicalKeyFilter", logicalKeys == null || logicalKeys.isEmpty())
-      .addValue("logicalKeys", logicalKeys == null || logicalKeys.isEmpty()
+      .addValue("skipFlowIdentifiersFilter", flowIdentifiers == null || flowIdentifiers.isEmpty())
+      .addValue("flowIdentifiers", flowIdentifiers == null || flowIdentifiers.isEmpty()
         ? Collections.singletonList(null)
-        : logicalKeys);
+        : flowIdentifiers);
   }
 
   private void validateIpaCode(String ipaCode) {

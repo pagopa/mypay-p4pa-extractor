@@ -41,7 +41,7 @@ class DebtPositionTypeOrgDaoTest {
   }
 
   @Test
-  void givenOrganizationWithoutLogicalKeysWhenFindThenQueryPagedMp4Database() {
+  void givenOrganizationWithoutDebtPositionTypeOrgCodesWhenFindThenQueryPagedMp4Database() {
     DebtPositionTypeOrgDao dao = buildDao(mypivotJdbcTemplateMock);
     List<DebtPositionTypeOrg> expected = List.of(sourceRow());
 
@@ -50,7 +50,7 @@ class DebtPositionTypeOrgDaoTest {
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         "IPA1".equals(params.getValue("ipaCode"))
           && Boolean.TRUE.equals(params.getValue("skipDebtPositionTypeOrgCodesFilter"))
-          && containsOnlyNullLogicalKey(params)
+          && containsOnlyNullDebtPositionTypeOrgCode(params)
           && Integer.valueOf(50).equals(params.getValue("limit"))
           && Integer.valueOf(100).equals(params.getValue("offset"))
           && params.getValues().size() == 5
@@ -64,16 +64,16 @@ class DebtPositionTypeOrgDaoTest {
   }
 
   @Test
-  void givenLogicalKeysWhenFindThenPassThemUnchangedToMp4Database() {
+  void givenDebtPositionTypeOrgCodesWhenFindThenPassThemUnchangedToMp4Database() {
     DebtPositionTypeOrgDao dao = buildDao(mypivotJdbcTemplateMock);
-    List<String> logicalKeys = List.of("TAX", "FEE");
+    List<String> debtPositionTypeOrgCodes = List.of("TAX", "FEE");
 
     when(mp4JdbcTemplateMock.query(
       eq(FIND_BY_ORGANIZATION_ID_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         "IPA1".equals(params.getValue("ipaCode"))
           && Boolean.FALSE.equals(params.getValue("skipDebtPositionTypeOrgCodesFilter"))
-          && logicalKeys.equals(params.getValue("debtPositionTypeOrgCodes"))
+          && debtPositionTypeOrgCodes.equals(params.getValue("debtPositionTypeOrgCodes"))
           && Integer.valueOf(25).equals(params.getValue("limit"))
           && Integer.valueOf(0).equals(params.getValue("offset"))
           && params.getValues().size() == 5
@@ -81,7 +81,7 @@ class DebtPositionTypeOrgDaoTest {
       same(DebtPositionTypeOrgDao.DEBT_POSITION_TYPE_ORG_ROW_MAPPER)
     )).thenReturn(List.of(sourceRowWithNullableValues()));
 
-    List<DebtPositionTypeOrg> result = dao.findByFilters("IPA1", logicalKeys, 25, 0);
+    List<DebtPositionTypeOrg> result = dao.findByFilters("IPA1", debtPositionTypeOrgCodes, 25, 0);
 
     assertEquals(List.of(sourceRowWithNullableValues()), result);
   }
@@ -153,9 +153,9 @@ class DebtPositionTypeOrgDaoTest {
     return new DebtPositionTypeOrgDao(mp4JdbcTemplateMock, mypivotJdbcTemplate, sqlLoaderMock);
   }
 
-  private boolean containsOnlyNullLogicalKey(MapSqlParameterSource params) {
-    Object logicalKeys = params.getValue("debtPositionTypeOrgCodes");
-    return logicalKeys instanceof List<?> values && values.size() == 1 && values.getFirst() == null;
+  private boolean containsOnlyNullDebtPositionTypeOrgCode(MapSqlParameterSource params) {
+    Object debtPositionTypeOrgCodes = params.getValue("debtPositionTypeOrgCodes");
+    return debtPositionTypeOrgCodes instanceof List<?> values && values.size() == 1 && values.getFirst() == null;
   }
 
   private DebtPositionTypeOrg sourceRow() {

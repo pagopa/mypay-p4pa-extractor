@@ -10,8 +10,8 @@ JOIN mygov_ente_tipo_dovuto etd
 JOIN mygov_ente e
     ON etd.mygov_ente_id = e.mygov_ente_id
 WHERE e.cod_ipa_ente = :ipaCode
-AND (:skipLogicalKeyFilter = TRUE
-  OR (etd.cod_tipo, o.cod_fed_user_id) IN (:logicalKeys))
+AND (:skipDebtPositionTypeOrgCode2operatorFiscalCodePairsFilter = TRUE
+  OR (etd.cod_tipo, o.cod_fed_user_id) IN (:debtPositionTypeOrgCode2operatorFiscalCodePairs))
 ORDER BY etd.cod_tipo, o.cod_fed_user_id
 LIMIT :limit
 OFFSET COALESCE(:offset, 0);
