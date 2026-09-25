@@ -59,15 +59,7 @@ class OrganizationDaoTest {
 
   @Test
   void testTreasurySqlParameters() {
-    List<String> parameters = List.of(
-      "ipaCodes",
-      "skipModifiedFromFilter",
-      "modifiedFrom",
-      "skipModifiedToExclusiveFilter",
-      "modifiedToExclusive",
-      "limit",
-      "offset"
-    );
+    List<String> parameters = List.of("codIpaEnte");
 
     SqlTestUtils.assertQueryParameters(OrganizationDao.FIND_TREASURY_BY_IPA_SQL_PATH, parameters);
   }
