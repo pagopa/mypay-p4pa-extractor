@@ -52,8 +52,8 @@ class TreasuryCsvCompleteDaoTest {
     TreasuryCsvCompleteDao dao = buildDao();
     mockQuery(params ->
       "IPA1".equals(params.getValue("ipaCode"))
-        && Boolean.TRUE.equals(params.getValue("skipBollettaFilter"))
-        && hasPair(params, "bollettaPairs", null, null)
+        && Boolean.TRUE.equals(params.getValue("skipYear2codeBollettaPairsFilter"))
+        && hasPair(params, "year2codeBollettaPairs", null, null)
         && Boolean.TRUE.equals(params.getValue("skipUpdatedFromFilter"))
         && params.getValue("updatedFrom") == null
         && Boolean.TRUE.equals(params.getValue("skipUpdatedToFilter"))
@@ -77,8 +77,8 @@ class TreasuryCsvCompleteDaoTest {
   void givenBollettaFilterWhenFindByFiltersThenApplyPairedBollettaComponents() {
     TreasuryCsvCompleteDao dao = buildDao();
     mockQuery(params ->
-      Boolean.FALSE.equals(params.getValue("skipBollettaFilter"))
-        && hasPairs(params, "bollettaPairs",
+      Boolean.FALSE.equals(params.getValue("skipYear2codeBollettaPairsFilter"))
+        && hasPairs(params, "year2codeBollettaPairs",
           new Object[]{"2024", "BOL001"},
           new Object[]{"2024", "BOL002"},
           new Object[]{"2025", "BOL003"})
@@ -144,8 +144,8 @@ class TreasuryCsvCompleteDaoTest {
     assertTrue(sql.contains("NULL AS cod_istat_ente"));
     assertTrue(sql.contains("e.cod_ipa_ente = :ipaCode"));
     assertTrue(sql.contains("ft.cod_id_univoco_flusso IS NOT NULL"));
-    assertTrue(sql.contains(":skipBollettaFilter = TRUE"));
-    assertTrue(sql.contains("(ft.de_anno_bolletta, ft.cod_bolletta) IN (:bollettaPairs)"));
+    assertTrue(sql.contains(":skipYear2codeBollettaPairsFilter = TRUE"));
+    assertTrue(sql.contains("(ft.de_anno_bolletta, ft.cod_bolletta) IN (:year2codeBollettaPairs)"));
     assertTrue(!sql.contains("skipAnnoBollettaFilter"));
     assertTrue(!sql.contains("skipCodBollettaFilter"));
     assertTrue(sql.contains(":skipUpdatedFromFilter = TRUE OR ft.dt_ultima_modifica >= :updatedFrom"));

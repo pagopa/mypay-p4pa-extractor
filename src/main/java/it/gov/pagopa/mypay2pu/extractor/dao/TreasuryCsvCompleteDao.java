@@ -51,30 +51,31 @@ public class TreasuryCsvCompleteDao {
     TreasuryCsvCompleteFilters effectiveFilters = filters != null
       ? filters
       : new TreasuryCsvCompleteFilters(null, null, null);
-    LogicalKeyPair bollettaPairs = PairedLogicalKeyValidator.parseLogicalKey(
+    LogicalKeyPair year2codeBollettaPairs = PairedLogicalKeyValidator.parseLogicalKey(
       effectiveFilters.bollettaFilter()
     );
     return mypivotJdbcTemplate.query(
       findByFiltersSql,
-      buildParams(ipaCode, bollettaPairs, effectiveFilters, limit, offset),
+      buildParams(ipaCode, year2codeBollettaPairs, effectiveFilters, limit, offset),
       TREASURY_CSV_COMPLETE_ROW_MAPPER
     );
   }
 
   private MapSqlParameterSource buildParams(
     String ipaCode,
-    LogicalKeyPair bollettaPairs,
+    LogicalKeyPair year2codeBollettaPairs,
     TreasuryCsvCompleteFilters filters,
     int limit,
     int offset
   ) {
-    boolean skipBollettaFilter = bollettaPairs.left().isEmpty() || bollettaPairs.right().isEmpty();
+    boolean skipYear2codeBollettaPairsFilter =
+      year2codeBollettaPairs.left().isEmpty() || year2codeBollettaPairs.right().isEmpty();
     return QueryUtils.buildPaginatedFilterParams(limit, offset)
       .addValue("ipaCode", ipaCode)
-      .addValue("skipBollettaFilter", skipBollettaFilter)
-      .addValue("bollettaPairs", skipBollettaFilter
+      .addValue("skipYear2codeBollettaPairsFilter", skipYear2codeBollettaPairsFilter)
+      .addValue("year2codeBollettaPairs", skipYear2codeBollettaPairsFilter
         ? java.util.Collections.singletonList(new Object[]{null, null})
-        : QueryUtils.pairValues(bollettaPairs.left(), bollettaPairs.right()))
+        : QueryUtils.pairValues(year2codeBollettaPairs.left(), year2codeBollettaPairs.right()))
       .addValue("skipUpdatedFromFilter", filters.updatedFrom() == null)
       .addValue("updatedFrom", DateTimeUtils.toLocalDateTime(filters.updatedFrom()))
       .addValue("skipUpdatedToFilter", filters.updatedTo() == null)
