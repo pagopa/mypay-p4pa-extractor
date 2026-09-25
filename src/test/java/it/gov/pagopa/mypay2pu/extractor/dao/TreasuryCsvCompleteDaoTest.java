@@ -52,8 +52,8 @@ class TreasuryCsvCompleteDaoTest {
     TreasuryCsvCompleteDao dao = buildDao();
     mockQuery(params ->
       "IPA1".equals(params.getValue("ipaCode"))
-        && Boolean.TRUE.equals(params.getValue("skipBollettaLogicalKeyFilter"))
-        && hasPair(params, "bollettaLogicalKeys", null, null)
+        && Boolean.TRUE.equals(params.getValue("skipBollettaFilter"))
+        && hasPair(params, "bollettaPairs", null, null)
         && Boolean.TRUE.equals(params.getValue("skipUpdatedFromFilter"))
         && params.getValue("updatedFrom") == null
         && Boolean.TRUE.equals(params.getValue("skipUpdatedToFilter"))
@@ -74,11 +74,11 @@ class TreasuryCsvCompleteDaoTest {
   }
 
   @Test
-  void givenLogicalKeyWhenFindByFiltersThenApplyPairedBollettaKeyComponents() {
+  void givenBollettaFilterWhenFindByFiltersThenApplyPairedBollettaComponents() {
     TreasuryCsvCompleteDao dao = buildDao();
     mockQuery(params ->
-      Boolean.FALSE.equals(params.getValue("skipBollettaLogicalKeyFilter"))
-        && hasPairs(params, "bollettaLogicalKeys",
+      Boolean.FALSE.equals(params.getValue("skipBollettaFilter"))
+        && hasPairs(params, "bollettaPairs",
           new Object[]{"2024", "BOL001"},
           new Object[]{"2024", "BOL002"},
           new Object[]{"2025", "BOL003"})
@@ -86,7 +86,7 @@ class TreasuryCsvCompleteDaoTest {
 
     assertEquals(List.of(), dao.findByFilters(
       "IPA1",
-      filters("2024,2024,2025|BOL001,BOL002,BOL003", null, null),
+      filters("2026|BOLLETTA-1", null, null),
       50,
       0
     ));
@@ -144,8 +144,8 @@ class TreasuryCsvCompleteDaoTest {
     assertTrue(sql.contains("NULL AS cod_istat_ente"));
     assertTrue(sql.contains("e.cod_ipa_ente = :ipaCode"));
     assertTrue(sql.contains("ft.cod_id_univoco_flusso IS NOT NULL"));
-    assertTrue(sql.contains(":skipBollettaLogicalKeyFilter = TRUE"));
-    assertTrue(sql.contains("(ft.de_anno_bolletta, ft.cod_bolletta) IN (:bollettaLogicalKeys)"));
+    assertTrue(sql.contains(":skipBollettaFilter = TRUE"));
+    assertTrue(sql.contains("(ft.de_anno_bolletta, ft.cod_bolletta) IN (:bollettaPairs)"));
     assertTrue(!sql.contains("skipAnnoBollettaFilter"));
     assertTrue(!sql.contains("skipCodBollettaFilter"));
     assertTrue(sql.contains(":skipUpdatedFromFilter = TRUE OR ft.dt_ultima_modifica >= :updatedFrom"));
@@ -205,12 +205,12 @@ class TreasuryCsvCompleteDaoTest {
   }
 
   private TreasuryCsvCompleteDao.TreasuryCsvCompleteFilters filters(
-    String logicalKey,
+    String bollettaFilter,
     OffsetDateTime updatedFrom,
     OffsetDateTime updatedTo
   ) {
     return new TreasuryCsvCompleteDao.TreasuryCsvCompleteFilters(
-      logicalKey,
+      bollettaFilter,
       updatedFrom,
       updatedTo
     );

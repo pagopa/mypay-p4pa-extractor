@@ -51,28 +51,30 @@ public class TreasuryCsvCompleteDao {
     TreasuryCsvCompleteFilters effectiveFilters = filters != null
       ? filters
       : new TreasuryCsvCompleteFilters(null, null, null);
-    LogicalKeyPair logicalKey = PairedLogicalKeyValidator.parseLogicalKey(effectiveFilters.logicalKey());
+    LogicalKeyPair bollettaPairs = PairedLogicalKeyValidator.parseLogicalKey(
+      effectiveFilters.bollettaFilter()
+    );
     return mypivotJdbcTemplate.query(
       findByFiltersSql,
-      buildParams(ipaCode, logicalKey, effectiveFilters, limit, offset),
+      buildParams(ipaCode, bollettaPairs, effectiveFilters, limit, offset),
       TREASURY_CSV_COMPLETE_ROW_MAPPER
     );
   }
 
   private MapSqlParameterSource buildParams(
     String ipaCode,
-    LogicalKeyPair logicalKey,
+    LogicalKeyPair bollettaPairs,
     TreasuryCsvCompleteFilters filters,
     int limit,
     int offset
   ) {
-    boolean skipBollettaLogicalKeyFilter = logicalKey.left().isEmpty() || logicalKey.right().isEmpty();
+    boolean skipBollettaFilter = bollettaPairs.left().isEmpty() || bollettaPairs.right().isEmpty();
     return QueryUtils.buildPaginatedFilterParams(limit, offset)
       .addValue("ipaCode", ipaCode)
-      .addValue("skipBollettaLogicalKeyFilter", skipBollettaLogicalKeyFilter)
-      .addValue("bollettaLogicalKeys", skipBollettaLogicalKeyFilter
+      .addValue("skipBollettaFilter", skipBollettaFilter)
+      .addValue("bollettaPairs", skipBollettaFilter
         ? java.util.Collections.singletonList(new Object[]{null, null})
-        : QueryUtils.pairValues(logicalKey.left(), logicalKey.right()))
+        : QueryUtils.pairValues(bollettaPairs.left(), bollettaPairs.right()))
       .addValue("skipUpdatedFromFilter", filters.updatedFrom() == null)
       .addValue("updatedFrom", DateTimeUtils.toLocalDateTime(filters.updatedFrom()))
       .addValue("skipUpdatedToFilter", filters.updatedTo() == null)
@@ -80,7 +82,7 @@ public class TreasuryCsvCompleteDao {
   }
 
   public record TreasuryCsvCompleteFilters(
-    String logicalKey,
+    String bollettaFilter,
     OffsetDateTime updatedFrom,
     OffsetDateTime updatedTo
   ) {

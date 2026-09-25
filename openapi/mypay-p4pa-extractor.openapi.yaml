@@ -123,16 +123,16 @@ components:
           description: |-
             Optional filter whose format depends on `fileTypes`.
 
-            - `ORGANIZATIONS`: not used.
+                       - `ORGANIZATIONS`: not used.
             - `ORG_SIL_SERVICES`: not used.
             - `DEBT_POSITIONS_TYPE`: comma-separated `debtPositionTypeCode` values (example: `TARI,TASI`).
             - `DEBT_POSITIONS_TYPE_ORG`: comma-separated `debtPositionTypeOrgCode` values (example: `TARI,TASI`).
             - `DEBT_POSITIONS`: comma-separated `iuv` values (example: `0101234567890001,0101234567890002`).
             - `DEBT_POSITIONS_PAID`: comma-separated `iuv` values.
             - `DEBT_POSITIONS_TYPE_ORG_OPERATORS`: two comma-separated lists separated by `|`, in the form `operatorFiscalCodes|debtPositionTypeOrgCodes`; values at the same position form a pair.
-            - `PAYMENT_NOTIFICATION`: two comma-separated lists separated by `|`, in the form `iuds|iuvs`; values at the same position form a pair.
+            - `PAYMENT_NOTIFICATION`: comma-separated IUD filter values (example: `IUD-1,IUD-2`).
             - `PAYMENTS_REPORTING`: comma-separated flow identifier values (example: `FLOW-1,FLOW-2`).
-            - `TREASURY_CSV_COMPLETE`: two comma-separated lists separated by `|`, in the form `billYears|billCodes` (example: `2024,2025|BOL001,BOL002`); values at the same position form a bill pair.
+            - `TREASURY_CSV_COMPLETE`: two comma-separated bill-filter lists separated by `|`, in the form `billYears|billCodes` (example: `2024,2025|BOL001,BOL002`); values at the same position form a bill pair.
             - `ASSESSMENTS`: comma-separated `assessmentName` values.
             - `ASSESSMENTS_REGISTRY`: comma-separated `debtPositionTypeOrgCode` values.
           examples:

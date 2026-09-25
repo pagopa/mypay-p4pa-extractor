@@ -7,7 +7,9 @@ import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -102,5 +104,30 @@ class QueryUtilsTest {
       "lastExtractionDate and filters.dateFrom must have the same value when both are provided",
       exception.getMessage()
     );
+  }
+
+  @Test
+  void givenPairedValuesWhenPairValuesThenPreserveTheirPositions() {
+    List<Object[]> result = QueryUtils.pairValues(
+      List.of("2024", "2025"),
+      List.of("BOL001", "BOL002")
+    );
+
+    assertEquals(2, result.size());
+    assertArrayEquals(new Object[]{"2024", "BOL001"}, result.get(0));
+    assertArrayEquals(new Object[]{"2025", "BOL002"}, result.get(1));
+  }
+
+  @Test
+  void givenListsWithDifferentSizesWhenPairValuesThenThrowIllegalArgumentException() {
+    List<String> billYears = List.of("2024");
+    List<String> billCodes = List.of("BOL001", "BOL002");
+
+    IllegalArgumentException exception = assertThrows(
+      IllegalArgumentException.class,
+      () -> QueryUtils.pairValues(billYears, billCodes)
+    );
+
+    assertEquals("logical key component lists must have the same size", exception.getMessage());
   }
 }
