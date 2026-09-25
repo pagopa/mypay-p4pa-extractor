@@ -3,7 +3,7 @@ package it.gov.pagopa.mypay2pu.extractor.dao;
 import it.gov.pagopa.mypay2pu.extractor.model.mpv4.TreasuryCsvComplete;
 import it.gov.pagopa.mypay2pu.extractor.utils.DateTimeUtils;
 import it.gov.pagopa.mypay2pu.extractor.utils.QueryUtils;
-import it.gov.pagopa.mypay2pu.extractor.utils.SqlLoader;
+import it.gov.pagopa.mypay2pu.extractor.service.SqlLoader;
 import it.gov.pagopa.mypay2pu.extractor.validation.LogicalKeyPair;
 import it.gov.pagopa.mypay2pu.extractor.validation.PairedLogicalKeyValidator;
 import org.springframework.beans.factory.annotation.Autowired;
