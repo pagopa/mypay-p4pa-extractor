@@ -2,7 +2,7 @@ package it.gov.pagopa.mypay2pu.extractor.dao;
 
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.DebtPositionTypeOrg;
 import it.gov.pagopa.mypay2pu.extractor.utils.QueryUtils;
-import it.gov.pagopa.mypay2pu.extractor.utils.SqlLoader;
+import it.gov.pagopa.mypay2pu.extractor.service.SqlLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.DataClassRowMapper;
@@ -19,8 +19,8 @@ import java.util.List;
 @Repository
 public class DebtPositionTypeOrgDao {
 
-  private static final String FIND_BY_FILTERS_SQL_PATH = "mypay/debt-position-type-org/debt-position-type-org.sql";
-  private static final String IS_EXTERNAL_SQL_PATH = "mypivot/debt-position-type-org/is-external.sql";
+  protected static final String FIND_BY_FILTERS_SQL_PATH = "mypay/debt-position-type-org/debt-position-type-org.sql";
+  protected static final String IS_EXTERNAL_SQL_PATH = "mypivot/debt-position-type-org/is-external.sql";
   protected static final RowMapper<DebtPositionTypeOrg> DEBT_POSITION_TYPE_ORG_ROW_MAPPER =
     DataClassRowMapper.newInstance(DebtPositionTypeOrg.class);
 

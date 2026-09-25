@@ -4,7 +4,7 @@ import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionFilters;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.Organization;
 import it.gov.pagopa.mypay2pu.extractor.utils.DateTimeUtils;
 import it.gov.pagopa.mypay2pu.extractor.utils.QueryUtils;
-import it.gov.pagopa.mypay2pu.extractor.utils.SqlLoader;
+import it.gov.pagopa.mypay2pu.extractor.service.SqlLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.DataClassRowMapper;
@@ -18,8 +18,8 @@ import java.util.List;
 @Repository
 public class OrganizationDao {
 
-  private static final String FIND_BY_FILTERS_SQL_PATH = "mypay/organization/organization.sql";
-  private static final String FIND_TREASURY_BY_IPA_SQL_PATH = "mypivot/organization/has-treasury.sql";
+  protected static final String FIND_BY_FILTERS_SQL_PATH = "mypay/organization/organization.sql";
+  protected static final String FIND_TREASURY_BY_IPA_SQL_PATH = "mypivot/organization/has-treasury.sql";
   protected static final RowMapper<Organization> ORGANIZATION_ROW_MAPPER =
     DataClassRowMapper.newInstance(Organization.class);
 

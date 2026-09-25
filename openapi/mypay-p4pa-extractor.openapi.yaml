@@ -73,6 +73,56 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorDTO'
+  /config/sql:
+    get:
+      tags:
+        - Config
+      operationId: getSqlLocations
+      summary: Get SQL locations
+      security:
+        - basicAuth: [ ]
+      responses:
+        '200':
+          description: Sql loaded locations
+          content:
+            plain/text:
+              schema:
+                type: array
+                items:
+                  type: string
+        '404':
+          description: Extraction not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDTO'
+  /config/sql/{location}:
+    get:
+      tags:
+        - Config
+      operationId: getSqlContent
+      summary: Get SQL location content
+      security:
+        - basicAuth: [ ]
+      parameters:
+        - name: location
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Sql loaded location content
+          content:
+            plain/text:
+              schema:
+                type: string
+        '404':
+          description: Extraction not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDTO'
 components:
   securitySchemes:
     basicAuth:

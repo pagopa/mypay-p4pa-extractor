@@ -4,7 +4,7 @@ import it.gov.pagopa.mypay2pu.extractor.config.ExtractorExportProperties;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.DebtPosition;
 import it.gov.pagopa.mypay2pu.extractor.utils.DateTimeUtils;
 import it.gov.pagopa.mypay2pu.extractor.utils.QueryUtils;
-import it.gov.pagopa.mypay2pu.extractor.utils.SqlLoader;
+import it.gov.pagopa.mypay2pu.extractor.service.SqlLoader;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.DataClassRowMapper;
@@ -21,8 +21,8 @@ import java.util.List;
 @Repository
 public class DebtPositionDao {
 
-  private static final String FIND_DEBT_POSITIONS_SQL_PATH = "mypay/debt-positions/debt-positions-open.sql";
-  private static final String FIND_CANCELLED_DEBT_POSITIONS_SQL_PATH = "mypay/debt-positions/debt-positions-cancelled.sql";
+  protected static final String FIND_DEBT_POSITIONS_SQL_PATH = "mypay/debt-positions/debt-positions-open.sql";
+  protected static final String FIND_CANCELLED_DEBT_POSITIONS_SQL_PATH = "mypay/debt-positions/debt-positions-cancelled.sql";
   protected static final RowMapper<DebtPosition> DEBT_POSITION_ROW_MAPPER =
     DataClassRowMapper.newInstance(DebtPosition.class);
 

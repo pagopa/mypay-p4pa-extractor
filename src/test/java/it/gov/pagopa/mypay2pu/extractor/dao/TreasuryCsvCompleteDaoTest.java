@@ -1,7 +1,8 @@
 package it.gov.pagopa.mypay2pu.extractor.dao;
 
 import it.gov.pagopa.mypay2pu.extractor.model.mpv4.TreasuryCsvComplete;
-import it.gov.pagopa.mypay2pu.extractor.utils.SqlLoader;
+import it.gov.pagopa.mypay2pu.extractor.service.SqlLoader;
+import it.gov.pagopa.mypay2pu.extractor.utils.SqlTestUtils;
 import it.gov.pagopa.mypay2pu.extractor.utils.TestUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -13,9 +14,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.OffsetDateTime;
@@ -23,14 +24,9 @@ import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.same;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class TreasuryCsvCompleteDaoTest {
@@ -45,6 +41,23 @@ class TreasuryCsvCompleteDaoTest {
   @AfterEach
   void verifyMocks() {
     verifyNoMoreInteractions(mypivotJdbcTemplateMock, sqlLoaderMock);
+  }
+
+  @Test
+  void testSqlParameters() {
+    List<String> parameters = List.of(
+      "ipaCode",
+      "skipYear2codeBollettaPairsFilter",
+      "year2codeBollettaPairs",
+      "skipUpdatedFromFilter",
+      "updatedFrom",
+      "skipUpdatedToFilter",
+      "updatedTo",
+      "limit",
+      "offset"
+    );
+
+    SqlTestUtils.assertQueryParameters(TreasuryCsvCompleteDao.FIND_BY_FILTERS_SQL_PATH, parameters);
   }
 
   @Test
@@ -196,7 +209,7 @@ class TreasuryCsvCompleteDaoTest {
   }
 
   private TreasuryCsvCompleteDao buildDao(NamedParameterJdbcTemplate mypivotJdbcTemplate) {
-    when(sqlLoaderMock.load("mypivot/treasury-csv-complete/treasury-csv-complete.sql")).thenReturn(FIND_BY_FILTERS_SQL);
+    when(sqlLoaderMock.load(TreasuryCsvCompleteDao.FIND_BY_FILTERS_SQL_PATH)).thenReturn(FIND_BY_FILTERS_SQL);
     return new TreasuryCsvCompleteDao(mypivotJdbcTemplate, sqlLoaderMock);
   }
 

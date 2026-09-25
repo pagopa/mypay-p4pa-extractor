@@ -1,5 +1,7 @@
-package it.gov.pagopa.mypay2pu.extractor.utils;
+package it.gov.pagopa.mypay2pu.extractor.service;
 
+import org.jspecify.annotations.NullMarked;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 
@@ -7,11 +9,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
+import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 class SqlLoaderTest {
 
@@ -88,7 +88,7 @@ class SqlLoaderTest {
           }
 
           @Override
-          public InputStream getInputStream() throws IOException {
+          public @NullMarked InputStream getInputStream() throws IOException {
             throw new IOException("read failure");
           }
         };
@@ -102,5 +102,24 @@ class SqlLoaderTest {
 
     assertInstanceOf(IOException.class, exception.getCause());
     assertEquals("read failure", exception.getCause().getMessage());
+  }
+
+  @Test
+  void testLoadedSqlBehavior() {
+    SqlLoader sqlLoader = new SqlLoader();
+    String location = "mypay/organization/organization.sql";
+    String fullLocation = "/db/" + location;
+
+    Assertions.assertTrue(sqlLoader.getLoadedSqlLocations().isEmpty());
+
+    // Load the SQL resource
+    String loadedSql = sqlLoader.load(location);
+
+    // Verify that the loaded SQL is not null and not empty
+    assertNotNull(loadedSql);
+    Assertions.assertEquals(Set.of(fullLocation), sqlLoader.getLoadedSqlLocations());
+
+    // Verify that the loaded SQL locations contain the expected location
+    assertEquals(loadedSql, sqlLoader.getLoadedSqlContent(fullLocation));
   }
 }

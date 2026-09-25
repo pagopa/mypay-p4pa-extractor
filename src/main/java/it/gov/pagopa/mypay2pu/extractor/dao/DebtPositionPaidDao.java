@@ -3,7 +3,7 @@ package it.gov.pagopa.mypay2pu.extractor.dao;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.DebtPositionPaid;
 import it.gov.pagopa.mypay2pu.extractor.utils.DateTimeUtils;
 import it.gov.pagopa.mypay2pu.extractor.utils.QueryUtils;
-import it.gov.pagopa.mypay2pu.extractor.utils.SqlLoader;
+import it.gov.pagopa.mypay2pu.extractor.service.SqlLoader;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.DataClassRowMapper;
@@ -20,7 +20,7 @@ import java.util.List;
 @Repository
 public class DebtPositionPaidDao {
 
-  private static final String FIND_BY_FILTERS_SQL_PATH = "mypay/debt-positions-paid/debt-positions-paid.sql";
+  protected static final String FIND_BY_FILTERS_SQL_PATH = "mypay/debt-positions-paid/debt-positions-paid.sql";
   protected static final RowMapper<DebtPositionPaid> DEBT_POSITION_PAID_ROW_MAPPER =
     DataClassRowMapper.newInstance(DebtPositionPaid.class);
 

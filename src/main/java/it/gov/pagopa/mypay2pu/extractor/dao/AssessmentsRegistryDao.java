@@ -2,7 +2,7 @@ package it.gov.pagopa.mypay2pu.extractor.dao;
 
 import it.gov.pagopa.mypay2pu.extractor.model.mpv4.AssessmentsRegistry;
 import it.gov.pagopa.mypay2pu.extractor.utils.QueryUtils;
-import it.gov.pagopa.mypay2pu.extractor.utils.SqlLoader;
+import it.gov.pagopa.mypay2pu.extractor.service.SqlLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.DataClassRowMapper;
@@ -19,7 +19,7 @@ import java.util.List;
 @Repository
 public class AssessmentsRegistryDao {
 
-  private static final String FIND_BY_FILTERS_SQL_PATH = "mypivot/assessments-registry/assessments-registry-export.sql";
+  protected static final String FIND_BY_FILTERS_SQL_PATH = "mypivot/assessments-registry/assessments-registry-export.sql";
   protected static final RowMapper<AssessmentsRegistry> ASSESSMENTS_REGISTRY_ROW_MAPPER =
     DataClassRowMapper.newInstance(AssessmentsRegistry.class);
 
