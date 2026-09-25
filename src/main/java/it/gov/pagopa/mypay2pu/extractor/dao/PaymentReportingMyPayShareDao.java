@@ -11,6 +11,7 @@ import org.springframework.util.StringUtils;
 
 import java.nio.file.Path;
 import java.time.OffsetDateTime;
+import java.util.Collections;
 import java.util.List;
 
 @Repository
@@ -60,25 +61,25 @@ public class PaymentReportingMyPayShareDao {
     return findByFilters(ipaCode, lastExtractionDate, dateFrom, dateTo, null, limit, offset);
   }
 
-  public List<Path> findByLogicalKey(String ipaCode, String logicalKey) {
-    return findByLogicalKey(ipaCode, logicalKey, Integer.MAX_VALUE, 0);
+  public List<Path> findByFlowIdentifiers(String ipaCode, List<String> flowIdentifiers) {
+    return findByFlowIdentifiers(ipaCode, flowIdentifiers, Integer.MAX_VALUE, 0);
   }
 
-  public List<Path> findByLogicalKey(String ipaCode, String logicalKey, int limit, int offset) {
-    return findByFilters(ipaCode, null, null, null, logicalKey, limit, offset);
+  public List<Path> findByFlowIdentifiers(String ipaCode, List<String> flowIdentifiers, int limit, int offset) {
+    return findByFilters(ipaCode, null, null, null, flowIdentifiers, limit, offset);
   }
 
   public List<Path> findByFilters(String ipaCode,
                                   OffsetDateTime lastExtractionDate,
                                   OffsetDateTime dateFrom,
                                   OffsetDateTime dateTo,
-                                  String logicalKey,
+                                  List<String> flowIdentifiers,
                                   int limit,
                                   int offset) {
     validateIpaCode(ipaCode);
     return fespJdbcTemplate.query(
       findByFiltersSql,
-      buildParams(ipaCode, QueryUtils.resolveDateFrom(lastExtractionDate, dateFrom), dateTo, logicalKey, limit, offset),
+      buildParams(ipaCode, QueryUtils.resolveDateFrom(lastExtractionDate, dateFrom), dateTo, flowIdentifiers, limit, offset),
       PAYMENTS_REPORTING_FILE_ROW_MAPPER
     );
   }
@@ -87,7 +88,7 @@ public class PaymentReportingMyPayShareDao {
     String ipaCode,
     OffsetDateTime dateFrom,
     OffsetDateTime dateTo,
-    String logicalKey,
+    List<String> flowIdentifiers,
     int limit,
     int offset
   ) {
@@ -97,8 +98,10 @@ public class PaymentReportingMyPayShareDao {
       .addValue("skipDateFromFilter", dateFrom == null)
       .addValue("dateTo", dateTo)
       .addValue("skipDateToFilter", dateTo == null)
-      .addValue("skipLogicalKeyFilter", logicalKey == null)
-      .addValue("logicalKey", logicalKey);
+      .addValue("skipFlowIdentifiersFilter", flowIdentifiers == null || flowIdentifiers.isEmpty())
+      .addValue("flowIdentifiers", flowIdentifiers == null || flowIdentifiers.isEmpty()
+        ? Collections.singletonList(null)
+        : flowIdentifiers);
   }
 
   private void validateIpaCode(String ipaCode) {

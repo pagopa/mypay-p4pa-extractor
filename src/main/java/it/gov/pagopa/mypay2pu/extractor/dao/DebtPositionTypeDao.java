@@ -36,23 +36,23 @@ public class DebtPositionTypeDao {
     this.findByFiltersSql = sqlLoader.load(FIND_BY_FILTERS_SQL_PATH);
   }
 
-  public List<DebtPositionType> findByFilters(List<String> debtPositionTypeOrgCodes,
-                                              int limit,
-                                              int offset) {
+  public List<DebtPositionType> findByFilters(List<String> debtPositionTypeCodes,
+                                             int limit,
+                                             int offset) {
     return mp4JdbcTemplate.query(
       findByFiltersSql,
-      buildParams(debtPositionTypeOrgCodes, limit, offset),
+      buildParams(debtPositionTypeCodes, limit, offset),
       DEBT_POSITIONS_TYPE_ROW_MAPPER
     );
   }
 
-  private MapSqlParameterSource buildParams(List<String> debtPositionTypeOrgCodes,
+  private MapSqlParameterSource buildParams(List<String> debtPositionTypeCodes,
                                             int limit,
                                             int offset) {
-    boolean isEmptyCollection = CollectionUtils.isEmpty(debtPositionTypeOrgCodes);
+    boolean isEmptyCollection = CollectionUtils.isEmpty(debtPositionTypeCodes);
     return QueryUtils.buildPaginatedFilterParams(limit, offset)
       .addValue("brokerCf", exportProperties.brokerCf())
-      .addValue("skipDebtPositionTypeOrgCodesFilter", isEmptyCollection)
-      .addValue("debtPositionTypeOrgCodes", isEmptyCollection ? Collections.singletonList(null) : debtPositionTypeOrgCodes);
+      .addValue("skipDebtPositionTypeCodesFilter", isEmptyCollection)
+      .addValue("debtPositionTypeCodes", isEmptyCollection ? Collections.singletonList(null) : debtPositionTypeCodes);
   }
 }

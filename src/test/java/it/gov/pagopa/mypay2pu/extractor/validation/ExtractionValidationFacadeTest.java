@@ -54,7 +54,7 @@ class ExtractionValidationFacadeTest {
     ExtractionRequest request = request(fileType);
     // using verify to testing routing
     switch (fileType) {
-      case ORGANIZATIONS, ORG_SIL_SERVICES, PAYMENTS_REPORTING -> {
+      case ORGANIZATIONS, ORG_SIL_SERVICES -> {
         validationFacade.validate(request);
         verify(extractionRequestValidatorMock).validate(request);
       }
@@ -66,6 +66,10 @@ class ExtractionValidationFacadeTest {
       case DEBT_POSITIONS_TYPE_ORG_OPERATORS, TREASURY_CSV_COMPLETE -> {
         validationFacade.validate(request);
         verify(pairedLogicalKeyValidatorMock).validate(request);
+      }
+      case PAYMENTS_REPORTING -> {
+        validationFacade.validate(request);
+        verify(extractionRequestValidatorMock).validate(request);
       }
       default -> assertThrows(ExportFileTypeNotSupportedException.class,
         () -> validationFacade.validate(request));
