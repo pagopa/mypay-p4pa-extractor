@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -51,10 +52,8 @@ class TreasuryCsvCompleteDaoTest {
     TreasuryCsvCompleteDao dao = buildDao();
     mockQuery(params ->
       "IPA1".equals(params.getValue("ipaCode"))
-        && Boolean.TRUE.equals(params.getValue("skipAnnoBollettaFilter"))
-        && params.getValue("annoBolletta") == null
-        && Boolean.TRUE.equals(params.getValue("skipCodBollettaFilter"))
-        && params.getValue("codBolletta") == null
+        && Boolean.TRUE.equals(params.getValue("skipYear2codeBollettaPairsFilter"))
+        && hasPair(params, "year2codeBollettaPairs", null, null)
         && Boolean.TRUE.equals(params.getValue("skipUpdatedFromFilter"))
         && params.getValue("updatedFrom") == null
         && Boolean.TRUE.equals(params.getValue("skipUpdatedToFilter"))
@@ -75,18 +74,19 @@ class TreasuryCsvCompleteDaoTest {
   }
 
   @Test
-  void givenLogicalKeyWhenFindByFiltersThenApplyBollettaKeyComponents() {
+  void givenBollettaFilterWhenFindByFiltersThenApplyPairedBollettaComponents() {
     TreasuryCsvCompleteDao dao = buildDao();
     mockQuery(params ->
-      "2026".equals(params.getValue("annoBolletta"))
-        && Boolean.FALSE.equals(params.getValue("skipAnnoBollettaFilter"))
-        && "BOLLETTA-1".equals(params.getValue("codBolletta"))
-        && Boolean.FALSE.equals(params.getValue("skipCodBollettaFilter"))
+      Boolean.FALSE.equals(params.getValue("skipYear2codeBollettaPairsFilter"))
+        && hasPairs(params, "year2codeBollettaPairs",
+          new Object[]{"2024", "BOL001"},
+          new Object[]{"2024", "BOL002"},
+          new Object[]{"2025", "BOL003"})
     );
 
     assertEquals(List.of(), dao.findByFilters(
       "IPA1",
-      filters("2026|BOLLETTA-1", null, null),
+      filters("2024,2024,2025|BOL001,BOL002,BOL003", null, null),
       50,
       0
     ));
@@ -144,8 +144,10 @@ class TreasuryCsvCompleteDaoTest {
     assertTrue(sql.contains("NULL AS cod_istat_ente"));
     assertTrue(sql.contains("e.cod_ipa_ente = :ipaCode"));
     assertTrue(sql.contains("ft.cod_id_univoco_flusso IS NOT NULL"));
-    assertTrue(sql.contains(":skipAnnoBollettaFilter = TRUE OR ft.de_anno_bolletta = :annoBolletta"));
-    assertTrue(sql.contains(":skipCodBollettaFilter = TRUE OR ft.cod_bolletta = :codBolletta"));
+    assertTrue(sql.contains(":skipYear2codeBollettaPairsFilter = TRUE"));
+    assertTrue(sql.contains("(ft.de_anno_bolletta, ft.cod_bolletta) IN (:year2codeBollettaPairs)"));
+    assertTrue(!sql.contains("skipAnnoBollettaFilter"));
+    assertTrue(!sql.contains("skipCodBollettaFilter"));
     assertTrue(sql.contains(":skipUpdatedFromFilter = TRUE OR ft.dt_ultima_modifica >= :updatedFrom"));
     assertTrue(sql.contains(":skipUpdatedToFilter = TRUE OR ft.dt_ultima_modifica < :updatedTo"));
     assertTrue(sql.contains("ORDER BY ft.de_anno_bolletta, ft.cod_bolletta"));
@@ -177,6 +179,18 @@ class TreasuryCsvCompleteDaoTest {
     )).thenReturn(List.of());
   }
 
+  private boolean hasPair(MapSqlParameterSource params, String parameterName, String first, String second) {
+    return hasPairs(params, parameterName, new Object[]{first, second});
+  }
+
+  private boolean hasPairs(MapSqlParameterSource params, String parameterName, Object[]... expectedPairs) {
+    Object value = params.getValue(parameterName);
+    return value instanceof List<?> pairs
+      && pairs.size() == expectedPairs.length
+      && java.util.stream.IntStream.range(0, expectedPairs.length)
+        .allMatch(index -> pairs.get(index) instanceof Object[] pair && Arrays.equals(expectedPairs[index], pair));
+  }
+
   private TreasuryCsvCompleteDao buildDao() {
     return buildDao(mypivotJdbcTemplateMock);
   }
@@ -191,12 +205,12 @@ class TreasuryCsvCompleteDaoTest {
   }
 
   private TreasuryCsvCompleteDao.TreasuryCsvCompleteFilters filters(
-    String logicalKey,
+    String bollettaFilter,
     OffsetDateTime updatedFrom,
     OffsetDateTime updatedTo
   ) {
     return new TreasuryCsvCompleteDao.TreasuryCsvCompleteFilters(
-      logicalKey,
+      bollettaFilter,
       updatedFrom,
       updatedTo
     );

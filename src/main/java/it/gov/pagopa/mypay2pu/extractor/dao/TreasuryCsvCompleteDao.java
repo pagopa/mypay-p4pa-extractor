@@ -4,6 +4,8 @@ import it.gov.pagopa.mypay2pu.extractor.model.mpv4.TreasuryCsvComplete;
 import it.gov.pagopa.mypay2pu.extractor.utils.DateTimeUtils;
 import it.gov.pagopa.mypay2pu.extractor.utils.QueryUtils;
 import it.gov.pagopa.mypay2pu.extractor.utils.SqlLoader;
+import it.gov.pagopa.mypay2pu.extractor.validation.LogicalKeyPair;
+import it.gov.pagopa.mypay2pu.extractor.validation.PairedLogicalKeyValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.DataClassRowMapper;
@@ -49,50 +51,39 @@ public class TreasuryCsvCompleteDao {
     TreasuryCsvCompleteFilters effectiveFilters = filters != null
       ? filters
       : new TreasuryCsvCompleteFilters(null, null, null);
-    TreasuryLogicalKey treasuryLogicalKey = parseLogicalKey(effectiveFilters.logicalKey());
+    LogicalKeyPair year2codeBollettaPairs = PairedLogicalKeyValidator.parseLogicalKey(
+      effectiveFilters.bollettaFilter()
+    );
     return mypivotJdbcTemplate.query(
       findByFiltersSql,
-      buildParams(ipaCode, treasuryLogicalKey, effectiveFilters, limit, offset),
+      buildParams(ipaCode, year2codeBollettaPairs, effectiveFilters, limit, offset),
       TREASURY_CSV_COMPLETE_ROW_MAPPER
     );
   }
 
   private MapSqlParameterSource buildParams(
     String ipaCode,
-    TreasuryLogicalKey logicalKey,
+    LogicalKeyPair year2codeBollettaPairs,
     TreasuryCsvCompleteFilters filters,
     int limit,
     int offset
   ) {
+    boolean skipYear2codeBollettaPairsFilter =
+      year2codeBollettaPairs.left().isEmpty() || year2codeBollettaPairs.right().isEmpty();
     return QueryUtils.buildPaginatedFilterParams(limit, offset)
       .addValue("ipaCode", ipaCode)
-      .addValue("skipAnnoBollettaFilter", logicalKey.annoBolletta() == null)
-      .addValue("annoBolletta", logicalKey.annoBolletta())
-      .addValue("skipCodBollettaFilter", logicalKey.codBolletta() == null)
-      .addValue("codBolletta", logicalKey.codBolletta())
+      .addValue("skipYear2codeBollettaPairsFilter", skipYear2codeBollettaPairsFilter)
+      .addValue("year2codeBollettaPairs", skipYear2codeBollettaPairsFilter
+        ? java.util.Collections.singletonList(new Object[]{null, null})
+        : QueryUtils.pairValues(year2codeBollettaPairs.left(), year2codeBollettaPairs.right()))
       .addValue("skipUpdatedFromFilter", filters.updatedFrom() == null)
       .addValue("updatedFrom", DateTimeUtils.toLocalDateTime(filters.updatedFrom()))
       .addValue("skipUpdatedToFilter", filters.updatedTo() == null)
       .addValue("updatedTo", DateTimeUtils.toLocalDateTime(filters.updatedTo()));
   }
 
-  private TreasuryLogicalKey parseLogicalKey(String logicalKey) {
-    if (logicalKey == null) {
-      return new TreasuryLogicalKey(null, null);
-    }
-
-    String[] parts = logicalKey.split("\\|", -1);
-    if (parts.length != 2 || parts[0].isBlank() || parts[1].isBlank()) {
-      throw new IllegalArgumentException("logicalKey must be in the format <annoBolletta>|<codBolletta>");
-    }
-    return new TreasuryLogicalKey(parts[0], parts[1]);
-  }
-
-  private record TreasuryLogicalKey(String annoBolletta, String codBolletta) {
-  }
-
   public record TreasuryCsvCompleteFilters(
-    String logicalKey,
+    String bollettaFilter,
     OffsetDateTime updatedFrom,
     OffsetDateTime updatedTo
   ) {

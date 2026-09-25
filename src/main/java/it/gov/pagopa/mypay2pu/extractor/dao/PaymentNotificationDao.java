@@ -38,7 +38,6 @@ public class PaymentNotificationDao {
   public List<PaymentNotification> findByFilters(
     String ipaCode,
     List<String> iuds,
-    List<String> iuvs,
     LocalDateTime createdFrom,
     LocalDateTime createdTo,
     int limit,
@@ -53,7 +52,7 @@ public class PaymentNotificationDao {
 
     return mypivotJdbcTemplate.query(
       findByFiltersSql,
-      buildParams(ipaCode, iuds, iuvs, createdFrom, createdTo, limit, offset),
+      buildParams(ipaCode, iuds, createdFrom, createdTo, limit, offset),
       PAYMENT_NOTIFICATION_ROW_MAPPER
     );
   }
@@ -61,20 +60,16 @@ public class PaymentNotificationDao {
   private MapSqlParameterSource buildParams(
     String ipaCode,
     List<String> iuds,
-    List<String> iuvs,
     LocalDateTime createdFrom,
     LocalDateTime createdTo,
     int limit,
     int offset
   ) {
-    boolean iudsEmpty = CollectionUtils.isEmpty(iuds);
-    boolean iuvsEmpty = CollectionUtils.isEmpty(iuvs);
+    boolean skipIudFilter = CollectionUtils.isEmpty(iuds);
     return QueryUtils.buildPaginatedFilterParams(limit, offset)
       .addValue("ipaCode", ipaCode)
-      .addValue("iudsEmpty", iudsEmpty)
-      .addValue("iuds", iudsEmpty ? Collections.singletonList(null) : iuds)
-      .addValue("iuvsEmpty", iuvsEmpty)
-      .addValue("iuvs", iuvsEmpty ? Collections.singletonList(null) : iuvs)
+      .addValue("skipIudFilter", skipIudFilter)
+      .addValue("iuds", skipIudFilter ? Collections.singletonList(null) : iuds)
       .addValue("skipCreatedFromFilter", createdFrom == null)
       .addValue("createdFrom", createdFrom)
       .addValue("skipCreatedToFilter", createdTo == null)
