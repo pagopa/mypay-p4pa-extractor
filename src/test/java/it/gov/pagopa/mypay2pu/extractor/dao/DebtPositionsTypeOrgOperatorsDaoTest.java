@@ -46,8 +46,8 @@ class DebtPositionsTypeOrgOperatorsDaoTest {
       eq(FIND_BY_FILTERS_SQL),
       ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
         "IPA_CODE".equals(params.getValue("ipaCode"))
-          && Boolean.FALSE.equals(params.getValue("skipDebtPositionTypeOrgCode2operatorFiscalCodePairsFilter"))
-          && hasPairs(params, "debtPositionTypeOrgCode2operatorFiscalCodePairs",
+          && Boolean.FALSE.equals(params.getValue("skipDPTOrgCode2operatorFCPairsFilter"))
+          && hasPairs(params, "DPTypeOrgCode2operatorFCPairs",
             new Object[]{"TYPE_ORG_CODE_1", "OPERATOR_CF_1"},
             new Object[]{"TYPE_ORG_CODE_2", "OPERATOR_CF_2"})
           && Integer.valueOf(50).equals(params.getValue("limit"))

@@ -47,17 +47,17 @@ public class DebtPositionsTypeOrgOperatorsDao {
                                             List<String> debtPositionTypeOrgCodes,
                                             int limit,
                                             int offset) {
-    boolean skipDebtPositionTypeOrgCode2operatorFiscalCodePairsFilter = CollectionUtils.isEmpty(operatorFiscalCodes)
+    boolean skipDPTOrgCode2operatorFCPairsFilter = CollectionUtils.isEmpty(operatorFiscalCodes)
       || CollectionUtils.isEmpty(debtPositionTypeOrgCodes);
     return QueryUtils.buildPaginatedFilterParams(limit, offset)
       .addValue("ipaCode", ipaCode)
       .addValue(
-        "skipDebtPositionTypeOrgCode2operatorFiscalCodePairsFilter",
-        skipDebtPositionTypeOrgCode2operatorFiscalCodePairsFilter
+        "skipDPTOrgCode2operatorFCPairsFilter",
+        skipDPTOrgCode2operatorFCPairsFilter
       )
       .addValue(
-        "debtPositionTypeOrgCode2operatorFiscalCodePairs",
-        skipDebtPositionTypeOrgCode2operatorFiscalCodePairsFilter
+        "DPTypeOrgCode2operatorFCPairs",
+        skipDPTOrgCode2operatorFCPairsFilter
         ? Collections.singletonList(new Object[]{null, null})
         : QueryUtils.pairValues(debtPositionTypeOrgCodes, operatorFiscalCodes));
   }
