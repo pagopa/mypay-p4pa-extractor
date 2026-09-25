@@ -17,7 +17,7 @@ import java.util.List;
 @Repository
 public class PaymentReportingMyPayShareDao {
 
-  private static final String FIND_BY_FILTERS_SQL_PATH = "fesp/payments-reporting/payments-reporting.sql";
+  protected static final String FIND_BY_FILTERS_SQL_PATH = "fesp/payments-reporting/payments-reporting.sql";
   protected static final RowMapper<Path> PAYMENTS_REPORTING_FILE_ROW_MAPPER = (resultSet, rowNum) ->
     Path.of(resultSet.getString("de_nome_file_scaricato"));
 

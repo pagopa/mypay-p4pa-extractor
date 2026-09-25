@@ -2,6 +2,7 @@ package it.gov.pagopa.mypay2pu.extractor.dao;
 
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.DebtPositionPaid;
 import it.gov.pagopa.mypay2pu.extractor.service.SqlLoader;
+import it.gov.pagopa.mypay2pu.extractor.utils.SqlTestUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,10 +24,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.same;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class DebtPositionPaidDaoTest {
@@ -45,6 +43,23 @@ class DebtPositionPaidDaoTest {
       verify(sqlLoaderMock).load("mypay/debt-positions-paid/debt-positions-paid.sql");
     }
     verifyNoMoreInteractions(mp4JdbcTemplateMock, sqlLoaderMock);
+  }
+
+  @Test
+  void testSqlParameters() {
+    List<String> parameters = List.of(
+      "codIpaEnte",
+      "skipIuvsFilter",
+      "iuvs",
+      "skipCreatedFromFilter",
+      "createdFrom",
+      "skipCreatedToFilter",
+      "createdTo",
+      "limit",
+      "offset"
+    );
+
+    SqlTestUtils.assertQueryParameters(DebtPositionPaidDao.FIND_BY_FILTERS_SQL_PATH, parameters);
   }
 
   @Test
@@ -172,7 +187,7 @@ class DebtPositionPaidDaoTest {
 
   private DebtPositionPaidDao buildDao() {
     sqlLoaderUsed = true;
-    when(sqlLoaderMock.load("mypay/debt-positions-paid/debt-positions-paid.sql")).thenReturn(FIND_BY_FILTERS_SQL);
+    when(sqlLoaderMock.load(DebtPositionPaidDao.FIND_BY_FILTERS_SQL_PATH)).thenReturn(FIND_BY_FILTERS_SQL);
     return new DebtPositionPaidDao(mp4JdbcTemplateMock, sqlLoaderMock);
   }
 }

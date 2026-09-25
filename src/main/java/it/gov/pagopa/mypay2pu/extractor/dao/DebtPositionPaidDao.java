@@ -20,7 +20,7 @@ import java.util.List;
 @Repository
 public class DebtPositionPaidDao {
 
-  private static final String FIND_BY_FILTERS_SQL_PATH = "mypay/debt-positions-paid/debt-positions-paid.sql";
+  protected static final String FIND_BY_FILTERS_SQL_PATH = "mypay/debt-positions-paid/debt-positions-paid.sql";
   protected static final RowMapper<DebtPositionPaid> DEBT_POSITION_PAID_ROW_MAPPER =
     DataClassRowMapper.newInstance(DebtPositionPaid.class);
 

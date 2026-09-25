@@ -2,6 +2,7 @@ package it.gov.pagopa.mypay2pu.extractor.dao;
 
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.DebtPositionTypeOrg;
 import it.gov.pagopa.mypay2pu.extractor.service.SqlLoader;
+import it.gov.pagopa.mypay2pu.extractor.utils.SqlTestUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,14 +14,9 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.same;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class DebtPositionTypeOrgDaoTest {
@@ -38,6 +34,29 @@ class DebtPositionTypeOrgDaoTest {
   @AfterEach
   void tearDown() {
     verifyNoMoreInteractions(mp4JdbcTemplateMock, mypivotJdbcTemplateMock, sqlLoaderMock);
+  }
+
+  @Test
+  void testSqlParameters() {
+    List<String> parameters = List.of(
+      "ipaCode",
+      "skipDebtPositionTypeOrgCodesFilter",
+      "debtPositionTypeOrgCodes",
+      "limit",
+      "offset"
+    );
+
+    SqlTestUtils.assertQueryParameters(DebtPositionTypeOrgDao.FIND_BY_FILTERS_SQL_PATH, parameters);
+  }
+
+  @Test
+  void testIsExternalSqlParameters() {
+    List<String> parameters = List.of(
+      "ipaCode",
+      "debtPositionsTypeOrgCode"
+    );
+
+    SqlTestUtils.assertQueryParameters(DebtPositionTypeOrgDao.IS_EXTERNAL_SQL_PATH, parameters);
   }
 
   @Test
@@ -147,9 +166,9 @@ class DebtPositionTypeOrgDaoTest {
   }
 
   private DebtPositionTypeOrgDao buildDao(NamedParameterJdbcTemplate mypivotJdbcTemplate) {
-    when(sqlLoaderMock.load("mypay/debt-position-type-org/debt-position-type-org.sql"))
+    when(sqlLoaderMock.load(DebtPositionTypeOrgDao.FIND_BY_FILTERS_SQL_PATH))
       .thenReturn(FIND_BY_ORGANIZATION_ID_SQL);
-    when(sqlLoaderMock.load("mypivot/debt-position-type-org/is-external.sql")).thenReturn(IS_EXTERNAL_SQL_PATH);
+    when(sqlLoaderMock.load(DebtPositionTypeOrgDao.IS_EXTERNAL_SQL_PATH)).thenReturn(IS_EXTERNAL_SQL_PATH);
     return new DebtPositionTypeOrgDao(mp4JdbcTemplateMock, mypivotJdbcTemplate, sqlLoaderMock);
   }
 

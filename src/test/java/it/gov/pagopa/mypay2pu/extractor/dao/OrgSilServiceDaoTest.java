@@ -2,6 +2,7 @@ package it.gov.pagopa.mypay2pu.extractor.dao;
 
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.OrgSilService;
 import it.gov.pagopa.mypay2pu.extractor.service.SqlLoader;
+import it.gov.pagopa.mypay2pu.extractor.utils.SqlTestUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,9 +17,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.same;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class OrgSilServiceDaoTest {
@@ -34,6 +33,19 @@ class OrgSilServiceDaoTest {
   @AfterEach
   void tearDown() {
     verifyNoMoreInteractions(mp4JdbcTemplateMock, sqlLoaderMock);
+  }
+
+  @Test
+  void testSqlParameters() {
+    List<String> parameters = List.of(
+      "skipCodIpaEnteFilter",
+      "codIpaEnte",
+      "limit",
+      "offset"
+    );
+
+    SqlTestUtils.assertQueryParameters(OrgSilServiceDao.FIND_PAID_NOTIFICATION_OUTCOME_SQL_PATH, parameters);
+    SqlTestUtils.assertQueryParameters(OrgSilServiceDao.FIND_ACTUALIZATION_SQL_PATH, parameters);
   }
 
   @Test
@@ -175,8 +187,8 @@ class OrgSilServiceDaoTest {
   }
 
   private OrgSilServiceDao buildDao() {
-    when(sqlLoaderMock.load("mypay/org-sil-service/paid-notification-outcome.sql")).thenReturn(FIND_PAID_NOTIFICATION_OUTCOME_SQL);
-    when(sqlLoaderMock.load("mypay/org-sil-service/actualization.sql")).thenReturn(FIND_ACTUALIZATION_SQL);
+    when(sqlLoaderMock.load(OrgSilServiceDao.FIND_PAID_NOTIFICATION_OUTCOME_SQL_PATH)).thenReturn(FIND_PAID_NOTIFICATION_OUTCOME_SQL);
+    when(sqlLoaderMock.load(OrgSilServiceDao.FIND_ACTUALIZATION_SQL_PATH)).thenReturn(FIND_ACTUALIZATION_SQL);
     return new OrgSilServiceDao(mp4JdbcTemplateMock, sqlLoaderMock);
   }
 }

@@ -59,7 +59,6 @@ class AssessmentsDaoTest {
     SqlTestUtils.assertQueryParameters(AssessmentsDao.FIND_BY_FILTERS_SQL_PATH, parameters);
   }
 
-
   @Test
   void givenNoAssessmentCodesAndNoDateRangeWhenFindByFiltersThenUseIncrementalFilterParams() {
     AssessmentsDao dao = buildDao();

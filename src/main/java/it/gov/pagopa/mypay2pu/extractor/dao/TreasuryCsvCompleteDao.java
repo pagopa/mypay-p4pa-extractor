@@ -21,7 +21,7 @@ import java.util.List;
 @Repository
 public class TreasuryCsvCompleteDao {
 
-  private static final String FIND_BY_FILTERS_SQL_PATH = "mypivot/treasury-csv-complete/treasury-csv-complete.sql";
+  protected static final String FIND_BY_FILTERS_SQL_PATH = "mypivot/treasury-csv-complete/treasury-csv-complete.sql";
   protected static final RowMapper<TreasuryCsvComplete> TREASURY_CSV_COMPLETE_ROW_MAPPER =
     DataClassRowMapper.newInstance(TreasuryCsvComplete.class);
 

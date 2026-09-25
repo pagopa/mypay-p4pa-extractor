@@ -2,6 +2,7 @@ package it.gov.pagopa.mypay2pu.extractor.dao;
 
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.DebtPositionsTypeOrgOperators;
 import it.gov.pagopa.mypay2pu.extractor.service.SqlLoader;
+import it.gov.pagopa.mypay2pu.extractor.utils.SqlTestUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,9 +18,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.same;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class DebtPositionsTypeOrgOperatorsDaoTest {
@@ -34,6 +33,19 @@ class DebtPositionsTypeOrgOperatorsDaoTest {
   @AfterEach
   void tearDown() {
     verifyNoMoreInteractions(mp4JdbcTemplateMock, sqlLoaderMock);
+  }
+
+  @Test
+  void testSqlParameters() {
+    List<String> parameters = List.of(
+      "ipaCode",
+      "skipDPTOrgCode2operatorFCPairsFilter",
+      "DPTypeOrgCode2operatorFCPairs",
+      "limit",
+      "offset"
+    );
+
+    SqlTestUtils.assertQueryParameters(DebtPositionsTypeOrgOperatorsDao.FIND_BY_FILTERS_SQL_PATH, parameters);
   }
 
   @Test
@@ -84,7 +96,7 @@ class DebtPositionsTypeOrgOperatorsDaoTest {
   }
 
   private DebtPositionsTypeOrgOperatorsDao buildDao() {
-    when(sqlLoaderMock.load("mypay/debt-positions-type-org-operators/debt-positions-type-org-operators.sql"))
+    when(sqlLoaderMock.load(DebtPositionsTypeOrgOperatorsDao.FIND_BY_FILTERS_SQL_PATH))
       .thenReturn(FIND_BY_FILTERS_SQL);
     return new DebtPositionsTypeOrgOperatorsDao(mp4JdbcTemplateMock, sqlLoaderMock);
   }

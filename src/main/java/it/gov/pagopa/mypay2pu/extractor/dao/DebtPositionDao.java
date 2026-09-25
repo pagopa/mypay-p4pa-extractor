@@ -21,8 +21,8 @@ import java.util.List;
 @Repository
 public class DebtPositionDao {
 
-  private static final String FIND_DEBT_POSITIONS_SQL_PATH = "mypay/debt-positions/debt-positions-open.sql";
-  private static final String FIND_CANCELLED_DEBT_POSITIONS_SQL_PATH = "mypay/debt-positions/debt-positions-cancelled.sql";
+  protected static final String FIND_DEBT_POSITIONS_SQL_PATH = "mypay/debt-positions/debt-positions-open.sql";
+  protected static final String FIND_CANCELLED_DEBT_POSITIONS_SQL_PATH = "mypay/debt-positions/debt-positions-cancelled.sql";
   protected static final RowMapper<DebtPosition> DEBT_POSITION_ROW_MAPPER =
     DataClassRowMapper.newInstance(DebtPosition.class);
 

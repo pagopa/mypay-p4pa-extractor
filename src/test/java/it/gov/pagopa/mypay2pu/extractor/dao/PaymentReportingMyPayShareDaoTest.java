@@ -1,6 +1,7 @@
 package it.gov.pagopa.mypay2pu.extractor.dao;
 
 import it.gov.pagopa.mypay2pu.extractor.service.SqlLoader;
+import it.gov.pagopa.mypay2pu.extractor.utils.SqlTestUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,10 +24,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.same;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class PaymentReportingMyPayShareDaoTest {
@@ -43,6 +41,23 @@ class PaymentReportingMyPayShareDaoTest {
   @AfterEach
   void verifyMocks() {
     verifyNoMoreInteractions(fespJdbcTemplateMock, sqlLoaderMock, resultSetMock);
+  }
+
+  @Test
+  void testSqlParameters() {
+    List<String> parameters = List.of(
+      "ipaCode",
+      "dateFrom",
+      "skipDateFromFilter",
+      "dateTo",
+      "skipDateToFilter",
+      "skipFlowIdentifiersFilter",
+      "flowIdentifiers",
+      "limit",
+      "offset"
+    );
+
+    SqlTestUtils.assertQueryParameters(PaymentReportingMyPayShareDao.FIND_BY_FILTERS_SQL_PATH, parameters);
   }
 
   @Test
@@ -161,7 +176,7 @@ class PaymentReportingMyPayShareDaoTest {
   }
 
   private PaymentReportingMyPayShareDao buildDao() {
-    when(sqlLoaderMock.load("fesp/payments-reporting/payments-reporting.sql")).thenReturn(FIND_BY_FILTERS_SQL);
+    when(sqlLoaderMock.load(PaymentReportingMyPayShareDao.FIND_BY_FILTERS_SQL_PATH)).thenReturn(FIND_BY_FILTERS_SQL);
     return new PaymentReportingMyPayShareDao(fespJdbcTemplateMock, sqlLoaderMock);
   }
 }

@@ -15,8 +15,8 @@ import java.util.List;
 @Repository
 public class OrgSilServiceDao {
 
-  private static final String FIND_PAID_NOTIFICATION_OUTCOME_SQL_PATH = "mypay/org-sil-service/paid-notification-outcome.sql";
-  private static final String FIND_ACTUALIZATION_SQL_PATH = "mypay/org-sil-service/actualization.sql";
+  protected static final String FIND_PAID_NOTIFICATION_OUTCOME_SQL_PATH = "mypay/org-sil-service/paid-notification-outcome.sql";
+  protected static final String FIND_ACTUALIZATION_SQL_PATH = "mypay/org-sil-service/actualization.sql";
   protected static final RowMapper<OrgSilService> ORG_SIL_SERVICE_ROW_MAPPER =
     DataClassRowMapper.newInstance(OrgSilService.class);
 

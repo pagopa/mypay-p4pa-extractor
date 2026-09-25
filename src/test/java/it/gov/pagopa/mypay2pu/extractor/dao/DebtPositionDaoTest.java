@@ -3,6 +3,7 @@ package it.gov.pagopa.mypay2pu.extractor.dao;
 import it.gov.pagopa.mypay2pu.extractor.config.ExtractorExportProperties;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.DebtPosition;
 import it.gov.pagopa.mypay2pu.extractor.service.SqlLoader;
+import it.gov.pagopa.mypay2pu.extractor.utils.SqlTestUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,20 +14,14 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.Month;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
+import java.time.*;
 import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.same;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class DebtPositionDaoTest {
@@ -42,6 +37,25 @@ class DebtPositionDaoTest {
   @AfterEach
   void tearDown() {
     verifyNoMoreInteractions(mp4JdbcTemplateMock, sqlLoaderMock);
+  }
+
+  @Test
+  void testSqlParameters() {
+    List<String> parameters = List.of(
+      "codIpaEnte",
+      "skipCodIuvFilter",
+      "iuvs",
+      "skipDateFromFilter",
+      "dateFrom",
+      "skipDateToExclusiveFilter",
+      "dateToExclusive",
+      "skipGpdEnabledFilter",
+      "limit",
+      "offset"
+    );
+
+    SqlTestUtils.assertQueryParameters(DebtPositionDao.FIND_DEBT_POSITIONS_SQL_PATH, parameters);
+    SqlTestUtils.assertQueryParameters(DebtPositionDao.FIND_CANCELLED_DEBT_POSITIONS_SQL_PATH, parameters);
   }
 
   @Test
@@ -182,8 +196,8 @@ class DebtPositionDaoTest {
   }
 
   private DebtPositionDao buildDao(boolean gpdEnabled) {
-    when(sqlLoaderMock.load("mypay/debt-positions/debt-positions-open.sql")).thenReturn(FIND_DEBT_POSITIONS_SQL);
-    when(sqlLoaderMock.load("mypay/debt-positions/debt-positions-cancelled.sql")).thenReturn(FIND_CANCELLED_DEBT_POSITIONS_SQL);
+    when(sqlLoaderMock.load(DebtPositionDao.FIND_DEBT_POSITIONS_SQL_PATH)).thenReturn(FIND_DEBT_POSITIONS_SQL);
+    when(sqlLoaderMock.load(DebtPositionDao.FIND_CANCELLED_DEBT_POSITIONS_SQL_PATH)).thenReturn(FIND_CANCELLED_DEBT_POSITIONS_SQL);
     return new DebtPositionDao(
       mp4JdbcTemplateMock,
       new ExtractorExportProperties(

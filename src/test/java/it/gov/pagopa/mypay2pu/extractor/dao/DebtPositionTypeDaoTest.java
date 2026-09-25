@@ -3,6 +3,7 @@ package it.gov.pagopa.mypay2pu.extractor.dao;
 import it.gov.pagopa.mypay2pu.extractor.config.ExtractorExportProperties;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.DebtPositionType;
 import it.gov.pagopa.mypay2pu.extractor.service.SqlLoader;
+import it.gov.pagopa.mypay2pu.extractor.utils.SqlTestUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,9 +18,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.same;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class DebtPositionTypeDaoTest {
@@ -34,6 +33,19 @@ class DebtPositionTypeDaoTest {
   @AfterEach
   void tearDown() {
     verifyNoMoreInteractions(mp4JdbcTemplateMock, sqlLoaderMock);
+  }
+
+  @Test
+  void testSqlParameters() {
+    List<String> parameters = List.of(
+      "brokerCf",
+      "skipDebtPositionTypeCodesFilter",
+      "debtPositionTypeCodes",
+      "limit",
+      "offset"
+    );
+
+    SqlTestUtils.assertQueryParameters(DebtPositionTypeDao.FIND_BY_FILTERS_SQL_PATH, parameters);
   }
 
   @Test
@@ -70,7 +82,7 @@ class DebtPositionTypeDaoTest {
   }
 
   private DebtPositionTypeDao buildDao() {
-    when(sqlLoaderMock.load("mypay/debt-position-type/debt-position-type.sql")).thenReturn(FIND_ALL_SQL);
+    when(sqlLoaderMock.load(DebtPositionTypeDao.FIND_BY_FILTERS_SQL_PATH)).thenReturn(FIND_ALL_SQL);
     return new DebtPositionTypeDao(
       mp4JdbcTemplateMock,
       new ExtractorExportProperties(

@@ -20,7 +20,7 @@ import java.util.List;
 @Repository
 public class PaymentNotificationDao {
 
-  private static final String FIND_BY_FILTERS_SQL_PATH = "mypivot/payment-notification/payment-notification.sql";
+  protected static final String FIND_BY_FILTERS_SQL_PATH = "mypivot/payment-notification/payment-notification.sql";
   protected static final RowMapper<PaymentNotification> PAYMENT_NOTIFICATION_ROW_MAPPER =
     DataClassRowMapper.newInstance(PaymentNotification.class);
 
