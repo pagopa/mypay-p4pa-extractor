@@ -1,7 +1,8 @@
 package it.gov.pagopa.mypay2pu.extractor.dao;
 
 import it.gov.pagopa.mypay2pu.extractor.model.mpv4.AssessmentsRegistry;
-import it.gov.pagopa.mypay2pu.extractor.utils.SqlLoader;
+import it.gov.pagopa.mypay2pu.extractor.service.SqlLoader;
+import it.gov.pagopa.mypay2pu.extractor.utils.SqlTestUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,9 +22,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.same;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class AssessmentsRegistryDaoTest {
@@ -39,6 +38,23 @@ class AssessmentsRegistryDaoTest {
   @AfterEach
   void tearDown() {
     verifyNoMoreInteractions(mypivotJdbcTemplateMock, sqlLoaderMock);
+  }
+
+  @Test
+  void testSqlParameters() {
+    List<String> parameters = List.of(
+      "ipaCode",
+      "dateFrom",
+      "skipDateFromFilter",
+      "dateTo",
+      "skipDateToFilter",
+      "skipDebtPositionTypeOrgCodesFilter",
+      "debtPositionTypeOrgCodes",
+      "limit",
+      "offset"
+    );
+
+    SqlTestUtils.assertQueryParameters(AssessmentsRegistryDao.FIND_BY_FILTERS_SQL_PATH, parameters);
   }
 
   @Test
@@ -156,7 +172,7 @@ class AssessmentsRegistryDaoTest {
   }
 
   private AssessmentsRegistryDao buildDao() {
-    when(sqlLoaderMock.load("mypivot/assessments-registry/assessments-registry-export.sql"))
+    when(sqlLoaderMock.load(AssessmentsRegistryDao.FIND_BY_FILTERS_SQL_PATH))
       .thenReturn(FIND_BY_FILTERS_SQL);
     return new AssessmentsRegistryDao(mypivotJdbcTemplateMock, sqlLoaderMock);
   }

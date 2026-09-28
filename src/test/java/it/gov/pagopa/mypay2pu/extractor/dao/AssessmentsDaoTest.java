@@ -1,7 +1,8 @@
 package it.gov.pagopa.mypay2pu.extractor.dao;
 
 import it.gov.pagopa.mypay2pu.extractor.model.mpv4.Assessments;
-import it.gov.pagopa.mypay2pu.extractor.utils.SqlLoader;
+import it.gov.pagopa.mypay2pu.extractor.service.SqlLoader;
+import it.gov.pagopa.mypay2pu.extractor.utils.SqlTestUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,6 +40,23 @@ class AssessmentsDaoTest {
   @AfterEach
   void tearDown() {
     verifyNoMoreInteractions(mypivotJdbcTemplateMock, sqlLoaderMock);
+  }
+
+  @Test
+  void testSqlParameters() {
+    List<String> parameters = List.of(
+      "ipaCode",
+      "skipAssessmentCodesFilter",
+      "assessmentCodes",
+      "dateFrom",
+      "skipDateFromFilter",
+      "dateTo",
+      "skipDateToFilter",
+      "limit",
+      "offset"
+    );
+
+    SqlTestUtils.assertQueryParameters(AssessmentsDao.FIND_BY_FILTERS_SQL_PATH, parameters);
   }
 
   @Test
@@ -149,7 +167,7 @@ class AssessmentsDaoTest {
   }
 
   private AssessmentsDao buildDao() {
-    when(sqlLoaderMock.load("mypivot/assessments/assessments-export.sql")).thenReturn(FIND_BY_FILTERS_SQL);
+    when(sqlLoaderMock.load(AssessmentsDao.FIND_BY_FILTERS_SQL_PATH)).thenReturn(FIND_BY_FILTERS_SQL);
     return new AssessmentsDao(mypivotJdbcTemplateMock, sqlLoaderMock);
   }
 }

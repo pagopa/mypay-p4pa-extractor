@@ -2,7 +2,7 @@ package it.gov.pagopa.mypay2pu.extractor.dao;
 
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.OrgSilService;
 import it.gov.pagopa.mypay2pu.extractor.utils.QueryUtils;
-import it.gov.pagopa.mypay2pu.extractor.utils.SqlLoader;
+import it.gov.pagopa.mypay2pu.extractor.service.SqlLoader;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.DataClassRowMapper;
 import org.springframework.jdbc.core.RowMapper;
@@ -15,8 +15,8 @@ import java.util.List;
 @Repository
 public class OrgSilServiceDao {
 
-  private static final String FIND_PAID_NOTIFICATION_OUTCOME_SQL_PATH = "mypay/org-sil-service/paid-notification-outcome.sql";
-  private static final String FIND_ACTUALIZATION_SQL_PATH = "mypay/org-sil-service/actualization.sql";
+  protected static final String FIND_PAID_NOTIFICATION_OUTCOME_SQL_PATH = "mypay/org-sil-service/paid-notification-outcome.sql";
+  protected static final String FIND_ACTUALIZATION_SQL_PATH = "mypay/org-sil-service/actualization.sql";
   protected static final RowMapper<OrgSilService> ORG_SIL_SERVICE_ROW_MAPPER =
     DataClassRowMapper.newInstance(OrgSilService.class);
 

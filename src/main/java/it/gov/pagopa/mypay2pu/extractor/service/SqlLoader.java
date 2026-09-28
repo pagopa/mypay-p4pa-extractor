@@ -1,8 +1,8 @@
-package it.gov.pagopa.mypay2pu.extractor.utils;
+package it.gov.pagopa.mypay2pu.extractor.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
-import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
@@ -60,7 +61,7 @@ public class SqlLoader {
 
     try (InputStream inputStream = resource.getInputStream()) {
       String query = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8).trim();
-      log.info("Loaded SQL resource: location={}, query={}", location, query);
+      log.debug("Loaded SQL resource: location={}, query={}", location, query);
       return query;
     } catch (IOException exception) {
       throw new UncheckedIOException("Cannot read SQL resource: " + location, exception);
@@ -69,5 +70,13 @@ public class SqlLoader {
 
   ClassPathResource getResource(String location) {
     return new ClassPathResource(location);
+  }
+
+  public Set<String> getLoadedSqlLocations() {
+    return sqlCache.keySet();
+  }
+
+  public String getLoadedSqlContent(String location) {
+    return sqlCache.get(location);
   }
 }

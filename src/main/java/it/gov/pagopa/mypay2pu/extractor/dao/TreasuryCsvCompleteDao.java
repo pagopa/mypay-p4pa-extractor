@@ -3,7 +3,7 @@ package it.gov.pagopa.mypay2pu.extractor.dao;
 import it.gov.pagopa.mypay2pu.extractor.model.mpv4.TreasuryCsvComplete;
 import it.gov.pagopa.mypay2pu.extractor.utils.DateTimeUtils;
 import it.gov.pagopa.mypay2pu.extractor.utils.QueryUtils;
-import it.gov.pagopa.mypay2pu.extractor.utils.SqlLoader;
+import it.gov.pagopa.mypay2pu.extractor.service.SqlLoader;
 import it.gov.pagopa.mypay2pu.extractor.validation.LogicalKeyPair;
 import it.gov.pagopa.mypay2pu.extractor.validation.PairedLogicalKeyValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +21,7 @@ import java.util.List;
 @Repository
 public class TreasuryCsvCompleteDao {
 
-  private static final String FIND_BY_FILTERS_SQL_PATH = "mypivot/treasury-csv-complete/treasury-csv-complete.sql";
+  protected static final String FIND_BY_FILTERS_SQL_PATH = "mypivot/treasury-csv-complete/treasury-csv-complete.sql";
   protected static final RowMapper<TreasuryCsvComplete> TREASURY_CSV_COMPLETE_ROW_MAPPER =
     DataClassRowMapper.newInstance(TreasuryCsvComplete.class);
 

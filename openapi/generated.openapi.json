@@ -15,6 +15,9 @@
   "tags" : [ {
     "name" : "Extract",
     "description" : "Extraction lifecycle APIs"
+  }, {
+    "name" : "Config",
+    "description" : "the Config API"
   } ],
   "paths" : {
     "/extract" : {
@@ -89,6 +92,104 @@
           "404" : {
             "description" : "Extraction not found",
             "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorDTO"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/config/sql" : {
+      "get" : {
+        "tags" : [ "Config" ],
+        "summary" : "Get SQL locations",
+        "operationId" : "getSqlLocations",
+        "responses" : {
+          "200" : {
+            "description" : "Sql loaded locations",
+            "content" : {
+              "plain/text" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "type" : "string"
+                  }
+                }
+              },
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "type" : "string"
+                  }
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Extraction not found",
+            "content" : {
+              "plain/text" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorDTO"
+                }
+              },
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorDTO"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/config/sql/{location}" : {
+      "get" : {
+        "tags" : [ "Config" ],
+        "summary" : "Get SQL location content",
+        "operationId" : "getSqlContent",
+        "parameters" : [ {
+          "name" : "location",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Sql loaded location content",
+            "content" : {
+              "plain/text" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "application/json" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Extraction not found",
+            "content" : {
+              "plain/text" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorDTO"
+                }
+              },
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/ErrorDTO"

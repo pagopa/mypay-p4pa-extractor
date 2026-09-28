@@ -2,7 +2,8 @@ package it.gov.pagopa.mypay2pu.extractor.dao;
 
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionFilters;
 import it.gov.pagopa.mypay2pu.extractor.model.mp4.Organization;
-import it.gov.pagopa.mypay2pu.extractor.utils.SqlLoader;
+import it.gov.pagopa.mypay2pu.extractor.service.SqlLoader;
+import it.gov.pagopa.mypay2pu.extractor.utils.SqlTestUtils;
 import it.gov.pagopa.mypay2pu.extractor.utils.TimeUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -16,19 +17,13 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.Month;
-import java.time.OffsetDateTime;
+import java.time.*;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class OrganizationDaoTest {
@@ -45,6 +40,28 @@ class OrganizationDaoTest {
   @AfterEach
   void tearDown() {
     verifyNoMoreInteractions(mp4JdbcTemplateMock, mpv4JdbcTemplateMock, sqlLoaderMock);
+  }
+
+  @Test
+  void testSqlParameters() {
+    List<String> parameters = List.of(
+      "ipaCodes",
+      "skipModifiedFromFilter",
+      "modifiedFrom",
+      "skipModifiedToExclusiveFilter",
+      "modifiedToExclusive",
+      "limit",
+      "offset"
+    );
+
+    SqlTestUtils.assertQueryParameters(OrganizationDao.FIND_BY_FILTERS_SQL_PATH, parameters);
+  }
+
+  @Test
+  void testTreasurySqlParameters() {
+    List<String> parameters = List.of("codIpaEnte");
+
+    SqlTestUtils.assertQueryParameters(OrganizationDao.FIND_TREASURY_BY_IPA_SQL_PATH, parameters);
   }
 
   @Test
@@ -160,8 +177,8 @@ class OrganizationDaoTest {
   }
 
   private OrganizationDao buildDao(NamedParameterJdbcTemplate mpv4JdbcTemplate) {
-    when(sqlLoaderMock.load("mypay/organization/organization.sql")).thenReturn(FIND_BY_FILTERS_SQL);
-    when(sqlLoaderMock.load("mypivot/organization/has-treasury.sql")).thenReturn(FIND_TREASURY_BY_IPA_SQL);
+    when(sqlLoaderMock.load(OrganizationDao.FIND_BY_FILTERS_SQL_PATH)).thenReturn(FIND_BY_FILTERS_SQL);
+    when(sqlLoaderMock.load(OrganizationDao.FIND_TREASURY_BY_IPA_SQL_PATH)).thenReturn(FIND_TREASURY_BY_IPA_SQL);
     return new OrganizationDao(mp4JdbcTemplateMock, mpv4JdbcTemplate, sqlLoaderMock);
   }
 }
