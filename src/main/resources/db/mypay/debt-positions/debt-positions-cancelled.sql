@@ -57,7 +57,6 @@ WHERE e.cod_ipa_ente = :codIpaEnte
   AND (:skipCodIuvFilter = TRUE OR de.cod_iuv IN (:iuvs))
   AND (:skipDateFromFilter = TRUE OR de.dt_creazione >= :dateFrom)
   AND (:skipDateToExclusiveFilter = TRUE OR de.dt_creazione < :dateToExclusive)
-  AND :skipGpdEnabledFilter = TRUE
 ORDER BY de.dt_creazione, de.mygov_dovuto_elaborato_id
 LIMIT :limit
 OFFSET COALESCE(:offset, 0)

@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
@@ -18,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class SqlLoader {
 
-  private static final Path BASE_SQL_PATH = Path.of("db");
+  private static final Path BASE_SQL_PATH = Path.of(File.separator + "db");
 
   private final Map<String, String> sqlCache = new ConcurrentHashMap<>();
 
@@ -49,7 +50,7 @@ public class SqlLoader {
       throw new IllegalArgumentException("SQL resource location escapes base path: " + location);
     }
 
-    return "/" + normalizedPath.toString().replace('\\', '/');
+    return normalizedPath.toString();
   }
 
   private String readSql(String location) {

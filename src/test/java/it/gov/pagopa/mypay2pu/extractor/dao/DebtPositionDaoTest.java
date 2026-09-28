@@ -41,7 +41,7 @@ class DebtPositionDaoTest {
 
   @Test
   void testSqlParameters() {
-    List<String> parameters = List.of(
+    List<String> openDebtPositionsParameters = List.of(
       "codIpaEnte",
       "skipCodIuvFilter",
       "iuvs",
@@ -53,9 +53,20 @@ class DebtPositionDaoTest {
       "limit",
       "offset"
     );
+    List<String> cancelledDebtPositionsParameters = List.of(
+      "codIpaEnte",
+      "skipCodIuvFilter",
+      "iuvs",
+      "skipDateFromFilter",
+      "dateFrom",
+      "skipDateToExclusiveFilter",
+      "dateToExclusive",
+      "limit",
+      "offset"
+    );
 
-    SqlTestUtils.assertQueryParameters(DebtPositionDao.FIND_DEBT_POSITIONS_SQL_PATH, parameters);
-    SqlTestUtils.assertQueryParameters(DebtPositionDao.FIND_CANCELLED_DEBT_POSITIONS_SQL_PATH, parameters);
+    SqlTestUtils.assertQueryParameters(DebtPositionDao.FIND_DEBT_POSITIONS_SQL_PATH, openDebtPositionsParameters);
+    SqlTestUtils.assertQueryParameters(DebtPositionDao.FIND_CANCELLED_DEBT_POSITIONS_SQL_PATH, cancelledDebtPositionsParameters);
   }
 
   @Test
