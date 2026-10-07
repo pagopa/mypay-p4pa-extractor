@@ -112,11 +112,16 @@ public class MypaySharePaymentsReportingExportProcessingService {
 
       ResolvedFiles resolvedFiles = resolveExistingXmlFiles(records, ipaCode);
       Path zipPath = resolveZipPath(extractionId, fileNameBuilder.buildZipPartBaseName(partNumber));
-      zipFileService.zipper(zipPath, resolvedFiles.existingXmlFiles(), false);
+      zipFileService.zipper(
+        zipPath,
+        resolvedFiles.existingXmlFiles(),
+        false,
+        file -> IPA_CODE_FILE_NAME_FORMAT.formatted(ipaCode, file.getFileName())
+      );
       archiveFiles.add(new ArchiveFile()
         .name(zipPath.getFileName().toString())
         .files(resolvedFiles.existingXmlFiles().stream()
-          .map(file -> file.getFileName().toString())
+          .map(file -> IPA_CODE_FILE_NAME_FORMAT.formatted(ipaCode, file.getFileName()))
           .toList()));
       writeMissingFilesCsv(
         extractionId,
