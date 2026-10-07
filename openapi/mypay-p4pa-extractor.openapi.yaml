@@ -203,7 +203,7 @@ components:
         - status
         - createdAt
         - updatedAt
-        - files
+        - archiveFiles
       properties:
         extractionId:
           type: string
@@ -224,6 +224,18 @@ components:
           type: string
           format: date-time
         error:
+          type: string
+        archiveFiles:
+          type: array
+          items:
+            $ref: '#/components/schemas/ArchiveFile'
+    ArchiveFile:
+      type: object
+      required:
+        - name
+        - files
+      properties:
+        name:
           type: string
         files:
           type: array

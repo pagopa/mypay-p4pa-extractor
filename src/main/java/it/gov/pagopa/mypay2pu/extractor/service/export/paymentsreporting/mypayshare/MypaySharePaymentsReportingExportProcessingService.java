@@ -5,6 +5,7 @@ import it.gov.pagopa.mypay2pu.extractor.config.MyPayProperties;
 import it.gov.pagopa.mypay2pu.extractor.config.PaymentsReportingSource;
 import it.gov.pagopa.mypay2pu.extractor.dao.PaymentReportingMyPayShareDao;
 import it.gov.pagopa.mypay2pu.extractor.dto.ExportFileResult;
+import it.gov.pagopa.mypay2pu.extractor.dto.generated.ArchiveFile;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionFilters;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
@@ -30,6 +31,7 @@ public class MypaySharePaymentsReportingExportProcessingService {
 
   private static final String ZIP_VERSION = "1.0";
   private static final String MISSING_XML_DESCRIPTION = "XML file not found on the MyPay share";
+  private static final String IPA_CODE_FILE_NAME_FORMAT = "%s-%s";
   private final PaymentReportingMyPayShareDao paymentReportingMyPayShareDao;
   private final ExtractorExportProperties extractorExportProperties;
   private final Path myPaySharedFolderPath;
@@ -59,14 +61,14 @@ public class MypaySharePaymentsReportingExportProcessingService {
   }
 
   public ExportFileResult executeExport(String extractionId, ExtractionRequest request) {
-    List<String> zipFileNames = new ArrayList<>();
+    List<ArchiveFile> archiveFiles = new ArrayList<>();
     for (String organizationId : request.getIpaCodes()) {
-      zipFileNames.addAll(createZips(extractionId, organizationId, request));
+      archiveFiles.addAll(createZips(extractionId, organizationId, request));
     }
-    return new ExportFileResult(zipFileNames, null);
+    return ExportFileResult.fromArchiveFiles(archiveFiles, null);
   }
 
-  private List<String> createZips(String extractionId, String ipaCode, ExtractionRequest request) {
+  private List<ArchiveFile> createZips(String extractionId, String ipaCode, ExtractionRequest request) {
     ExtractionFilters filters = request.getFilters();
     List<String> flowIdentifiers = ValueLogicalKeyValidator.parseLogicalKey(
       filters != null ? filters.getLogicalKey() : null
@@ -76,7 +78,7 @@ public class MypaySharePaymentsReportingExportProcessingService {
     int pageSize = extractorExportProperties.resolveFileTypeConfiguration(MigrationFileType.PAYMENTS_REPORTING)
       .exportPageSize();
     ExportFileNameBuilder fileNameBuilder = new ExportFileNameBuilder(
-      "%s-%s".formatted(extractorExportProperties.brokerIpaCode(), ipaCode),
+      IPA_CODE_FILE_NAME_FORMAT.formatted(extractorExportProperties.brokerIpaCode(), ipaCode),
       ipaCode,
       true,
       MigrationFileType.PAYMENTS_REPORTING,
@@ -91,7 +93,7 @@ public class MypaySharePaymentsReportingExportProcessingService {
 
     int offset = 0;
     int partNumber = 1;
-    List<String> zipFileNames = new ArrayList<>();
+    List<ArchiveFile> archiveFiles = new ArrayList<>();
     List<Path> records;
     do {
       records = paymentReportingMyPayShareDao.findByFilters(
@@ -113,14 +115,17 @@ public class MypaySharePaymentsReportingExportProcessingService {
         zipPath,
         resolvedFiles.existingXmlFiles(),
         false,
-        file -> "%s-%s".formatted(ipaCode, file.getFileName())
+        file -> IPA_CODE_FILE_NAME_FORMAT.formatted(ipaCode, file.getFileName())
       );
-      zipFileNames.add(zipPath.getFileName().toString());
+      archiveFiles.add(new ArchiveFile()
+        .name(zipPath.getFileName().toString())
+        .files(resolvedFiles.existingXmlFiles().stream()
+          .map(file -> IPA_CODE_FILE_NAME_FORMAT.formatted(ipaCode, file.getFileName()))
+          .toList()));
       writeMissingFilesCsv(
         extractionId,
         fileNameBuilder.buildZipPartBaseName(partNumber),
-        resolvedFiles.missingXmlFiles(),
-        zipFileNames
+        resolvedFiles.missingXmlFiles()
       );
 
       log.info(
@@ -131,7 +136,7 @@ public class MypaySharePaymentsReportingExportProcessingService {
       offset += records.size();
       partNumber++;
     } while(records.size() >= pageSize);
-    return zipFileNames;
+    return archiveFiles;
   }
 
   private ResolvedFiles resolveExistingXmlFiles(List<Path> records, String ipaCode) {
@@ -163,8 +168,7 @@ public class MypaySharePaymentsReportingExportProcessingService {
 
   private void writeMissingFilesCsv(String extractionId,
                                     String zipFileBaseName,
-                                    List<Path> missingXmlFiles,
-                                    List<String> generatedFileNames) {
+                                    List<Path> missingXmlFiles) {
     if (missingXmlFiles.isEmpty()) {
       return;
     }
@@ -181,7 +185,6 @@ public class MypaySharePaymentsReportingExportProcessingService {
     } catch (java.io.IOException e) {
       throw new IllegalStateException("Cannot create payments reporting discard file " + discardFilePath, e);
     }
-    generatedFileNames.add(discardFilePath.getFileName().toString());
   }
 
   private Path resolveZipPath(String extractionId, String zipFileName) {

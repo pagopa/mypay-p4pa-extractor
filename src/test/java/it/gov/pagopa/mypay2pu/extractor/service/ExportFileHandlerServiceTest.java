@@ -1,6 +1,7 @@
 package it.gov.pagopa.mypay2pu.extractor.service;
 
 import it.gov.pagopa.mypay2pu.extractor.dto.ExportFileResult;
+import it.gov.pagopa.mypay2pu.extractor.dto.generated.ArchiveFile;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionStatus;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionStatusResponse;
@@ -117,7 +118,10 @@ class ExportFileHandlerServiceTest {
     InOrder inOrder = inOrder(exportFileStatusServiceMock, dataExportFacadeServiceMock);
     inOrder.verify(exportFileStatusServiceMock).createNew(extractionId, request);
     inOrder.verify(dataExportFacadeServiceMock).executeExport(extractionId, request);
-    verify(exportFileStatusServiceMock).update(extractionId, new ExportFileResult(List.of(), "export failed"));
+    verify(exportFileStatusServiceMock).update(
+      extractionId,
+      ExportFileResult.fromArchiveFiles(List.of(), "export failed")
+    );
   }
 
   @Test
@@ -160,7 +164,7 @@ class ExportFileHandlerServiceTest {
       OffsetDateTime.parse("2026-01-01T00:00:00Z"),
       OffsetDateTime.parse("2026-01-01T00:00:00Z"),
       null,
-      List.of("organizations.csv")
+      List.of(new ArchiveFile("archive1.zip", List.of("organizations.csv")))
     );
     when(exportFileStatusServiceMock.readStatus(extractionId)).thenReturn(statusResponse);
 

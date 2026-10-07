@@ -1,6 +1,7 @@
 package it.gov.pagopa.mypay2pu.extractor.dao;
 
 import it.gov.pagopa.mypay2pu.extractor.config.json.JsonConfig;
+import it.gov.pagopa.mypay2pu.extractor.dto.generated.ArchiveFile;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionStatus;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionStatusResponse;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
@@ -40,7 +41,7 @@ class ExportFileStatusDaoTest {
       now,
       now,
       null,
-      List.of("organizations.csv")
+      List.of(new ArchiveFile("archive1.zip", List.of("file1.csv", "file2.csv")))
     );
 
     service.writeStatus(status);
@@ -50,9 +51,39 @@ class ExportFileStatusDaoTest {
     assertEquals(List.of("IPA_CODE_TEST"), storedStatus.getIpaCodes());
     assertEquals(MigrationFileType.ORGANIZATIONS, storedStatus.getFileTypes());
     assertEquals(ExtractionStatus.RUNNING, storedStatus.getStatus());
-    assertEquals(List.of("organizations.csv"), storedStatus.getFiles());
+    assertEquals(
+      List.of(new ArchiveFile("archive1.zip", List.of("file1.csv", "file2.csv"))),
+      storedStatus.getArchiveFiles()
+    );
     assertNotNull(storedStatus.getCreatedAt());
     assertNotNull(storedStatus.getUpdatedAt());
+  }
+
+  @Test
+  void givenStatusWhenWrittenThenSerializeArchiveFilesWithNamesAndContents() throws Exception {
+    ExportFileStatusDao service = new ExportFileStatusDao(jsonMapper, tempDir.toString());
+    OffsetDateTime now = OffsetDateTime.parse("2026-01-01T00:00:00Z");
+    ExtractionStatusResponse status = new ExtractionStatusResponse(
+      "extraction-id",
+      List.of("IPA_CODE_TEST"),
+      MigrationFileType.ORGANIZATIONS,
+      ExtractionStatus.COMPLETED,
+      now,
+      now,
+      null,
+      List.of(
+        new ArchiveFile("archive1.zip", List.of("file1.csv", "file2.csv")),
+        new ArchiveFile("archive2.zip", List.of("file3.csv", "file4.csv"))
+      )
+    );
+
+    service.writeStatus(status);
+
+    String json = Files.readString(service.resolveExtractionDirectory("extraction-id").resolve("status.json"));
+    assertTrue(json.contains("\"archiveFiles\""));
+    assertTrue(json.contains("\"name\":\"archive1.zip\""));
+    assertTrue(json.contains("\"files\":[\"file1.csv\",\"file2.csv\"]"));
+    assertFalse(json.contains("\"files\":[\"archive1.zip\""));
   }
 
   @Test

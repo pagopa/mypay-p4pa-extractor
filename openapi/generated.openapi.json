@@ -286,6 +286,21 @@
         "type" : [ "string", "null" ],
         "enum" : [ "ORGANIZATIONS", "ORG_SIL_SERVICES", "DEBT_POSITIONS_TYPE", "DEBT_POSITIONS_TYPE_ORG", "DEBT_POSITIONS_TYPE_ORG_OPERATORS", "DEBT_POSITIONS", "DEBT_POSITIONS_PAID", "PAYMENT_NOTIFICATION", "PAYMENTS_REPORTING", "TREASURY_CSV_COMPLETE", "ASSESSMENTS", "ASSESSMENTS_REGISTRY" ]
       },
+      "ArchiveFile" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string"
+          },
+          "files" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        },
+        "required" : [ "files", "name" ]
+      },
       "ExtractionStatus" : {
         "type" : "string",
         "enum" : [ "RUNNING", "COMPLETED", "FAILED" ]
@@ -321,14 +336,14 @@
           "error" : {
             "type" : [ "string", "null" ]
           },
-          "files" : {
+          "archiveFiles" : {
             "type" : "array",
             "items" : {
-              "type" : "string"
+              "$ref" : "#/components/schemas/ArchiveFile"
             }
           }
         },
-        "required" : [ "createdAt", "extractionId", "files", "status", "updatedAt" ]
+        "required" : [ "archiveFiles", "createdAt", "extractionId", "status", "updatedAt" ]
       }
     },
     "securitySchemes" : {

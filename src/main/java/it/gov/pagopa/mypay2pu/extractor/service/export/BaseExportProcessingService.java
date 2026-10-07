@@ -2,6 +2,7 @@ package it.gov.pagopa.mypay2pu.extractor.service.export;
 
 import it.gov.pagopa.mypay2pu.extractor.config.ExtractorExportProperties;
 import it.gov.pagopa.mypay2pu.extractor.dto.ExportFileResult;
+import it.gov.pagopa.mypay2pu.extractor.dto.generated.ArchiveFile;
 import it.gov.pagopa.mypay2pu.extractor.dto.export.CsvExportDto;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
@@ -109,14 +110,14 @@ public abstract class BaseExportProcessingService<E extends ExportModel, C exten
         errorFilePaths
       );
 
-      List<String> archivedFiles = archiveExportFiles(
+      List<ArchiveFile> archiveFiles = archiveExportFiles(
         csvFilePaths,
         errorFilePaths,
         zipFileNameBuilder.buildZipBaseName(),
         extractionDirectory,
         workingDirectory
       );
-      return new ExportFileResult(archivedFiles, null);
+      return ExportFileResult.fromArchiveFiles(archiveFiles, null);
     } catch (IOException e) {
       throw new IllegalStateException(
         "Cannot generate export for " + getMigrationFileType(),
@@ -236,27 +237,31 @@ public abstract class BaseExportProcessingService<E extends ExportModel, C exten
    * @param exportName export base name
    * @param extractionDirectory target archive directory
    * @param workingDirectory temporary working directory
-   * @return names of archived files
+   * @return archived files and their ZIP entry names
    * @throws IOException if archive creation fails
    */
-  private List<String> archiveExportFiles(List<Path> csvFilePaths,
-                                          List<Path> errorFilePaths,
-                                          String exportName,
-                                          Path extractionDirectory,
-                                          Path workingDirectory) throws IOException {
-    List<String> archivedFileNames = new ArrayList<>(2);
+  private List<ArchiveFile> archiveExportFiles(List<Path> csvFilePaths,
+                                               List<Path> errorFilePaths,
+                                               String exportName,
+                                               Path extractionDirectory,
+                                               Path workingDirectory) throws IOException {
+    List<ArchiveFile> archiveFiles = new ArrayList<>(2);
 
     Path exportZipPath = workingDirectory.resolve(exportName + ".zip");
     fileArchiverService.compressAndArchive(csvFilePaths, exportZipPath, extractionDirectory);
-    archivedFileNames.add(exportZipPath.getFileName().toString());
+    archiveFiles.add(new ArchiveFile()
+      .name(exportZipPath.getFileName().toString())
+      .files(csvFilePaths.stream().map(path -> path.getFileName().toString()).toList()));
 
     if (!errorFilePaths.isEmpty()) {
       String errorZipName = exportName + ".errors.zip";
       Path errorZipPath = workingDirectory.resolve(errorZipName);
       fileArchiverService.compressAndArchive(errorFilePaths, errorZipPath, extractionDirectory);
-      archivedFileNames.add(errorZipPath.getFileName().toString());
+      archiveFiles.add(new ArchiveFile()
+        .name(errorZipPath.getFileName().toString())
+        .files(errorFilePaths.stream().map(path -> path.getFileName().toString()).toList()));
     }
-    return archivedFileNames;
+    return archiveFiles;
   }
 
   private String resolveOrganizationIpaCode(ExtractionRequest request) {
