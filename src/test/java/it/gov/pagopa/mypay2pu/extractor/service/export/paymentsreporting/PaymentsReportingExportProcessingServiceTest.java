@@ -3,6 +3,7 @@ package it.gov.pagopa.mypay2pu.extractor.service.export.paymentsreporting;
 import it.gov.pagopa.mypay2pu.extractor.config.ExtractorExportProperties;
 import it.gov.pagopa.mypay2pu.extractor.config.PaymentsReportingSource;
 import it.gov.pagopa.mypay2pu.extractor.dto.ExportFileResult;
+import it.gov.pagopa.mypay2pu.extractor.dto.generated.ArchiveFile;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.service.export.paymentsreporting.mypayshare.MypaySharePaymentsReportingExportProcessingService;
@@ -36,7 +37,10 @@ class PaymentsReportingExportProcessingServiceTest {
   @Test
   void givenMypayShareSourceWhenExportThenDelegateToMypayShareService() {
     ExtractionRequest request = request();
-    ExportFileResult expected = new ExportFileResult(List.of("payments-reporting.zip"), null);
+    ExportFileResult expected = new ExportFileResult(
+      List.of(new ArchiveFile("payments-reporting.zip", List.of())),
+      null
+    );
     when(mypayShareServiceMock.executeExport("extraction-id", request)).thenReturn(expected);
 
     ExportFileResult result = service(PaymentsReportingSource.MYPAY_SHARE).executeExport("extraction-id", request);

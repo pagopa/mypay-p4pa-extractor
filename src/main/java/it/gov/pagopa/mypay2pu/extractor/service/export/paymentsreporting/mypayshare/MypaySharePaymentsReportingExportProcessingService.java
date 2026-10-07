@@ -22,6 +22,7 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static it.gov.pagopa.mypay2pu.extractor.utils.Constants.ZONEID;
 
@@ -65,7 +66,7 @@ public class MypaySharePaymentsReportingExportProcessingService {
     for (String organizationId : request.getIpaCodes()) {
       archiveFiles.addAll(createZips(extractionId, organizationId, request));
     }
-    return ExportFileResult.fromArchiveFiles(archiveFiles, null);
+    return new ExportFileResult(archiveFiles, null);
   }
 
   private List<ArchiveFile> createZips(String extractionId, String ipaCode, ExtractionRequest request) {
@@ -111,22 +112,17 @@ public class MypaySharePaymentsReportingExportProcessingService {
 
       ResolvedFiles resolvedFiles = resolveExistingXmlFiles(records, ipaCode);
       Path zipPath = resolveZipPath(extractionId, fileNameBuilder.buildZipPartBaseName(partNumber));
-      zipFileService.zipper(
-        zipPath,
-        resolvedFiles.existingXmlFiles(),
-        false,
-        file -> IPA_CODE_FILE_NAME_FORMAT.formatted(ipaCode, file.getFileName())
-      );
+      zipFileService.zipper(zipPath, resolvedFiles.existingXmlFiles(), false);
       archiveFiles.add(new ArchiveFile()
         .name(zipPath.getFileName().toString())
         .files(resolvedFiles.existingXmlFiles().stream()
-          .map(file -> IPA_CODE_FILE_NAME_FORMAT.formatted(ipaCode, file.getFileName()))
+          .map(file -> file.getFileName().toString())
           .toList()));
       writeMissingFilesCsv(
         extractionId,
         fileNameBuilder.buildZipPartBaseName(partNumber),
         resolvedFiles.missingXmlFiles()
-      );
+      ).ifPresent(archiveFiles::add);
 
       log.info(
         "Generated payments reporting ZIP: ipaCode={}, zip={}, processedXmls={}, skippedXmls={}",
@@ -166,11 +162,11 @@ public class MypaySharePaymentsReportingExportProcessingService {
     return resolvedPath;
   }
 
-  private void writeMissingFilesCsv(String extractionId,
-                                    String zipFileBaseName,
-                                    List<Path> missingXmlFiles) {
+  private Optional<ArchiveFile> writeMissingFilesCsv(String extractionId,
+                                                      String zipFileBaseName,
+                                                      List<Path> missingXmlFiles) {
     if (missingXmlFiles.isEmpty()) {
-      return;
+      return Optional.empty();
     }
 
     Path discardFilePath = resolveOutputPath(extractionId, zipFileBaseName + ".errors.csv");
@@ -185,6 +181,9 @@ public class MypaySharePaymentsReportingExportProcessingService {
     } catch (java.io.IOException e) {
       throw new IllegalStateException("Cannot create payments reporting discard file " + discardFilePath, e);
     }
+    return Optional.of(new ArchiveFile()
+      .name(discardFilePath.getFileName().toString())
+      .files(List.of()));
   }
 
   private Path resolveZipPath(String extractionId, String zipFileName) {

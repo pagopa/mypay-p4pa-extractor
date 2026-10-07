@@ -64,16 +64,18 @@ class MypaySharePaymentsReportingExportProcessingServiceTest {
 
     ExportFileResult result = service().executeExport("extraction-id", request);
 
-    assertEquals(2, result.archiveFiles().size());
+    assertEquals(3, result.archiveFiles().size());
     assertTrue(result.files().getFirst().matches("BROKER_IPA-IPA_CODE-PAYMENTS_REPORTING-\\d{14}-part001-1\\.0\\.zip"));
-    assertEquals(List.of("IPA_CODE-report.xml"), result.archiveFiles().getFirst().getFiles());
+    assertEquals(List.of("report.xml"), result.archiveFiles().getFirst().getFiles());
+    assertTrue(result.files().stream()
+      .anyMatch(fileName -> fileName.matches("BROKER_IPA-IPA_CODE-PAYMENTS_REPORTING-\\d{14}-part002-1\\.0\\.errors\\.csv")));
     Path zipPath = tempDir.resolve("extraction-id").resolve(result.files().getFirst());
     assertTrue(Files.exists(zipPath));
     try (ZipFile zipFile = new ZipFile(zipPath.toFile())) {
       assertEquals(1, zipFile.size());
       assertEquals(
         "<report>content</report>",
-        new String(zipFile.getInputStream(zipFile.getEntry("IPA_CODE-report.xml")).readAllBytes(), StandardCharsets.UTF_8)
+        new String(zipFile.getInputStream(zipFile.getEntry("report.xml")).readAllBytes(), StandardCharsets.UTF_8)
       );
     }
     assertTrue(Files.exists(xmlFile));
@@ -134,7 +136,7 @@ class MypaySharePaymentsReportingExportProcessingServiceTest {
     try (ZipFile zipFile = new ZipFile(zipPath.toFile())) {
       assertEquals(
         "<report>content</report>",
-        new String(zipFile.getInputStream(zipFile.getEntry("IPA_CODE-report.xml")).readAllBytes(), StandardCharsets.UTF_8)
+        new String(zipFile.getInputStream(zipFile.getEntry("report.xml")).readAllBytes(), StandardCharsets.UTF_8)
       );
     }
     verify(paymentReportingMyPayShareDaoMock).findByFilters("IPA_CODE", null, null, null, List.of(), 1, 0);
@@ -157,7 +159,7 @@ class MypaySharePaymentsReportingExportProcessingServiceTest {
     try (ZipFile zipFile = new ZipFile(zipPath.toFile())) {
       assertEquals(
         "<report>content</report>",
-        new String(zipFile.getInputStream(zipFile.getEntry("IPA_CODE-report.xml")).readAllBytes(), StandardCharsets.UTF_8)
+        new String(zipFile.getInputStream(zipFile.getEntry("report.xml")).readAllBytes(), StandardCharsets.UTF_8)
       );
     }
     verify(paymentReportingMyPayShareDaoMock).findByFilters("IPA_CODE", null, null, null, List.of(), 1, 0);

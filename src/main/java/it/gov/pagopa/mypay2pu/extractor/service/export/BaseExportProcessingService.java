@@ -117,7 +117,7 @@ public abstract class BaseExportProcessingService<E extends ExportModel, C exten
         extractionDirectory,
         workingDirectory
       );
-      return ExportFileResult.fromArchiveFiles(archiveFiles, null);
+      return new ExportFileResult(archiveFiles, null);
     } catch (IOException e) {
       throw new IllegalStateException(
         "Cannot generate export for " + getMigrationFileType(),

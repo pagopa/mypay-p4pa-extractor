@@ -129,7 +129,7 @@ class ExportFileStatusServiceTest {
   private static Stream<Arguments> updateStatusCases() {
     return Stream.of(
       Arguments.of(
-        ExportFileResult.fromArchiveFiles(
+        new ExportFileResult(
           List.of(new ArchiveFile("archive1.zip", List.of("file1.csv", "file2.csv"))),
           null
         ),
@@ -138,7 +138,7 @@ class ExportFileStatusServiceTest {
         List.of(new ArchiveFile("archive1.zip", List.of("file1.csv", "file2.csv")))
       ),
       Arguments.of(
-        ExportFileResult.fromArchiveFiles(
+        new ExportFileResult(
           List.of(
             new ArchiveFile("archive1.zip", List.of("file1.csv", "file2.csv")),
             new ArchiveFile("archive2.zip", List.of("file3.csv", "file4.csv"))
@@ -153,13 +153,13 @@ class ExportFileStatusServiceTest {
         )
       ),
       Arguments.of(
-        ExportFileResult.fromArchiveFiles(null, "   "),
+        new ExportFileResult((List<ArchiveFile>) null, "   "),
         ExtractionStatus.COMPLETED,
         null,
         List.of()
       ),
       Arguments.of(
-        ExportFileResult.fromArchiveFiles(
+        new ExportFileResult(
           List.of(new ArchiveFile("archive1.zip", List.of("organizations.csv"))),
           "result error"
         ),
@@ -168,7 +168,7 @@ class ExportFileStatusServiceTest {
         List.of(new ArchiveFile("archive1.zip", List.of("organizations.csv")))
       ),
       Arguments.of(
-        ExportFileResult.fromArchiveFiles(null, "result error"),
+        new ExportFileResult((List<ArchiveFile>) null, "result error"),
         ExtractionStatus.FAILED,
         "result error",
         List.of()

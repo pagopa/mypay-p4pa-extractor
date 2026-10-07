@@ -64,7 +64,10 @@ class ExportFileHandlerServiceTest {
   @Test
   void givenValidRequestWhenCreateExtractionThenReturnGeneratedIdAndScheduleExecution() {
     ExtractionRequest request = new ExtractionRequest(List.of("IPA_CODE_TEST"), MigrationFileType.ORGANIZATIONS);
-    ExportFileResult exportFileResult = new ExportFileResult(List.of("organizations.csv"), null);
+    ExportFileResult exportFileResult = new ExportFileResult(
+      List.of(new ArchiveFile("organizations.csv", List.of())),
+      null
+    );
     ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
 
     String extractionId = service.createExtraction(request);
@@ -92,7 +95,10 @@ class ExportFileHandlerServiceTest {
   void givenValidRequestWhenExecuteExportThenStoreCompletedStatus() {
     String extractionId = "extraction-id";
     ExtractionRequest request = new ExtractionRequest(List.of("IPA_CODE_TEST"), MigrationFileType.ORGANIZATIONS);
-    ExportFileResult exportFileResult = new ExportFileResult(List.of("organizations.csv"), null);
+    ExportFileResult exportFileResult = new ExportFileResult(
+      List.of(new ArchiveFile("organizations.csv", List.of())),
+      null
+    );
 
     when(dataExportFacadeServiceMock.executeExport(extractionId, request))
       .thenReturn(exportFileResult);
@@ -120,7 +126,7 @@ class ExportFileHandlerServiceTest {
     inOrder.verify(dataExportFacadeServiceMock).executeExport(extractionId, request);
     verify(exportFileStatusServiceMock).update(
       extractionId,
-      ExportFileResult.fromArchiveFiles(List.of(), "export failed")
+      new ExportFileResult(List.<ArchiveFile>of(), "export failed")
     );
   }
 
@@ -128,7 +134,10 @@ class ExportFileHandlerServiceTest {
   void givenFacadeReturnsErrorWhenExecuteExportThenStoreFailedStatus() {
     String extractionId = "extraction-id";
     ExtractionRequest request = new ExtractionRequest(List.of("IPA_CODE_TEST"), MigrationFileType.ORGANIZATIONS);
-    ExportFileResult exportFileResult = new ExportFileResult(List.of("organizations.csv"), "result error");
+    ExportFileResult exportFileResult = new ExportFileResult(
+      List.of(new ArchiveFile("organizations.csv", List.of())),
+      "result error"
+    );
 
     when(dataExportFacadeServiceMock.executeExport(extractionId, request))
       .thenReturn(exportFileResult);
