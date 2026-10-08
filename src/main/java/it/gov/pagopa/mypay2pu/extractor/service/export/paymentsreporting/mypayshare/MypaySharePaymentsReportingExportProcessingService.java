@@ -95,6 +95,7 @@ public class MypaySharePaymentsReportingExportProcessingService {
     int offset = 0;
     int partNumber = 1;
     List<ArchiveFile> archiveFiles = new ArrayList<>();
+    List<Path> errorFilePaths = new ArrayList<>();
     List<Path> records;
     do {
       records = paymentReportingMyPayShareDao.findByFilters(
@@ -127,7 +128,7 @@ public class MypaySharePaymentsReportingExportProcessingService {
         extractionId,
         fileNameBuilder.buildZipPartBaseName(partNumber),
         resolvedFiles.missingXmlFiles()
-      ).ifPresent(archiveFiles::add);
+      ).ifPresent(errorFilePaths::add);
 
       log.info(
         "Generated payments reporting ZIP: ipaCode={}, zip={}, processedXmls={}, skippedXmls={}",
@@ -137,6 +138,15 @@ public class MypaySharePaymentsReportingExportProcessingService {
       offset += records.size();
       partNumber++;
     } while(records.size() >= pageSize);
+
+    if (!errorFilePaths.isEmpty()) {
+      Path errorZipPath = resolveOutputPath(extractionId, fileNameBuilder.buildZipBaseName() + ".errors.zip");
+      zipFileService.zipper(errorZipPath, errorFilePaths);
+      archiveFiles.add(new ArchiveFile()
+        .name(errorZipPath.getFileName().toString())
+        .files(errorFilePaths.stream().map(path -> path.getFileName().toString()).toList()));
+    }
+
     return archiveFiles;
   }
 
@@ -167,9 +177,9 @@ public class MypaySharePaymentsReportingExportProcessingService {
     return resolvedPath;
   }
 
-  private Optional<ArchiveFile> writeMissingFilesCsv(String extractionId,
-                                                      String zipFileBaseName,
-                                                      List<Path> missingXmlFiles) {
+  private Optional<Path> writeMissingFilesCsv(String extractionId,
+                                              String zipFileBaseName,
+                                              List<Path> missingXmlFiles) {
     if (missingXmlFiles.isEmpty()) {
       return Optional.empty();
     }
@@ -186,9 +196,7 @@ public class MypaySharePaymentsReportingExportProcessingService {
     } catch (java.io.IOException e) {
       throw new IllegalStateException("Cannot create payments reporting discard file " + discardFilePath, e);
     }
-    return Optional.of(new ArchiveFile()
-      .name(discardFilePath.getFileName().toString())
-      .files(List.of()));
+    return Optional.of(discardFilePath);
   }
 
   private Path resolveZipPath(String extractionId, String zipFileName) {
