@@ -5,6 +5,7 @@ import it.gov.pagopa.mypay2pu.extractor.config.MyPayProperties;
 import it.gov.pagopa.mypay2pu.extractor.config.PaymentsReportingSource;
 import it.gov.pagopa.mypay2pu.extractor.dao.PaymentReportingMyPayShareDao;
 import it.gov.pagopa.mypay2pu.extractor.dto.ExportFileResult;
+import it.gov.pagopa.mypay2pu.extractor.dto.generated.ArchiveFile;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionFilters;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
@@ -23,7 +24,6 @@ import java.nio.file.Path;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 import java.util.zip.ZipFile;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -67,8 +67,15 @@ class MypaySharePaymentsReportingExportProcessingServiceTest {
     assertEquals(3, result.archiveFiles().size());
     assertTrue(result.files().getFirst().matches("BROKER_IPA-IPA_CODE-PAYMENTS_REPORTING-\\d{14}-part001-1\\.0\\.zip"));
     assertEquals(List.of("IPA_CODE-report.xml"), result.archiveFiles().getFirst().getFiles());
-    assertTrue(result.files().stream()
-      .anyMatch(fileName -> fileName.matches("BROKER_IPA-IPA_CODE-PAYMENTS_REPORTING-\\d{14}-part002-1\\.0\\.errors\\.csv")));
+    ArchiveFile errorArchive = result.archiveFiles().stream()
+      .filter(archiveFile -> archiveFile.getName().endsWith(".errors.zip"))
+      .findFirst()
+      .orElseThrow();
+    assertTrue(errorArchive.getName().matches("BROKER_IPA-IPA_CODE-PAYMENTS_REPORTING-\\d{14}-1\\.0\\.errors\\.zip"));
+    assertEquals(1, errorArchive.getFiles().size());
+    String discardFileName = errorArchive.getFiles().getFirst();
+    assertTrue(discardFileName
+      .matches("BROKER_IPA-IPA_CODE-PAYMENTS_REPORTING-\\d{14}-part002-1\\.0\\.errors\\.csv"));
     Path zipPath = tempDir.resolve("extraction-id").resolve(result.files().getFirst());
     assertTrue(Files.exists(zipPath));
     try (ZipFile zipFile = new ZipFile(zipPath.toFile())) {
@@ -79,23 +86,19 @@ class MypaySharePaymentsReportingExportProcessingServiceTest {
       );
     }
     assertTrue(Files.exists(xmlFile));
-    Path extractionDirectory = tempDir.resolve("extraction-id");
-    Path discardFilePath;
-    try (Stream<Path> files = Files.list(extractionDirectory)) {
-      discardFilePath = files
-        .filter(file -> file.getFileName().toString().endsWith(".errors.csv"))
-        .findFirst()
-        .orElseThrow();
+    Path errorZipPath = tempDir.resolve("extraction-id").resolve(errorArchive.getName());
+    assertTrue(Files.exists(errorZipPath));
+    try (ZipFile errorZip = new ZipFile(errorZipPath.toFile())) {
+      assertEquals(
+        List.of(
+          "\"fileName\";\"description\"",
+          "\"missing.xml\";\"XML file not found on the MyPay share\""
+        ),
+        new String(errorZip.getInputStream(errorZip.getEntry(discardFileName)).readAllBytes(), StandardCharsets.UTF_8)
+          .lines()
+          .toList()
+      );
     }
-    assertTrue(discardFilePath.getFileName().toString()
-      .matches("BROKER_IPA-IPA_CODE-PAYMENTS_REPORTING-\\d{14}-part002-1\\.0\\.errors\\.csv"));
-    assertEquals(
-      List.of(
-        "\"fileName\";\"description\"",
-        "\"missing.xml\";\"XML file not found on the MyPay share\""
-      ),
-      Files.readAllLines(discardFilePath)
-    );
     verify(paymentReportingMyPayShareDaoMock).findByFilters("IPA_CODE", null, createdFrom, createdTo, List.of(), 1, 0);
     verify(paymentReportingMyPayShareDaoMock).findByFilters("IPA_CODE", null, createdFrom, createdTo, List.of(), 1, 1);
     verify(paymentReportingMyPayShareDaoMock).findByFilters("IPA_CODE", null, createdFrom, createdTo, List.of(), 1, 2);
