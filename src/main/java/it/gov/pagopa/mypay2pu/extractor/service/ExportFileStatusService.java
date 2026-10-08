@@ -3,6 +3,7 @@ package it.gov.pagopa.mypay2pu.extractor.service;
 import io.micrometer.common.util.StringUtils;
 import it.gov.pagopa.mypay2pu.extractor.dao.ExportFileStatusDao;
 import it.gov.pagopa.mypay2pu.extractor.dto.ExportFileResult;
+import it.gov.pagopa.mypay2pu.extractor.dto.generated.ArchiveFile;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionStatus;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionStatusResponse;
@@ -34,27 +35,29 @@ public class ExportFileStatusService {
       .createdAt(now)
       .updatedAt(now)
       .error(null)
-      .files(List.of())
+      .archiveFiles(List.of())
       .build();
     exportFileStatusDao.writeStatus(newStatus);
   }
 
   public void update(String extractionId, ExportFileResult exportFileResult) {
     ExtractionStatusResponse currentStatus = exportFileStatusDao.readStatus(extractionId);
-    List<String> exportedFiles = exportFileResult.files() == null ? List.of() : List.copyOf(exportFileResult.files());
+    List<ArchiveFile> archiveFiles = exportFileResult.archiveFiles() == null
+      ? List.of()
+      : List.copyOf(exportFileResult.archiveFiles());
     String errorDescription = exportFileResult.error();
     if (StringUtils.isBlank(errorDescription)) {
       currentStatus
         .status(ExtractionStatus.COMPLETED)
         .updatedAt(OffsetDateTime.now(ZONEID))
         .error(null)
-        .files(exportedFiles);
+        .archiveFiles(archiveFiles);
     } else {
       currentStatus
         .status(ExtractionStatus.FAILED)
         .updatedAt(OffsetDateTime.now(ZONEID))
         .error(errorDescription)
-        .files(exportedFiles);
+        .archiveFiles(archiveFiles);
     }
     exportFileStatusDao.writeStatus(currentStatus);
   }

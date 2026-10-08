@@ -23,6 +23,7 @@ import java.nio.file.Path;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 import java.util.zip.ZipFile;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -63,8 +64,11 @@ class MypaySharePaymentsReportingExportProcessingServiceTest {
 
     ExportFileResult result = service().executeExport("extraction-id", request);
 
-    assertEquals(3, result.files().size());
+    assertEquals(3, result.archiveFiles().size());
     assertTrue(result.files().getFirst().matches("BROKER_IPA-IPA_CODE-PAYMENTS_REPORTING-\\d{14}-part001-1\\.0\\.zip"));
+    assertEquals(List.of("IPA_CODE-report.xml"), result.archiveFiles().getFirst().getFiles());
+    assertTrue(result.files().stream()
+      .anyMatch(fileName -> fileName.matches("BROKER_IPA-IPA_CODE-PAYMENTS_REPORTING-\\d{14}-part002-1\\.0\\.errors\\.csv")));
     Path zipPath = tempDir.resolve("extraction-id").resolve(result.files().getFirst());
     assertTrue(Files.exists(zipPath));
     try (ZipFile zipFile = new ZipFile(zipPath.toFile())) {
@@ -75,7 +79,14 @@ class MypaySharePaymentsReportingExportProcessingServiceTest {
       );
     }
     assertTrue(Files.exists(xmlFile));
-    Path discardFilePath = tempDir.resolve("extraction-id").resolve(result.files().get(2));
+    Path extractionDirectory = tempDir.resolve("extraction-id");
+    Path discardFilePath;
+    try (Stream<Path> files = Files.list(extractionDirectory)) {
+      discardFilePath = files
+        .filter(file -> file.getFileName().toString().endsWith(".errors.csv"))
+        .findFirst()
+        .orElseThrow();
+    }
     assertTrue(discardFilePath.getFileName().toString()
       .matches("BROKER_IPA-IPA_CODE-PAYMENTS_REPORTING-\\d{14}-part002-1\\.0\\.errors\\.csv"));
     assertEquals(

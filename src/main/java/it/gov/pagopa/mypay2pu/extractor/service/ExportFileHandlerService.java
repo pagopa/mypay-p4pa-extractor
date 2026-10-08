@@ -1,6 +1,7 @@
 package it.gov.pagopa.mypay2pu.extractor.service;
 
 import it.gov.pagopa.mypay2pu.extractor.dto.ExportFileResult;
+import it.gov.pagopa.mypay2pu.extractor.dto.generated.ArchiveFile;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionStatusResponse;
 import it.gov.pagopa.mypay2pu.extractor.validation.ExtractionRequestValidator;
@@ -57,7 +58,7 @@ public class ExportFileHandlerService {
       exportFileResult = dataExportFacadeService.executeExport(extractionId, request);
     } catch (Exception e) {
       log.error("Error processing extraction {}", extractionId, e);
-      exportFileResult = new ExportFileResult(List.of(), e.getMessage());
+      exportFileResult = new ExportFileResult(List.<ArchiveFile>of(), e.getMessage());
     }
     exportFileStatusService.update(extractionId, exportFileResult);
   }

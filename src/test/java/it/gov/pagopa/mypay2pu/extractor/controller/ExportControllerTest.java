@@ -2,6 +2,7 @@ package it.gov.pagopa.mypay2pu.extractor.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.gov.pagopa.mypay2pu.extractor.config.json.JsonConfig;
+import it.gov.pagopa.mypay2pu.extractor.dto.generated.ArchiveFile;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionFilters;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionStatus;
@@ -91,7 +92,7 @@ class ExportControllerTest {
       now,
       now,
       null,
-      List.of("organizations.csv")
+      List.of(new ArchiveFile("archive1.zip", List.of("organizations.csv")))
     );
     when(exportFileHandlerServiceMock.getExtractionStatus(extractionId)).thenReturn(statusResponse);
 
@@ -99,7 +100,8 @@ class ExportControllerTest {
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.extractionId").value(extractionId))
       .andExpect(jsonPath("$.status").value("COMPLETED"))
-      .andExpect(jsonPath("$.files[0]").value("organizations.csv"));
+      .andExpect(jsonPath("$.archiveFiles[0].name").value("archive1.zip"))
+      .andExpect(jsonPath("$.archiveFiles[0].files[0]").value("organizations.csv"));
 
     verify(exportFileHandlerServiceMock).getExtractionStatus(extractionId);
   }

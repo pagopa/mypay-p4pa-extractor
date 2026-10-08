@@ -2,6 +2,7 @@ package it.gov.pagopa.mypay2pu.extractor.service;
 
 import it.gov.pagopa.mypay2pu.extractor.dao.ExportFileStatusDao;
 import it.gov.pagopa.mypay2pu.extractor.dto.ExportFileResult;
+import it.gov.pagopa.mypay2pu.extractor.dto.generated.ArchiveFile;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionStatus;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionStatusResponse;
@@ -57,7 +58,7 @@ class ExportFileStatusServiceTest {
     assertEquals(List.of("IPA_CODE_TEST"), writtenStatus.getIpaCodes());
     assertEquals(MigrationFileType.ORGANIZATIONS, writtenStatus.getFileTypes());
     assertEquals(ExtractionStatus.RUNNING, writtenStatus.getStatus());
-    assertEquals(List.of(), writtenStatus.getFiles());
+    assertEquals(List.of(), writtenStatus.getArchiveFiles());
     assertNull(writtenStatus.getError());
     assertNotNull(writtenStatus.getCreatedAt());
     assertEquals(writtenStatus.getCreatedAt(), writtenStatus.getUpdatedAt());
@@ -69,7 +70,7 @@ class ExportFileStatusServiceTest {
     ExportFileResult exportFileResult,
     ExtractionStatus expectedStatus,
     String expectedError,
-    List<String> expectedFiles
+    List<ArchiveFile> expectedArchiveFiles
   ) {
     String extractionId = "extraction-id";
     OffsetDateTime createdAt = OffsetDateTime.parse("2026-01-01T00:00:00Z");
@@ -99,7 +100,7 @@ class ExportFileStatusServiceTest {
     assertEquals(createdAt, writtenStatus.getCreatedAt());
     assertEquals(expectedStatus, writtenStatus.getStatus());
     assertEquals(expectedError, writtenStatus.getError());
-    assertEquals(expectedFiles, writtenStatus.getFiles());
+    assertEquals(expectedArchiveFiles, writtenStatus.getArchiveFiles());
     assertNotNull(writtenStatus.getUpdatedAt());
     assertEquals(currentStatus, writtenStatus);
   }
@@ -115,7 +116,7 @@ class ExportFileStatusServiceTest {
       OffsetDateTime.parse("2026-01-01T00:00:00Z"),
       OffsetDateTime.parse("2026-01-02T00:00:00Z"),
       null,
-      List.of("organizations.csv")
+      List.of(new ArchiveFile("archive1.zip", List.of("organizations.csv")))
     );
     when(exportFileStatusDaoMock.readStatus(extractionId)).thenReturn(expectedStatus);
 
@@ -128,31 +129,46 @@ class ExportFileStatusServiceTest {
   private static Stream<Arguments> updateStatusCases() {
     return Stream.of(
       Arguments.of(
-        new ExportFileResult(List.of("organizations.csv"), null),
+        new ExportFileResult(
+          List.of(new ArchiveFile("archive1.zip", List.of("file1.csv", "file2.csv"))),
+          null
+        ),
         ExtractionStatus.COMPLETED,
         null,
-        List.of("organizations.csv")
+        List.of(new ArchiveFile("archive1.zip", List.of("file1.csv", "file2.csv")))
       ),
       Arguments.of(
-        new ExportFileResult(List.of("organizations.csv"), ""),
+        new ExportFileResult(
+          List.of(
+            new ArchiveFile("archive1.zip", List.of("file1.csv", "file2.csv")),
+            new ArchiveFile("archive2.zip", List.of("file3.csv", "file4.csv"))
+          ),
+          ""
+        ),
         ExtractionStatus.COMPLETED,
         null,
-        List.of("organizations.csv")
+        List.of(
+          new ArchiveFile("archive1.zip", List.of("file1.csv", "file2.csv")),
+          new ArchiveFile("archive2.zip", List.of("file3.csv", "file4.csv"))
+        )
       ),
       Arguments.of(
-        new ExportFileResult(null, "   "),
+        new ExportFileResult((List<ArchiveFile>) null, "   "),
         ExtractionStatus.COMPLETED,
         null,
         List.of()
       ),
       Arguments.of(
-        new ExportFileResult(List.of("organizations.csv"), "result error"),
+        new ExportFileResult(
+          List.of(new ArchiveFile("archive1.zip", List.of("organizations.csv"))),
+          "result error"
+        ),
         ExtractionStatus.FAILED,
         "result error",
-        List.of("organizations.csv")
+        List.of(new ArchiveFile("archive1.zip", List.of("organizations.csv")))
       ),
       Arguments.of(
-        new ExportFileResult(null, "result error"),
+        new ExportFileResult((List<ArchiveFile>) null, "result error"),
         ExtractionStatus.FAILED,
         "result error",
         List.of()

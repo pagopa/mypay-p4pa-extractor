@@ -1,6 +1,7 @@
 package it.gov.pagopa.mypay2pu.extractor.service;
 
 import it.gov.pagopa.mypay2pu.extractor.dto.ExportFileResult;
+import it.gov.pagopa.mypay2pu.extractor.dto.generated.ArchiveFile;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionStatus;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionStatusResponse;
@@ -63,7 +64,10 @@ class ExportFileHandlerServiceTest {
   @Test
   void givenValidRequestWhenCreateExtractionThenReturnGeneratedIdAndScheduleExecution() {
     ExtractionRequest request = new ExtractionRequest(List.of("IPA_CODE_TEST"), MigrationFileType.ORGANIZATIONS);
-    ExportFileResult exportFileResult = new ExportFileResult(List.of("organizations.csv"), null);
+    ExportFileResult exportFileResult = new ExportFileResult(
+      List.of(new ArchiveFile("organizations.csv", List.of())),
+      null
+    );
     ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
 
     String extractionId = service.createExtraction(request);
@@ -91,7 +95,10 @@ class ExportFileHandlerServiceTest {
   void givenValidRequestWhenExecuteExportThenStoreCompletedStatus() {
     String extractionId = "extraction-id";
     ExtractionRequest request = new ExtractionRequest(List.of("IPA_CODE_TEST"), MigrationFileType.ORGANIZATIONS);
-    ExportFileResult exportFileResult = new ExportFileResult(List.of("organizations.csv"), null);
+    ExportFileResult exportFileResult = new ExportFileResult(
+      List.of(new ArchiveFile("organizations.csv", List.of())),
+      null
+    );
 
     when(dataExportFacadeServiceMock.executeExport(extractionId, request))
       .thenReturn(exportFileResult);
@@ -117,14 +124,20 @@ class ExportFileHandlerServiceTest {
     InOrder inOrder = inOrder(exportFileStatusServiceMock, dataExportFacadeServiceMock);
     inOrder.verify(exportFileStatusServiceMock).createNew(extractionId, request);
     inOrder.verify(dataExportFacadeServiceMock).executeExport(extractionId, request);
-    verify(exportFileStatusServiceMock).update(extractionId, new ExportFileResult(List.of(), "export failed"));
+    verify(exportFileStatusServiceMock).update(
+      extractionId,
+      new ExportFileResult(List.<ArchiveFile>of(), "export failed")
+    );
   }
 
   @Test
   void givenFacadeReturnsErrorWhenExecuteExportThenStoreFailedStatus() {
     String extractionId = "extraction-id";
     ExtractionRequest request = new ExtractionRequest(List.of("IPA_CODE_TEST"), MigrationFileType.ORGANIZATIONS);
-    ExportFileResult exportFileResult = new ExportFileResult(List.of("organizations.csv"), "result error");
+    ExportFileResult exportFileResult = new ExportFileResult(
+      List.of(new ArchiveFile("organizations.csv", List.of())),
+      "result error"
+    );
 
     when(dataExportFacadeServiceMock.executeExport(extractionId, request))
       .thenReturn(exportFileResult);
@@ -160,7 +173,7 @@ class ExportFileHandlerServiceTest {
       OffsetDateTime.parse("2026-01-01T00:00:00Z"),
       OffsetDateTime.parse("2026-01-01T00:00:00Z"),
       null,
-      List.of("organizations.csv")
+      List.of(new ArchiveFile("archive1.zip", List.of("organizations.csv")))
     );
     when(exportFileStatusServiceMock.readStatus(extractionId)).thenReturn(statusResponse);
 

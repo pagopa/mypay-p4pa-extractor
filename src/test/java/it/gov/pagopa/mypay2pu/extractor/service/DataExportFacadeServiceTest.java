@@ -1,6 +1,7 @@
 package it.gov.pagopa.mypay2pu.extractor.service;
 
 import it.gov.pagopa.mypay2pu.extractor.dto.ExportFileResult;
+import it.gov.pagopa.mypay2pu.extractor.dto.generated.ArchiveFile;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.exception.ExportFileTypeNotSupportedException;
@@ -92,51 +93,51 @@ class DataExportFacadeServiceTest {
 
     switch (fileType) {
       case ORGANIZATIONS -> {
-        expected = new ExportFileResult(List.of("organizations_1_0.zip"), null);
+        expected = archiveFileResult("organizations_1_0.zip");
         when(organizationExportProcessingServiceMock.executeExport(extractionId, request)).thenReturn(expected);
       }
       case ORG_SIL_SERVICES -> {
-        expected = new ExportFileResult(List.of("orgsilservices_1_0.zip"), null);
+        expected = archiveFileResult("orgsilservices_1_0.zip");
         when(orgSilServiceExportProcessingServiceMock.executeExport(extractionId, request)).thenReturn(expected);
       }
       case DEBT_POSITIONS_TYPE -> {
-        expected = new ExportFileResult(List.of("debtpositionstype_1_0.zip"), null);
+        expected = archiveFileResult("debtpositionstype_1_0.zip");
         when(debtPositionTypeExportProcessingServiceMock.executeExport(extractionId, request)).thenReturn(expected);
       }
       case DEBT_POSITIONS_TYPE_ORG -> {
-        expected = new ExportFileResult(List.of("debtpositionstypeorg_1_0.zip"), null);
+        expected = archiveFileResult("debtpositionstypeorg_1_0.zip");
         when(debtPositionTypeOrgExportProcessingServiceMock.executeExport(extractionId, request)).thenReturn(expected);
       }
       case DEBT_POSITIONS_TYPE_ORG_OPERATORS -> {
-        expected = new ExportFileResult(List.of("debtpositionstypeorgoperators_1_0.zip"), null);
+        expected = archiveFileResult("debtpositionstypeorgoperators_1_0.zip");
         when(debtPositionsTypeOrgOperatorsExportProcessingServiceMock.executeExport(extractionId, request)).thenReturn(expected);
       }
       case DEBT_POSITIONS -> {
-        expected = new ExportFileResult(List.of("debtpositions_1_0.zip"), null);
+        expected = archiveFileResult("debtpositions_1_0.zip");
         when(debtPositionExportProcessingServiceMock.executeExport(extractionId, request)).thenReturn(expected);
       }
       case DEBT_POSITIONS_PAID -> {
-        expected = new ExportFileResult(List.of("debtpositionspaid_1_0.zip"), null);
+        expected = archiveFileResult("debtpositionspaid_1_0.zip");
         when(debtPositionPaidExportProcessingServiceMock.executeExport(extractionId, request)).thenReturn(expected);
       }
       case PAYMENT_NOTIFICATION -> {
-        expected = new ExportFileResult(List.of("paymentnotification_1_0.zip"), null);
+        expected = archiveFileResult("paymentnotification_1_0.zip");
         when(paymentNotificationExportProcessingServiceMock.executeExport(extractionId, request)).thenReturn(expected);
       }
       case TREASURY_CSV_COMPLETE -> {
-        expected = new ExportFileResult(List.of("treasury_1_0.zip"), null);
+        expected = archiveFileResult("treasury_1_0.zip");
         when(treasuryCsvCompleteExportProcessingServiceMock.executeExport(extractionId, request)).thenReturn(expected);
       }
       case ASSESSMENTS -> {
-        expected = new ExportFileResult(List.of("assessments_1_0.zip"), null);
+        expected = archiveFileResult("assessments_1_0.zip");
         when(assessmentsExportProcessingServiceMock.executeExport(extractionId, request)).thenReturn(expected);
       }
       case ASSESSMENTS_REGISTRY -> {
-        expected = new ExportFileResult(List.of("assessmentsregistry_1_0.zip"), null);
+        expected = archiveFileResult("assessmentsregistry_1_0.zip");
         when(assessmentsRegistryExportProcessingServiceMock.executeExport(extractionId, request)).thenReturn(expected);
       }
       case PAYMENTS_REPORTING -> {
-        expected = new ExportFileResult(List.of("payments_reporting_1_0.zip"), null);
+        expected = archiveFileResult("payments_reporting_1_0.zip");
         when(paymentsReportingExportProcessingServiceMock.executeExport(extractionId, request)).thenReturn(expected);
       }
       default -> {
@@ -154,5 +155,9 @@ class DataExportFacadeServiceTest {
       ExportFileResult result = service.executeExport(extractionId, request);
       assertEquals(expected, result);
     }
+  }
+
+  private ExportFileResult archiveFileResult(String archiveFileName) {
+    return new ExportFileResult(List.of(new ArchiveFile(archiveFileName, List.of())), null);
   }
 }
