@@ -67,7 +67,6 @@ class DebtPositionMapperTest {
 
     PuDebtPositionDTO result = debtPositionMapper.map(debtPosition, Action.M);
 
-    assertEquals(debtPosition.iud(), result.getIupdIUD());
     assertEquals(debtPosition.iud(), result.getIupdOrg());
     assertEquals(debtPosition.iupd(), result.getIupdPagoPa());
     assertEquals(debtPosition.descrizionePosizioneDebitoria(), result.getDescription());

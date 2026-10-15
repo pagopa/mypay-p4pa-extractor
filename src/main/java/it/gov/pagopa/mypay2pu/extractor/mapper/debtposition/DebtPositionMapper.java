@@ -13,7 +13,6 @@ public class DebtPositionMapper {
 
   public PuDebtPositionDTO map(DebtPosition debtPosition, Action action) {
     return PuDebtPositionDTO.builder()
-      .iupdIUD(debtPosition.iud())
       .iupdOrg(debtPosition.iud())
       .iupdPagoPa(debtPosition.iupd())
       .description(debtPosition.descrizionePosizioneDebitoria())
