@@ -57,6 +57,7 @@ val kafkaAppender = "0.2.0-RC2"
 val lz4JavaVersion = "1.12.0"
 val postgresJdbcVersion = "42.7.13"
 val openCsvVersion = "5.12.0"
+val gsonVersion = "2.13.2"
 val podamVersion = "8.0.2.RELEASE"
 
 // CVE Security dependencies
@@ -84,7 +85,7 @@ dependencies {
   }
   implementation("at.yawk.lz4:lz4-java:$lz4JavaVersion")
   implementation("com.opencsv:opencsv:$openCsvVersion")
-  implementation("com.google.code.gson:gson")
+  implementation("com.google.code.gson:gson:$gsonVersion")
   implementation("org.springframework.boot:spring-boot-starter-jdbc")
   implementation("org.postgresql:postgresql:$postgresJdbcVersion")
 
