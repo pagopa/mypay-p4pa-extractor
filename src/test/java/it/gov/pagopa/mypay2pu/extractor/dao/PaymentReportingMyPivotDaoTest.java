@@ -1,6 +1,7 @@
 package it.gov.pagopa.mypay2pu.extractor.dao;
 
 import it.gov.pagopa.mypay2pu.extractor.service.SqlLoader;
+import it.gov.pagopa.mypay2pu.extractor.model.mpv4.PaymentReporting;
 import it.gov.pagopa.mypay2pu.extractor.utils.SqlTestUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +21,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.same;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -27,6 +29,7 @@ import static org.mockito.Mockito.when;
 class PaymentReportingMyPivotDaoTest {
 
   private static final String FIND_FLOW_IDENTIFIERS_SQL = "SELECT payment reporting flow identifiers";
+  private static final String FIND_ROWS_BY_FLOW_IDENTIFIER_SQL = "SELECT payment reporting flow rows";
 
   @Mock
   private NamedParameterJdbcTemplate mypivotJdbcTemplateMock;
@@ -92,6 +95,34 @@ class PaymentReportingMyPivotDaoTest {
   }
 
   @Test
+  void givenFlowIdentifierWhenFindRowsThenQueryMyPivot() {
+    OffsetDateTime createdFrom = OffsetDateTime.of(
+      LocalDateTime.of(2026, Month.JANUARY, 10, 10, 30),
+      ZoneOffset.UTC
+    );
+    List<PaymentReporting> expected = List.of(paymentReporting());
+    PaymentReportingMyPivotDao dao = buildDao();
+    when(mypivotJdbcTemplateMock.query(
+      eq(FIND_ROWS_BY_FLOW_IDENTIFIER_SQL),
+      ArgumentMatchers.<MapSqlParameterSource>argThat(params ->
+        "IPA1".equals(params.getValue("ipaCode"))
+          && createdFrom.toLocalDateTime().equals(params.getValue("createdFrom"))
+          && Boolean.FALSE.equals(params.getValue("skipCreatedFromFilter"))
+          && params.getValue("createdTo") == null
+          && Boolean.TRUE.equals(params.getValue("skipCreatedToFilter"))
+          && Boolean.FALSE.equals(params.getValue("skipFlowIdentifiersFilter"))
+          && List.of("FLOW_1").equals(params.getValue("flowIdentifiers"))
+          && Integer.valueOf(Integer.MAX_VALUE).equals(params.getValue("limit"))
+          && Integer.valueOf(0).equals(params.getValue("offset"))
+          && params.getValues().size() == 9
+      ),
+      same(PaymentReportingMyPivotDao.PAYMENT_REPORTING_ROW_MAPPER)
+    )).thenReturn(expected);
+
+    assertEquals(expected, dao.findRowsByFlowIdentifier("IPA1", "FLOW_1", createdFrom, null, null));
+  }
+
+  @Test
   void givenSqlWhenVerifiedThenContainFlowSelectionParameters() {
     SqlTestUtils.assertQueryParameters(
       PaymentReportingMyPivotDao.FIND_FLOW_IDENTIFIERS_SQL_PATH,
@@ -109,9 +140,49 @@ class PaymentReportingMyPivotDaoTest {
     );
   }
 
+  @Test
+  void givenRowsSqlWhenVerifiedThenContainFlowRowsParameters() {
+    SqlTestUtils.assertQueryParameters(
+      PaymentReportingMyPivotDao.FIND_ROWS_BY_FLOW_IDENTIFIER_SQL_PATH,
+      List.of(
+        "ipaCode",
+        "flowIdentifiers",
+        "skipCreatedFromFilter",
+        "createdFrom",
+        "skipCreatedToFilter",
+        "createdTo"
+      )
+    );
+  }
+
   private PaymentReportingMyPivotDao buildDao() {
     when(sqlLoaderMock.load(PaymentReportingMyPivotDao.FIND_FLOW_IDENTIFIERS_SQL_PATH))
       .thenReturn(FIND_FLOW_IDENTIFIERS_SQL);
+    when(sqlLoaderMock.load(PaymentReportingMyPivotDao.FIND_ROWS_BY_FLOW_IDENTIFIER_SQL_PATH))
+      .thenReturn(FIND_ROWS_BY_FLOW_IDENTIFIER_SQL);
     return new PaymentReportingMyPivotDao(mypivotJdbcTemplateMock, sqlLoaderMock);
+  }
+
+  private PaymentReporting paymentReporting() {
+    return new PaymentReporting(
+      "FLOW_1",
+      "1.1",
+      LocalDateTime.of(2026, Month.JANUARY, 10, 10, 30),
+      "REG_1",
+      java.time.LocalDate.of(2026, Month.JANUARY, 10),
+      "B",
+      "PPAYITR1XXX",
+      "Poste Pay",
+      "PPAYITR1XXX",
+      "G",
+      "80050050154",
+      "Organization",
+      "IUV_1",
+      "IUR_1",
+      1,
+      new java.math.BigDecimal("23.00"),
+      "0",
+      java.time.LocalDate.of(2026, Month.JANUARY, 10)
+    );
   }
 }
