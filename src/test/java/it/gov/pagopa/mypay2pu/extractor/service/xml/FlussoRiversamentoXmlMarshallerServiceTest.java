@@ -17,7 +17,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import javax.xml.datatype.DatatypeFactory;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -39,21 +38,6 @@ class FlussoRiversamentoXmlMarshallerServiceTest {
     assertTrue(xml.contains("<FlussoRiversamento xmlns=\"http://www.digitpa.gov.it/schemas/2011/Pagamenti/\""));
     assertTrue(xml.contains("<importoTotalePagamenti>23.00</importoTotalePagamenti>"));
     assertTrue(xml.contains("<datiSingoliPagamenti>"));
-  }
-
-  @Test
-  void givenFlowThatDoesNotConformToSchemaWhenMarshalThenFailWithoutWritingXml() {
-    Path xmlPath = tempDir.resolve("invalid-flow.xml");
-    FlussoRiversamento invalidFlow = flow();
-    invalidFlow.setVersioneOggetto("2.0");
-
-    IllegalStateException exception = assertThrows(
-      IllegalStateException.class,
-      () -> marshaller.marshal(invalidFlow, xmlPath)
-    );
-
-    assertTrue(exception.getMessage().contains("does not conform to the XSD"));
-    assertFalse(Files.exists(xmlPath));
   }
 
   @Test

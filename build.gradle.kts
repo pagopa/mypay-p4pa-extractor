@@ -93,10 +93,11 @@ dependencies {
   implementation("org.postgresql:postgresql:$postgresJdbcVersion")
   implementation("jakarta.xml.bind:jakarta.xml.bind-api:$jaxbApiVersion")
   implementation("jakarta.activation:jakarta.activation-api:$activationVersion")
-  runtimeOnly("org.glassfish.jaxb:jaxb-runtime:$jaxbVersion")
 
   // CVE Security dependencies
   implementation("com.fasterxml.jackson.core:jackson-databind:$jackson2DatabindVersion")
+
+  runtimeOnly("org.glassfish.jaxb:jaxb-runtime:$jaxbVersion")
 
   compileOnly("org.projectlombok:lombok")
   annotationProcessor("org.projectlombok:lombok")
@@ -149,19 +150,6 @@ val projectInfo = mapOf(
 configure<SourceSetContainer> {
   named("main") {
     java.srcDir("$projectDir/build/generated/src/main/java")
-    java.srcDir("$projectDir/build/generated/jaxb/java")
-  }
-}
-
-jaxb {
-  javaGen {
-    register("PaymentsReport") {
-      extension = true
-      args = listOf("-xmlschema")
-      outputDir = file("$projectDir/build/generated/jaxb/java")
-      schema = file("src/main/resources/xsd/FlussoRiversamento.xsd")
-      bindings = layout.files("src/main/resources/xsd/simple-bindings.xjb")
-    }
   }
 }
 
@@ -202,6 +190,19 @@ tasks.register("dependenciesBuild") {
     "openApiGenerate_P4PADEBTPOSITIONS",
     "openApiGenerate_P4PACLASSIFICATION"
   )
+}
+
+
+jaxb {
+  javaGen {
+    register("PaymentsReport") {
+      extension = true
+      args = listOf("-xmlschema")
+      outputDir = file("$projectDir/build/generated/src/main/java")
+      schema = file("src/main/resources/xsd/FlussoRiversamento.xsd")
+      bindings = layout.files("src/main/resources/xsd/simple-bindings.xjb")
+    }
+  }
 }
 
 openApiGenerate {
