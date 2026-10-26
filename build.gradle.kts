@@ -11,6 +11,7 @@ plugins {
   jacoco
   id("org.sonarqube") version "7.5.0.8588"
   id("org.openapi.generator") version "7.26.0"
+  id("com.intershop.gradle.jaxb") version "8.0.1"
   id("com.gorylenko.gradle-git-properties") version "4.0.1"
   id("com.github.jk1.dependency-license-report") version "3.1.4"
 }
@@ -60,6 +61,9 @@ val postgresJdbcVersion = "42.7.14"
 val openCsvVersion = "5.12.0"
 val gsonVersion = "2.14.0"
 val podamVersion = "8.0.2.RELEASE"
+val jaxbVersion = "4.0.9"
+val jaxbApiVersion = "4.0.5"
+val activationVersion = "2.1.4"
 
 // CVE Security dependencies
 val jackson2DatabindVersion = "2.22.3"
@@ -87,6 +91,9 @@ dependencies {
   implementation("com.google.code.gson:gson:$gsonVersion")
   implementation("org.springframework.boot:spring-boot-starter-jdbc")
   implementation("org.postgresql:postgresql:$postgresJdbcVersion")
+  implementation("jakarta.xml.bind:jakarta.xml.bind-api:$jaxbApiVersion")
+  implementation("jakarta.activation:jakarta.activation-api:$activationVersion")
+  runtimeOnly("org.glassfish.jaxb:jaxb-runtime:$jaxbVersion")
 
   // CVE Security dependencies
   implementation("com.fasterxml.jackson.core:jackson-databind:$jackson2DatabindVersion")
@@ -142,6 +149,19 @@ val projectInfo = mapOf(
 configure<SourceSetContainer> {
   named("main") {
     java.srcDir("$projectDir/build/generated/src/main/java")
+    java.srcDir("$projectDir/build/generated/jaxb/java")
+  }
+}
+
+jaxb {
+  javaGen {
+    register("PaymentsReport") {
+      extension = true
+      args = listOf("-xmlschema")
+      outputDir = file("$projectDir/build/generated/jaxb/java")
+      schema = file("src/main/resources/xsd/FlussoRiversamento.xsd")
+      bindings = layout.files("src/main/resources/xsd/simple-bindings.xjb")
+    }
   }
 }
 
@@ -176,6 +196,7 @@ tasks.register("dependenciesBuild") {
   description = "grouping all together automatically generate code tasks"
 
   dependsOn(
+    "jaxb",
     "openApiGenerate",
     "openApiGenerate_P4PAORGANIZATION",
     "openApiGenerate_P4PADEBTPOSITIONS",
