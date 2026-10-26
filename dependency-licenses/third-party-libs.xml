@@ -111,6 +111,11 @@
 <td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
 </tr>
 <tr>
+<td><a href='https://www.eclipse.org'>com.sun.istack:istack-commons-runtime</a></td>
+<td>4.1.2</td>
+<td><a href='https://openjdk.java.net/legal/gplv2+ce.html'>GPL-2.0-only WITH Classpath-exception-2.0</a></td>
+</tr>
+<tr>
 <td><a href='https://github.com/brettwooldridge/HikariCP'>com.zaxxer:HikariCP</a></td>
 <td>7.0.2</td>
 <td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
@@ -384,6 +389,26 @@
 <td><a href='https://checkerframework.org/'>org.checkerframework:checker-qual</a></td>
 <td>3.55.1</td>
 <td><a href='https://opensource.org/licenses/mit'>MIT</a></td>
+</tr>
+<tr>
+<td><a href='https://www.eclipse.org'>org.eclipse.angus:angus-activation</a></td>
+<td>2.0.3</td>
+<td><a href='https://openjdk.java.net/legal/gplv2+ce.html'>GPL-2.0-only WITH Classpath-exception-2.0</a></td>
+</tr>
+<tr>
+<td><a href='https://www.eclipse.org'>org.glassfish.jaxb:jaxb-core</a></td>
+<td>4.0.9</td>
+<td><a href='https://openjdk.java.net/legal/gplv2+ce.html'>GPL-2.0-only WITH Classpath-exception-2.0</a></td>
+</tr>
+<tr>
+<td><a href='https://www.eclipse.org'>org.glassfish.jaxb:jaxb-runtime</a></td>
+<td>4.0.9</td>
+<td><a href='https://openjdk.java.net/legal/gplv2+ce.html'>GPL-2.0-only WITH Classpath-exception-2.0</a></td>
+</tr>
+<tr>
+<td><a href='https://eclipse-ee4j.github.io/jaxb-ri/'>org.glassfish.jaxb:txw2</a></td>
+<td>4.0.9</td>
+<td><a href='https://openjdk.java.net/legal/gplv2+ce.html'>GPL-2.0-only WITH Classpath-exception-2.0</a></td>
 </tr>
 <tr>
 <td><a href='http://hdrhistogram.github.io/HdrHistogram/'>org.hdrhistogram:HdrHistogram</a></td>
