@@ -58,9 +58,11 @@ class FlussoRiversamentoXmlMarshallerServiceTest {
 
   @Test
   void givenDirectoryAsXmlOutputWhenMarshalThenFailWithIoError() {
+    FlussoRiversamento validFlow = flow();
+
     IllegalStateException exception = assertThrows(
       IllegalStateException.class,
-      () -> marshaller.marshal(flow(), tempDir)
+      () -> marshaller.marshal(validFlow, tempDir)
     );
 
     assertTrue(exception.getMessage().contains("Cannot create payments reporting XML"));

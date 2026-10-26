@@ -41,10 +41,11 @@ class XMLMarshallerServiceTest {
   @Test
   void givenJaxbFailureWhenMarshalThenThrowIllegalStateException() throws JAXBException {
     when(jaxbContextMock.createMarshaller()).thenThrow(new JAXBException("JAXB failure"));
+    FlussoRiversamento value = new FlussoRiversamento();
 
     IllegalStateException exception = assertThrows(
       IllegalStateException.class,
-      () -> service.marshal(FlussoRiversamento.class, new FlussoRiversamento(), jaxbContextMock)
+      () -> service.marshal(FlussoRiversamento.class, value, jaxbContextMock)
     );
 
     assertTrue(exception.getMessage().contains(FlussoRiversamento.class.getName()));
