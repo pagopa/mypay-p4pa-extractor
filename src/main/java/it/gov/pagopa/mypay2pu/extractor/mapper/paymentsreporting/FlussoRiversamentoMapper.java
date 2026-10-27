@@ -9,7 +9,9 @@ import it.gov.digitpa.schemas._2011.pagamenti.CtIstitutoRicevente;
 import it.gov.digitpa.schemas._2011.pagamenti.FlussoRiversamento;
 import it.gov.digitpa.schemas._2011.pagamenti.StTipoIdentificativoUnivoco;
 import it.gov.digitpa.schemas._2011.pagamenti.StTipoIdentificativoUnivocoPersG;
+import it.gov.pagopa.mypay2pu.extractor.exception.InvalidValueException;
 import it.gov.pagopa.mypay2pu.extractor.utils.Utilities;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -22,9 +24,11 @@ import java.util.Set;
 @Component
 public class FlussoRiversamentoMapper {
 
+  private static final String INVALID_PAYMENTS_REPORTING_FLOW = "INVALID_PAYMENTS_REPORTING_FLOW";
+
   public FlussoRiversamento map(List<PaymentReporting> rows) {
-    if (rows == null || rows.isEmpty()) {
-      throw new IllegalArgumentException("Cannot map an empty payments reporting flow");
+    if (CollectionUtils.isEmpty(rows)) {
+      throw new InvalidValueException(INVALID_PAYMENTS_REPORTING_FLOW, "Cannot map an empty payments reporting flow");
     }
 
     PaymentReporting firstRow = rows.getFirst();
@@ -98,7 +102,7 @@ public class FlussoRiversamentoMapper {
       || !StringUtils.hasText(row.codIstMittIdUnivMittCodiceIdentificativoUnivoco())
       || !StringUtils.hasText(row.codIstRicevIdUnivRicevTipoIdentificativoUnivoco())
       || !StringUtils.hasText(row.codIstRicevIdUnivRicevCodiceIdentificativoUnivoco())) {
-      throw new IllegalArgumentException(
+      throw new InvalidValueException(INVALID_PAYMENTS_REPORTING_FLOW,
         "Missing mandatory header value for payments reporting flow " + row.codIdentificativoFlusso()
       );
     }
@@ -108,7 +112,7 @@ public class FlussoRiversamentoMapper {
     Set<String> detailKeys = new HashSet<>();
     for (PaymentReporting row : rows) {
       if (!sameHeader(firstRow, row)) {
-        throw new IllegalArgumentException(
+        throw new InvalidValueException(INVALID_PAYMENTS_REPORTING_FLOW,
           "Inconsistent header values for payments reporting flow " + firstRow.codIdentificativoFlusso()
         );
       }
@@ -119,7 +123,7 @@ public class FlussoRiversamentoMapper {
         row.indiceDatiSingoloPagamento()
       );
       if (!detailKeys.add(detailKey)) {
-        throw new IllegalArgumentException(
+        throw new InvalidValueException(INVALID_PAYMENTS_REPORTING_FLOW,
           "Duplicate payment detail for payments reporting flow " + firstRow.codIdentificativoFlusso()
         );
       }
@@ -156,7 +160,7 @@ public class FlussoRiversamentoMapper {
       || row.numDatiSingPagamSingoloImportoPagato() == null
       || !StringUtils.hasText(row.codDatiSingPagamCodiceEsitoSingoloPagamento())
       || row.dtDatiSingPagamDataEsitoSingoloPagamento() == null) {
-      throw new IllegalArgumentException(
+      throw new InvalidValueException(INVALID_PAYMENTS_REPORTING_FLOW,
         "Missing mandatory payment detail value for payments reporting flow " + row.codIdentificativoFlusso()
       );
     }
