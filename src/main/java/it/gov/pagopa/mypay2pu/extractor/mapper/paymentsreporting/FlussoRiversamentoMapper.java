@@ -202,7 +202,7 @@ public class FlussoRiversamentoMapper {
   private IllegalArgumentException invalidValue(String message, Throwable cause) {
     InvalidValueException invalidValueException = new InvalidValueException(INVALID_PAYMENTS_REPORTING_FLOW, message);
     if (cause != null) {
-      invalidValueException.initCause(cause);
+      invalidValueException.addSuppressed(cause);
     }
     return new IllegalArgumentException(message, invalidValueException);
   }
