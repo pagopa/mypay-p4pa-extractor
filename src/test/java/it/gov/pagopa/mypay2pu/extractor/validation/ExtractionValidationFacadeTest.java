@@ -67,7 +67,7 @@ class ExtractionValidationFacadeTest {
         validationFacade.validate(request);
         verify(pairedLogicalKeyValidatorMock).validate(request);
       }
-      case PAYMENTS_REPORTING -> {
+      case PAYMENTS_REPORTING, PAYMENTS_REPORTING_MYPIVOT -> {
         validationFacade.validate(request);
         verify(extractionRequestValidatorMock).validate(request);
       }

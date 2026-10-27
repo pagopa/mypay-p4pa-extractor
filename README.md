@@ -21,9 +21,10 @@ Supports **12 MigrationFileType**:
 | 7 | `DEBT_POSITIONS_PAID` | MyPay4 | CSV |
 | 8 | `PAYMENT_NOTIFICATION` | myPivot4 | CSV |
 | 9 | `PAYMENTS_REPORTING` | FESP | XML (FdR) |
-| 10 | `TREASURY_CSV_COMPLETE` | myPivot4 *(optional)* | CSV (IUF only) |
-| 11 | `ASSESSMENTS` | myPivot4 *(optional)* | CSV |
-| 12 | `ASSESSMENTS_REGISTRY` | myPivot4 *(optional)* | CSV |
+| 10 | `PAYMENTS_REPORTING_MYPIVOT` | myPivot4 *(optional)* | XML (FdR) |
+| 11 | `TREASURY_CSV_COMPLETE` | myPivot4 *(optional)* | CSV (IUF only) |
+| 12 | `ASSESSMENTS` | myPivot4 *(optional)* | CSV |
+| 13 | `ASSESSMENTS_REGISTRY` | myPivot4 *(optional)* | CSV |
 
 > myDictionary is invoked to populate fields in the `DEBT_POSITIONS_TYPE_ORG` record (`spontaneous_form_code` → `spontaneous_form_structure`).
 
@@ -183,7 +184,7 @@ See [application.yml](src/main/resources/application.yml) for each configurable 
 | ENV | DESCRIPTION | DEFAULT |
 |---|---|---|
 | `STORAGE_PATH` | Base path for extracted ZIP files | `/data/extractions` |
-| `MYPIVOT_ENABLED` | Enable myPivot4 extraction (types 10/11/12). If `false`, Adapters related to MyPivot are skipped | `false` |
+| `MYPIVOT_ENABLED` | Enable myPivot4 extraction, including Payments Reporting. If `false`, adapters related to MyPivot are skipped | `false` |
 | `BROKER_CF` | Fiscal code of the broker/intermediary running the extraction (used as context metadata) | — |
 | `BROKER_IPA_CODE` | Optional IPA code of the broker/intermediary running the extraction | — |
 | `GPD_ENABLED` | Enable the GPD-only filter for open debt positions. When `false`, open positions keep the legacy behavior; when `true`, only positions with a non-null `gpd_iupd` and status `S` are exported | `false` |
@@ -191,7 +192,6 @@ See [application.yml](src/main/resources/application.yml) for each configurable 
 | `CSV_QUOTE_CHAR` | Quote character used when generating CSV files | `"` |
 | `FILE_ENCRYPT_ENABLED` | Enable the encryption of the extracted files. **Files are returned unencrypted via the `/extract/{id}/files` API regardless of this setting.** When encryption is enabled, it is the responsibility of the operator to ensure secure temporary storage and cleanup of extracted data. | `false` |
 | `MYPAY_PATH_DIRECTORY_ROOT_ENTI` | Value of `mypay.path.directoryRootEnti`: existing MyPay-share directory containing Payments Reporting XML files at `<directoryRootEnti>/<codice-IPA>/<de_nome_file_scaricato>`. | `TMP_FOLDER` |
-| `PAYMENTS_REPORTING_SOURCE` | Source used to retrieve Payments Reporting files: `MYPAY_SHARE` or `MYPIVOT`. Only `MYPAY_SHARE` is currently implemented. | `MYPAY_SHARE` |
 
 `GPD_ENABLED` is bound from `extractor.export.gpd-enabled` in `application.yml` to
 `ExtractorExportProperties.gpdEnabled`. The `DebtPositionDao` translates it into the
@@ -218,7 +218,8 @@ The following global properties are exported for configuration in the migrated M
 | `EXPORT_PAGE_SIZE_DEBT_POSITIONS`                    | Maximum number of records to write to an exported file before creating a new one | `1000` |
 | `EXPORT_PAGE_SIZE_DEBT_POSITIONS_PAID`               | Maximum number of records to write to an exported file before creating a new one | `1000` |
 | `EXPORT_PAGE_SIZE_PAYMENT_NOTIFICATION`              | Maximum number of records to write to an exported file before creating a new one | `1000` |
-| `EXPORT_PAGE_SIZE_PAYMENTS_REPORTING`                | Maximum number of FESP payments-reporting file paths read in each database page | `1000` |
+| `EXPORT_PAGE_SIZE_PAYMENTS_REPORTING`                | Maximum number of Payments Reporting flow identifiers processed in each ZIP part | `1000` |
+| `EXPORT_PAGE_SIZE_PAYMENTS_REPORTING_MYPIVOT`        | Maximum number of MyPivot Payments Reporting flow identifiers processed in each ZIP part | `1000` |
 | `EXPORT_PAGE_SIZE_TREASURY_CSV_COMPLETE`            | Maximum number of records to write to an exported file before creating a new one | `1000` |
 | `EXPORT_PAGE_SIZE_ASSESSMENTS`                       | Maximum number of records to write to an exported file before creating a new one | `1000` |
 | `EXPORT_PAGE_SIZE_ASSESSMENTS_REGISTRY`             | Maximum number of records to write to an exported file before creating a new one | `1000` |

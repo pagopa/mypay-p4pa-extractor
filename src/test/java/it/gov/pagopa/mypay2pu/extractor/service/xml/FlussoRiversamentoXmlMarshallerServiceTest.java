@@ -19,6 +19,7 @@ import javax.xml.datatype.DatatypeFactory;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class FlussoRiversamentoXmlMarshallerServiceTest {
 
@@ -50,6 +51,21 @@ class FlussoRiversamentoXmlMarshallerServiceTest {
     );
 
     assertTrue(exception.getMessage().contains("Cannot create payments reporting XML"));
+  }
+
+  @Test
+  void givenSchemaInvalidFlowWhenMarshalThenFailWithoutWritingXml() {
+    FlussoRiversamento invalidFlow = flow();
+    invalidFlow.setVersioneOggetto("2.0");
+    Path xmlPath = tempDir.resolve("FLOW_1.xml");
+
+    IllegalStateException exception = assertThrows(
+      IllegalStateException.class,
+      () -> marshaller.marshal(invalidFlow, xmlPath)
+    );
+
+    assertTrue(exception.getMessage().contains("does not conform to the XSD"));
+    assertFalse(Files.exists(xmlPath));
   }
 
   private FlussoRiversamento flow() {

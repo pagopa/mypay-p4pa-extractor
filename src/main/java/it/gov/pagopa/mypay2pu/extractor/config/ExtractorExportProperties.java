@@ -5,7 +5,6 @@ import jakarta.annotation.PostConstruct;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.bind.ConstructorBinding;
@@ -25,9 +24,7 @@ public record ExtractorExportProperties(
   @NotBlank String brokerIpaCode,
   boolean gpdEnabled,
   @NestedConfigurationProperty
-  @NotEmpty Map<MigrationFileType, @Valid FileTypeConfiguration> fileTypeConfigurations,
-  @NestedConfigurationProperty
-  @NotNull @Valid PaymentsReportingConfiguration paymentsReporting) {
+  @NotEmpty Map<MigrationFileType, @Valid FileTypeConfiguration> fileTypeConfigurations) {
 
   @ConstructorBinding
   public ExtractorExportProperties(
@@ -36,8 +33,7 @@ public record ExtractorExportProperties(
     String brokerCf,
     String brokerIpaCode,
     boolean gpdEnabled,
-    Map<MigrationFileType, @Valid FileTypeConfiguration> fileTypeConfigurations,
-    PaymentsReportingConfiguration paymentsReporting
+    Map<MigrationFileType, @Valid FileTypeConfiguration> fileTypeConfigurations
   ) {
     this.storagePath = storagePath;
     this.tempBaseDir = tempBaseDir;
@@ -45,7 +41,6 @@ public record ExtractorExportProperties(
     this.brokerIpaCode = brokerIpaCode;
     this.gpdEnabled = gpdEnabled;
     this.fileTypeConfigurations = fileTypeConfigurations;
-    this.paymentsReporting = paymentsReporting;
   }
 
   public ExtractorExportProperties(
@@ -53,10 +48,9 @@ public record ExtractorExportProperties(
     String tempBaseDir,
     String brokerCf,
     String brokerIpaCode,
-    Map<MigrationFileType, @Valid FileTypeConfiguration> fileTypeConfigurations,
-    PaymentsReportingConfiguration paymentsReporting
+    Map<MigrationFileType, @Valid FileTypeConfiguration> fileTypeConfigurations
   ) {
-    this(storagePath, tempBaseDir, brokerCf, brokerIpaCode, false, fileTypeConfigurations, paymentsReporting);
+    this(storagePath, tempBaseDir, brokerCf, brokerIpaCode, false, fileTypeConfigurations);
   }
 
   @PostConstruct
@@ -85,7 +79,4 @@ public record ExtractorExportProperties(
   }
 
   public record FileTypeConfiguration(@Positive int exportPageSize) { }
-
-  public record PaymentsReportingConfiguration(@NotNull PaymentsReportingSource source) {
-  }
 }
