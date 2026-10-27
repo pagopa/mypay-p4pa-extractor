@@ -13,6 +13,7 @@ import java.time.Month;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class FlussoRiversamentoMapperTest {
@@ -60,7 +61,9 @@ class FlussoRiversamentoMapperTest {
 
     List<PaymentReporting> rows = List.of(row(1, "23.00"), inconsistentRow);
 
-    assertThrows(InvalidValueException.class, () -> mapper.map(rows));
+    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> mapper.map(rows));
+
+    assertInvalidValueException(exception);
   }
 
   @Test
@@ -88,7 +91,9 @@ class FlussoRiversamentoMapperTest {
 
     List<PaymentReporting> rows = List.of(rowWithMissingHeader);
 
-    assertThrows(InvalidValueException.class, () -> mapper.map(rows));
+    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> mapper.map(rows));
+
+    assertInvalidValueException(exception);
   }
 
   private PaymentReporting row(int index, String amount) {
@@ -112,5 +117,10 @@ class FlussoRiversamentoMapperTest {
       "0",
       LocalDate.of(2026, Month.JANUARY, 15)
     );
+  }
+
+  private void assertInvalidValueException(IllegalArgumentException exception) {
+    InvalidValueException cause = assertInstanceOf(InvalidValueException.class, exception.getCause());
+    assertEquals("INVALID_PAYMENTS_REPORTING_FLOW", cause.getCode());
   }
 }

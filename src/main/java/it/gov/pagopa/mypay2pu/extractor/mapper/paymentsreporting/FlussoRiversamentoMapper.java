@@ -28,7 +28,7 @@ public class FlussoRiversamentoMapper {
 
   public FlussoRiversamento map(List<PaymentReporting> rows) {
     if (CollectionUtils.isEmpty(rows)) {
-      throw new InvalidValueException(INVALID_PAYMENTS_REPORTING_FLOW, "Cannot map an empty payments reporting flow");
+      throw invalidValue("Cannot map an empty payments reporting flow");
     }
 
     PaymentReporting firstRow = rows.getFirst();
@@ -62,7 +62,7 @@ public class FlussoRiversamentoMapper {
     detail.setIdentificativoUnivocoVersamento(row.codDatiSingPagamIdentificativoUnivocoVersamento());
     detail.setIdentificativoUnivocoRiscossione(row.codDatiSingPagamIdentificativoUnivocoRiscossione());
     detail.setIndiceDatiSingoloPagamento(row.indiceDatiSingoloPagamento());
-    detail.setSingoloImportoPagato(row.numDatiSingPagamSingoloImportoPagato().setScale(2, RoundingMode.UNNECESSARY));
+    detail.setSingoloImportoPagato(normalizeAmount(row));
     detail.setCodiceEsitoSingoloPagamento(row.codDatiSingPagamCodiceEsitoSingoloPagamento());
     detail.setDataEsitoSingoloPagamento(Utilities.toXMLGregorianCalendar(row.dtDatiSingPagamDataEsitoSingoloPagamento()));
     return detail;
@@ -70,9 +70,7 @@ public class FlussoRiversamentoMapper {
 
   private CtIstitutoMittente mapIstitutoMittente(PaymentReporting row) {
     CtIdentificativoUnivoco identificativo = new CtIdentificativoUnivoco();
-    identificativo.setTipoIdentificativoUnivoco(
-      StTipoIdentificativoUnivoco.valueOf(row.codIstMittIdUnivMittTipoIdentificativoUnivoco())
-    );
+    identificativo.setTipoIdentificativoUnivoco(mapMittenteIdentifierType(row));
     identificativo.setCodiceIdentificativoUnivoco(row.codIstMittIdUnivMittCodiceIdentificativoUnivoco());
     CtIstitutoMittente istituto = new CtIstitutoMittente();
     istituto.setIdentificativoUnivocoMittente(identificativo);
@@ -82,9 +80,7 @@ public class FlussoRiversamentoMapper {
 
   private CtIstitutoRicevente mapIstitutoRicevente(PaymentReporting row) {
     CtIdentificativoUnivocoPersonaG identificativo = new CtIdentificativoUnivocoPersonaG();
-    identificativo.setTipoIdentificativoUnivoco(
-      StTipoIdentificativoUnivocoPersG.valueOf(row.codIstRicevIdUnivRicevTipoIdentificativoUnivoco())
-    );
+    identificativo.setTipoIdentificativoUnivoco(mapRiceventeIdentifierType(row));
     identificativo.setCodiceIdentificativoUnivoco(row.codIstRicevIdUnivRicevCodiceIdentificativoUnivoco());
     CtIstitutoRicevente istituto = new CtIstitutoRicevente();
     istituto.setIdentificativoUnivocoRicevente(identificativo);
@@ -102,7 +98,7 @@ public class FlussoRiversamentoMapper {
       || !StringUtils.hasText(row.codIstMittIdUnivMittCodiceIdentificativoUnivoco())
       || !StringUtils.hasText(row.codIstRicevIdUnivRicevTipoIdentificativoUnivoco())
       || !StringUtils.hasText(row.codIstRicevIdUnivRicevCodiceIdentificativoUnivoco())) {
-      throw new InvalidValueException(INVALID_PAYMENTS_REPORTING_FLOW,
+      throw invalidValue(
         "Missing mandatory header value for payments reporting flow " + row.codIdentificativoFlusso()
       );
     }
@@ -112,7 +108,7 @@ public class FlussoRiversamentoMapper {
     Set<String> detailKeys = new HashSet<>();
     for (PaymentReporting row : rows) {
       if (!sameHeader(firstRow, row)) {
-        throw new InvalidValueException(INVALID_PAYMENTS_REPORTING_FLOW,
+        throw invalidValue(
           "Inconsistent header values for payments reporting flow " + firstRow.codIdentificativoFlusso()
         );
       }
@@ -123,7 +119,7 @@ public class FlussoRiversamentoMapper {
         row.indiceDatiSingoloPagamento()
       );
       if (!detailKeys.add(detailKey)) {
-        throw new InvalidValueException(INVALID_PAYMENTS_REPORTING_FLOW,
+        throw invalidValue(
           "Duplicate payment detail for payments reporting flow " + firstRow.codIdentificativoFlusso()
         );
       }
@@ -160,9 +156,54 @@ public class FlussoRiversamentoMapper {
       || row.numDatiSingPagamSingoloImportoPagato() == null
       || !StringUtils.hasText(row.codDatiSingPagamCodiceEsitoSingoloPagamento())
       || row.dtDatiSingPagamDataEsitoSingoloPagamento() == null) {
-      throw new InvalidValueException(INVALID_PAYMENTS_REPORTING_FLOW,
+      throw invalidValue(
         "Missing mandatory payment detail value for payments reporting flow " + row.codIdentificativoFlusso()
       );
     }
+  }
+
+  private BigDecimal normalizeAmount(PaymentReporting row) {
+    try {
+      return row.numDatiSingPagamSingoloImportoPagato().setScale(2, RoundingMode.UNNECESSARY);
+    } catch (ArithmeticException exception) {
+      throw invalidValue(
+        "Invalid payment amount for payments reporting flow " + row.codIdentificativoFlusso(),
+        exception
+      );
+    }
+  }
+
+  private StTipoIdentificativoUnivoco mapMittenteIdentifierType(PaymentReporting row) {
+    try {
+      return StTipoIdentificativoUnivoco.valueOf(row.codIstMittIdUnivMittTipoIdentificativoUnivoco());
+    } catch (IllegalArgumentException exception) {
+      throw invalidValue(
+        "Invalid sender identifier type for payments reporting flow " + row.codIdentificativoFlusso(),
+        exception
+      );
+    }
+  }
+
+  private StTipoIdentificativoUnivocoPersG mapRiceventeIdentifierType(PaymentReporting row) {
+    try {
+      return StTipoIdentificativoUnivocoPersG.valueOf(row.codIstRicevIdUnivRicevTipoIdentificativoUnivoco());
+    } catch (IllegalArgumentException exception) {
+      throw invalidValue(
+        "Invalid receiver identifier type for payments reporting flow " + row.codIdentificativoFlusso(),
+        exception
+      );
+    }
+  }
+
+  private IllegalArgumentException invalidValue(String message) {
+    return invalidValue(message, null);
+  }
+
+  private IllegalArgumentException invalidValue(String message, Throwable cause) {
+    InvalidValueException invalidValueException = new InvalidValueException(INVALID_PAYMENTS_REPORTING_FLOW, message);
+    if (cause != null) {
+      invalidValueException.initCause(cause);
+    }
+    return new IllegalArgumentException(message, invalidValueException);
   }
 }
