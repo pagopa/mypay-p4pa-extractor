@@ -1,6 +1,7 @@
 package it.gov.pagopa.mypay2pu.extractor.mapper.paymentsreporting;
 
 import it.gov.digitpa.schemas._2011.pagamenti.FlussoRiversamento;
+import it.gov.pagopa.mypay2pu.extractor.exception.InvalidValueException;
 import it.gov.pagopa.mypay2pu.extractor.model.mpv4.PaymentReporting;
 import it.gov.pagopa.mypay2pu.extractor.utils.TestUtils;
 import org.junit.jupiter.api.Test;
@@ -12,6 +13,7 @@ import java.time.Month;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class FlussoRiversamentoMapperTest {
@@ -59,7 +61,9 @@ class FlussoRiversamentoMapperTest {
 
     List<PaymentReporting> rows = List.of(row(1, "23.00"), inconsistentRow);
 
-    assertThrows(IllegalArgumentException.class, () -> mapper.map(rows));
+    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> mapper.map(rows));
+
+    assertInvalidValueException(exception);
   }
 
   @Test
@@ -87,7 +91,9 @@ class FlussoRiversamentoMapperTest {
 
     List<PaymentReporting> rows = List.of(rowWithMissingHeader);
 
-    assertThrows(IllegalArgumentException.class, () -> mapper.map(rows));
+    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> mapper.map(rows));
+
+    assertInvalidValueException(exception);
   }
 
   private PaymentReporting row(int index, String amount) {
@@ -111,5 +117,10 @@ class FlussoRiversamentoMapperTest {
       "0",
       LocalDate.of(2026, Month.JANUARY, 15)
     );
+  }
+
+  private void assertInvalidValueException(IllegalArgumentException exception) {
+    InvalidValueException cause = assertInstanceOf(InvalidValueException.class, exception.getCause());
+    assertEquals("INVALID_PAYMENTS_REPORTING_FLOW", cause.getCode());
   }
 }
