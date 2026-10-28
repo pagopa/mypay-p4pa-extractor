@@ -2,7 +2,6 @@ package it.gov.pagopa.mypay2pu.extractor.service.export.paymentsreporting.mypays
 
 import it.gov.pagopa.mypay2pu.extractor.config.ExtractorExportProperties;
 import it.gov.pagopa.mypay2pu.extractor.config.MyPayProperties;
-import it.gov.pagopa.mypay2pu.extractor.config.PaymentsReportingSource;
 import it.gov.pagopa.mypay2pu.extractor.dao.PaymentReportingMyPayShareDao;
 import it.gov.pagopa.mypay2pu.extractor.dto.ExportFileResult;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ArchiveFile;
@@ -27,7 +26,6 @@ import java.util.Map;
 import java.util.zip.ZipFile;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
@@ -186,12 +184,14 @@ class MypaySharePaymentsReportingExportProcessingServiceTest {
   }
 
   @Test
-  void givenMypayShareSourceAndMissingSharedFolderWhenServiceCreatedThenThrowException() {
+  void givenMissingSharedFolderWhenExportThenThrowException() {
     Path missingDirectory = tempDir.resolve("missing");
+    MypaySharePaymentsReportingExportProcessingService service = service(missingDirectory);
+    ExtractionRequest request = request(null);
 
     IllegalStateException exception = assertThrows(
       IllegalStateException.class,
-      () -> service(missingDirectory, PaymentsReportingSource.MYPAY_SHARE)
+      () -> service.executeExport("extraction-id", request)
     );
 
     assertEquals(
@@ -200,25 +200,16 @@ class MypaySharePaymentsReportingExportProcessingServiceTest {
     );
   }
 
-  @Test
-  void givenMypivotSourceAndMissingSharedFolderWhenServiceCreatedThenDoNotThrowException() {
-    assertDoesNotThrow(() -> service(tempDir.resolve("missing"), PaymentsReportingSource.MYPIVOT));
-  }
-
   private MypaySharePaymentsReportingExportProcessingService service() {
-    return service(tempDir, PaymentsReportingSource.MYPAY_SHARE);
+    return service(tempDir);
   }
 
-  private MypaySharePaymentsReportingExportProcessingService service(
-    Path myPaySharedFolderPath,
-    PaymentsReportingSource paymentsReportingSource
-  ) {
+  private MypaySharePaymentsReportingExportProcessingService service(Path myPaySharedFolderPath) {
     return new MypaySharePaymentsReportingExportProcessingService(
       paymentReportingMyPayShareDaoMock,
       new ExtractorExportProperties(
         tempDir.toString(), tempDir.toString(), "BROKER_CF", "BROKER_IPA",
-        Map.of(MigrationFileType.PAYMENTS_REPORTING, new ExtractorExportProperties.FileTypeConfiguration(1)),
-        new ExtractorExportProperties.PaymentsReportingConfiguration(paymentsReportingSource)
+        Map.of(MigrationFileType.PAYMENTS_REPORTING, new ExtractorExportProperties.FileTypeConfiguration(1))
       ),
       new MyPayProperties(
         new MyPayProperties.PathProperties(myPaySharedFolderPath.toString()),

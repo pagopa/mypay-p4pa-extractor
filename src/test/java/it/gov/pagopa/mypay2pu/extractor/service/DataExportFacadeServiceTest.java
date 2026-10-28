@@ -16,6 +16,7 @@ import it.gov.pagopa.mypay2pu.extractor.service.export.organization.Organization
 import it.gov.pagopa.mypay2pu.extractor.service.export.orgsil.OrgSilServiceExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.paymentnotification.PaymentNotificationExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.paymentsreporting.PaymentsReportingExportProcessingService;
+import it.gov.pagopa.mypay2pu.extractor.service.export.paymentsreporting.mypivot.MypivotPaymentsReportingExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.treasurycsvcomplete.TreasuryCsvCompleteExportProcessingService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -60,6 +61,8 @@ class DataExportFacadeServiceTest {
   private AssessmentsRegistryExportProcessingService assessmentsRegistryExportProcessingServiceMock;
   @Mock
   private PaymentsReportingExportProcessingService paymentsReportingExportProcessingServiceMock;
+  @Mock
+  private MypivotPaymentsReportingExportProcessingService mypivotPaymentsReportingExportProcessingServiceMock;
 
   @InjectMocks
   private DataExportFacadeService service;
@@ -79,7 +82,8 @@ class DataExportFacadeServiceTest {
         assessmentsExportProcessingServiceMock,
         treasuryCsvCompleteExportProcessingServiceMock,
         assessmentsRegistryExportProcessingServiceMock,
-        paymentsReportingExportProcessingServiceMock
+        paymentsReportingExportProcessingServiceMock,
+        mypivotPaymentsReportingExportProcessingServiceMock
       )
     );
   }
@@ -139,6 +143,10 @@ class DataExportFacadeServiceTest {
       case PAYMENTS_REPORTING -> {
         expected = archiveFileResult("payments_reporting_1_0.zip");
         when(paymentsReportingExportProcessingServiceMock.executeExport(extractionId, request)).thenReturn(expected);
+      }
+      case PAYMENTS_REPORTING_MYPIVOT -> {
+        expected = archiveFileResult("payments_reporting_mypivot_1_0.zip");
+        when(mypivotPaymentsReportingExportProcessingServiceMock.executeExport(extractionId, request)).thenReturn(expected);
       }
       default -> {
         ExportFileTypeNotSupportedException exception = assertThrows(

@@ -14,6 +14,7 @@ import it.gov.pagopa.mypay2pu.extractor.service.export.organization.Organization
 import it.gov.pagopa.mypay2pu.extractor.service.export.orgsil.OrgSilServiceExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.paymentnotification.PaymentNotificationExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.paymentsreporting.PaymentsReportingExportProcessingService;
+import it.gov.pagopa.mypay2pu.extractor.service.export.paymentsreporting.mypivot.MypivotPaymentsReportingExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.treasurycsvcomplete.TreasuryCsvCompleteExportProcessingService;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +32,7 @@ public class DataExportFacadeService {
   private final AssessmentsExportProcessingService assessmentsExportProcessingService;
   private final TreasuryCsvCompleteExportProcessingService treasuryCsvCompleteExportProcessingService;
   private final PaymentsReportingExportProcessingService paymentsReportingExportProcessingService;
+  private final MypivotPaymentsReportingExportProcessingService mypivotPaymentsReportingExportProcessingService;
   private final AssessmentsRegistryExportProcessingService assessmentsRegistryExportProcessingService;
 
   public DataExportFacadeService(OrganizationExportProcessingService organizationExportProcessingService,
@@ -44,7 +46,8 @@ public class DataExportFacadeService {
                                  AssessmentsExportProcessingService assessmentsExportProcessingService,
                                  TreasuryCsvCompleteExportProcessingService treasuryCsvCompleteExportProcessingService,
                                  AssessmentsRegistryExportProcessingService assessmentsRegistryExportProcessingService,
-                                 PaymentsReportingExportProcessingService paymentsReportingExportProcessingService) {
+                                 PaymentsReportingExportProcessingService paymentsReportingExportProcessingService,
+                                 MypivotPaymentsReportingExportProcessingService mypivotPaymentsReportingExportProcessingService) {
     this.organizationExportProcessingService = organizationExportProcessingService;
     this.orgSilServiceExportProcessingService = orgSilServiceExportProcessingService;
     this.debtPositionTypeExportProcessingService = debtPositionTypeExportProcessingService;
@@ -57,6 +60,7 @@ public class DataExportFacadeService {
     this.assessmentsExportProcessingService = assessmentsExportProcessingService;
     this.assessmentsRegistryExportProcessingService = assessmentsRegistryExportProcessingService;
     this.paymentsReportingExportProcessingService = paymentsReportingExportProcessingService;
+    this.mypivotPaymentsReportingExportProcessingService = mypivotPaymentsReportingExportProcessingService;
   }
 
   public ExportFileResult executeExport(String extractionId, ExtractionRequest request) {
@@ -73,6 +77,7 @@ public class DataExportFacadeService {
       case ASSESSMENTS -> assessmentsExportProcessingService.executeExport(extractionId, request);
       case ASSESSMENTS_REGISTRY -> assessmentsRegistryExportProcessingService.executeExport(extractionId, request);
       case PAYMENTS_REPORTING -> paymentsReportingExportProcessingService.executeExport(extractionId, request);
+      case PAYMENTS_REPORTING_MYPIVOT -> mypivotPaymentsReportingExportProcessingService.executeExport(extractionId, request);
       default ->
         throw new ExportFileTypeNotSupportedException("Invalid export file type: " + request.getFileTypes());
     };
