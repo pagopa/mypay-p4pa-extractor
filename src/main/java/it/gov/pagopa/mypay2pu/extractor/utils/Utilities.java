@@ -5,10 +5,14 @@ import org.slf4j.MDC;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.util.GregorianCalendar;
+import java.time.format.DateTimeFormatter;
 
 public class Utilities {
+  private static final DateTimeFormatter XML_DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+
   private Utilities() {
   }
 
@@ -27,7 +31,19 @@ public class Utilities {
   }
 
   public static XMLGregorianCalendar toXMLGregorianCalendar(OffsetDateTime offsetDateTime) {
-    return offsetDateTime != null ? DATATYPE_FACTORY_XML_GREGORIAN_CALENDAR.newXMLGregorianCalendar(GregorianCalendar.from(offsetDateTime.toZonedDateTime())) : null;
+    return offsetDateTime != null
+      ? DATATYPE_FACTORY_XML_GREGORIAN_CALENDAR.newXMLGregorianCalendar(offsetDateTime.toString())
+      : null;
+  }
+
+  public static XMLGregorianCalendar toXMLGregorianCalendar(LocalDate date) {
+    return date != null ? DATATYPE_FACTORY_XML_GREGORIAN_CALENDAR.newXMLGregorianCalendar(date.toString()) : null;
+  }
+
+  public static XMLGregorianCalendar toXMLGregorianCalendar(LocalDateTime dateTime) {
+    return dateTime != null
+      ? DATATYPE_FACTORY_XML_GREGORIAN_CALENDAR.newXMLGregorianCalendar(dateTime.format(XML_DATE_TIME_FORMATTER))
+      : null;
   }
 
 }
