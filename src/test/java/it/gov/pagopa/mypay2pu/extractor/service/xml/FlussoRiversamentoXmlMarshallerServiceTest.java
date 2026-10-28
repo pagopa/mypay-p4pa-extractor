@@ -42,6 +42,15 @@ class FlussoRiversamentoXmlMarshallerServiceTest {
   }
 
   @Test
+  void givenNestedOutputPathWhenMarshalThenCreateParentDirectoriesAndWriteXml() {
+    Path xmlPath = tempDir.resolve("nested").resolve("output").resolve("FLOW_1.xml");
+
+    marshaller.marshal(flow(), xmlPath);
+
+    assertTrue(Files.exists(xmlPath));
+  }
+
+  @Test
   void givenDirectoryAsXmlOutputWhenMarshalThenFailWithIoError() {
     FlussoRiversamento validFlow = flow();
 

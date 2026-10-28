@@ -5,6 +5,7 @@ import it.gov.pagopa.mypay2pu.extractor.config.ExtractorExportProperties;
 import it.gov.pagopa.mypay2pu.extractor.dao.PaymentReportingMyPivotDao;
 import it.gov.pagopa.mypay2pu.extractor.dto.ExportFileResult;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ArchiveFile;
+import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionFilters;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.mapper.paymentsreporting.FlussoRiversamentoMapper;
@@ -23,6 +24,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipFile;
@@ -180,6 +182,62 @@ class MypivotPaymentsReportingExportProcessingServiceTest {
     verify(xmlMarshallerServiceMock, times(2)).marshal(flow, xmlPath);
   }
 
+  @Test
+  void givenNoFlowsWhenExportThenReturnNoArchives() {
+    when(paymentReportingMyPivotDaoMock.findFlowIdentifiers("IPA_CODE", null, null, null, List.of(), 2, 0))
+      .thenReturn(List.of());
+
+    ExportFileResult result = service(2).executeExport("extraction-id", request());
+
+    assertEquals(List.of(), result.archiveFiles());
+    verify(paymentReportingMyPivotDaoMock).findFlowIdentifiers("IPA_CODE", null, null, null, List.of(), 2, 0);
+  }
+
+  @Test
+  void givenFiltersWhenExportThenPassThemToDao() {
+    OffsetDateTime createdFrom = OffsetDateTime.parse("2026-01-01T00:00:00Z");
+    OffsetDateTime createdTo = OffsetDateTime.parse("2026-01-31T23:59:59Z");
+    ExtractionRequest request = request(
+      new ExtractionFilters().logicalKey("FLOW_1,FLOW_2").dateFrom(createdFrom).dateTo(createdTo)
+    );
+    when(paymentReportingMyPivotDaoMock.findFlowIdentifiers(
+      "IPA_CODE", null, createdFrom, createdTo, List.of("FLOW_1", "FLOW_2"), 2, 0
+    )).thenReturn(List.of());
+
+    ExportFileResult result = service(2).executeExport("extraction-id", request);
+
+    assertEquals(List.of(), result.archiveFiles());
+    verify(paymentReportingMyPivotDaoMock).findFlowIdentifiers(
+      "IPA_CODE", null, createdFrom, createdTo, List.of("FLOW_1", "FLOW_2"), 2, 0
+    );
+  }
+
+  @Test
+  void givenPersistentXmlWriteFailureWhenExportThenDiscardFlowAfterRetries() {
+    List<PaymentReporting> rows = List.of();
+    FlussoRiversamento flow = new FlussoRiversamento();
+    Path xmlPath = tempDir.resolve("extraction-id").resolve("FLOW_1.xml");
+    IllegalStateException writeException = new IllegalStateException("I/O failure", new IOException("Write error"));
+    when(paymentReportingMyPivotDaoMock.findFlowIdentifiers("IPA_CODE", null, null, null, List.of(), 1, 0))
+      .thenReturn(List.of("FLOW_1"));
+    when(paymentReportingMyPivotDaoMock.findFlowIdentifiers("IPA_CODE", null, null, null, List.of(), 1, 1))
+      .thenReturn(List.of());
+    when(paymentReportingMyPivotDaoMock.findRowsByFlowIdentifier("IPA_CODE", "FLOW_1", null, null, null))
+      .thenReturn(rows);
+    when(flussoRiversamentoMapperMock.map(rows)).thenReturn(flow);
+    doThrow(writeException, writeException, writeException).when(xmlMarshallerServiceMock).marshal(flow, xmlPath);
+
+    ExportFileResult result = service(1).executeExport("extraction-id", request());
+
+    assertEquals(2, result.archiveFiles().size());
+    assertTrue(result.archiveFiles().get(1).getName().endsWith(".errors.zip"));
+    verify(paymentReportingMyPivotDaoMock).findFlowIdentifiers("IPA_CODE", null, null, null, List.of(), 1, 0);
+    verify(paymentReportingMyPivotDaoMock).findFlowIdentifiers("IPA_CODE", null, null, null, List.of(), 1, 1);
+    verify(paymentReportingMyPivotDaoMock).findRowsByFlowIdentifier("IPA_CODE", "FLOW_1", null, null, null);
+    verify(flussoRiversamentoMapperMock).map(rows);
+    verify(xmlMarshallerServiceMock, times(3)).marshal(flow, xmlPath);
+  }
+
   private MypivotPaymentsReportingExportProcessingService service(int pageSize) {
     return new MypivotPaymentsReportingExportProcessingService(
       paymentReportingMyPivotDaoMock,
@@ -198,6 +256,10 @@ class MypivotPaymentsReportingExportProcessingServiceTest {
   }
 
   private ExtractionRequest request() {
-    return new ExtractionRequest(List.of("IPA_CODE"), MigrationFileType.PAYMENTS_REPORTING_MYPIVOT);
+    return request(null);
+  }
+
+  private ExtractionRequest request(ExtractionFilters filters) {
+    return new ExtractionRequest(List.of("IPA_CODE"), MigrationFileType.PAYMENTS_REPORTING_MYPIVOT, null, filters);
   }
 }
