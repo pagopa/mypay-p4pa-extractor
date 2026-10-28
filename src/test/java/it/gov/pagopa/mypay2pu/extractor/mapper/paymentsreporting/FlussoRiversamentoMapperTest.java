@@ -14,6 +14,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class FlussoRiversamentoMapperTest {
@@ -96,7 +97,108 @@ class FlussoRiversamentoMapperTest {
     assertInvalidValueException(exception);
   }
 
+  @Test
+  void givenEmptyRowsWhenMapThenFail() {
+    List<PaymentReporting> rows = List.of();
+
+    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> mapper.map(rows));
+
+    assertInvalidValueException(exception);
+    assertNull(exception.getCause().getCause());
+  }
+
+  @Test
+  void givenRowsWithDuplicatePaymentDetailWhenMapThenFail() {
+    List<PaymentReporting> rows = List.of(row(1, "23.00"), row(1, "7.50"));
+
+    IllegalArgumentException exception = assertThrows(
+      IllegalArgumentException.class,
+      () -> mapper.map(rows)
+    );
+
+    assertInvalidValueException(exception);
+  }
+
+  @Test
+  void givenRowWithMissingMandatoryPaymentDetailWhenMapThenFail() {
+    PaymentReporting rowWithMissingDetail = row(
+      "IUV_1",
+      "IUR_1",
+      null,
+      new BigDecimal("23.00"),
+      "0",
+      LocalDate.of(2026, Month.JANUARY, 15)
+    );
+    List<PaymentReporting> rows = List.of(rowWithMissingDetail);
+
+    IllegalArgumentException exception = assertThrows(
+      IllegalArgumentException.class,
+      () -> mapper.map(rows)
+    );
+
+    assertInvalidValueException(exception);
+  }
+
+  @Test
+  void givenRowWithAmountHavingMoreThanTwoDecimalsWhenMapThenFail() {
+    List<PaymentReporting> rows = List.of(row(1, "23.001"));
+
+    IllegalArgumentException exception = assertThrows(
+      IllegalArgumentException.class,
+      () -> mapper.map(rows)
+    );
+
+    assertInvalidValueException(exception);
+    assertSuppressedCause(exception, ArithmeticException.class);
+  }
+
+  @Test
+  void givenRowWithInvalidSenderIdentifierTypeWhenMapThenFail() {
+    PaymentReporting rowWithInvalidSenderIdentifierType = rowWithIdentifierTypes("INVALID", "G");
+    List<PaymentReporting> rows = List.of(rowWithInvalidSenderIdentifierType);
+
+    IllegalArgumentException exception = assertThrows(
+      IllegalArgumentException.class,
+      () -> mapper.map(rows)
+    );
+
+    assertInvalidValueException(exception);
+    assertSuppressedCause(exception, IllegalArgumentException.class);
+  }
+
+  @Test
+  void givenRowWithInvalidReceiverIdentifierTypeWhenMapThenFail() {
+    PaymentReporting rowWithInvalidReceiverIdentifierType = rowWithIdentifierTypes("B", "INVALID");
+    List<PaymentReporting> rows = List.of(rowWithInvalidReceiverIdentifierType);
+
+    IllegalArgumentException exception = assertThrows(
+      IllegalArgumentException.class,
+      () -> mapper.map(rows)
+    );
+
+    assertInvalidValueException(exception);
+    assertSuppressedCause(exception, IllegalArgumentException.class);
+  }
+
   private PaymentReporting row(int index, String amount) {
+    return row(
+      "IUV_" + index,
+      "IUR_" + index,
+      index,
+      new BigDecimal(amount),
+      "0",
+      LocalDate.of(2026, Month.JANUARY, 15)
+    );
+  }
+
+  private PaymentReporting row(
+    String iuv,
+    String iur,
+    Integer index,
+    BigDecimal amount,
+    String outcome,
+    LocalDate outcomeDate
+  ) {
     return new PaymentReporting(
       "FLOW_1",
       "1.1",
@@ -110,10 +212,33 @@ class FlussoRiversamentoMapperTest {
       "G",
       "80050050154",
       "Organization",
-      "IUV_" + index,
-      "IUR_" + index,
+      iuv,
+      iur,
       index,
-      new BigDecimal(amount),
+      amount,
+      outcome,
+      outcomeDate
+    );
+  }
+
+  private PaymentReporting rowWithIdentifierTypes(String senderIdentifierType, String receiverIdentifierType) {
+    return new PaymentReporting(
+      "FLOW_1",
+      "1.1",
+      LocalDateTime.of(2026, Month.JANUARY, 15, 10, 30),
+      "REG_1",
+      LocalDate.of(2026, Month.JANUARY, 15),
+      senderIdentifierType,
+      "PPAYITR1XXX",
+      "Poste Pay",
+      "PPAYITR1XXX",
+      receiverIdentifierType,
+      "80050050154",
+      "Organization",
+      "IUV_1",
+      "IUR_1",
+      1,
+      new BigDecimal("23.00"),
       "0",
       LocalDate.of(2026, Month.JANUARY, 15)
     );
@@ -122,5 +247,11 @@ class FlussoRiversamentoMapperTest {
   private void assertInvalidValueException(IllegalArgumentException exception) {
     InvalidValueException cause = assertInstanceOf(InvalidValueException.class, exception.getCause());
     assertEquals("INVALID_PAYMENTS_REPORTING_FLOW", cause.getCode());
+  }
+
+  private void assertSuppressedCause(IllegalArgumentException exception, Class<? extends Throwable> expectedType) {
+    Throwable[] suppressed = exception.getCause().getSuppressed();
+    assertEquals(1, suppressed.length);
+    assertInstanceOf(expectedType, suppressed[0]);
   }
 }
