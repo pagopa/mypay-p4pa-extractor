@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.zip.ZipFile;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -184,28 +183,7 @@ class MypaySharePaymentsReportingExportProcessingServiceTest {
     verify(paymentReportingMyPayShareDaoMock).findByFilters("IPA_CODE", null, createdFrom, createdTo, List.of("FLOW-1"), 1, 0);
   }
 
-  @Test
-  void givenMissingSharedFolderWhenExportThenThrowException() {
-    Path missingDirectory = tempDir.resolve("missing");
-    MypaySharePaymentsReportingExportProcessingService service = service(missingDirectory);
-    ExtractionRequest request = request(null);
-
-    IllegalStateException exception = assertThrows(
-      IllegalStateException.class,
-      () -> service.executeExport("extraction-id", request)
-    );
-
-    assertEquals(
-      "Property mypay.path.directory-root-enti must point to an existing directory: " + missingDirectory,
-      exception.getMessage()
-    );
-  }
-
   private MypaySharePaymentsReportingExportProcessingService service() {
-    return service(tempDir);
-  }
-
-  private MypaySharePaymentsReportingExportProcessingService service(Path myPaySharedFolderPath) {
     return new MypaySharePaymentsReportingExportProcessingService(
       paymentReportingMyPayShareDaoMock,
       new ExtractorExportProperties(
@@ -213,7 +191,7 @@ class MypaySharePaymentsReportingExportProcessingServiceTest {
         Map.of(MigrationFileType.PAYMENTS_REPORTING_MYPAY, new ExtractorExportProperties.FileTypeConfiguration(1))
       ),
       new MyPaySharedFolderValidator(new MyPayProperties(
-        new MyPayProperties.PathProperties(myPaySharedFolderPath.toString()),
+        new MyPayProperties.PathProperties(tempDir.toString()),
         new MyPayProperties.GlobalProperties(null, null)
       )),
       new CsvService(';', '"'),

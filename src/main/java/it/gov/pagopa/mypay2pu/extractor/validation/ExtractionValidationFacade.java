@@ -51,12 +51,8 @@ public class ExtractionValidationFacade {
         "MyPivot extraction is disabled"
       );
     }
-    if (request.getFileTypes() == MigrationFileType.PAYMENTS_REPORTING_MYPAY
-      && !myPaySharedFolderValidator.isDirectoryAvailable()) {
-      throw new BadRequestException(
-        "MYPAY_SHARED_FOLDER_UNAVAILABLE",
-        myPaySharedFolderValidator.unavailableDirectoryMessage()
-      );
+    if (request.getFileTypes() == MigrationFileType.PAYMENTS_REPORTING_MYPAY) {
+      myPaySharedFolderValidator.validateMyPaySharedFolder();
     }
 
     switch (request.getFileTypes()) {

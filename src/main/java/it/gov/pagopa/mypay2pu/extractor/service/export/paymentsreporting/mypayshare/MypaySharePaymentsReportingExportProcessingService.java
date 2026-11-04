@@ -50,14 +50,7 @@ public class MypaySharePaymentsReportingExportProcessingService {
     this.zipFileService = zipFileService;
   }
 
-  private void validateMyPaySharedFolder() {
-    if (!myPaySharedFolderValidator.isDirectoryAvailable()) {
-      throw new IllegalStateException(myPaySharedFolderValidator.unavailableDirectoryMessage());
-    }
-  }
-
   public ExportFileResult executeExport(String extractionId, ExtractionRequest request) {
-    validateMyPaySharedFolder();
     List<ArchiveFile> archiveFiles = new ArrayList<>();
     for (String organizationId : request.getIpaCodes()) {
       archiveFiles.addAll(createZips(extractionId, organizationId, request));

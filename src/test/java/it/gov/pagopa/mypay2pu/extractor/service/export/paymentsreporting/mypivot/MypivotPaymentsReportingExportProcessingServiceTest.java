@@ -2,6 +2,7 @@ package it.gov.pagopa.mypay2pu.extractor.service.export.paymentsreporting.mypivo
 
 import it.gov.digitpa.schemas._2011.pagamenti.FlussoRiversamento;
 import it.gov.pagopa.mypay2pu.extractor.config.ExtractorExportProperties;
+import it.gov.pagopa.mypay2pu.extractor.config.MyPivotProperties;
 import it.gov.pagopa.mypay2pu.extractor.dao.PaymentReportingMyPivotDao;
 import it.gov.pagopa.mypay2pu.extractor.dto.ExportFileResult;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ArchiveFile;
@@ -31,6 +32,7 @@ import java.util.zip.ZipFile;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -57,6 +59,19 @@ class MypivotPaymentsReportingExportProcessingServiceTest {
       flussoRiversamentoMapperMock,
       xmlMarshallerServiceMock
     );
+  }
+
+  @Test
+  void givenMyPivotDisabledWhenExportThenFailBeforeAccessingDao() {
+    MypivotPaymentsReportingExportProcessingService service = service(1, false);
+    ExtractionRequest request = request();
+
+    IllegalStateException exception = assertThrows(
+      IllegalStateException.class,
+      () -> service.executeExport("extraction-id", request)
+    );
+
+    assertEquals("MyPivot extraction is disabled", exception.getMessage());
   }
 
   @Test
@@ -209,6 +224,10 @@ class MypivotPaymentsReportingExportProcessingServiceTest {
   }
 
   private MypivotPaymentsReportingExportProcessingService service(int pageSize) {
+    return service(pageSize, true);
+  }
+
+  private MypivotPaymentsReportingExportProcessingService service(int pageSize, boolean myPivotEnabled) {
     return new MypivotPaymentsReportingExportProcessingService(
       paymentReportingMyPivotDaoMock,
       flussoRiversamentoMapperMock,
@@ -220,6 +239,7 @@ class MypivotPaymentsReportingExportProcessingServiceTest {
         "BROKER_IPA",
         Map.of(MigrationFileType.PAYMENTS_REPORTING_MYPIVOT, new ExtractorExportProperties.FileTypeConfiguration(pageSize))
       ),
+      new MyPivotProperties(myPivotEnabled),
       new CsvService(';', '"'),
       new ZipFileService()
     );

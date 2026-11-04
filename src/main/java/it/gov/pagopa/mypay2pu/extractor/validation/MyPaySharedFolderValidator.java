@@ -1,6 +1,7 @@
 package it.gov.pagopa.mypay2pu.extractor.validation;
 
 import it.gov.pagopa.mypay2pu.extractor.config.MyPayProperties;
+import it.gov.pagopa.mypay2pu.extractor.exception.BadRequestException;
 import org.springframework.stereotype.Component;
 
 import java.nio.file.Files;
@@ -19,11 +20,14 @@ public class MyPaySharedFolderValidator {
     return Files.isDirectory(sharedFolderPath);
   }
 
+  public void validateMyPaySharedFolder() {
+    if (!isDirectoryAvailable()) {
+      throw new BadRequestException("MYPAY_SHARED_FOLDER_UNAVAILABLE", "MyPay shared folder is unavailable");
+    }
+  }
+
   public Path sharedFolderPath() {
     return sharedFolderPath;
   }
 
-  public String unavailableDirectoryMessage() {
-    return "Property mypay.path.directory-root-enti must point to an existing directory: " + sharedFolderPath;
-  }
 }

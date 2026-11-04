@@ -1,6 +1,7 @@
 package it.gov.pagopa.mypay2pu.extractor.service.export.paymentsreporting.mypivot;
 
 import it.gov.pagopa.mypay2pu.extractor.config.ExtractorExportProperties;
+import it.gov.pagopa.mypay2pu.extractor.config.MyPivotProperties;
 import it.gov.pagopa.mypay2pu.extractor.dao.PaymentReportingMyPivotDao;
 import it.gov.pagopa.mypay2pu.extractor.dto.ExportFileResult;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
@@ -90,6 +91,7 @@ class MypivotPaymentsReportingExportProcessingServiceIntegrationTest {
         "BROKER_IPA",
         Map.of(MigrationFileType.PAYMENTS_REPORTING_MYPIVOT, new ExtractorExportProperties.FileTypeConfiguration(1))
       ),
+      new MyPivotProperties(true),
       new CsvService(';', '"'),
       new ZipFileService()
     );

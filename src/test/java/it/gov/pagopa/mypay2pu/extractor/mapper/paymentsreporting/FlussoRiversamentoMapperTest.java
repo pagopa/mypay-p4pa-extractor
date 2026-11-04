@@ -1,6 +1,8 @@
 package it.gov.pagopa.mypay2pu.extractor.mapper.paymentsreporting;
 
 import it.gov.digitpa.schemas._2011.pagamenti.FlussoRiversamento;
+import it.gov.digitpa.schemas._2011.pagamenti.StTipoIdentificativoUnivoco;
+import it.gov.digitpa.schemas._2011.pagamenti.StTipoIdentificativoUnivocoPersG;
 import it.gov.pagopa.mypay2pu.extractor.exception.InvalidValueException;
 import it.gov.pagopa.mypay2pu.extractor.model.mpv4.PaymentReporting;
 import it.gov.pagopa.mypay2pu.extractor.utils.TestUtils;
@@ -13,7 +15,6 @@ import java.time.Month;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -29,6 +30,14 @@ class FlussoRiversamentoMapperTest {
     assertEquals(new BigDecimal("2"), result.getNumeroTotalePagamenti());
     assertEquals(new BigDecimal("30.50"), result.getImportoTotalePagamenti());
     assertEquals(2, result.getDatiSingoliPagamentis().size());
+    assertEquals(
+      StTipoIdentificativoUnivoco.B,
+      result.getIstitutoMittente().getIdentificativoUnivocoMittente().getTipoIdentificativoUnivoco()
+    );
+    assertEquals(
+      StTipoIdentificativoUnivocoPersG.G,
+      result.getIstitutoRicevente().getIdentificativoUnivocoRicevente().getTipoIdentificativoUnivoco()
+    );
     TestUtils.checkNotNullFields(result, "revisioneFlusso");
     TestUtils.checkNotNullFields(result.getIstitutoMittente());
     TestUtils.checkNotNullFields(result.getIstitutoMittente().getIdentificativoUnivocoMittente());
@@ -62,7 +71,7 @@ class FlussoRiversamentoMapperTest {
 
     List<PaymentReporting> rows = List.of(row(1, "23.00"), inconsistentRow);
 
-    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> mapper.map(rows));
+    InvalidValueException exception = assertThrows(InvalidValueException.class, () -> mapper.map(rows));
 
     assertInvalidValueException(exception);
   }
@@ -92,7 +101,7 @@ class FlussoRiversamentoMapperTest {
 
     List<PaymentReporting> rows = List.of(rowWithMissingHeader);
 
-    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> mapper.map(rows));
+    InvalidValueException exception = assertThrows(InvalidValueException.class, () -> mapper.map(rows));
 
     assertInvalidValueException(exception);
   }
@@ -101,18 +110,18 @@ class FlussoRiversamentoMapperTest {
   void givenEmptyRowsWhenMapThenFail() {
     List<PaymentReporting> rows = List.of();
 
-    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> mapper.map(rows));
+    InvalidValueException exception = assertThrows(InvalidValueException.class, () -> mapper.map(rows));
 
     assertInvalidValueException(exception);
-    assertNull(exception.getCause().getCause());
+    assertNull(exception.getCause());
   }
 
   @Test
   void givenRowsWithDuplicatePaymentDetailWhenMapThenFail() {
     List<PaymentReporting> rows = List.of(row(1, "23.00"), row(1, "7.50"));
 
-    IllegalArgumentException exception = assertThrows(
-      IllegalArgumentException.class,
+    InvalidValueException exception = assertThrows(
+      InvalidValueException.class,
       () -> mapper.map(rows)
     );
 
@@ -131,8 +140,8 @@ class FlussoRiversamentoMapperTest {
     );
     List<PaymentReporting> rows = List.of(rowWithMissingDetail);
 
-    IllegalArgumentException exception = assertThrows(
-      IllegalArgumentException.class,
+    InvalidValueException exception = assertThrows(
+      InvalidValueException.class,
       () -> mapper.map(rows)
     );
 
@@ -148,8 +157,7 @@ class FlussoRiversamentoMapperTest {
       () -> mapper.map(rows)
     );
 
-    assertInvalidValueException(exception);
-    assertSuppressedCause(exception, ArithmeticException.class);
+    assertCause(exception, ArithmeticException.class);
   }
 
   @Test
@@ -162,8 +170,7 @@ class FlussoRiversamentoMapperTest {
       () -> mapper.map(rows)
     );
 
-    assertInvalidValueException(exception);
-    assertSuppressedCause(exception, IllegalArgumentException.class);
+    assertCause(exception, IllegalArgumentException.class);
   }
 
   @Test
@@ -176,8 +183,7 @@ class FlussoRiversamentoMapperTest {
       () -> mapper.map(rows)
     );
 
-    assertInvalidValueException(exception);
-    assertSuppressedCause(exception, IllegalArgumentException.class);
+    assertCause(exception, IllegalArgumentException.class);
   }
 
   private PaymentReporting row(int index, String amount) {
@@ -244,14 +250,11 @@ class FlussoRiversamentoMapperTest {
     );
   }
 
-  private void assertInvalidValueException(IllegalArgumentException exception) {
-    InvalidValueException cause = assertInstanceOf(InvalidValueException.class, exception.getCause());
-    assertEquals("INVALID_PAYMENTS_REPORTING_FLOW", cause.getCode());
+  private void assertInvalidValueException(InvalidValueException exception) {
+    assertEquals("INVALID_PAYMENTS_REPORTING_FLOW", exception.getCode());
   }
 
-  private void assertSuppressedCause(IllegalArgumentException exception, Class<? extends Throwable> expectedType) {
-    Throwable[] suppressed = exception.getCause().getSuppressed();
-    assertEquals(1, suppressed.length);
-    assertInstanceOf(expectedType, suppressed[0]);
+  private void assertCause(IllegalArgumentException exception, Class<? extends Throwable> expectedType) {
+    assertEquals(expectedType, exception.getCause().getClass());
   }
 }

@@ -75,9 +75,8 @@ class ExtractionValidationFacadeTest {
         verify(pairedLogicalKeyValidatorMock).validate(request);
       }
       case PAYMENTS_REPORTING_MYPAY -> {
-        when(myPaySharedFolderValidatorMock.isDirectoryAvailable()).thenReturn(true);
         validationFacade.validate(request);
-        verify(myPaySharedFolderValidatorMock).isDirectoryAvailable();
+        verify(myPaySharedFolderValidatorMock).validateMyPaySharedFolder();
         verify(extractionRequestValidatorMock).validate(request);
       }
       case PAYMENTS_REPORTING_MYPIVOT -> {
@@ -127,9 +126,11 @@ class ExtractionValidationFacadeTest {
 
   @Test
   void givenMyPaySharedFolderUnavailableWhenValidateThenThrowBadRequest() {
-    when(myPaySharedFolderValidatorMock.isDirectoryAvailable()).thenReturn(false);
-    when(myPaySharedFolderValidatorMock.unavailableDirectoryMessage())
-      .thenReturn("Property mypay.path.directory-root-enti must point to an existing directory: /missing");
+    BadRequestException expectedException = new BadRequestException(
+      "MYPAY_SHARED_FOLDER_UNAVAILABLE",
+      "MyPay shared folder is unavailable"
+    );
+    doThrow(expectedException).when(myPaySharedFolderValidatorMock).validateMyPaySharedFolder();
     ExtractionRequest request = request(MigrationFileType.PAYMENTS_REPORTING_MYPAY);
 
     BadRequestException exception = assertThrows(
@@ -139,11 +140,10 @@ class ExtractionValidationFacadeTest {
 
     assertEquals("MYPAY_SHARED_FOLDER_UNAVAILABLE", exception.getCode());
     assertEquals(
-      "Property mypay.path.directory-root-enti must point to an existing directory: /missing",
+      "MyPay shared folder is unavailable",
       exception.getMessage()
     );
-    verify(myPaySharedFolderValidatorMock).isDirectoryAvailable();
-    verify(myPaySharedFolderValidatorMock).unavailableDirectoryMessage();
+    verify(myPaySharedFolderValidatorMock).validateMyPaySharedFolder();
   }
 
   private ExtractionRequest request(MigrationFileType fileType) {

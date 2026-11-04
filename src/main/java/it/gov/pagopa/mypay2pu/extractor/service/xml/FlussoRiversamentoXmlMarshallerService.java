@@ -8,12 +8,10 @@ import org.springframework.stereotype.Service;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
-import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.net.URL;
 import javax.xml.XMLConstants;
-import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
@@ -35,8 +33,12 @@ public class FlussoRiversamentoXmlMarshallerService {
   }
 
   public void marshal(FlussoRiversamento flow, Path outputPath) {
-    String xml = xmlMarshallerService.marshal(FlussoRiversamento.class, flow, jaxbContext);
-    validate(xml);
+    String xml;
+    try {
+      xml = xmlMarshallerService.marshal(FlussoRiversamento.class, flow, jaxbContext, schema);
+    } catch (IllegalStateException exception) {
+      throw new IllegalStateException("Payments reporting XML does not conform to the XSD", exception);
+    }
     try {
       Files.createDirectories(outputPath.getParent());
       Files.writeString(outputPath, xml);
@@ -61,11 +63,4 @@ public class FlussoRiversamentoXmlMarshallerService {
     }
   }
 
-  private void validate(String xml) {
-    try {
-      schema.newValidator().validate(new StreamSource(new StringReader(xml)));
-    } catch (SAXException | IOException exception) {
-      throw new IllegalStateException("Payments reporting XML does not conform to the XSD", exception);
-    }
-  }
 }

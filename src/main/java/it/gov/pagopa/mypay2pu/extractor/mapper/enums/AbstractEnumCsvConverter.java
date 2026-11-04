@@ -17,10 +17,8 @@ import java.util.function.Function;
  *
  * @param <E> the destination enum type
  */
-public abstract class AbstractEnumCsvConverter<E extends Enum<E>> {
+public abstract class AbstractEnumCsvConverter<E extends Enum<E>> extends AbstractEnumConverter<E> {
 
-  private final Map<String, E> mappings;
-  private final Function<String, E> defaultResolver;
   private final Class<E> enumType;
   private final String csvFieldName;
 
@@ -34,8 +32,7 @@ public abstract class AbstractEnumCsvConverter<E extends Enum<E>> {
     Class<E> enumType,
     String csvFieldName
   ) {
-    this.mappings = Map.copyOf(Objects.requireNonNull(mappings, "Mappings are required"));
-    this.defaultResolver = defaultResolver;
+    super(mappings, defaultResolver);
     this.enumType = Objects.requireNonNull(enumType, "Enum type is required");
     this.csvFieldName = Objects.requireNonNull(csvFieldName, "CSV field name is required");
   }
@@ -45,20 +42,8 @@ public abstract class AbstractEnumCsvConverter<E extends Enum<E>> {
       return null;
     }
 
-    E enumValue = mappings.get(dbValue);
-    if (enumValue == null) {
-      enumValue = resolveDefault(dbValue);
-    }
-    return enumValue;
-  }
-
-  private E resolveDefault(String dbValue) {
-    if (defaultResolver == null) {
-      throw mappingException(dbValue, null);
-    }
-
     try {
-      E resolved = defaultResolver.apply(dbValue);
+      E resolved = convert(dbValue);
       if (resolved == null) {
         throw mappingException(dbValue, null);
       }

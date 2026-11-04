@@ -1,6 +1,7 @@
 package it.gov.pagopa.mypay2pu.extractor.service.export.paymentsreporting.mypivot;
 
 import it.gov.pagopa.mypay2pu.extractor.config.ExtractorExportProperties;
+import it.gov.pagopa.mypay2pu.extractor.config.MyPivotProperties;
 import it.gov.pagopa.mypay2pu.extractor.dao.PaymentReportingMyPivotDao;
 import it.gov.pagopa.mypay2pu.extractor.dto.ExportFileResult;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ArchiveFile;
@@ -39,6 +40,7 @@ public class MypivotPaymentsReportingExportProcessingService {
   private final FlussoRiversamentoMapper flussoRiversamentoMapper;
   private final FlussoRiversamentoXmlMarshallerService xmlMarshallerService;
   private final ExtractorExportProperties extractorExportProperties;
+  private final MyPivotProperties myPivotProperties;
   private final CsvService csvService;
   private final ZipFileService zipFileService;
 
@@ -47,6 +49,7 @@ public class MypivotPaymentsReportingExportProcessingService {
     FlussoRiversamentoMapper flussoRiversamentoMapper,
     FlussoRiversamentoXmlMarshallerService xmlMarshallerService,
     ExtractorExportProperties extractorExportProperties,
+    MyPivotProperties myPivotProperties,
     CsvService csvService,
     ZipFileService zipFileService
   ) {
@@ -54,16 +57,24 @@ public class MypivotPaymentsReportingExportProcessingService {
     this.flussoRiversamentoMapper = flussoRiversamentoMapper;
     this.xmlMarshallerService = xmlMarshallerService;
     this.extractorExportProperties = extractorExportProperties;
+    this.myPivotProperties = myPivotProperties;
     this.csvService = csvService;
     this.zipFileService = zipFileService;
   }
 
   public ExportFileResult executeExport(String extractionId, ExtractionRequest request) {
+    validateMyPivotEnabled();
     List<ArchiveFile> archiveFiles = new ArrayList<>();
     for (String ipaCode : request.getIpaCodes()) {
       archiveFiles.addAll(createZips(extractionId, ipaCode, request));
     }
     return new ExportFileResult(archiveFiles, null);
+  }
+
+  private void validateMyPivotEnabled() {
+    if (!myPivotProperties.enabled()) {
+      throw new IllegalStateException("MyPivot extraction is disabled");
+    }
   }
 
   private List<ArchiveFile> createZips(String extractionId, String ipaCode, ExtractionRequest request) {
@@ -105,7 +116,7 @@ public class MypivotPaymentsReportingExportProcessingService {
         ).ifPresent(xmlFiles::add);
       }
       Path zipPath = resolveOutputPath(extractionId, fileNameBuilder.buildZipPartBaseName(partNumber) + ".zip");
-      zip(
+      zipFileService.zipper(
         zipPath,
         xmlFiles,
         true,
@@ -121,7 +132,7 @@ public class MypivotPaymentsReportingExportProcessingService {
 
     if (!errorFilePaths.isEmpty()) {
       Path errorZipPath = resolveOutputPath(extractionId, fileNameBuilder.buildZipBaseName() + ".errors.zip");
-      zip(errorZipPath, errorFilePaths, true, file -> file.getFileName().toString());
+      zipFileService.zipper(errorZipPath, errorFilePaths, true, file -> file.getFileName().toString());
       archiveFiles.add(new ArchiveFile()
         .name(errorZipPath.getFileName().toString())
         .files(errorFilePaths.stream().map(path -> path.getFileName().toString()).toList()));
@@ -143,7 +154,7 @@ public class MypivotPaymentsReportingExportProcessingService {
         ipaCode, flowIdentifier, lastExtractionDate, createdFrom, createdTo
       );
       Path xmlPath = resolveOutputPath(extractionId, flowIdentifier + ".xml");
-      marshal(flussoRiversamentoMapper.map(rows), xmlPath);
+      xmlMarshallerService.marshal(flussoRiversamentoMapper.map(rows), xmlPath);
       return Optional.of(xmlPath);
     } catch (IllegalArgumentException | IllegalStateException exception) {
       log.error("Cannot generate payments reporting XML: ipaCode={}, flowIdentifier={}", ipaCode, flowIdentifier, exception);
@@ -169,19 +180,6 @@ public class MypivotPaymentsReportingExportProcessingService {
       throw new IllegalStateException("Cannot create payments reporting discard file " + errorFile, exception);
     }
     return Optional.of(errorFile);
-  }
-
-  private void marshal(it.gov.digitpa.schemas._2011.pagamenti.FlussoRiversamento flow, Path xmlPath) {
-    xmlMarshallerService.marshal(flow, xmlPath);
-  }
-
-  private void zip(
-    Path zipPath,
-    List<Path> files,
-    boolean deleteSourceFiles,
-    java.util.function.Function<Path, String> entryNameResolver
-  ) {
-    zipFileService.zipper(zipPath, files, deleteSourceFiles, entryNameResolver);
   }
 
   private Path resolveOutputPath(String extractionId, String fileName) {

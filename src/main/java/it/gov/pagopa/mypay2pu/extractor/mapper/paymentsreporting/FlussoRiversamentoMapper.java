@@ -28,7 +28,7 @@ public class FlussoRiversamentoMapper {
 
   public FlussoRiversamento map(List<PaymentReporting> rows) {
     if (CollectionUtils.isEmpty(rows)) {
-      throw invalidValue("Cannot map an empty payments reporting flow");
+      throw new InvalidValueException(INVALID_PAYMENTS_REPORTING_FLOW, "Cannot map an empty payments reporting flow");
     }
 
     PaymentReporting firstRow = rows.getFirst();
@@ -98,7 +98,8 @@ public class FlussoRiversamentoMapper {
       || !StringUtils.hasText(row.codIstMittIdUnivMittCodiceIdentificativoUnivoco())
       || !StringUtils.hasText(row.codIstRicevIdUnivRicevTipoIdentificativoUnivoco())
       || !StringUtils.hasText(row.codIstRicevIdUnivRicevCodiceIdentificativoUnivoco())) {
-      throw invalidValue(
+      throw new InvalidValueException(
+        INVALID_PAYMENTS_REPORTING_FLOW,
         "Missing mandatory header value for payments reporting flow " + row.codIdentificativoFlusso()
       );
     }
@@ -108,7 +109,8 @@ public class FlussoRiversamentoMapper {
     Set<String> detailKeys = new HashSet<>();
     for (PaymentReporting row : rows) {
       if (!sameHeader(firstRow, row)) {
-        throw invalidValue(
+        throw new InvalidValueException(
+          INVALID_PAYMENTS_REPORTING_FLOW,
           "Inconsistent header values for payments reporting flow " + firstRow.codIdentificativoFlusso()
         );
       }
@@ -119,7 +121,8 @@ public class FlussoRiversamentoMapper {
         row.indiceDatiSingoloPagamento()
       );
       if (!detailKeys.add(detailKey)) {
-        throw invalidValue(
+        throw new InvalidValueException(
+          INVALID_PAYMENTS_REPORTING_FLOW,
           "Duplicate payment detail for payments reporting flow " + firstRow.codIdentificativoFlusso()
         );
       }
@@ -156,7 +159,8 @@ public class FlussoRiversamentoMapper {
       || row.numDatiSingPagamSingoloImportoPagato() == null
       || !StringUtils.hasText(row.codDatiSingPagamCodiceEsitoSingoloPagamento())
       || row.dtDatiSingPagamDataEsitoSingoloPagamento() == null) {
-      throw invalidValue(
+      throw new InvalidValueException(
+        INVALID_PAYMENTS_REPORTING_FLOW,
         "Missing mandatory payment detail value for payments reporting flow " + row.codIdentificativoFlusso()
       );
     }
@@ -166,7 +170,7 @@ public class FlussoRiversamentoMapper {
     try {
       return row.numDatiSingPagamSingoloImportoPagato().setScale(2, RoundingMode.UNNECESSARY);
     } catch (ArithmeticException exception) {
-      throw invalidValue(
+      throw new IllegalArgumentException(
         "Invalid payment amount for payments reporting flow " + row.codIdentificativoFlusso(),
         exception
       );
@@ -175,9 +179,11 @@ public class FlussoRiversamentoMapper {
 
   private StTipoIdentificativoUnivoco mapMittenteIdentifierType(PaymentReporting row) {
     try {
-      return StTipoIdentificativoUnivoco.valueOf(row.codIstMittIdUnivMittTipoIdentificativoUnivoco());
+      return PaymentReportingSenderIdentifierTypeConverter.INSTANCE.toXmlValue(
+        row.codIstMittIdUnivMittTipoIdentificativoUnivoco()
+      );
     } catch (IllegalArgumentException exception) {
-      throw invalidValue(
+      throw new IllegalArgumentException(
         "Invalid sender identifier type for payments reporting flow " + row.codIdentificativoFlusso(),
         exception
       );
@@ -186,24 +192,15 @@ public class FlussoRiversamentoMapper {
 
   private StTipoIdentificativoUnivocoPersG mapRiceventeIdentifierType(PaymentReporting row) {
     try {
-      return StTipoIdentificativoUnivocoPersG.valueOf(row.codIstRicevIdUnivRicevTipoIdentificativoUnivoco());
+      return PaymentReportingReceiverIdentifierTypeConverter.INSTANCE.toXmlValue(
+        row.codIstRicevIdUnivRicevTipoIdentificativoUnivoco()
+      );
     } catch (IllegalArgumentException exception) {
-      throw invalidValue(
+      throw new IllegalArgumentException(
         "Invalid receiver identifier type for payments reporting flow " + row.codIdentificativoFlusso(),
         exception
       );
     }
   }
 
-  private IllegalArgumentException invalidValue(String message) {
-    return invalidValue(message, null);
-  }
-
-  private IllegalArgumentException invalidValue(String message, Throwable cause) {
-    InvalidValueException invalidValueException = new InvalidValueException(INVALID_PAYMENTS_REPORTING_FLOW, message);
-    if (cause != null) {
-      invalidValueException.addSuppressed(cause);
-    }
-    return new IllegalArgumentException(message, invalidValueException);
-  }
 }

@@ -6,15 +6,21 @@ import jakarta.xml.bind.Marshaller;
 import org.springframework.stereotype.Service;
 
 import java.io.StringWriter;
+import javax.xml.validation.Schema;
 
 @Service
 public class XMLMarshallerService {
 
   public <T> String marshal(Class<T> clazz, T value, JAXBContext jaxbContext) {
+    return marshal(clazz, value, jaxbContext, null);
+  }
+
+  public <T> String marshal(Class<T> clazz, T value, JAXBContext jaxbContext, Schema schema) {
     try {
       Marshaller marshaller = jaxbContext.createMarshaller();
       marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
       marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+      marshaller.setSchema(schema);
       StringWriter stringWriter = new StringWriter();
       marshaller.marshal(value, stringWriter);
       return stringWriter.toString();
