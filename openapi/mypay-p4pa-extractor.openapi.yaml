@@ -181,7 +181,7 @@ components:
             - `DEBT_POSITIONS_PAID`: comma-separated `iuv` values.
             - `DEBT_POSITIONS_TYPE_ORG_OPERATORS`: two comma-separated lists separated by `|`, in the form `operatorFiscalCodes|debtPositionTypeOrgCodes`; values at the same position form a pair.
             - `PAYMENT_NOTIFICATION`: comma-separated IUD filter values (example: `IUD-1,IUD-2`).
-            - `PAYMENTS_REPORTING`: comma-separated flow identifier values (example: `FLOW-1,FLOW-2`).
+            - `PAYMENTS_REPORTING_MYPAY`: comma-separated flow identifier values (example: `FLOW-1,FLOW-2`).
             - `TREASURY_CSV_COMPLETE`: two comma-separated bill-filter lists separated by `|`, in the form `billYears|billCodes` (example: `2024,2025|BOL001,BOL002`); values at the same position form a bill pair.
             - `ASSESSMENTS`: comma-separated `assessmentName` values.
             - `ASSESSMENTS_REGISTRY`: comma-separated `debtPositionTypeOrgCode` values.
@@ -258,7 +258,7 @@ components:
         - DEBT_POSITIONS
         - DEBT_POSITIONS_PAID
         - PAYMENT_NOTIFICATION
-        - PAYMENTS_REPORTING
+        - PAYMENTS_REPORTING_MYPAY
         - PAYMENTS_REPORTING_MYPIVOT
         - TREASURY_CSV_COMPLETE
         - ASSESSMENTS

@@ -13,7 +13,7 @@ import it.gov.pagopa.mypay2pu.extractor.service.export.debtpositiontypeorg.DebtP
 import it.gov.pagopa.mypay2pu.extractor.service.export.organization.OrganizationExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.orgsil.OrgSilServiceExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.paymentnotification.PaymentNotificationExportProcessingService;
-import it.gov.pagopa.mypay2pu.extractor.service.export.paymentsreporting.PaymentsReportingExportProcessingService;
+import it.gov.pagopa.mypay2pu.extractor.service.export.paymentsreporting.mypayshare.MypaySharePaymentsReportingExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.paymentsreporting.mypivot.MypivotPaymentsReportingExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.treasurycsvcomplete.TreasuryCsvCompleteExportProcessingService;
 import org.springframework.stereotype.Service;
@@ -31,7 +31,7 @@ public class DataExportFacadeService {
   private final PaymentNotificationExportProcessingService paymentNotificationExportProcessingService;
   private final AssessmentsExportProcessingService assessmentsExportProcessingService;
   private final TreasuryCsvCompleteExportProcessingService treasuryCsvCompleteExportProcessingService;
-  private final PaymentsReportingExportProcessingService paymentsReportingExportProcessingService;
+  private final MypaySharePaymentsReportingExportProcessingService mypaySharePaymentsReportingExportProcessingService;
   private final MypivotPaymentsReportingExportProcessingService mypivotPaymentsReportingExportProcessingService;
   private final AssessmentsRegistryExportProcessingService assessmentsRegistryExportProcessingService;
 
@@ -46,7 +46,7 @@ public class DataExportFacadeService {
                                  AssessmentsExportProcessingService assessmentsExportProcessingService,
                                  TreasuryCsvCompleteExportProcessingService treasuryCsvCompleteExportProcessingService,
                                  AssessmentsRegistryExportProcessingService assessmentsRegistryExportProcessingService,
-                                 PaymentsReportingExportProcessingService paymentsReportingExportProcessingService,
+                                 MypaySharePaymentsReportingExportProcessingService mypaySharePaymentsReportingExportProcessingService,
                                  MypivotPaymentsReportingExportProcessingService mypivotPaymentsReportingExportProcessingService) {
     this.organizationExportProcessingService = organizationExportProcessingService;
     this.orgSilServiceExportProcessingService = orgSilServiceExportProcessingService;
@@ -59,7 +59,7 @@ public class DataExportFacadeService {
     this.treasuryCsvCompleteExportProcessingService = treasuryCsvCompleteExportProcessingService;
     this.assessmentsExportProcessingService = assessmentsExportProcessingService;
     this.assessmentsRegistryExportProcessingService = assessmentsRegistryExportProcessingService;
-    this.paymentsReportingExportProcessingService = paymentsReportingExportProcessingService;
+    this.mypaySharePaymentsReportingExportProcessingService = mypaySharePaymentsReportingExportProcessingService;
     this.mypivotPaymentsReportingExportProcessingService = mypivotPaymentsReportingExportProcessingService;
   }
 
@@ -76,7 +76,7 @@ public class DataExportFacadeService {
       case TREASURY_CSV_COMPLETE -> treasuryCsvCompleteExportProcessingService.executeExport(extractionId, request);
       case ASSESSMENTS -> assessmentsExportProcessingService.executeExport(extractionId, request);
       case ASSESSMENTS_REGISTRY -> assessmentsRegistryExportProcessingService.executeExport(extractionId, request);
-      case PAYMENTS_REPORTING -> paymentsReportingExportProcessingService.executeExport(extractionId, request);
+      case PAYMENTS_REPORTING_MYPAY -> mypaySharePaymentsReportingExportProcessingService.executeExport(extractionId, request);
       case PAYMENTS_REPORTING_MYPIVOT -> mypivotPaymentsReportingExportProcessingService.executeExport(extractionId, request);
       default ->
         throw new ExportFileTypeNotSupportedException("Invalid export file type: " + request.getFileTypes());

@@ -1,5 +1,6 @@
 package it.gov.pagopa.mypay2pu.extractor.validation;
 
+import it.gov.pagopa.mypay2pu.extractor.config.MyPivotProperties;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.exception.BadRequestException;
@@ -15,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
@@ -27,6 +29,8 @@ class ExtractionValidationFacadeTest {
   private ValueLogicalKeyValidator valueLogicalKeyValidatorMock;
   @Mock
   private PairedLogicalKeyValidator pairedLogicalKeyValidatorMock;
+  @Mock
+  private MyPaySharedFolderValidator myPaySharedFolderValidatorMock;
 
   private ExtractionValidationFacade validationFacade;
 
@@ -35,7 +39,9 @@ class ExtractionValidationFacadeTest {
     validationFacade = new ExtractionValidationFacade(
       extractionRequestValidatorMock,
       valueLogicalKeyValidatorMock,
-      pairedLogicalKeyValidatorMock
+      pairedLogicalKeyValidatorMock,
+      new MyPivotProperties(true),
+      myPaySharedFolderValidatorMock
     );
   }
 
@@ -44,7 +50,8 @@ class ExtractionValidationFacadeTest {
     verifyNoMoreInteractions(
       extractionRequestValidatorMock,
       valueLogicalKeyValidatorMock,
-      pairedLogicalKeyValidatorMock
+      pairedLogicalKeyValidatorMock,
+      myPaySharedFolderValidatorMock
     );
   }
 
@@ -67,7 +74,13 @@ class ExtractionValidationFacadeTest {
         validationFacade.validate(request);
         verify(pairedLogicalKeyValidatorMock).validate(request);
       }
-      case PAYMENTS_REPORTING, PAYMENTS_REPORTING_MYPIVOT -> {
+      case PAYMENTS_REPORTING_MYPAY -> {
+        when(myPaySharedFolderValidatorMock.isDirectoryAvailable()).thenReturn(true);
+        validationFacade.validate(request);
+        verify(myPaySharedFolderValidatorMock).isDirectoryAvailable();
+        verify(extractionRequestValidatorMock).validate(request);
+      }
+      case PAYMENTS_REPORTING_MYPIVOT -> {
         validationFacade.validate(request);
         verify(extractionRequestValidatorMock).validate(request);
       }
@@ -79,6 +92,58 @@ class ExtractionValidationFacadeTest {
   @Test
   void givenNullRequestWhenValidateThenThrowException() {
     assertThrows(BadRequestException.class, () -> validationFacade.validate(null));
+  }
+
+  @ParameterizedTest
+  @EnumSource(
+    value = MigrationFileType.class,
+    names = {
+      "PAYMENT_NOTIFICATION",
+      "PAYMENTS_REPORTING_MYPIVOT",
+      "TREASURY_CSV_COMPLETE",
+      "ASSESSMENTS",
+      "ASSESSMENTS_REGISTRY"
+    },
+    mode = EnumSource.Mode.INCLUDE
+  )
+  void givenMyPivotDisabledWhenValidateThenThrowBadRequest(MigrationFileType fileType) {
+    ExtractionValidationFacade disabledMyPivotValidationFacade = new ExtractionValidationFacade(
+      extractionRequestValidatorMock,
+      valueLogicalKeyValidatorMock,
+      pairedLogicalKeyValidatorMock,
+      new MyPivotProperties(false),
+      myPaySharedFolderValidatorMock
+    );
+    ExtractionRequest request = request(fileType);
+
+    BadRequestException exception = assertThrows(
+      BadRequestException.class,
+      () -> disabledMyPivotValidationFacade.validate(request)
+    );
+
+    assertEquals("MYPIVOT_DISABLED", exception.getCode());
+    assertEquals("MyPivot extraction is disabled", exception.getMessage());
+  }
+
+  @Test
+  void givenMyPaySharedFolderUnavailableWhenValidateThenThrowBadRequest() {
+    when(myPaySharedFolderValidatorMock.isDirectoryAvailable()).thenReturn(false);
+    when(myPaySharedFolderValidatorMock.unavailableDirectoryMessage())
+      .thenReturn("Property mypay.path.directory-root-enti must point to an existing directory: /missing");
+    ExtractionRequest request = request(MigrationFileType.PAYMENTS_REPORTING_MYPAY);
+
+    BadRequestException exception = assertThrows(
+      BadRequestException.class,
+      () -> validationFacade.validate(request)
+    );
+
+    assertEquals("MYPAY_SHARED_FOLDER_UNAVAILABLE", exception.getCode());
+    assertEquals(
+      "Property mypay.path.directory-root-enti must point to an existing directory: /missing",
+      exception.getMessage()
+    );
+    verify(myPaySharedFolderValidatorMock).isDirectoryAvailable();
+    verify(myPaySharedFolderValidatorMock).unavailableDirectoryMessage();
   }
 
   private ExtractionRequest request(MigrationFileType fileType) {

@@ -20,7 +20,7 @@ Supports **12 MigrationFileType**:
 | 6 | `DEBT_POSITIONS` | MyPay4 | CSV |
 | 7 | `DEBT_POSITIONS_PAID` | MyPay4 | CSV |
 | 8 | `PAYMENT_NOTIFICATION` | myPivot4 | CSV |
-| 9 | `PAYMENTS_REPORTING` | FESP | XML (FdR) |
+| 9 | `PAYMENTS_REPORTING_MYPAY` | FESP | XML (FdR) |
 | 10 | `PAYMENTS_REPORTING_MYPIVOT` | myPivot4 *(optional)* | XML (FdR) |
 | 11 | `TREASURY_CSV_COMPLETE` | myPivot4 *(optional)* | CSV (IUF only) |
 | 12 | `ASSESSMENTS` | myPivot4 *(optional)* | CSV |
@@ -218,7 +218,7 @@ The following global properties are exported for configuration in the migrated M
 | `EXPORT_PAGE_SIZE_DEBT_POSITIONS`                    | Maximum number of records to write to an exported file before creating a new one | `1000` |
 | `EXPORT_PAGE_SIZE_DEBT_POSITIONS_PAID`               | Maximum number of records to write to an exported file before creating a new one | `1000` |
 | `EXPORT_PAGE_SIZE_PAYMENT_NOTIFICATION`              | Maximum number of records to write to an exported file before creating a new one | `1000` |
-| `EXPORT_PAGE_SIZE_PAYMENTS_REPORTING`                | Maximum number of Payments Reporting flow identifiers processed in each ZIP part | `1000` |
+| `EXPORT_PAGE_SIZE_PAYMENTS_REPORTING_MYPAY`          | Maximum number of MyPay Payments Reporting flow identifiers processed in each ZIP part | `1000` |
 | `EXPORT_PAGE_SIZE_PAYMENTS_REPORTING_MYPIVOT`        | Maximum number of MyPivot Payments Reporting flow identifiers processed in each ZIP part | `1000` |
 | `EXPORT_PAGE_SIZE_TREASURY_CSV_COMPLETE`            | Maximum number of records to write to an exported file before creating a new one | `1000` |
 | `EXPORT_PAGE_SIZE_ASSESSMENTS`                       | Maximum number of records to write to an exported file before creating a new one | `1000` |

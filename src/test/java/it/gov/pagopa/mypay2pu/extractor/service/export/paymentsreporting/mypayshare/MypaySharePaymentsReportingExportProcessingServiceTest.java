@@ -10,6 +10,7 @@ import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.service.files.CsvService;
 import it.gov.pagopa.mypay2pu.extractor.service.files.ZipFileService;
+import it.gov.pagopa.mypay2pu.extractor.validation.MyPaySharedFolderValidator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -63,17 +64,17 @@ class MypaySharePaymentsReportingExportProcessingServiceTest {
     ExportFileResult result = service().executeExport("extraction-id", request);
 
     assertEquals(3, result.archiveFiles().size());
-    assertTrue(result.files().getFirst().matches("BROKER_IPA-IPA_CODE-PAYMENTS_REPORTING-\\d{14}-part001-1\\.0\\.zip"));
+    assertTrue(result.files().getFirst().matches("BROKER_IPA-IPA_CODE-PAYMENTS_REPORTING_MYPAY-\\d{14}-part001-1\\.0\\.zip"));
     assertEquals(List.of("IPA_CODE-report.xml"), result.archiveFiles().getFirst().getFiles());
     ArchiveFile errorArchive = result.archiveFiles().stream()
       .filter(archiveFile -> archiveFile.getName().endsWith(".errors.zip"))
       .findFirst()
       .orElseThrow();
-    assertTrue(errorArchive.getName().matches("BROKER_IPA-IPA_CODE-PAYMENTS_REPORTING-\\d{14}-1\\.0\\.errors\\.zip"));
+    assertTrue(errorArchive.getName().matches("BROKER_IPA-IPA_CODE-PAYMENTS_REPORTING_MYPAY-\\d{14}-1\\.0\\.errors\\.zip"));
     assertEquals(1, errorArchive.getFiles().size());
     String discardFileName = errorArchive.getFiles().getFirst();
     assertTrue(discardFileName
-      .matches("BROKER_IPA-IPA_CODE-PAYMENTS_REPORTING-\\d{14}-part002-1\\.0\\.errors\\.csv"));
+      .matches("BROKER_IPA-IPA_CODE-PAYMENTS_REPORTING_MYPAY-\\d{14}-part002-1\\.0\\.errors\\.csv"));
     Path zipPath = tempDir.resolve("extraction-id").resolve(result.files().getFirst());
     assertTrue(Files.exists(zipPath));
     try (ZipFile zipFile = new ZipFile(zipPath.toFile())) {
@@ -209,18 +210,18 @@ class MypaySharePaymentsReportingExportProcessingServiceTest {
       paymentReportingMyPayShareDaoMock,
       new ExtractorExportProperties(
         tempDir.toString(), tempDir.toString(), "BROKER_CF", "BROKER_IPA",
-        Map.of(MigrationFileType.PAYMENTS_REPORTING, new ExtractorExportProperties.FileTypeConfiguration(1))
+        Map.of(MigrationFileType.PAYMENTS_REPORTING_MYPAY, new ExtractorExportProperties.FileTypeConfiguration(1))
       ),
-      new MyPayProperties(
+      new MyPaySharedFolderValidator(new MyPayProperties(
         new MyPayProperties.PathProperties(myPaySharedFolderPath.toString()),
         new MyPayProperties.GlobalProperties(null, null)
-      ),
+      )),
       new CsvService(';', '"'),
       new ZipFileService()
     );
   }
 
   private ExtractionRequest request(ExtractionFilters filters) {
-    return new ExtractionRequest(List.of("IPA_CODE"), MigrationFileType.PAYMENTS_REPORTING, null, filters);
+    return new ExtractionRequest(List.of("IPA_CODE"), MigrationFileType.PAYMENTS_REPORTING_MYPAY, null, filters);
   }
 }

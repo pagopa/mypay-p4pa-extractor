@@ -1,9 +1,13 @@
 package it.gov.pagopa.mypay2pu.extractor.validation;
 
+import it.gov.pagopa.mypay2pu.extractor.config.MyPivotProperties;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
+import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.exception.BadRequestException;
 import it.gov.pagopa.mypay2pu.extractor.exception.ExportFileTypeNotSupportedException;
 import org.springframework.stereotype.Component;
+
+import java.util.EnumSet;
 
 /**
  * Routes extraction validation to the validator matching the requested file type.
@@ -11,25 +15,52 @@ import org.springframework.stereotype.Component;
 @Component
 public class ExtractionValidationFacade {
 
+  private static final EnumSet<MigrationFileType> MYPIVOT_FILE_TYPES = EnumSet.of(
+    MigrationFileType.PAYMENT_NOTIFICATION,
+    MigrationFileType.PAYMENTS_REPORTING_MYPIVOT,
+    MigrationFileType.TREASURY_CSV_COMPLETE,
+    MigrationFileType.ASSESSMENTS,
+    MigrationFileType.ASSESSMENTS_REGISTRY
+  );
+
   private final ExtractionRequestValidator extractionRequestValidator;
   private final ValueLogicalKeyValidator valueLogicalKeyValidator;
   private final PairedLogicalKeyValidator pairedLogicalKeyValidator;
+  private final MyPivotProperties myPivotProperties;
+  private final MyPaySharedFolderValidator myPaySharedFolderValidator;
 
   public ExtractionValidationFacade(ExtractionRequestValidator extractionRequestValidator,
                                     ValueLogicalKeyValidator valueLogicalKeyValidator,
-                                    PairedLogicalKeyValidator pairedLogicalKeyValidator) {
+                                    PairedLogicalKeyValidator pairedLogicalKeyValidator,
+                                    MyPivotProperties myPivotProperties,
+                                    MyPaySharedFolderValidator myPaySharedFolderValidator) {
     this.extractionRequestValidator = extractionRequestValidator;
     this.valueLogicalKeyValidator = valueLogicalKeyValidator;
     this.pairedLogicalKeyValidator = pairedLogicalKeyValidator;
+    this.myPivotProperties = myPivotProperties;
+    this.myPaySharedFolderValidator = myPaySharedFolderValidator;
   }
 
   public void validate(ExtractionRequest request) {
     if (request == null) {
       throw new BadRequestException("INVALID_EXTRACTION_REQUEST", "fileTypes must be provided");
     }
+    if (MYPIVOT_FILE_TYPES.contains(request.getFileTypes()) && !myPivotProperties.enabled()) {
+      throw new BadRequestException(
+        "MYPIVOT_DISABLED",
+        "MyPivot extraction is disabled"
+      );
+    }
+    if (request.getFileTypes() == MigrationFileType.PAYMENTS_REPORTING_MYPAY
+      && !myPaySharedFolderValidator.isDirectoryAvailable()) {
+      throw new BadRequestException(
+        "MYPAY_SHARED_FOLDER_UNAVAILABLE",
+        myPaySharedFolderValidator.unavailableDirectoryMessage()
+      );
+    }
 
     switch (request.getFileTypes()) {
-      case ORGANIZATIONS, ORG_SIL_SERVICES, PAYMENTS_REPORTING, PAYMENTS_REPORTING_MYPIVOT ->
+      case ORGANIZATIONS, ORG_SIL_SERVICES, PAYMENTS_REPORTING_MYPAY, PAYMENTS_REPORTING_MYPIVOT ->
         extractionRequestValidator.validate(request);
       case DEBT_POSITIONS_TYPE, DEBT_POSITIONS_TYPE_ORG, DEBT_POSITIONS, DEBT_POSITIONS_PAID, PAYMENT_NOTIFICATION, ASSESSMENTS, ASSESSMENTS_REGISTRY ->
         valueLogicalKeyValidator.validate(request);

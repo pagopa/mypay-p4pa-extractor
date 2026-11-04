@@ -34,8 +34,6 @@ public class MypivotPaymentsReportingExportProcessingService {
 
   private static final String ZIP_VERSION = "1.0";
   private static final String IPA_CODE_FILE_NAME_FORMAT = "%s-%s";
-  private static final int MAX_IO_ATTEMPTS = 3;
-  private static final long IO_RETRY_DELAY_MILLIS = 100L;
 
   private final PaymentReportingMyPivotDao paymentReportingMyPivotDao;
   private final FlussoRiversamentoMapper flussoRiversamentoMapper;
@@ -81,7 +79,7 @@ public class MypivotPaymentsReportingExportProcessingService {
       IPA_CODE_FILE_NAME_FORMAT.formatted(extractorExportProperties.brokerIpaCode(), ipaCode),
       ipaCode,
       true,
-      MigrationFileType.PAYMENTS_REPORTING,
+      MigrationFileType.PAYMENTS_REPORTING_MYPIVOT,
       LocalDateTime.now(ZONEID),
       ZIP_VERSION
     );
@@ -162,13 +160,10 @@ public class MypivotPaymentsReportingExportProcessingService {
     }
     Path errorFile = resolveOutputPath(extractionId, zipFileBaseName + ".errors.csv");
     try {
-      executeWithIoRetry(
-        "create payments reporting discard file " + errorFile,
-        () -> csvService.createCsv(
-          errorFile,
-          List.<String[]>of(new String[]{"flowIdentifier", "description"}),
-          failures.stream().map(failure -> new String[]{failure.flowIdentifier(), failure.description()}).toList()
-        )
+      csvService.createCsv(
+        errorFile,
+        List.<String[]>of(new String[]{"flowIdentifier", "description"}),
+        failures.stream().map(failure -> new String[]{failure.flowIdentifier(), failure.description()}).toList()
       );
     } catch (IOException exception) {
       throw new IllegalStateException("Cannot create payments reporting discard file " + errorFile, exception);
@@ -177,14 +172,7 @@ public class MypivotPaymentsReportingExportProcessingService {
   }
 
   private void marshal(it.gov.digitpa.schemas._2011.pagamenti.FlussoRiversamento flow, Path xmlPath) {
-    try {
-      executeWithIoRetry(
-        "create payments reporting XML " + xmlPath,
-        () -> xmlMarshallerService.marshal(flow, xmlPath)
-      );
-    } catch (IOException exception) {
-      throw new IllegalStateException("Cannot create payments reporting XML " + xmlPath, exception);
-    }
+    xmlMarshallerService.marshal(flow, xmlPath);
   }
 
   private void zip(
@@ -193,64 +181,7 @@ public class MypivotPaymentsReportingExportProcessingService {
     boolean deleteSourceFiles,
     java.util.function.Function<Path, String> entryNameResolver
   ) {
-    try {
-      executeWithIoRetry(
-        "create payments reporting ZIP " + zipPath,
-        () -> zipFileService.zipper(zipPath, files, deleteSourceFiles, entryNameResolver)
-      );
-    } catch (IOException exception) {
-      throw new IllegalStateException("Cannot create payments reporting ZIP " + zipPath, exception);
-    }
-  }
-
-  private void executeWithIoRetry(String operationDescription, IoOperation operation) throws IOException {
-    for (int attempt = 1; attempt <= MAX_IO_ATTEMPTS; attempt++) {
-      try {
-        operation.execute();
-        return;
-      } catch (IOException exception) {
-        if (attempt == MAX_IO_ATTEMPTS) {
-          throw exception;
-        }
-        waitBeforeRetry(operationDescription, attempt, exception);
-      } catch (IllegalStateException exception) {
-        IOException ioException = findIoException(exception);
-        if (ioException == null) {
-          throw exception;
-        }
-        if (attempt == MAX_IO_ATTEMPTS) {
-          throw ioException;
-        }
-        waitBeforeRetry(operationDescription, attempt, ioException);
-      }
-    }
-  }
-
-  private IOException findIoException(Throwable exception) {
-    Throwable cause = exception.getCause();
-    while (cause != null) {
-      if (cause instanceof IOException ioException) {
-        return ioException;
-      }
-      cause = cause.getCause();
-    }
-    return null;
-  }
-
-  private void waitBeforeRetry(String operationDescription, int attempt, IOException exception) {
-    log.warn(
-      "I/O failure while attempting to {} (attempt {}/{}), retrying",
-      operationDescription,
-      attempt,
-      MAX_IO_ATTEMPTS,
-      exception
-    );
-    try {
-      Thread.sleep(IO_RETRY_DELAY_MILLIS * attempt);
-    } catch (InterruptedException interruptedException) {
-      Thread.currentThread().interrupt();
-      throw new IllegalStateException("Interrupted while retrying to " + operationDescription, interruptedException);
-    }
+    zipFileService.zipper(zipPath, files, deleteSourceFiles, entryNameResolver);
   }
 
   private Path resolveOutputPath(String extractionId, String fileName) {
@@ -268,10 +199,5 @@ public class MypivotPaymentsReportingExportProcessingService {
   }
 
   private record Failure(String flowIdentifier, String description) {
-  }
-
-  @FunctionalInterface
-  private interface IoOperation {
-    void execute() throws IOException;
   }
 }
