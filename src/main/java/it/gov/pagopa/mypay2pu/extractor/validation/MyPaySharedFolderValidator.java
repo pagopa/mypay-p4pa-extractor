@@ -26,7 +26,7 @@ public class MyPaySharedFolderValidator {
     }
   }
 
-  public Path sharedFolderPath() {
+  public Path getMyPaySharedFolderPath() {
     return sharedFolderPath;
   }
 

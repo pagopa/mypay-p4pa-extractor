@@ -68,12 +68,11 @@ class FlussoRiversamentoXmlMarshallerServiceTest {
     invalidFlow.setVersioneOggetto("2.0");
     Path xmlPath = tempDir.resolve("FLOW_1.xml");
 
-    IllegalStateException exception = assertThrows(
+    assertThrows(
       IllegalStateException.class,
       () -> marshaller.marshal(invalidFlow, xmlPath)
     );
 
-    assertTrue(exception.getMessage().contains("does not conform to the XSD"));
     assertFalse(Files.exists(xmlPath));
   }
 

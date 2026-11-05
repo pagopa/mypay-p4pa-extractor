@@ -8,10 +8,16 @@ public abstract class AbstractEnumConverter<E extends Enum<E>> {
 
   private final Map<String, E> mappings;
   private final Function<String, E> defaultResolver;
+  private final String fieldName;
 
-  protected AbstractEnumConverter(Map<String, E> mappings, Function<String, E> defaultResolver) {
+  protected AbstractEnumConverter(
+    Map<String, E> mappings,
+    Function<String, E> defaultResolver,
+    String fieldName
+  ) {
     this.mappings = Map.copyOf(Objects.requireNonNull(mappings, "Mappings are required"));
     this.defaultResolver = defaultResolver;
+    this.fieldName = Objects.requireNonNull(fieldName, "Field name is required");
   }
 
   protected E convert(String sourceValue) {
@@ -20,8 +26,21 @@ public abstract class AbstractEnumConverter<E extends Enum<E>> {
     }
 
     E enumValue = mappings.get(sourceValue);
-    return enumValue != null || defaultResolver == null
-      ? enumValue
-      : defaultResolver.apply(sourceValue);
+    if (enumValue != null || defaultResolver == null) {
+      return enumValue;
+    }
+
+    try {
+      return defaultResolver.apply(sourceValue);
+    } catch (IllegalArgumentException exception) {
+      throw new IllegalArgumentException(
+        "Unrecognized enum value '%s' for field '%s'".formatted(sourceValue, fieldName),
+        exception
+      );
+    }
+  }
+
+  protected String getFieldName() {
+    return fieldName;
   }
 }

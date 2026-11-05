@@ -33,12 +33,7 @@ public class FlussoRiversamentoXmlMarshallerService {
   }
 
   public void marshal(FlussoRiversamento flow, Path outputPath) {
-    String xml;
-    try {
-      xml = xmlMarshallerService.marshal(FlussoRiversamento.class, flow, jaxbContext, schema);
-    } catch (IllegalStateException exception) {
-      throw new IllegalStateException("Payments reporting XML does not conform to the XSD", exception);
-    }
+    String xml = xmlMarshallerService.marshal(FlussoRiversamento.class, flow, jaxbContext, schema);
     try {
       Files.createDirectories(outputPath.getParent());
       Files.writeString(outputPath, xml);

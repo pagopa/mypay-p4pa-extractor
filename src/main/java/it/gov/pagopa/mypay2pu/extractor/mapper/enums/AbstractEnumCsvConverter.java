@@ -20,7 +20,6 @@ import java.util.function.Function;
 public abstract class AbstractEnumCsvConverter<E extends Enum<E>> extends AbstractEnumConverter<E> {
 
   private final Class<E> enumType;
-  private final String csvFieldName;
 
   protected AbstractEnumCsvConverter(Map<String, E> mappings, Class<E> enumType, String csvFieldName) {
     this(mappings, null, enumType, csvFieldName);
@@ -32,9 +31,8 @@ public abstract class AbstractEnumCsvConverter<E extends Enum<E>> extends Abstra
     Class<E> enumType,
     String csvFieldName
   ) {
-    super(mappings, defaultResolver);
+    super(mappings, defaultResolver, csvFieldName);
     this.enumType = Objects.requireNonNull(enumType, "Enum type is required");
-    this.csvFieldName = Objects.requireNonNull(csvFieldName, "CSV field name is required");
   }
 
   public E toCsvValue(String dbValue) {
@@ -58,7 +56,7 @@ public abstract class AbstractEnumCsvConverter<E extends Enum<E>> extends Abstra
   private CsvRowMappingException mappingException(String dbValue, Throwable cause) {
     return new CsvRowMappingException(
       "EnumMapping",
-      csvFieldName,
+      getFieldName(),
       dbValue,
       "Unrecognized value '" + dbValue + "' for enum " + enumType.getSimpleName(),
       cause

@@ -12,7 +12,11 @@ public final class PaymentReportingSenderIdentifierTypeConverter
     new PaymentReportingSenderIdentifierTypeConverter();
 
   private PaymentReportingSenderIdentifierTypeConverter() {
-    super(Map.of(), StTipoIdentificativoUnivoco::valueOf);
+    super(
+      Map.of(),
+      StTipoIdentificativoUnivoco::valueOf,
+      "codIstMittIdUnivMittTipoIdentificativoUnivoco"
+    );
   }
 
   public StTipoIdentificativoUnivoco toXmlValue(String sourceValue) {

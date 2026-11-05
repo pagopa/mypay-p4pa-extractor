@@ -34,7 +34,7 @@ public class MypaySharePaymentsReportingExportProcessingService {
   private static final String IPA_CODE_FILE_NAME_FORMAT = "%s-%s";
   private final PaymentReportingMyPayShareDao paymentReportingMyPayShareDao;
   private final ExtractorExportProperties extractorExportProperties;
-  private final MyPaySharedFolderValidator myPaySharedFolderValidator;
+  private final Path sharedFolderPath;
   private final CsvService csvService;
   private final ZipFileService zipFileService;
 
@@ -45,7 +45,7 @@ public class MypaySharePaymentsReportingExportProcessingService {
                                                             ZipFileService zipFileService) {
     this.paymentReportingMyPayShareDao = paymentReportingMyPayShareDao;
     this.extractorExportProperties = extractorExportProperties;
-    this.myPaySharedFolderValidator = myPaySharedFolderValidator;
+    this.sharedFolderPath = myPaySharedFolderValidator.getMyPaySharedFolderPath();
     this.csvService = csvService;
     this.zipFileService = zipFileService;
   }
@@ -158,7 +158,7 @@ public class MypaySharePaymentsReportingExportProcessingService {
     String relativeFilePath = filePath.toString()
       .replace('\\', '/')
       .replaceFirst("^/+", "");
-    Path organizationDirectory = myPaySharedFolderValidator.sharedFolderPath().resolve(ipaCode).normalize();
+    Path organizationDirectory = sharedFolderPath.resolve(ipaCode).normalize();
     Path resolvedPath = organizationDirectory.resolve(relativeFilePath).normalize();
     if (!resolvedPath.startsWith(organizationDirectory)) {
       throw new IllegalArgumentException("Invalid payments reporting file path: " + filePath);

@@ -1,7 +1,6 @@
 package it.gov.pagopa.mypay2pu.extractor.service.export.paymentsreporting.mypivot;
 
 import it.gov.pagopa.mypay2pu.extractor.config.ExtractorExportProperties;
-import it.gov.pagopa.mypay2pu.extractor.config.MyPivotProperties;
 import it.gov.pagopa.mypay2pu.extractor.dao.PaymentReportingMyPivotDao;
 import it.gov.pagopa.mypay2pu.extractor.dto.ExportFileResult;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ArchiveFile;
@@ -40,7 +39,6 @@ public class MypivotPaymentsReportingExportProcessingService {
   private final FlussoRiversamentoMapper flussoRiversamentoMapper;
   private final FlussoRiversamentoXmlMarshallerService xmlMarshallerService;
   private final ExtractorExportProperties extractorExportProperties;
-  private final MyPivotProperties myPivotProperties;
   private final CsvService csvService;
   private final ZipFileService zipFileService;
 
@@ -49,7 +47,6 @@ public class MypivotPaymentsReportingExportProcessingService {
     FlussoRiversamentoMapper flussoRiversamentoMapper,
     FlussoRiversamentoXmlMarshallerService xmlMarshallerService,
     ExtractorExportProperties extractorExportProperties,
-    MyPivotProperties myPivotProperties,
     CsvService csvService,
     ZipFileService zipFileService
   ) {
@@ -57,24 +54,16 @@ public class MypivotPaymentsReportingExportProcessingService {
     this.flussoRiversamentoMapper = flussoRiversamentoMapper;
     this.xmlMarshallerService = xmlMarshallerService;
     this.extractorExportProperties = extractorExportProperties;
-    this.myPivotProperties = myPivotProperties;
     this.csvService = csvService;
     this.zipFileService = zipFileService;
   }
 
   public ExportFileResult executeExport(String extractionId, ExtractionRequest request) {
-    validateMyPivotEnabled();
     List<ArchiveFile> archiveFiles = new ArrayList<>();
     for (String ipaCode : request.getIpaCodes()) {
       archiveFiles.addAll(createZips(extractionId, ipaCode, request));
     }
     return new ExportFileResult(archiveFiles, null);
-  }
-
-  private void validateMyPivotEnabled() {
-    if (!myPivotProperties.enabled()) {
-      throw new IllegalStateException("MyPivot extraction is disabled");
-    }
   }
 
   private List<ArchiveFile> createZips(String extractionId, String ipaCode, ExtractionRequest request) {

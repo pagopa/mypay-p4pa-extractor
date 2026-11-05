@@ -62,7 +62,7 @@ public class FlussoRiversamentoMapper {
     detail.setIdentificativoUnivocoVersamento(row.codDatiSingPagamIdentificativoUnivocoVersamento());
     detail.setIdentificativoUnivocoRiscossione(row.codDatiSingPagamIdentificativoUnivocoRiscossione());
     detail.setIndiceDatiSingoloPagamento(row.indiceDatiSingoloPagamento());
-    detail.setSingoloImportoPagato(normalizeAmount(row));
+    detail.setSingoloImportoPagato(mapAmount(row));
     detail.setCodiceEsitoSingoloPagamento(row.codDatiSingPagamCodiceEsitoSingoloPagamento());
     detail.setDataEsitoSingoloPagamento(Utilities.toXMLGregorianCalendar(row.dtDatiSingPagamDataEsitoSingoloPagamento()));
     return detail;
@@ -166,9 +166,9 @@ public class FlussoRiversamentoMapper {
     }
   }
 
-  private BigDecimal normalizeAmount(PaymentReporting row) {
+  private BigDecimal mapAmount(PaymentReporting row) {
     try {
-      return row.numDatiSingPagamSingoloImportoPagato().setScale(2, RoundingMode.UNNECESSARY);
+      return Utilities.validateAmount(row.numDatiSingPagamSingoloImportoPagato());
     } catch (ArithmeticException exception) {
       throw new IllegalArgumentException(
         "Invalid payment amount for payments reporting flow " + row.codIdentificativoFlusso(),
@@ -178,29 +178,15 @@ public class FlussoRiversamentoMapper {
   }
 
   private StTipoIdentificativoUnivoco mapMittenteIdentifierType(PaymentReporting row) {
-    try {
-      return PaymentReportingSenderIdentifierTypeConverter.INSTANCE.toXmlValue(
-        row.codIstMittIdUnivMittTipoIdentificativoUnivoco()
-      );
-    } catch (IllegalArgumentException exception) {
-      throw new IllegalArgumentException(
-        "Invalid sender identifier type for payments reporting flow " + row.codIdentificativoFlusso(),
-        exception
-      );
-    }
+    return PaymentReportingSenderIdentifierTypeConverter.INSTANCE.toXmlValue(
+      row.codIstMittIdUnivMittTipoIdentificativoUnivoco()
+    );
   }
 
   private StTipoIdentificativoUnivocoPersG mapRiceventeIdentifierType(PaymentReporting row) {
-    try {
-      return PaymentReportingReceiverIdentifierTypeConverter.INSTANCE.toXmlValue(
-        row.codIstRicevIdUnivRicevTipoIdentificativoUnivoco()
-      );
-    } catch (IllegalArgumentException exception) {
-      throw new IllegalArgumentException(
-        "Invalid receiver identifier type for payments reporting flow " + row.codIdentificativoFlusso(),
-        exception
-      );
-    }
+    return PaymentReportingReceiverIdentifierTypeConverter.INSTANCE.toXmlValue(
+      row.codIstRicevIdUnivRicevTipoIdentificativoUnivoco()
+    );
   }
 
 }
