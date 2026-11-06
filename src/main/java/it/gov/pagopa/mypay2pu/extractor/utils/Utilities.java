@@ -33,7 +33,11 @@ public class Utilities {
   }
 
   public static BigDecimal validateAmount(BigDecimal amount) {
-    return amount.setScale(2, RoundingMode.UNNECESSARY);
+    try {
+      return amount.setScale(2, RoundingMode.UNNECESSARY);
+    } catch (ArithmeticException exception) {
+      throw new IllegalArgumentException("Invalid amount", exception);
+    }
   }
 
   public static XMLGregorianCalendar toXMLGregorianCalendar(OffsetDateTime offsetDateTime) {

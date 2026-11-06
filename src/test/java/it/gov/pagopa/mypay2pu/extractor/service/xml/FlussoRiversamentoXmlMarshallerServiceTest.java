@@ -9,6 +9,7 @@ import it.gov.digitpa.schemas._2011.pagamenti.FlussoRiversamento;
 import it.gov.digitpa.schemas._2011.pagamenti.StTipoIdentificativoUnivoco;
 import it.gov.digitpa.schemas._2011.pagamenti.StTipoIdentificativoUnivocoPersG;
 import it.gov.pagopa.mypay2pu.extractor.service.files.XMLMarshallerService;
+import jakarta.xml.bind.JAXBContext;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -63,10 +64,16 @@ class FlussoRiversamentoXmlMarshallerServiceTest {
   }
 
   @Test
-  void givenSchemaInvalidFlowWhenMarshalThenFailWithoutWritingXml() {
+  void givenSchemaInvalidFlowWhenMarshallingWithAndWithoutSchemaThenOnlySchemaRejectsIt() throws Exception {
     FlussoRiversamento invalidFlow = flow();
     invalidFlow.setVersioneOggetto("2.0");
     Path xmlPath = tempDir.resolve("FLOW_1.xml");
+
+    new XMLMarshallerService().marshal(
+      FlussoRiversamento.class,
+      invalidFlow,
+      JAXBContext.newInstance(FlussoRiversamento.class)
+    );
 
     assertThrows(
       IllegalStateException.class,

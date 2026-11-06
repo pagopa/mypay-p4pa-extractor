@@ -7,8 +7,6 @@ import it.gov.digitpa.schemas._2011.pagamenti.CtIdentificativoUnivocoPersonaG;
 import it.gov.digitpa.schemas._2011.pagamenti.CtIstitutoMittente;
 import it.gov.digitpa.schemas._2011.pagamenti.CtIstitutoRicevente;
 import it.gov.digitpa.schemas._2011.pagamenti.FlussoRiversamento;
-import it.gov.digitpa.schemas._2011.pagamenti.StTipoIdentificativoUnivoco;
-import it.gov.digitpa.schemas._2011.pagamenti.StTipoIdentificativoUnivocoPersG;
 import it.gov.pagopa.mypay2pu.extractor.exception.InvalidValueException;
 import it.gov.pagopa.mypay2pu.extractor.utils.Utilities;
 import org.apache.commons.collections.CollectionUtils;
@@ -62,7 +60,7 @@ public class FlussoRiversamentoMapper {
     detail.setIdentificativoUnivocoVersamento(row.codDatiSingPagamIdentificativoUnivocoVersamento());
     detail.setIdentificativoUnivocoRiscossione(row.codDatiSingPagamIdentificativoUnivocoRiscossione());
     detail.setIndiceDatiSingoloPagamento(row.indiceDatiSingoloPagamento());
-    detail.setSingoloImportoPagato(mapAmount(row));
+    detail.setSingoloImportoPagato(Utilities.validateAmount(row.numDatiSingPagamSingoloImportoPagato()));
     detail.setCodiceEsitoSingoloPagamento(row.codDatiSingPagamCodiceEsitoSingoloPagamento());
     detail.setDataEsitoSingoloPagamento(Utilities.toXMLGregorianCalendar(row.dtDatiSingPagamDataEsitoSingoloPagamento()));
     return detail;
@@ -70,7 +68,11 @@ public class FlussoRiversamentoMapper {
 
   private CtIstitutoMittente mapIstitutoMittente(PaymentReporting row) {
     CtIdentificativoUnivoco identificativo = new CtIdentificativoUnivoco();
-    identificativo.setTipoIdentificativoUnivoco(mapMittenteIdentifierType(row));
+    identificativo.setTipoIdentificativoUnivoco(
+      PaymentReportingSenderIdentifierTypeConverter.INSTANCE.toXmlValue(
+        row.codIstMittIdUnivMittTipoIdentificativoUnivoco()
+      )
+    );
     identificativo.setCodiceIdentificativoUnivoco(row.codIstMittIdUnivMittCodiceIdentificativoUnivoco());
     CtIstitutoMittente istituto = new CtIstitutoMittente();
     istituto.setIdentificativoUnivocoMittente(identificativo);
@@ -80,7 +82,11 @@ public class FlussoRiversamentoMapper {
 
   private CtIstitutoRicevente mapIstitutoRicevente(PaymentReporting row) {
     CtIdentificativoUnivocoPersonaG identificativo = new CtIdentificativoUnivocoPersonaG();
-    identificativo.setTipoIdentificativoUnivoco(mapRiceventeIdentifierType(row));
+    identificativo.setTipoIdentificativoUnivoco(
+      PaymentReportingReceiverIdentifierTypeConverter.INSTANCE.toXmlValue(
+        row.codIstRicevIdUnivRicevTipoIdentificativoUnivoco()
+      )
+    );
     identificativo.setCodiceIdentificativoUnivoco(row.codIstRicevIdUnivRicevCodiceIdentificativoUnivoco());
     CtIstitutoRicevente istituto = new CtIstitutoRicevente();
     istituto.setIdentificativoUnivocoRicevente(identificativo);
@@ -164,29 +170,6 @@ public class FlussoRiversamentoMapper {
         "Missing mandatory payment detail value for payments reporting flow " + row.codIdentificativoFlusso()
       );
     }
-  }
-
-  private BigDecimal mapAmount(PaymentReporting row) {
-    try {
-      return Utilities.validateAmount(row.numDatiSingPagamSingoloImportoPagato());
-    } catch (ArithmeticException exception) {
-      throw new IllegalArgumentException(
-        "Invalid payment amount for payments reporting flow " + row.codIdentificativoFlusso(),
-        exception
-      );
-    }
-  }
-
-  private StTipoIdentificativoUnivoco mapMittenteIdentifierType(PaymentReporting row) {
-    return PaymentReportingSenderIdentifierTypeConverter.INSTANCE.toXmlValue(
-      row.codIstMittIdUnivMittTipoIdentificativoUnivoco()
-    );
-  }
-
-  private StTipoIdentificativoUnivocoPersG mapRiceventeIdentifierType(PaymentReporting row) {
-    return PaymentReportingReceiverIdentifierTypeConverter.INSTANCE.toXmlValue(
-      row.codIstRicevIdUnivRicevTipoIdentificativoUnivoco()
-    );
   }
 
 }
