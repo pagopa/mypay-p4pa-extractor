@@ -5,6 +5,8 @@ import org.slf4j.MDC;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -28,6 +30,14 @@ public class Utilities {
 
   public static String getTraceId() {
     return MDC.get("traceId");
+  }
+
+  public static BigDecimal validateAmount(BigDecimal amount) {
+    try {
+      return amount.setScale(2, RoundingMode.UNNECESSARY);
+    } catch (ArithmeticException exception) {
+      throw new IllegalArgumentException("Invalid amount", exception);
+    }
   }
 
   public static XMLGregorianCalendar toXMLGregorianCalendar(OffsetDateTime offsetDateTime) {

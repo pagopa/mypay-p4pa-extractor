@@ -1,8 +1,6 @@
 package it.gov.pagopa.mypay2pu.extractor.service.export.paymentsreporting.mypayshare;
 
 import it.gov.pagopa.mypay2pu.extractor.config.ExtractorExportProperties;
-import it.gov.pagopa.mypay2pu.extractor.config.MyPayProperties;
-import it.gov.pagopa.mypay2pu.extractor.config.PaymentsReportingSource;
 import it.gov.pagopa.mypay2pu.extractor.dao.PaymentReportingMyPayShareDao;
 import it.gov.pagopa.mypay2pu.extractor.dto.ExportFileResult;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ArchiveFile;
@@ -12,6 +10,7 @@ import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.service.export.ExportFileNameBuilder;
 import it.gov.pagopa.mypay2pu.extractor.service.files.CsvService;
 import it.gov.pagopa.mypay2pu.extractor.service.files.ZipFileService;
+import it.gov.pagopa.mypay2pu.extractor.validation.MyPaySharedFolderValidator;
 import it.gov.pagopa.mypay2pu.extractor.validation.ValueLogicalKeyValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -35,30 +34,20 @@ public class MypaySharePaymentsReportingExportProcessingService {
   private static final String IPA_CODE_FILE_NAME_FORMAT = "%s-%s";
   private final PaymentReportingMyPayShareDao paymentReportingMyPayShareDao;
   private final ExtractorExportProperties extractorExportProperties;
-  private final Path myPaySharedFolderPath;
+  private final Path sharedFolderPath;
   private final CsvService csvService;
   private final ZipFileService zipFileService;
 
   public MypaySharePaymentsReportingExportProcessingService(PaymentReportingMyPayShareDao paymentReportingMyPayShareDao,
                                                             ExtractorExportProperties extractorExportProperties,
-                                                            MyPayProperties myPayProperties,
+                                                            MyPaySharedFolderValidator myPaySharedFolderValidator,
                                                             CsvService csvService,
                                                             ZipFileService zipFileService) {
     this.paymentReportingMyPayShareDao = paymentReportingMyPayShareDao;
     this.extractorExportProperties = extractorExportProperties;
-    this.myPaySharedFolderPath = Path.of(myPayProperties.path().directoryRootEnti());
-    validateMyPaySharedFolder();
+    this.sharedFolderPath = myPaySharedFolderValidator.getMyPaySharedFolderPath();
     this.csvService = csvService;
     this.zipFileService = zipFileService;
-  }
-
-  private void validateMyPaySharedFolder() {
-    if (extractorExportProperties.paymentsReporting().source().equals(PaymentsReportingSource.MYPAY_SHARE)
-      && !Files.isDirectory(myPaySharedFolderPath)) {
-      throw new IllegalStateException(
-        "Property mypay.path.directory-root-enti must point to an existing directory: " + myPaySharedFolderPath
-      );
-    }
   }
 
   public ExportFileResult executeExport(String extractionId, ExtractionRequest request) {
@@ -76,13 +65,13 @@ public class MypaySharePaymentsReportingExportProcessingService {
     );
     OffsetDateTime createdFrom = filters != null ? filters.getDateFrom() : null;
     OffsetDateTime createdTo = filters != null ? filters.getDateTo() : null;
-    int pageSize = extractorExportProperties.resolveFileTypeConfiguration(MigrationFileType.PAYMENTS_REPORTING)
+    int pageSize = extractorExportProperties.resolveFileTypeConfiguration(MigrationFileType.PAYMENTS_REPORTING_MYPAY)
       .exportPageSize();
     ExportFileNameBuilder fileNameBuilder = new ExportFileNameBuilder(
       IPA_CODE_FILE_NAME_FORMAT.formatted(extractorExportProperties.brokerIpaCode(), ipaCode),
       ipaCode,
       true,
-      MigrationFileType.PAYMENTS_REPORTING,
+      MigrationFileType.PAYMENTS_REPORTING_MYPAY,
       LocalDateTime.now(ZONEID),
       ZIP_VERSION
     );
@@ -169,7 +158,7 @@ public class MypaySharePaymentsReportingExportProcessingService {
     String relativeFilePath = filePath.toString()
       .replace('\\', '/')
       .replaceFirst("^/+", "");
-    Path organizationDirectory = myPaySharedFolderPath.resolve(ipaCode).normalize();
+    Path organizationDirectory = sharedFolderPath.resolve(ipaCode).normalize();
     Path resolvedPath = organizationDirectory.resolve(relativeFilePath).normalize();
     if (!resolvedPath.startsWith(organizationDirectory)) {
       throw new IllegalArgumentException("Invalid payments reporting file path: " + filePath);

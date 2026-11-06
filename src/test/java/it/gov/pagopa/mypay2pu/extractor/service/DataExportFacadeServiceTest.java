@@ -15,7 +15,8 @@ import it.gov.pagopa.mypay2pu.extractor.service.export.debtpositiontypeorg.DebtP
 import it.gov.pagopa.mypay2pu.extractor.service.export.organization.OrganizationExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.orgsil.OrgSilServiceExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.paymentnotification.PaymentNotificationExportProcessingService;
-import it.gov.pagopa.mypay2pu.extractor.service.export.paymentsreporting.PaymentsReportingExportProcessingService;
+import it.gov.pagopa.mypay2pu.extractor.service.export.paymentsreporting.mypivot.MypivotPaymentsReportingExportProcessingService;
+import it.gov.pagopa.mypay2pu.extractor.service.export.paymentsreporting.mypayshare.MypaySharePaymentsReportingExportProcessingService;
 import it.gov.pagopa.mypay2pu.extractor.service.export.treasurycsvcomplete.TreasuryCsvCompleteExportProcessingService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -59,7 +60,9 @@ class DataExportFacadeServiceTest {
   @Mock
   private AssessmentsRegistryExportProcessingService assessmentsRegistryExportProcessingServiceMock;
   @Mock
-  private PaymentsReportingExportProcessingService paymentsReportingExportProcessingServiceMock;
+  private MypaySharePaymentsReportingExportProcessingService mypaySharePaymentsReportingExportProcessingServiceMock;
+  @Mock
+  private MypivotPaymentsReportingExportProcessingService mypivotPaymentsReportingExportProcessingServiceMock;
 
   @InjectMocks
   private DataExportFacadeService service;
@@ -79,7 +82,8 @@ class DataExportFacadeServiceTest {
         assessmentsExportProcessingServiceMock,
         treasuryCsvCompleteExportProcessingServiceMock,
         assessmentsRegistryExportProcessingServiceMock,
-        paymentsReportingExportProcessingServiceMock
+        mypaySharePaymentsReportingExportProcessingServiceMock,
+        mypivotPaymentsReportingExportProcessingServiceMock
       )
     );
   }
@@ -136,9 +140,13 @@ class DataExportFacadeServiceTest {
         expected = archiveFileResult("assessmentsregistry_1_0.zip");
         when(assessmentsRegistryExportProcessingServiceMock.executeExport(extractionId, request)).thenReturn(expected);
       }
-      case PAYMENTS_REPORTING -> {
+      case PAYMENTS_REPORTING_MYPAY -> {
         expected = archiveFileResult("payments_reporting_1_0.zip");
-        when(paymentsReportingExportProcessingServiceMock.executeExport(extractionId, request)).thenReturn(expected);
+        when(mypaySharePaymentsReportingExportProcessingServiceMock.executeExport(extractionId, request)).thenReturn(expected);
+      }
+      case PAYMENTS_REPORTING_MYPIVOT -> {
+        expected = archiveFileResult("payments_reporting_mypivot_1_0.zip");
+        when(mypivotPaymentsReportingExportProcessingServiceMock.executeExport(extractionId, request)).thenReturn(expected);
       }
       default -> {
         ExportFileTypeNotSupportedException exception = assertThrows(

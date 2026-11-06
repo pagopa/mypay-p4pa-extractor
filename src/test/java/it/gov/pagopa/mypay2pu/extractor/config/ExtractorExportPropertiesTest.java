@@ -44,7 +44,6 @@ class ExtractorExportPropertiesTest {
         assertEquals("12345678901", properties.brokerCf());
         assertEquals("IPA_CODE", properties.brokerIpaCode());
         assertEquals(false, properties.gpdEnabled());
-        assertEquals(PaymentsReportingSource.MYPAY_SHARE, properties.paymentsReporting().source());
         assertEquals(1000, properties.resolveFileTypeConfiguration(MigrationFileType.ORGANIZATIONS).exportPageSize());
       });
   }
@@ -95,8 +94,7 @@ class ExtractorExportPropertiesTest {
       existingDirectories.tempBaseDir().toString(),
       "12345678901",
       "IPA_CODE",
-      Map.of(MigrationFileType.ORG_SIL_SERVICES, new ExtractorExportProperties.FileTypeConfiguration(500)),
-      new ExtractorExportProperties.PaymentsReportingConfiguration(PaymentsReportingSource.MYPAY_SHARE)
+      Map.of(MigrationFileType.ORG_SIL_SERVICES, new ExtractorExportProperties.FileTypeConfiguration(500))
     );
 
     IllegalStateException exception = assertThrows(
