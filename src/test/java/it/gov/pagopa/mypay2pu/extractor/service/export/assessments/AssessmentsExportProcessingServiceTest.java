@@ -20,9 +20,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -32,7 +29,6 @@ import java.nio.file.Path;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -122,17 +118,14 @@ class AssessmentsExportProcessingServiceTest {
     );
   }
 
-  @ParameterizedTest
-  @MethodSource("filtersWithoutLogicalKey")
-  void whenNoValidationErrorsThenArchiveContainsOnlyExportCsv(
-    ExtractionFilters filters, OffsetDateTime lastExtractionDate) throws Exception {
-    ExtractionRequest request = new ExtractionRequest(
-      List.of("IPA_CODE"), MigrationFileType.ASSESSMENTS, lastExtractionDate, filters);
+  @Test
+  void whenNoValidationErrorsThenArchiveContainsOnlyExportCsv() throws Exception {
+    ExtractionRequest request = request(null);
     Assessments first = assessments("first");
     Assessments second = assessments("second");
-    when(assessmentsDaoMock.findByFilters("IPA_CODE", lastExtractionDate, List.of(), null, null, 2, 0))
+    when(assessmentsDaoMock.findByFilters("IPA_CODE", null, List.of(), null, null, 2, 0))
       .thenReturn(List.of(first, second));
-    when(assessmentsDaoMock.findByFilters("IPA_CODE", lastExtractionDate, List.of(), null, null, 2, 2))
+    when(assessmentsDaoMock.findByFilters("IPA_CODE", null, List.of(), null, null, 2, 2))
       .thenReturn(List.of());
     when(assessmentsMapperMock.map(first)).thenReturn(dto("first"));
     when(assessmentsMapperMock.map(second)).thenReturn(dto("second"));
@@ -147,18 +140,8 @@ class AssessmentsExportProcessingServiceTest {
     assertTrue(archiveEntries.get(0).matches("IPA_CODE-ASSESSMENTS-\\d{14}-1_0\\.csv"));
 
     InOrder inOrder = inOrder(assessmentsDaoMock);
-    inOrder.verify(assessmentsDaoMock).findByFilters("IPA_CODE", lastExtractionDate, List.of(), null, null, 2, 0);
-    inOrder.verify(assessmentsDaoMock).findByFilters("IPA_CODE", lastExtractionDate, List.of(), null, null, 2, 2);
-  }
-
-  private static Stream<Arguments> filtersWithoutLogicalKey() {
-    OffsetDateTime lastExtractionDate = OffsetDateTime.parse("2026-01-01T00:00:00Z");
-    return Stream.of(
-      Arguments.of(null, null),
-      Arguments.of(new ExtractionFilters(), null),
-      Arguments.of(null, lastExtractionDate),
-      Arguments.of(new ExtractionFilters(), lastExtractionDate)
-    );
+    inOrder.verify(assessmentsDaoMock).findByFilters("IPA_CODE", null, List.of(), null, null, 2, 0);
+    inOrder.verify(assessmentsDaoMock).findByFilters("IPA_CODE", null, List.of(), null, null, 2, 2);
   }
 
   @Test

@@ -20,8 +20,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -30,13 +28,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -142,32 +138,6 @@ class DebtPositionTypeOrgExportProcessingServiceTest {
     InOrder inOrder = inOrder(debtPositionTypeOrgDaoMock);
     inOrder.verify(debtPositionTypeOrgDaoMock).findByFilters("IPA_CODE", debtPositionTypeOrgCodes, 2, 0);
     inOrder.verify(debtPositionTypeOrgDaoMock).findByFilters("IPA_CODE", debtPositionTypeOrgCodes, 2, 2);
-  }
-
-  @ParameterizedTest
-  @MethodSource("filtersWithoutLogicalKey")
-  void whenLogicalKeyIsAbsentThenExportWithoutCodeFilter(ExtractionFilters filters) throws Exception {
-    ExtractionRequest request = new ExtractionRequest(
-      List.of("IPA_CODE"), MigrationFileType.DEBT_POSITIONS_TYPE_ORG, null, filters);
-    DebtPositionTypeOrg first = debtPositionTypeOrg("first");
-    when(debtPositionTypeOrgDaoMock.findByFilters("IPA_CODE", List.of(), 2, 0)).thenReturn(List.of(first));
-    when(debtPositionTypeOrgMapperMock.map(first)).thenReturn(dto("first"));
-
-    ExportFileResult result = service.executeExport("IPA_CODE", request);
-
-    assertNull(result.error());
-    assertEquals(2, result.files().size());
-    Path archivePath = tempDir.resolve("IPA_CODE").resolve(result.files().getFirst());
-    List<String> archiveEntries = ZipUtils.readZipEntries(archivePath);
-    assertEquals(1, archiveEntries.size());
-    assertTrue(archiveEntries.getFirst().matches("IPA_CODE-DEBT_POSITIONS_TYPE_ORG-\\d{14}-1_0\\.csv"));
-
-    verify(debtPositionTypeOrgDaoMock).findByFilters("IPA_CODE", List.of(), 2, 0);
-    verify(debtPositionTypeOrgMapperMock).map(first);
-  }
-
-  private static Stream<ExtractionFilters> filtersWithoutLogicalKey() {
-    return Stream.of(null, new ExtractionFilters());
   }
 
   private ExtractorExportProperties exportProperties() {

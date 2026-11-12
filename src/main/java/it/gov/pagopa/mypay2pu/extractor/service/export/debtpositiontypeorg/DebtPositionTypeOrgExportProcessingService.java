@@ -3,7 +3,6 @@ package it.gov.pagopa.mypay2pu.extractor.service.export.debtpositiontypeorg;
 import it.gov.pagopa.mypay2pu.extractor.config.ExtractorExportProperties;
 import it.gov.pagopa.mypay2pu.extractor.dao.DebtPositionTypeOrgDao;
 import it.gov.pagopa.mypay2pu.extractor.dto.export.PuDebtPositionTypeOrgDTO;
-import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionFilters;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.MigrationFileType;
 import it.gov.pagopa.mypay2pu.extractor.mapper.debtpositiontypeorg.DebtPositionTypeOrgMapper;
@@ -56,11 +55,9 @@ public class DebtPositionTypeOrgExportProcessingService extends SplitByIpaCodeBa
 
   @Override
   protected List<DebtPositionTypeOrg> retrieveData(String ipaCode, ExtractionRequest request, int pageSize, int offset) {
-    ExtractionFilters filters = request.getFilters();
-    String debtPositionTypeOrgCodesFilter = filters == null ? null : filters.getLogicalKey();
     return debtPositionTypeOrgDao.findByFilters(
       ipaCode,
-      ValueLogicalKeyValidator.parseLogicalKey(debtPositionTypeOrgCodesFilter),
+      ValueLogicalKeyValidator.parseLogicalKey(request.getFilters().getLogicalKey()),
       pageSize,
       offset
     );
