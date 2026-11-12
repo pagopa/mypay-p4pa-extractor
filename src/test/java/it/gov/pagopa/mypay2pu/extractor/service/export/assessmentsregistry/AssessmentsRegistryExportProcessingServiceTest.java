@@ -20,6 +20,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -29,6 +32,7 @@ import java.nio.file.Path;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -118,14 +122,17 @@ class AssessmentsRegistryExportProcessingServiceTest {
     );
   }
 
-  @Test
-  void whenNoValidationErrorsThenArchiveContainsOnlyExportCsv() throws Exception {
-    ExtractionRequest request = request(null);
+  @ParameterizedTest
+  @MethodSource("filtersWithoutLogicalKey")
+  void whenNoValidationErrorsThenArchiveContainsOnlyExportCsv(
+    ExtractionFilters filters, OffsetDateTime lastExtractionDate) throws Exception {
+    ExtractionRequest request = new ExtractionRequest(
+      List.of("IPA_CODE"), MigrationFileType.ASSESSMENTS_REGISTRY, lastExtractionDate, filters);
     AssessmentsRegistry first = assessmentsRegistry("first");
     AssessmentsRegistry second = assessmentsRegistry("second");
-    when(assessmentsRegistryDaoMock.findByFilters("IPA_CODE", null, List.of(), null, null, 2, 0))
+    when(assessmentsRegistryDaoMock.findByFilters("IPA_CODE", lastExtractionDate, List.of(), null, null, 2, 0))
       .thenReturn(List.of(first, second));
-    when(assessmentsRegistryDaoMock.findByFilters("IPA_CODE", null, List.of(), null, null, 2, 2))
+    when(assessmentsRegistryDaoMock.findByFilters("IPA_CODE", lastExtractionDate, List.of(), null, null, 2, 2))
       .thenReturn(List.of());
     when(assessmentsRegistryMapperMock.map(first)).thenReturn(dto("first"));
     when(assessmentsRegistryMapperMock.map(second)).thenReturn(dto("second"));
@@ -141,10 +148,20 @@ class AssessmentsRegistryExportProcessingServiceTest {
 
     InOrder inOrder = inOrder(assessmentsRegistryDaoMock);
     inOrder.verify(assessmentsRegistryDaoMock).findByFilters(
-      "IPA_CODE", null, List.of(), null, null, 2, 0
+      "IPA_CODE", lastExtractionDate, List.of(), null, null, 2, 0
     );
     inOrder.verify(assessmentsRegistryDaoMock).findByFilters(
-      "IPA_CODE", null, List.of(), null, null, 2, 2
+      "IPA_CODE", lastExtractionDate, List.of(), null, null, 2, 2
+    );
+  }
+
+  private static Stream<Arguments> filtersWithoutLogicalKey() {
+    OffsetDateTime lastExtractionDate = OffsetDateTime.parse("2026-01-01T00:00:00Z");
+    return Stream.of(
+      Arguments.of(null, null),
+      Arguments.of(new ExtractionFilters(), null),
+      Arguments.of(null, lastExtractionDate),
+      Arguments.of(new ExtractionFilters(), lastExtractionDate)
     );
   }
 
