@@ -38,9 +38,13 @@ See [OpenAPI](openapi/generated.openapi.json), exposed through the following pat
 | Method | Path | Description |
 |---|---|---|
 | `POST` | `/extract` | Start an extraction for one `MigrationFileType` and one or more organizations |
-| `GET` | `/extract/{id}` | Get the extraction status (`RUNNING`, `COMPLETED`, `FAILED`) |
+| `GET` | `/extract/{id}` | Get the extraction status (`NEW`, `RUNNING`, `COMPLETED`, `FAILED`) |
 | `GET` | `/extract/{id}/files` | List produced ZIP files by scanning the filesystem (`STORAGE_PATH/<id>/`) |
 
+The status is persisted as `NEW` before the extraction task is submitted and the POST
+returns `202 Accepted`. It becomes `RUNNING` when the task starts, then `COMPLETED`
+or `FAILED`. A rejected task is marked as `FAILED` and the POST propagates the error
+instead of accepting the extraction.
 
 
 

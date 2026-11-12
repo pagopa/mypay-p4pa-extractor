@@ -3,6 +3,7 @@ package it.gov.pagopa.mypay2pu.extractor.service;
 import it.gov.pagopa.mypay2pu.extractor.dto.ExportFileResult;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ArchiveFile;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
+import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionStatus;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionStatusResponse;
 import it.gov.pagopa.mypay2pu.extractor.validation.ExtractionRequestValidator;
 import it.gov.pagopa.mypay2pu.extractor.validation.ExtractionValidationFacade;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.RejectedExecutionException;
 
 @Slf4j
 @Service
@@ -39,7 +41,19 @@ public class ExportFileHandlerService {
   public String createExtraction(ExtractionRequest request) {
     extractionValidationFacade.validate(request);
     String extractionId = UUID.randomUUID().toString();
-    extractorTaskExecutor.execute(() -> executeExport(extractionId, request));
+    exportFileStatusService.createNew(extractionId, request);
+    try {
+      extractorTaskExecutor.execute(() -> executeExport(extractionId, request));
+    } catch (RejectedExecutionException e) {
+      log.error("Error scheduling extraction {}", extractionId, e);
+      try {
+        exportFileStatusService.update(extractionId, new ExportFileResult(List.of(), "Extraction task rejected"));
+      } catch (RuntimeException statusUpdateException) {
+        log.error("Cannot mark rejected extraction {} as failed", extractionId, statusUpdateException);
+        e.addSuppressed(statusUpdateException);
+      }
+      throw e;
+    }
     return extractionId;
   }
 
@@ -51,7 +65,7 @@ public class ExportFileHandlerService {
   public void executeExport(String extractionId, ExtractionRequest request) {
     log.info("Processing extraction {} for ipaCodes {} and fileTypes {}", extractionId, request.getIpaCodes(), request.getFileTypes());
 
-    exportFileStatusService.createNew(extractionId, request);
+    exportFileStatusService.update(extractionId, ExtractionStatus.RUNNING);
 
     ExportFileResult exportFileResult;
     try {

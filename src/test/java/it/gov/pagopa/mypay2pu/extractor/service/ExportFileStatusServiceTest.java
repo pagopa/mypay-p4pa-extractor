@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -44,7 +45,7 @@ class ExportFileStatusServiceTest {
   }
 
   @Test
-  void givenRequestWhenCreateNewThenStoreRunningStatus() {
+  void givenRequestWhenCreateNewThenStoreNewStatus() {
     String extractionId = "extraction-id";
     ExtractionRequest request = new ExtractionRequest(List.of("IPA_CODE_TEST"), MigrationFileType.ORGANIZATIONS);
 
@@ -57,11 +58,37 @@ class ExportFileStatusServiceTest {
     assertEquals(extractionId, writtenStatus.getExtractionId());
     assertEquals(List.of("IPA_CODE_TEST"), writtenStatus.getIpaCodes());
     assertEquals(MigrationFileType.ORGANIZATIONS, writtenStatus.getFileTypes());
-    assertEquals(ExtractionStatus.RUNNING, writtenStatus.getStatus());
+    assertEquals(ExtractionStatus.NEW, writtenStatus.getStatus());
     assertEquals(List.of(), writtenStatus.getArchiveFiles());
     assertNull(writtenStatus.getError());
     assertNotNull(writtenStatus.getCreatedAt());
     assertEquals(writtenStatus.getCreatedAt(), writtenStatus.getUpdatedAt());
+  }
+
+  @Test
+  void givenNewExtractionWhenUpdateToRunningThenPreserveMetadataAndRefreshUpdatedAt() {
+    String extractionId = "extraction-id";
+    OffsetDateTime createdAt = OffsetDateTime.parse("2026-01-01T00:00:00Z");
+    ExtractionStatusResponse currentStatus = new ExtractionStatusResponse(
+      extractionId, List.of("IPA_CODE_TEST"), MigrationFileType.ORGANIZATIONS,
+      ExtractionStatus.NEW, createdAt, createdAt, null, List.of()
+    );
+    when(exportFileStatusDaoMock.readStatus(extractionId)).thenReturn(currentStatus);
+
+    service.update(extractionId, ExtractionStatus.RUNNING);
+
+    ArgumentCaptor<ExtractionStatusResponse> statusCaptor = ArgumentCaptor.forClass(ExtractionStatusResponse.class);
+    verify(exportFileStatusDaoMock).readStatus(extractionId);
+    verify(exportFileStatusDaoMock).writeStatus(statusCaptor.capture());
+    ExtractionStatusResponse writtenStatus = statusCaptor.getValue();
+    assertEquals(ExtractionStatus.RUNNING, writtenStatus.getStatus());
+    assertEquals(extractionId, writtenStatus.getExtractionId());
+    assertEquals(List.of("IPA_CODE_TEST"), writtenStatus.getIpaCodes());
+    assertEquals(MigrationFileType.ORGANIZATIONS, writtenStatus.getFileTypes());
+    assertEquals(createdAt, writtenStatus.getCreatedAt());
+    assertTrue(writtenStatus.getUpdatedAt().isAfter(createdAt));
+    assertNull(writtenStatus.getError());
+    assertEquals(List.of(), writtenStatus.getArchiveFiles());
   }
 
   @ParameterizedTest

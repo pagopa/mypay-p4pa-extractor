@@ -303,7 +303,7 @@
       },
       "ExtractionStatus" : {
         "type" : "string",
-        "enum" : [ "RUNNING", "COMPLETED", "FAILED" ]
+        "enum" : [ "NEW", "RUNNING", "COMPLETED", "FAILED" ]
       },
       "ExtractionStatusResponse" : {
         "type" : "object",

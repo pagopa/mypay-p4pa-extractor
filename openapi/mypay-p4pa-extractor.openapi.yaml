@@ -244,6 +244,7 @@ components:
     ExtractionStatus:
       type: string
       enum:
+        - NEW
         - RUNNING
         - COMPLETED
         - FAILED
