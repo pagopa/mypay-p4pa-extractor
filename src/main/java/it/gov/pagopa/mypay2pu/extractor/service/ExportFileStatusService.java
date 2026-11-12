@@ -31,13 +31,21 @@ public class ExportFileStatusService {
       .extractionId(extractionId)
       .ipaCodes(List.copyOf(request.getIpaCodes()))
       .fileTypes(request.getFileTypes())
-      .status(ExtractionStatus.RUNNING)
+      .status(ExtractionStatus.NEW)
       .createdAt(now)
       .updatedAt(now)
       .error(null)
       .archiveFiles(List.of())
       .build();
     exportFileStatusDao.writeStatus(newStatus);
+  }
+
+  public void update(String extractionId, ExtractionStatus status) {
+    ExtractionStatusResponse currentStatus = exportFileStatusDao.readStatus(extractionId);
+    currentStatus
+      .status(status)
+      .updatedAt(OffsetDateTime.now(ZONEID));
+    exportFileStatusDao.writeStatus(currentStatus);
   }
 
   public void update(String extractionId, ExportFileResult exportFileResult) {
