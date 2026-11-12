@@ -34,11 +34,15 @@ public record ExportFileNameBuilder(
     return buildBaseName(resolveCsvIpaCode(), partNumber) + ".csv";
   }
 
+  public String formatTimestamp() {
+    return timestamp.format(TIMESTAMP_FORMATTER);
+  }
+
   private String buildBaseName(String ipaCode, Integer partNumber) {
     String migrationType = migrationFileType.name()
       .toUpperCase(Locale.ROOT);
 
-    String formattedTimestamp = timestamp.format(TIMESTAMP_FORMATTER);
+    String formattedTimestamp = formatTimestamp();
 
     if (partNumber == null) {
       return "%s-%s-%s-%s".formatted(

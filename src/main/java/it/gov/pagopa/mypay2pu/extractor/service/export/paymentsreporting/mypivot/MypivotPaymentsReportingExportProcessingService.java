@@ -83,6 +83,7 @@ public class MypivotPaymentsReportingExportProcessingService {
       LocalDateTime.now(ZONEID),
       ZIP_VERSION
     );
+    String timestamp = fileNameBuilder.formatTimestamp();
 
     int offset = 0;
     int partNumber = 1;
@@ -101,7 +102,7 @@ public class MypivotPaymentsReportingExportProcessingService {
       List<Failure> failures = new ArrayList<>();
       for (String flowIdentifier : pageFlowIdentifiers) {
         createXml(
-          extractionId, ipaCode, flowIdentifier, request.getLastExtractionDate(), createdFrom, createdTo, failures
+          extractionId, ipaCode, flowIdentifier, timestamp, request.getLastExtractionDate(), createdFrom, createdTo, failures
         ).ifPresent(xmlFiles::add);
       }
       Path zipPath = resolveOutputPath(extractionId, fileNameBuilder.buildZipPartBaseName(partNumber) + ".zip");
@@ -133,6 +134,7 @@ public class MypivotPaymentsReportingExportProcessingService {
     String extractionId,
     String ipaCode,
     String flowIdentifier,
+    String timestamp,
     OffsetDateTime lastExtractionDate,
     OffsetDateTime createdFrom,
     OffsetDateTime createdTo,
@@ -142,7 +144,7 @@ public class MypivotPaymentsReportingExportProcessingService {
       List<PaymentReporting> rows = paymentReportingMyPivotDao.findRowsByFlowIdentifier(
         ipaCode, flowIdentifier, lastExtractionDate, createdFrom, createdTo
       );
-      Path xmlPath = resolveOutputPath(extractionId, flowIdentifier + ".xml");
+      Path xmlPath = resolveOutputPath(extractionId, "%s-%s.xml".formatted(flowIdentifier, timestamp));
       xmlMarshallerService.marshal(flussoRiversamentoMapper.map(rows), xmlPath);
       return Optional.of(xmlPath);
     } catch (IllegalArgumentException | IllegalStateException exception) {
