@@ -33,6 +33,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -76,36 +78,49 @@ class MypivotPaymentsReportingExportProcessingServiceTest {
     doAnswer(invocation -> {
       Files.writeString(invocation.getArgument(1), "<FlussoRiversamento/>");
       return null;
-    }).when(xmlMarshallerServiceMock).marshal(firstFlow, tempDir.resolve("extraction-id").resolve("FLOW_1.xml"));
+    }).when(xmlMarshallerServiceMock).marshal(
+      eq(firstFlow),
+      argThat(path -> path.getFileName().toString().matches("FLOW_1-\\d{14}\\.xml"))
+    );
     doAnswer(invocation -> {
       Files.writeString(invocation.getArgument(1), "<FlussoRiversamento/>");
       return null;
-    }).when(xmlMarshallerServiceMock).marshal(secondFlow, tempDir.resolve("extraction-id").resolve("FLOW_2.xml"));
+    }).when(xmlMarshallerServiceMock).marshal(
+      eq(secondFlow),
+      argThat(path -> path.getFileName().toString().matches("FLOW_2-\\d{14}\\.xml"))
+    );
 
     ExportFileResult result = service(2).executeExport("extraction-id", request());
 
     assertEquals(1, result.archiveFiles().size());
     ArchiveFile archiveFile = result.archiveFiles().getFirst();
     assertTrue(archiveFile.getName().matches("BROKER_IPA-IPA_CODE-PAYMENTS_REPORTING_MYPIVOT-\\d{14}-part001-1\\.0\\.zip"));
-    assertEquals(List.of("IPA_CODE-FLOW_1.xml", "IPA_CODE-FLOW_2.xml"), archiveFile.getFiles());
+    assertTrue(archiveFile.getFiles().getFirst().matches("IPA_CODE-FLOW_1-\\d{14}\\.xml"));
+    assertTrue(archiveFile.getFiles().get(1).matches("IPA_CODE-FLOW_2-\\d{14}\\.xml"));
     Path zipPath = tempDir.resolve("extraction-id").resolve(archiveFile.getName());
     try (ZipFile zipFile = new ZipFile(zipPath.toFile())) {
       assertEquals("<FlussoRiversamento/>", new String(
-        zipFile.getInputStream(zipFile.getEntry("IPA_CODE-FLOW_1.xml")).readAllBytes(), StandardCharsets.UTF_8
+        zipFile.getInputStream(zipFile.getEntry(archiveFile.getFiles().getFirst())).readAllBytes(), StandardCharsets.UTF_8
       ));
       assertEquals("<FlussoRiversamento/>", new String(
-        zipFile.getInputStream(zipFile.getEntry("IPA_CODE-FLOW_2.xml")).readAllBytes(), StandardCharsets.UTF_8
+        zipFile.getInputStream(zipFile.getEntry(archiveFile.getFiles().get(1))).readAllBytes(), StandardCharsets.UTF_8
       ));
     }
-    assertFalse(Files.exists(tempDir.resolve("extraction-id").resolve("FLOW_1.xml")));
-    assertFalse(Files.exists(tempDir.resolve("extraction-id").resolve("FLOW_2.xml")));
+    assertFalse(Files.exists(tempDir.resolve("extraction-id").resolve(archiveFile.getFiles().getFirst().substring("IPA_CODE-".length()))));
+    assertFalse(Files.exists(tempDir.resolve("extraction-id").resolve(archiveFile.getFiles().get(1).substring("IPA_CODE-".length()))));
     verify(paymentReportingMyPivotDaoMock).findFlowIdentifiers("IPA_CODE", null, null, null, List.of(), 2, 0);
     verify(paymentReportingMyPivotDaoMock).findFlowIdentifiers("IPA_CODE", null, null, null, List.of(), 2, 2);
     verify(paymentReportingMyPivotDaoMock).findRowsByFlowIdentifier("IPA_CODE", "FLOW_1", null, null, null);
     verify(paymentReportingMyPivotDaoMock).findRowsByFlowIdentifier("IPA_CODE", "FLOW_2", null, null, null);
     verify(flussoRiversamentoMapperMock, times(2)).map(rows);
-    verify(xmlMarshallerServiceMock).marshal(firstFlow, tempDir.resolve("extraction-id").resolve("FLOW_1.xml"));
-    verify(xmlMarshallerServiceMock).marshal(secondFlow, tempDir.resolve("extraction-id").resolve("FLOW_2.xml"));
+    verify(xmlMarshallerServiceMock).marshal(
+      eq(firstFlow),
+      argThat(path -> path.getFileName().toString().matches("FLOW_1-\\d{14}\\.xml"))
+    );
+    verify(xmlMarshallerServiceMock).marshal(
+      eq(secondFlow),
+      argThat(path -> path.getFileName().toString().matches("FLOW_2-\\d{14}\\.xml"))
+    );
   }
 
   @Test
@@ -186,7 +201,6 @@ class MypivotPaymentsReportingExportProcessingServiceTest {
   void givenXmlWriteFailureWhenExportThenDiscardFlowWithoutRetry() {
     List<PaymentReporting> rows = List.of();
     FlussoRiversamento flow = new FlussoRiversamento();
-    Path xmlPath = tempDir.resolve("extraction-id").resolve("FLOW_1.xml");
     IllegalStateException writeException = new IllegalStateException("I/O failure");
     when(paymentReportingMyPivotDaoMock.findFlowIdentifiers("IPA_CODE", null, null, null, List.of(), 1, 0))
       .thenReturn(List.of("FLOW_1"));
@@ -195,7 +209,10 @@ class MypivotPaymentsReportingExportProcessingServiceTest {
     when(paymentReportingMyPivotDaoMock.findRowsByFlowIdentifier("IPA_CODE", "FLOW_1", null, null, null))
       .thenReturn(rows);
     when(flussoRiversamentoMapperMock.map(rows)).thenReturn(flow);
-    doThrow(writeException).when(xmlMarshallerServiceMock).marshal(flow, xmlPath);
+    doThrow(writeException).when(xmlMarshallerServiceMock).marshal(
+      eq(flow),
+      argThat(path -> path.getFileName().toString().matches("FLOW_1-\\d{14}\\.xml"))
+    );
 
     ExportFileResult result = service(1).executeExport("extraction-id", request());
 
@@ -205,7 +222,10 @@ class MypivotPaymentsReportingExportProcessingServiceTest {
     verify(paymentReportingMyPivotDaoMock).findFlowIdentifiers("IPA_CODE", null, null, null, List.of(), 1, 1);
     verify(paymentReportingMyPivotDaoMock).findRowsByFlowIdentifier("IPA_CODE", "FLOW_1", null, null, null);
     verify(flussoRiversamentoMapperMock).map(rows);
-    verify(xmlMarshallerServiceMock).marshal(flow, xmlPath);
+    verify(xmlMarshallerServiceMock).marshal(
+      eq(flow),
+      argThat(path -> path.getFileName().toString().matches("FLOW_1-\\d{14}\\.xml"))
+    );
   }
 
   private MypivotPaymentsReportingExportProcessingService service(int pageSize) {

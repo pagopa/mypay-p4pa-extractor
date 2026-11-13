@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -65,8 +66,13 @@ class MypivotPaymentsReportingExportProcessingServiceIntegrationTest {
     assertEquals(1, result.archiveFiles().size());
     Path zipPath = tempDir.resolve("extraction-id").resolve(result.files().getFirst());
     try (ZipFile zipFile = new ZipFile(zipPath.toFile())) {
+      String xmlEntryName = zipFile.stream()
+        .map(ZipEntry::getName)
+        .findFirst()
+        .orElseThrow();
+      assertTrue(xmlEntryName.matches("IPA_CODE-FLOW_1-\\d{14}\\.xml"));
       String xml = new String(
-        zipFile.getInputStream(zipFile.getEntry("IPA_CODE-FLOW_1.xml")).readAllBytes(),
+        zipFile.getInputStream(zipFile.getEntry(xmlEntryName)).readAllBytes(),
         StandardCharsets.UTF_8
       );
       assertTrue(xml.contains("<FlussoRiversamento xmlns=\"http://www.digitpa.gov.it/schemas/2011/Pagamenti/\""));
