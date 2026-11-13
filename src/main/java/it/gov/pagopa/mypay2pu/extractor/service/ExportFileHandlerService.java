@@ -1,10 +1,7 @@
 package it.gov.pagopa.mypay2pu.extractor.service;
 
 import it.gov.pagopa.mypay2pu.extractor.dto.ExportFileResult;
-import it.gov.pagopa.mypay2pu.extractor.dto.generated.ArchiveFile;
-import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
-import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionStatus;
-import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionStatusResponse;
+import it.gov.pagopa.mypay2pu.extractor.dto.generated.*;
 import it.gov.pagopa.mypay2pu.extractor.validation.ExtractionRequestValidator;
 import it.gov.pagopa.mypay2pu.extractor.validation.ExtractionValidationFacade;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +36,9 @@ public class ExportFileHandlerService {
   }
 
   public String createExtraction(ExtractionRequest request) {
+    if (request.getFilters() == null) {
+      request.setFilters(new ExtractionFilters());
+    }
     extractionValidationFacade.validate(request);
     String extractionId = UUID.randomUUID().toString();
     exportFileStatusService.createNew(extractionId, request);

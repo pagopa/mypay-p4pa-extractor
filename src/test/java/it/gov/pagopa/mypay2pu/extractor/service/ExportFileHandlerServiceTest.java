@@ -4,6 +4,7 @@ import it.gov.pagopa.mypay2pu.extractor.config.json.JsonConfig;
 import it.gov.pagopa.mypay2pu.extractor.dao.ExportFileStatusDao;
 import it.gov.pagopa.mypay2pu.extractor.dto.ExportFileResult;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ArchiveFile;
+import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionFilters;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionRequest;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionStatus;
 import it.gov.pagopa.mypay2pu.extractor.dto.generated.ExtractionStatusResponse;
@@ -34,8 +35,9 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -72,6 +74,12 @@ class ExportFileHandlerServiceTest {
   void givenValidRequestWhenCreateExtractionThenReturnGeneratedIdAndScheduleExecution() {
     ExtractionRequest request = new ExtractionRequest(List.of("IPA_CODE_TEST"), MigrationFileType.ORGANIZATIONS);
     ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
+    doAnswer(invocation -> {
+      assertNotNull(invocation.<ExtractionRequest>getArgument(0).getFilters());
+      return null;
+    })
+      .when(extractionValidationFacadeMock)
+      .validate(any(ExtractionRequest.class));
 
     String extractionId = service.createExtraction(request);
 
@@ -81,6 +89,7 @@ class ExportFileHandlerServiceTest {
     validationOrder.verify(extractionValidationFacadeMock).validate(request);
     validationOrder.verify(exportFileStatusServiceMock).createNew(extractionId, request);
     validationOrder.verify(extractorTaskExecutorMock).execute(runnableCaptor.capture());
+    assertNotNull(request.getFilters());
   }
 
   @Test
@@ -178,7 +187,12 @@ class ExportFileHandlerServiceTest {
 
   @Test
   void givenInvalidRequestWhenCreateExtractionThenDoNotScheduleExport() {
-    ExtractionRequest request = new ExtractionRequest(List.of("IPA_CODE_TEST"), MigrationFileType.DEBT_POSITIONS);
+    ExtractionRequest request = new ExtractionRequest(
+      List.of("IPA_CODE_TEST"),
+      MigrationFileType.DEBT_POSITIONS,
+      null,
+      new ExtractionFilters()
+    );
     doThrow(new BadRequestException("INVALID_EXTRACTION_FILTERS", "invalid logical key"))
       .when(extractionValidationFacadeMock)
       .validate(request);
