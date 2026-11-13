@@ -22,8 +22,6 @@ public class ExtractionRequestValidator {
       if (filters != null) {
         validateFilters(filters);
         validateDateFrom(filters, request.getLastExtractionDate());
-      } else {
-        request.setFilters(new ExtractionFilters());
       }
     }
   }
